@@ -1,0 +1,39 @@
+{
+  "capturedAt": "2026-11-03T12:17:23+08:00",
+  "head": "0a09a2e478bcd0a03d5eb65496960c99fdf02b5e",
+  "branch": "codex/final-b-brand-home",
+  "status": [
+    " M app/home.module.css",
+    " M app/page.tsx",
+    " M components/HomeJourney.module.css",
+    " M components/SiteHeader.module.css",
+    "?? components/home/HomeMotion.tsx",
+    "?? evidence/final-sprint/20261103/b-brand-home/after/",
+    "?? evidence/final-sprint/20261103/b-brand-home/audit/",
+    "?? evidence/final-sprint/20261103/b-brand-home/b3/",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/capture-phase2-after.mjs",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/capture-phase2-b3.mjs",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/phase2-lib.mjs"
+  ],
+  "diffStat": [
+    " app/home.module.css               | 23 ++++++++++++--",
+    " app/page.tsx                      | 63 ++++++++++++++++++++++++---------------",
+    " components/HomeJourney.module.css |  2 ++",
+    " components/SiteHeader.module.css  |  6 ++--",
+    " 4 files changed, 65 insertions(+), 29 deletions(-)"
+  ],
+  "dirtyHashes": {
+    "app\\page.tsx": "EDD37A93B2C98BD55E2975368277A74A64B4089D9208788443DF352E0EFC483D",
+    "components\\HomeJourney.module.css": "16F1B071A809D13C33BC4BB09CDA6FDA3FC3444158BE68AAD43454DB707202CF",
+    "components\\home\\HomeMotion.tsx": "E9BC64F72F7EFBB26AB855EE6A03AED33B3A1679A383ED6BCB1ADDEE4B02BA4F",
+    "app\\home.module.css": "A3BC7F4855F1884EBA962713E5D46D6AE053A6611E596F0BC0753B509FC14468",
+    "components\\SiteHeader.module.css": "A7AE1B92DE1303C9BB6980BD0DC51B3030E2083B7A09DBFAFCA1C8E1785B6598"
+  },
+  "mtimes": {
+    "page.tsx": "2026-11-03 12:17:14.756",
+    "home.module.css": "2026-11-03 12:10:19.990",
+    "HomeJourney.module.css": "2026-11-03 12:08:15.759",
+    "HomeMotion.tsx": "2026-11-03 12:16:42.650",
+    "SiteHeader.module.css": "2026-11-03 12:07:58.437"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "candidateSha": "cc7c19fed573c79a55f727eaa338ab84fd80cc3b",
+  "command": "npm.cmd run build",
+  "exitCode": 0,
+  "durationSec": 52.9,
+  "nextVersion": "16.4.3 (Turbopack)",
+  "distDir": ".next-build",
+  "env": {
+    "ATTACHMENT_DIR": "D:\\Projects\\hongmen-final-b-brand-home\\tmp\\final-preparation\\attachments",
+    "MISSION_WRITES_ENABLED": "true",
+    "FOCUS_ASYNC_ENABLED": "false",
+    "NEXT_DIST_DIR": ".next-build",
+    "FOCUS_AGENT_ENABLED": "true",
+    "FOCUS_AGENT_R4_ENABLED": "true",
+    "DATABASE_URL": "file:D:/Projects/hongmen-final-b-brand-home/prisma/final-preparation.db",
+    "MISSION_ENABLED": "true",
+    "MISSION_WEB_ENABLED": "false",
+    "FOCUS_CONTINUITY_ENABLED": "true",
+    "LLM_MODE": "mock",
+    "FOCUS_WEB_ENABLED": "true",
+    "MISSION_AUTO_CONTINUATION_ENABLED": "false",
+    "MISSION_UI_ENABLED": "true"
+  },
+  "artifacts": {
+    "buildId": "Y7ZJXHJYV5ZWBLSCFp2Wf",
+    "staticPages": 43,
+    "files": 3758,
+    "sizeMB": 221.7
+  },
+  "warnings": [
+    "Turbopack: 6 warnings in lib/mission/workerPresence.ts & lib/services/attachmentService.ts (dynamic fs tracing; unrelated to homepage)"
+  ],
+  "oom": false,
+  "generatedWorktreeChanges": [
+    "next-env.d.ts (Next build rewrote reference to .next-build/types)",
+    "tsconfig.json (Next build added .next-build/types include)"
+  ],
+  "notes": "tsc passed inside build (Finished TypeScript in 24.4s); no OOM; build artifacts gitignored (.next-*/)",
+  "finalCandidateBinding": "结论绑定最终候选 9bae926e9475cedef118deedf5e002ec8365a23b（构建实测于 cc7c19f；cc7c19f→9bae926 为 CSS 作用域字号 + role=\"group\" 的非行为性 delta，构建产物与构建结论继承有效）"
+}

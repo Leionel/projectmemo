@@ -12,33 +12,23 @@ import {
   X,
 } from "lucide-react";
 import { StateDiffView } from "@/components/StateDiffView";
+import { exampleProject } from "@/components/home/homeExample";
 import type { ProjectStateDiff } from "@/lib/types/projectState";
-import styles from "@/app/home.module.css";
+import styles from "./HomeJourney.module.css";
 
-// Verbatim demonstration material from prisma/seed.ts; no private project data.
-const sources = [
-  {
-    id: "task",
-    title: "任务安排",
-    text: "目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。",
-  },
-  {
-    id: "requirements",
-    title: "比赛材料",
-    text: "初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。",
-  },
-  {
-    id: "advice",
-    title: "老师建议",
-    text: "老师建议作品不要叫普通学习助手，要突出项目制学习和知识资产复用。",
-  },
-];
+// 与 Hero 工作包共用同一份公开素材；文案只在 components/home/homeExample.ts 维护一次。
+const sourceOrder = ["task", "requirements", "advice"] as const;
+const sources = sourceOrder.map((id) => {
+  const source = exampleProject.sources.find((item) => item.id === id);
+  if (!source) throw new Error(`missing public example source: ${id}`);
+  return { id: source.id, title: source.title, text: source.detail };
+});
 const steps = [
   {
     label: "查看记录",
     title: "先看看上次留下了什么",
     description:
-      "这份示例项目保留了任务安排、参赛要求和老师建议。先读原文，再判断现在该做什么。",
+      "这份示例项目保留了任务安排、比赛材料和老师建议。先读原文，再判断现在该做什么。",
     context: "已有示例素材",
   },
   {
@@ -137,15 +127,20 @@ export function HomeJourney() {
     );
   }
   return (
-    <div className={styles.storyFrame} aria-label="参赛项目交互示例">
+    <div
+      className={styles.storyFrame}
+      role="group"
+      aria-label="参赛项目交互示例"
+    >
       <div className={styles.storyHeader}>
         <div className={styles.projectIdentity}>
           <span className={styles.projectIcon}>
             <FolderOpen size={20} aria-hidden="true" />
           </span>
           <div>
-            <span>内置示例项目</span>
+            <span className={styles.projectKicker}>内置公开示例</span>
             <h3>忆程参赛作品开发</h3>
+            <p className={styles.projectMission}>当前委托 · 整理阶段汇报</p>
           </div>
         </div>
         <button type="button" className={styles.resetButton} onClick={reset}>

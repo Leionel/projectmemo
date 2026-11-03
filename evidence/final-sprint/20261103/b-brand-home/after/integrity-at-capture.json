@@ -1,0 +1,44 @@
+{
+  "task": "task-4",
+  "phase": 2,
+  "kind": "source-integrity-at-capture",
+  "finalCandidateSha": "9bae926e9475cedef118deedf5e002ec8365a23b",
+  "finalCandidateSubject": "官网：B3 终验修复（共享差异组件字号作用域 + 分组语义）",
+  "branch": "codex/final-b-brand-home",
+  "capturedAtLocal": "2026-11-03T12:31:00+08:00 → 2026-11-03T12:45:00+08:00",
+  "treeState": "git status 仅 evidence/final-sprint/20261103/b-brand-home/{after,b3,audit,tools} 未跟踪；业务源码干净。",
+  "superseded": "对 0a09a2e / 216cf05 及中间态的所有 after/b3 采集均已作废并覆盖，不再混用。",
+  "headAtCapture": "cc7c19fed573c79a55f727eaa338ab84fd80cc3b",
+  "diffFrom216cf05": "仅 app/home.module.css 与 components/HomeJourney.module.css：移动端可见字号统一提升到 ≥0.8rem（12.8px），closingLink 增加 44px 最小触控高度。",
+  "note": "dev server 服务 cc7c19f；全部 after/b3 截图、指标、录屏均在本 SHA 下重跑。",
+  "postCaptureEdits": {
+    "capturedAt": "2026-11-03T12:31–12:40+08:00（截图/录屏均在此窗口内）",
+    "treeAtCapture": "HEAD=cc7c19f；git status 仅证据目录未跟踪（干净）",
+    "editsAfterCapture": [
+      {
+        "file": "components/home/HomeHeroLens.tsx",
+        "mtimeLocal": "2026-11-03T12:40:44+08:00",
+        "diff": "+ role=\"group\"（aria 语义，无视觉变化）"
+      },
+      {
+        "file": "components/HomeJourney.module.css",
+        "mtimeLocal": "2026-11-03T12:40:45+08:00",
+        "diff": "+ 五步示例 judgmentPane 内 text-xs/text-[11px] 元数据提升到 12.8px（仅影响第 3 步“查看判断”的 StateDiffView 文本）"
+      },
+      {
+        "file": "next-env.d.ts",
+        "mtimeLocal": "2026-11-03T12:38:00+08:00",
+        "diff": "Next 自动生成"
+      }
+    ],
+    "impact": "上述改动已由 Lead 提交为 9bae926（终验修复）；本目录证据采集于 cc7c19f，已按 Lead 确认绑定到 9bae926，并额外补拍第 3 步判断页（judgment-step-1440-light）直接验证 12.8px。"
+  },
+  "capturedOnSha": "cc7c19fed573c79a55f727eaa338ab84fd80cc3b",
+  "binding": {
+    "finalCandidateSha": "9bae926e9475cedef118deedf5e002ec8365a23b",
+    "finalCandidateSubject": "官网：B3 终验修复（共享差异组件字号作用域 + 分组语义）",
+    "capturedOnSha": "cc7c19fed573c79a55f727eaa338ab84fd80cc3b",
+    "delta": "9bae926 相对 cc7c19f 仅：① components/HomeJourney.module.css 新增 .judgmentPane 作用域字号覆盖（共享 StateDiffView 的 text-xs / text-[11px] → 0.8rem=12.8px，仅影响五步第 3 步“查看判断”）；② components/HomeJourney.tsx / components/home/HomeHeroLens.tsx 补 role=\"group\"（无视觉变化）。不影响已采的 after 六图、断点、Hero 状态、rail/进度线/kicker/深度离场、reduced-motion、字体失败、dialog、回执、锚点与录屏路径。",
+    "targetedRecapture": "b3/states/judgment-step-1440-light.png 于 9bae926 直接补拍：比较基线 / 待确认 / 依据 2 项 / 主判断摘要 计算字号均 = 12.8px，pane 最小可见字号 12.8px；Hero lens role=group 已生效。"
+  }
+}

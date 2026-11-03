@@ -1,0 +1,47 @@
+diff --git a/components/HomeJourney.module.css b/components/HomeJourney.module.css
+index 3d2d995..02b23dd 100644
+--- a/components/HomeJourney.module.css
++++ b/components/HomeJourney.module.css
+@@ -839,3 +839,13 @@
+     box-shadow: none;
+   }
+ }
++
++/* 首页五步示例里复用的共享状态差异组件：只在首页作用域内把 11–12px 元数据提升到 12.8px，不修改共享组件本身。 */
++.judgmentPane [class~="text-xs"] {
++  font-size: 0.8rem;
++  line-height: 1.65;
++}
++.judgmentPane [class~="text-[11px]"] {
++  font-size: 0.8rem;
++  line-height: 1.6;
++}
+diff --git a/components/HomeJourney.tsx b/components/HomeJourney.tsx
+index 3cb5dbb..c2fc437 100644
+--- a/components/HomeJourney.tsx
++++ b/components/HomeJourney.tsx
+@@ -127,7 +127,11 @@ export function HomeJourney() {
+     );
+   }
+   return (
+-    <div className={styles.storyFrame} aria-label="参赛项目交互示例">
++    <div
++      className={styles.storyFrame}
++      role="group"
++      aria-label="参赛项目交互示例"
++    >
+       <div className={styles.storyHeader}>
+         <div className={styles.projectIdentity}>
+           <span className={styles.projectIcon}>
+diff --git a/components/home/HomeHeroLens.tsx b/components/home/HomeHeroLens.tsx
+index e5cc221..ea10db2 100644
+--- a/components/home/HomeHeroLens.tsx
++++ b/components/home/HomeHeroLens.tsx
+@@ -140,6 +140,7 @@ export function HomeHeroLens() {
+     <div
+       className={styles.lens}
+       data-hero-lens
++      role="group"
+       aria-label="公开示例：委托当前工作包"
+     >
+       <header className={styles.lensHead}>

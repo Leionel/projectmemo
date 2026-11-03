@@ -1,0 +1,19 @@
+=== PHASE 2-B SUMMARY ===
+BP  1024x768             97327B overflow=false h1clip=false ctaClip=false ctaFirst=true scrollW=1024/1024
+BP  768x1024             86322B overflow=false h1clip=false ctaClip=false ctaFirst=true scrollW=768/768
+BP  360x780              59508B overflow=false h1clip=false ctaClip=false ctaFirst=true scrollW=360/360
+BP  320x720              46177B overflow=false h1clip=false ctaClip=false ctaFirst=true scrollW=320/320
+BP  zoom200-720x450      42438B overflow=false h1clip=false ctaClip=false ctaFirst=true scrollW=720/720
+BP  zoom200-640x360      34238B overflow=false h1clip=false ctaClip=false ctaFirst=true scrollW=640/640
+ST  reduced-motion-during     117775B
+ST  reduced-motion-evidence   123211B
+ST  reduced-motion-rail       106729B
+ST  font-failure              119532B
+ST  dialog-open               119181B
+ST  receipt-gate               87899B
+ST  receipt-saved              90140B
+ST  anchor-experience          92029B
+VIDEO evidence/final-sprint/20261103/b-brand-home/b3/interaction-20s.webm bytes=2155752 wall=20310ms
+assertions: {"reducedMotion":{"mediaMatches":true,"dataMotionAttribute":"reduced","contentChangedAfterSwitch":true,"tabSwitched":true,"stageSwitchLatencyMs":81,"noEntranceAnimation":true,"rowsAnimationNone":true,"evidenceOpenLatencyMs":102,"runningAnimationsAtRest":0,"heroParallaxDisabled":true,"kickerLineFull":true,"railLineFullAtRest":true,"railLineFullAfterScroll":true,"railProgressFillsRail":true,"railActiveDots":0,"scrollProgressLineHidden":true,"contentComplete":true,"noAnimationWait":true},"fontFailure":{"abortedFontUrls":["http://127.0.0.1:34111/fonts/pm-serif-brand.ttf","http://127.0.0.1:34111/fonts/pm-editorial-serif.ttf","http://127.0.0.1:34111/fonts/manrope-variable.ttf"],"h1Visible":true,"h1Text":"人可以下线， 项目别掉线。","ctaVisible":true,"heroNoteVisible":true,"mockNoteText":"公开示例 · 不调用模型 · 不写入你的项目。","mainTextLength":1640,"noAriaBusy":true,"fontStatus":"loaded","pmBrandAvailable":false,"h1FontFamily":"\"PM Editorial\", \"Noto Serif SC\", \"Songti SC\", STSong, SimSun, serif","loadMs":5239},"dialog":{"open":true,"ariaLabelledby":"source-title","title":"任务安排","bbox":{"x":416,"y":319.97,"width":608,"height":260.05,"bottom":580.02,"right":1024,"inFirstScreen":true,"clippedRight":false,"clippedLeft":false,"clippedBottom":false,"display":"block","visibility":"visible"},"focusReturnAfterEsc":{"tag":"button","ariaLabel":"查看原文：任务安排","text":"任务安排 查看原文"},"focusReturnedToTrigger":true},"anchor":{"scrollY":1274,"headerHeight":57,"headerBottom":57,"experienceTitleTop":202.640625,"experienceTitleBottom":266,"titleHiddenBehindHeader":false,"experienceSectionTop":79.5625}}
+network: {"requestRecords":636,"uniqueRequestUrls":27,"externalOriginRequests":0,"apiWriteRequests":0,"bilibiliRequests":0,"failures":83,"imageFontFailures":16,"consoleErrors":6,"pageErrors":0,"userAbortedRequests":0}
+assertions-net: {"noBilibiliRequestDuringLoad":true,"noApiWrites":true,"noExternalOrigins":true,"noPageErrors":true}

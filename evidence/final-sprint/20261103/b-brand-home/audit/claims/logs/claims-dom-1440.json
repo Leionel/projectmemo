@@ -1,0 +1,246 @@
+{
+  "lang": "zh-CN",
+  "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+  "mainText": "面向大学生的\n个人项目 Agent\n\n人可以下线，\n项目别掉线。\n\n关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。\n\n体验一段项目接续\n进入工作台\n\n公开示例 · 不调用模型 · 不写入你的项目。\n\n公开示例\n·\n忆程参赛作品开发\n\n整理阶段汇报\n等你确认\n01\n离开时\n02\n期间\n03\n回来后\n原委托\n用已有材料整理一份阶段汇报\n原任务与草稿都留在原处\n依据\n比赛材料、任务安排、老师建议\n3 条来源可回看原文\n变化\n演示流程缺少完成回执\n原判断“先写汇报草稿”需要你重新确认\n等你\n补充演示结果，或确认先按现有材料写汇报草稿\n确认后从原委托继续，不会另建任务\n查看依据\n回到原委托\n冻结示例\n·\n不调用模型\n·\n与下方五步示例使用同一份素材\n\n01\n离开以后\n\n新情况出现时，它带着出处回来。\n\n同一个示例委托：来源、判断和等你决定的那一步，都留在原处。\n\n来源\n\n3 条来源保留原文\n\n比赛材料、任务安排、老师建议，随时可以回到原文核对。\n\n变化\n\n发现一处没有回执\n\n演示流程是否跑通，现有材料无法确认。\n\n判断改变\n\n先补演示结果，再写汇报\n\n原来：先按比赛材料写汇报草稿。\n\n等你\n\n补充结果，或确认原计划\n\n原任务、来源和草稿都保留，不另建一个新任务。\n\n什么情况下才会自动接续？\n\n这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。\n\n02\n公开交互示例\n\n同一份素材，走一遍接续。\n\n从原始记录到模拟回执：先看依据，再确认行动。所有操作只影响本页。\n\n内置公开示例\n忆程参赛作品开发\n\n当前委托 · 整理阶段汇报\n\n重置示例\n1\n查看记录\n2\n核对依据\n3\n查看判断\n4\n确认行动\n5\n填写回执\n\n已有示例素材\n\n先看看上次留下了什么\n\n这份示例项目保留了任务安排、比赛材料和老师建议。先读原文，再判断现在该做什么。\n\n1 / 5\n原始记录\n3 条内置素材\n任务安排\n\n目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。\n\n任务安排\n查看原文\n比赛材料\n\n初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。\n\n比赛材料\n查看原文\n老师建议\n\n老师建议作品不要叫普通学习助手，要突出项目制学习和知识资产复用。\n\n老师建议\n查看原文\n\n已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。\n\n03\n同一个任务\n\n电脑上看依据，手机上回应。\n\nWeb 工作台与鸿蒙客户端连到同一服务。同一个项目、同一条任务，换设备后仍从原位置继续。\n\n界面示意 · 实际可用范围取决于部署与授权\n\n同一任务\n整理阶段汇报\n·\n公开示例\n\nWeb 工作台\n\n项目\n依据与原文\n结果写回\n\n在电脑上核对较长材料，处理需要仔细读的那一步。\n\n鸿蒙客户端\n\n项目\n等待提醒\n回应原委托\n\n在手机上完成一次简短回应，回到电脑继续。\n\n04\n用在什么项目上\n\n竞赛、科研、课程设计。\n竞赛备赛\n\n实验记录、报名要求和答辩材料回到同一个项目，整理汇报时能回看来源。\n\n科研训练\n\n查清方案为什么改过、结论用了哪些实验记录，哪些问题还没有依据。\n\n课程设计\n\n保留需求、问题和修改过程；完成行动后，把结果接回项目历史。\n\n05\n决赛演示\n\n看一遍决赛演示。\n\n2026 C4-AI 决赛演示视频。视频托管在 Bilibili，点击后在新窗口打开外部站点。\n\n2026 C4-AI 决赛演示视频\n忆程 ProjectMemo · Bilibili · 新窗口打开\n让你的下一段长期项目，接得上。\n\n从自己的项目开始。已有账号可以直接进入工作台。\n\n进入工作台\n先看一段示例\n\n使用边界来源可以回看；没有依据的内容会标明缺口。建议需要你判断，重要操作在确认后才应用。模型分析与委托执行取决于实际配置。\n\n忆程 ProjectMemo\n公开示例\n决赛演示\n回到顶部 ↑\n\n竞赛 · 科研 · 课程项目",
+  "imgs": [
+    {
+      "src": "http://127.0.0.1:34111/logo.png",
+      "alt": "",
+      "w": 1254,
+      "h": 1254
+    }
+  ],
+  "iframes": 0,
+  "media": 0,
+  "autoplay": 0,
+  "anchors": [
+    {
+      "text": "跳到主要内容",
+      "href": "#main-content",
+      "target": null,
+      "rel": null,
+      "ariaLabel": null
+    },
+    {
+      "text": "忆程 ProjectMemo",
+      "href": "/",
+      "target": null,
+      "rel": null,
+      "ariaLabel": "忆程 ProjectMemo 首页"
+    },
+    {
+      "text": "产品体验",
+      "href": "#experience",
+      "target": null,
+      "rel": null,
+      "ariaLabel": null
+    },
+    {
+      "text": "长期委托",
+      "href": "#missions",
+      "target": null,
+      "rel": null,
+      "ariaLabel": null
+    },
+    {
+      "text": "使用场景",
+      "href": "#moments",
+      "target": null,
+      "rel": null,
+      "ariaLabel": null
+    },
+    {
+      "text": "决赛演示",
+      "href": "#demo",
+      "target": null,
+      "rel": null,
+      "ariaLabel": null
+    },
+    {
+      "text": "进入工作台",
+      "href": "/focus",
+      "target": null,
+      "rel": null,
+      "ariaLabel": null
+    },
+    {
+      "text": "体验一段项目接续",
+      "href": "#experience",
+      "target": null,
+      "rel": null,
+      "ariaLabel": null
+    },
+    {
+      "text": "进入工作台",
+      "href": "/login?from=%2Ffocus",
+      "target": null,
+      "rel": null,
+      "ariaLabel": null
+    },
+    {
+      "text": "回到原委托",
+      "href": "#experience",
+      "target": null,
+      "rel": null,
+      "ariaLabel": null
+    },
+    {
+      "text": "2026 C4-AI 决赛演示视频忆程 ProjectMemo · Bilibili · 新窗口打开",
+      "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "ariaLabel": null
+    },
+    {
+      "text": "进入工作台",
+      "href": "/login?from=%2Ffocus",
+      "target": null,
+      "rel": null,
+      "ariaLabel": null
+    },
+    {
+      "text": "先看一段示例",
+      "href": "#experience",
+      "target": null,
+      "rel": null,
+      "ariaLabel": null
+    },
+    {
+      "text": "忆程 ProjectMemo",
+      "href": "/",
+      "target": null,
+      "rel": null,
+      "ariaLabel": null
+    },
+    {
+      "text": "公开示例",
+      "href": "#experience",
+      "target": null,
+      "rel": null,
+      "ariaLabel": null
+    },
+    {
+      "text": "决赛演示",
+      "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "ariaLabel": "决赛演示（Bilibili，在新窗口打开）"
+    },
+    {
+      "text": "回到顶部 ↑",
+      "href": "#home-heading",
+      "target": null,
+      "rel": null,
+      "ariaLabel": null
+    }
+  ],
+  "headings": [
+    {
+      "tag": "H1",
+      "id": "hero-title",
+      "text": "人可以下线，项目别掉线。"
+    },
+    {
+      "tag": "H2",
+      "id": "",
+      "text": "整理阶段汇报"
+    },
+    {
+      "tag": "H2",
+      "id": "continuity-title",
+      "text": "新情况出现时，它带着出处回来。"
+    },
+    {
+      "tag": "H3",
+      "id": "",
+      "text": "3 条来源保留原文"
+    },
+    {
+      "tag": "H3",
+      "id": "",
+      "text": "发现一处没有回执"
+    },
+    {
+      "tag": "H3",
+      "id": "",
+      "text": "先补演示结果，再写汇报"
+    },
+    {
+      "tag": "H3",
+      "id": "",
+      "text": "补充结果，或确认原计划"
+    },
+    {
+      "tag": "H2",
+      "id": "experience-title",
+      "text": "同一份素材，走一遍接续。"
+    },
+    {
+      "tag": "H3",
+      "id": "",
+      "text": "忆程参赛作品开发"
+    },
+    {
+      "tag": "H3",
+      "id": "source-title",
+      "text": ""
+    },
+    {
+      "tag": "H2",
+      "id": "platform-title",
+      "text": "电脑上看依据，手机上回应。"
+    },
+    {
+      "tag": "H3",
+      "id": "",
+      "text": "Web 工作台"
+    },
+    {
+      "tag": "H3",
+      "id": "",
+      "text": "鸿蒙客户端"
+    },
+    {
+      "tag": "H2",
+      "id": "moments-title",
+      "text": "竞赛、科研、课程设计。"
+    },
+    {
+      "tag": "H3",
+      "id": "",
+      "text": "竞赛备赛"
+    },
+    {
+      "tag": "H3",
+      "id": "",
+      "text": "科研训练"
+    },
+    {
+      "tag": "H3",
+      "id": "",
+      "text": "课程设计"
+    },
+    {
+      "tag": "H2",
+      "id": "demo-title",
+      "text": "看一遍决赛演示。"
+    },
+    {
+      "tag": "H2",
+      "id": "closing-title",
+      "text": "让你的下一段长期项目，接得上。"
+    }
+  ],
+  "boundaryTexts": [
+    "公开示例 · 不调用模型 · 不写入你的项目。",
+    "公开示例·忆程参赛作品开发",
+    "冻结示例·不调用模型·与下方五步示例使用同一份素材",
+    "冻结示例",
+    "不调用模型",
+    "从原始记录到模拟回执：先看依据，再确认行动。所有操作只影响本页。",
+    "内置公开示例",
+    "已有示例素材",
+    "同一任务整理阶段汇报·公开示例",
+    "忆程 ProjectMemo公开示例决赛演示回到顶部 ↑竞赛 · 科研 · 课程项目"
+  ]
+}

@@ -1,0 +1,6250 @@
+{
+  "task": "task-4",
+  "track": "B",
+  "phase": 2,
+  "part": "2-A after 六图 + Hero 状态 + 216cf05/cc7c19f 滚动动效（进度线/rail/kicker/Hero 深度离场）+ 性能/资源取证",
+  "capturedAt": "2026-11-03T04:35:05.310Z",
+  "sourceSha": "9bae926e9475cedef118deedf5e002ec8365a23b",
+  "worktree": "D:\\Projects\\hongmen-final-b-brand-home",
+  "branch": "codex/final-b-brand-home",
+  "baseURL": "http://127.0.0.1:34111",
+  "environment": {
+    "os": "win32 10.0.26300 (Windows 11 Home China)",
+    "arch": "x64",
+    "cpu": "Intel(R) Core(TM) i7-14700HX ×28",
+    "totalMemoryGiB": 15.78,
+    "node": "v24.16.0",
+    "browser": "chromium via @playwright/test 1.61.1 (headless)",
+    "deviceScaleFactor": 1,
+    "network": "localhost loopback（Next dev，同一台机器）",
+    "timezoneId": "Asia/Shanghai",
+    "locale": "zh-CN",
+    "mode": "Next dev（非生产构建）；LLM_MODE=mock、空 SQLite、无 Worker（由 Lead 提供）",
+    "caveat": "性能/体积数字仅代表本机本地 dev 环境，不宣称代表所有用户体验或生产构建。"
+  },
+  "sourceIntegrity": {
+    "headAtCapture": "9bae926e9475cedef118deedf5e002ec8365a23b",
+    "headVerified": true,
+    "treeCleanExceptEvidence": true,
+    "note": "最终候选 9bae926（cc7c19f + 终验 a11y/字号作用域修复）；截图/录屏采集于 cc7c19f（12:31–12:40），9bae926 仅改 .judgmentPane 字号作用域与 role 属性，不改变已采状态。",
+    "postCaptureEdits": {
+      "capturedAt": "2026-11-03T12:31–12:40+08:00（截图/录屏均在此窗口内）",
+      "treeAtCapture": "HEAD=cc7c19f；git status 仅证据目录未跟踪（干净）",
+      "editsAfterCapture": [
+        {
+          "file": "components/home/HomeHeroLens.tsx",
+          "mtimeLocal": "2026-11-03T12:40:44+08:00",
+          "diff": "+ role=\"group\"（aria 语义，无视觉变化）"
+        },
+        {
+          "file": "components/HomeJourney.module.css",
+          "mtimeLocal": "2026-11-03T12:40:45+08:00",
+          "diff": "+ 五步示例 judgmentPane 内 text-xs/text-[11px] 元数据提升到 12.8px（仅影响第 3 步“查看判断”的 StateDiffView 文本）"
+        },
+        {
+          "file": "next-env.d.ts",
+          "mtimeLocal": "2026-11-03T12:38:00+08:00",
+          "diff": "Next 自动生成"
+        }
+      ],
+      "impact": "已提交为 9bae926；证据绑定 9bae926，第 3 步判断页另行定向补拍验证。"
+    },
+    "finalCandidateSha": "9bae926e9475cedef118deedf5e002ec8365a23b"
+  },
+  "protocol": "after 六图：1440×900 / 1280×720 / 390×844 × light/dark；localStorage theme 后 reload；等 #hero-title 可见、主题类生效、document.fonts.ready、入场动画结束（≥900ms）、scrollY=0；截整视口非全页。Hero 状态：1440 light 默认“回来后”之后紧接着切“02 期间”、回“回来后”展开“查看依据”。滚动动效：Hero 深度离场（scrollY=180）、01 节 kicker 绘制、rail 中段（--rail-progress≈0.5）、阅读进度线中段（45% 页高）。",
+  "matrix": [
+    {
+      "label": "after-1440-light",
+      "width": 1440,
+      "height": 900,
+      "theme": "light",
+      "file": "evidence/final-sprint/20261103/b-brand-home/after/homepage-1440-light-after.png",
+      "fileBytes": 119851,
+      "fileSha256": "73cfa0cd586fdc3613d68850069cc3d96745d8521fa1aa4025012c3104155603",
+      "metricsFile": "homepage-1440-light.json",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1124.53,
+            "y": 205.05,
+            "width": 195.66,
+            "height": 44,
+            "bottom": 249.05,
+            "right": 1320.19,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": 111.72,
+        "ctaVisibleInFirstScreen": true
+      },
+      "fontSizes": {
+        "h1": {
+          "selector": "#hero-title",
+          "text": "人可以下线， 项目别掉线。",
+          "fontSize": "72.72px",
+          "fontSizePx": 72.72,
+          "lineHeight": "82.9008px",
+          "fontWeight": "500",
+          "color": "rgb(28, 46, 44)",
+          "width": 545,
+          "height": 165.8
+        },
+        "heroSub": {
+          "selector": "#hero-title + p",
+          "text": "关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。",
+          "fontSize": "17px",
+          "fontSizePx": 17,
+          "lineHeight": "32.3px",
+          "fontWeight": "400",
+          "color": "rgb(83, 100, 94)",
+          "width": 512,
+          "height": 64.6
+        },
+        "heroNote": {
+          "selector": "[class*=\"heroNote\"]",
+          "text": "公开示例 · 不调用模型 · 不写入你的项目。",
+          "fontSize": "13.44px",
+          "fontSizePx": 13.44,
+          "lineHeight": "22.848px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 545,
+          "height": 22.8
+        },
+        "lensKicker": {
+          "selector": "[class*=\"lensKicker\"]",
+          "text": "公开示例 · 忆程参赛作品开发",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 172.6,
+          "height": 19.2
+        },
+        "lensMission": {
+          "selector": "[class*=\"lensMission\"]",
+          "text": "整理阶段汇报",
+          "fontSize": "22.4px",
+          "fontSizePx": 22.4,
+          "lineHeight": "31.36px",
+          "fontWeight": "500",
+          "color": "rgb(28, 46, 44)",
+          "width": 172.6,
+          "height": 31.4
+        },
+        "stageTab": {
+          "selector": "[class*=\"stageTab\"]",
+          "text": "01 离开时 02 期间 03 回来后",
+          "fontSize": "14px",
+          "fontSizePx": 14,
+          "lineHeight": "21.7px",
+          "fontWeight": "400",
+          "color": "rgb(28, 46, 44)",
+          "width": 612.5,
+          "height": 57
+        },
+        "rowLabel": {
+          "selector": "[class*=\"lensRow\"] dt",
+          "text": "原委托",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "600",
+          "color": "rgb(97, 114, 104)",
+          "width": 65.6,
+          "height": 50
+        },
+        "rowValue": {
+          "selector": "[class*=\"rowValue\"]",
+          "text": "用已有材料整理一份阶段汇报",
+          "fontSize": "15px",
+          "fontSizePx": 15,
+          "lineHeight": "25.5px",
+          "fontWeight": "400",
+          "color": "rgb(28, 46, 44)",
+          "width": 487.8,
+          "height": 25.5
+        },
+        "rowMeta": {
+          "selector": "[class*=\"rowMeta\"]",
+          "text": "原任务与草稿都留在原处",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "21.648px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 487.8,
+          "height": 21.7
+        },
+        "lensFoot": {
+          "selector": "[class*=\"lensFoot\"]",
+          "text": "冻结示例 · 不调用模型 · 与下方五步示例使用同一份素材",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "20.48px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 612.5,
+          "height": 40.7
+        },
+        "sectionKicker": {
+          "selector": "#missions [class*=\"kicker\"]",
+          "text": "01 离开以后",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "19.68px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 1220,
+          "height": 19.7
+        },
+        "sectionIntro": {
+          "selector": "#missions [class*=\"sectionIntro\"]",
+          "text": "同一个示例委托：来源、判断和等你决定的那一步，都留在原处。",
+          "fontSize": "16px",
+          "fontSizePx": 16,
+          "lineHeight": "30.4px",
+          "fontWeight": "400",
+          "color": "rgb(83, 100, 94)",
+          "width": 464,
+          "height": 30.4
+        },
+        "railLabel": {
+          "selector": "[class*=\"railLabel\"]",
+          "text": "来源",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "600",
+          "color": "rgb(97, 114, 104)",
+          "width": 280,
+          "height": 19.2
+        },
+        "railText": {
+          "selector": "[class*=\"railText\"]",
+          "text": "比赛材料、任务安排、老师建议，随时可以回到原文核对。",
+          "fontSize": "15px",
+          "fontSizePx": 15,
+          "lineHeight": "27px",
+          "fontWeight": "400",
+          "color": "rgb(83, 100, 94)",
+          "width": 280,
+          "height": 54
+        },
+        "demoNote": {
+          "selector": "[class*=\"demoNote\"]",
+          "text": "这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "26.64px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 581.2,
+          "height": 26.6
+        },
+        "storyFooter": {
+          "selector": "[class*=\"storyFooter\"] > p",
+          "text": "已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "21.76px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 460.8,
+          "height": 21.8
+        },
+        "paneHeading": {
+          "selector": "[class*=\"paneHeading\"] h4",
+          "text": "原始记录",
+          "fontSize": "15.2px",
+          "fontSizePx": 15.2,
+          "lineHeight": "22.8px",
+          "fontWeight": "650",
+          "color": "rgb(28, 46, 44)",
+          "width": 60.8,
+          "height": 22.8
+        },
+        "projectKicker": {
+          "selector": "[class*=\"projectKicker\"]",
+          "text": "内置公开示例",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 76.8,
+          "height": 18
+        },
+        "sourceButton": {
+          "selector": "[class*=\"sourceButton\"]",
+          "text": "任务安排 查看原文",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(39, 104, 93)",
+          "width": 136.2,
+          "height": 44
+        },
+        "videoMeta": {
+          "selector": "[class*=\"videoMeta\"]",
+          "text": "忆程 ProjectMemo · Bilibili · 新窗口打开",
+          "fontSize": "13.44px",
+          "fontSizePx": 13.44,
+          "lineHeight": "20.16px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 250.3,
+          "height": 20.2
+        },
+        "footerMeta": {
+          "selector": "[class*=\"footerMeta\"]",
+          "text": "竞赛 · 科研 · 课程项目",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "19.68px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 121.4,
+          "height": 19.7
+        },
+        "boundary": {
+          "selector": "[class*=\"boundary\"] p",
+          "text": "使用边界来源可以回看；没有依据的内容会标明缺口。建议需要你判断，重要操作在确认后才应用。模型分析与委托执行取决于实际配置。",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "26.64px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 1220,
+          "height": 26.6
+        },
+        "caption": {
+          "selector": "[class*=\"caption\"]",
+          "text": "界面示意 · 实际可用范围取决于部署与授权",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "22.304px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 574,
+          "height": 22.3
+        }
+      },
+      "smallTextBottom": [
+        {
+          "fontSizePx": 12.8,
+          "text": "公开示例·忆程参赛作品开发",
+          "tag": "p"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "·",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "等你确认",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "01",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "02",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "03",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "原委托",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "依据",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "变化",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "等你",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "冻结示例",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "不调用模型",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "与下方五步示例使用同一份素材",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "来源",
+          "tag": "p"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "判断改变",
+          "tag": "p"
+        }
+      ],
+      "headings": [
+        {
+          "tag": "h1",
+          "id": "hero-title",
+          "text": "人可以下线， 项目别掉线。",
+          "bbox": {
+            "x": 110,
+            "y": 166.11,
+            "width": 544.97,
+            "height": 165.78,
+            "bottom": 331.89,
+            "right": 654.97,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": null,
+          "text": "整理阶段汇报",
+          "bbox": {
+            "x": 738.03,
+            "y": 151.91,
+            "width": 172.63,
+            "height": 31.36,
+            "bottom": 183.27,
+            "right": 910.66,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "continuity-title",
+          "text": "新情况出现时，它带着出处回来。",
+          "bbox": {
+            "x": 110,
+            "y": 842.42,
+            "width": 610.25,
+            "height": 126.72,
+            "bottom": 969.14,
+            "right": 720.25,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "3 条来源保留原文",
+          "bbox": {
+            "x": 110,
+            "y": 1079.55,
+            "width": 280,
+            "height": 28.05,
+            "bottom": 1107.59,
+            "right": 390,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "发现一处没有回执",
+          "bbox": {
+            "x": 439,
+            "y": 1079.55,
+            "width": 256,
+            "height": 28.05,
+            "bottom": 1107.59,
+            "right": 695,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "先补演示结果，再写汇报",
+          "bbox": {
+            "x": 744,
+            "y": 1079.55,
+            "width": 256,
+            "height": 28.05,
+            "bottom": 1107.59,
+            "right": 1000,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "补充结果，或确认原计划",
+          "bbox": {
+            "x": 1049,
+            "y": 1079.55,
+            "width": 281,
+            "height": 28.05,
+            "bottom": 1107.59,
+            "right": 1330,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "experience-title",
+          "text": "同一份素材，走一遍接续。",
+          "bbox": {
+            "x": 110,
+            "y": 1476.64,
+            "width": 610.25,
+            "height": 63.36,
+            "bottom": 1540,
+            "right": 720.25,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "忆程参赛作品开发",
+          "bbox": {
+            "x": 190.19,
+            "y": 1610.67,
+            "width": 139.42,
+            "height": 24,
+            "bottom": 1634.67,
+            "right": 329.61,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": "source-title",
+          "text": "",
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "platform-title",
+          "text": "电脑上看依据，手机上回应。",
+          "bbox": {
+            "x": 110,
+            "y": 2523.98,
+            "width": 574,
+            "height": 126.72,
+            "bottom": 2650.7,
+            "right": 684,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "Web 工作台",
+          "bbox": {
+            "x": 783.59,
+            "y": 2561.06,
+            "width": 90.31,
+            "height": 25.5,
+            "bottom": 2586.56,
+            "right": 873.91,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "鸿蒙客户端",
+          "bbox": {
+            "x": 783.59,
+            "y": 2697.53,
+            "width": 85,
+            "height": 25.5,
+            "bottom": 2723.03,
+            "right": 868.59,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "moments-title",
+          "text": "竞赛、科研、课程设计。",
+          "bbox": {
+            "x": 110,
+            "y": 3020.28,
+            "width": 610.25,
+            "height": 63.36,
+            "bottom": 3083.64,
+            "right": 720.25,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "竞赛备赛",
+          "bbox": {
+            "x": 110,
+            "y": 3162.06,
+            "width": 377.66,
+            "height": 31.19,
+            "bottom": 3193.25,
+            "right": 487.66,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "科研训练",
+          "bbox": {
+            "x": 544.66,
+            "y": 3162.06,
+            "width": 349.67,
+            "height": 31.19,
+            "bottom": 3193.25,
+            "right": 894.33,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "课程设计",
+          "bbox": {
+            "x": 951.33,
+            "y": 3162.06,
+            "width": 378.66,
+            "height": 31.19,
+            "bottom": 3193.25,
+            "right": 1329.98,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "demo-title",
+          "text": "看一遍决赛演示。",
+          "bbox": {
+            "x": 110,
+            "y": 3495,
+            "width": 574,
+            "height": 63.36,
+            "bottom": 3558.36,
+            "right": 684,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "closing-title",
+          "text": "让你的下一段长期项目，接得上。",
+          "bbox": {
+            "x": 110,
+            "y": 3811.92,
+            "width": 638.66,
+            "height": 135.16,
+            "bottom": 3947.08,
+            "right": 748.66,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        }
+      ],
+      "videoLink": {
+        "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "text": "2026 C4-AI 决赛演示视频 忆程 ProjectMemo · Bilibili · 新窗口打开",
+        "bbox": {
+          "x": 756,
+          "y": 3501.22,
+          "width": 574,
+          "height": 96,
+          "bottom": 3597.22,
+          "right": 1330,
+          "inFirstScreen": false,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": true,
+          "display": "flex",
+          "visibility": "visible"
+        }
+      }
+    },
+    {
+      "label": "after-1440-dark",
+      "width": 1440,
+      "height": 900,
+      "theme": "dark",
+      "file": "evidence/final-sprint/20261103/b-brand-home/after/homepage-1440-dark-after.png",
+      "fileBytes": 115298,
+      "fileSha256": "cd3a0d761a28700f0828231f31313d94cf74d352a2de924c90e7f229c48cc571",
+      "metricsFile": "homepage-1440-dark.json",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "dark",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1124.53,
+            "y": 205.05,
+            "width": 195.66,
+            "height": 44,
+            "bottom": 249.05,
+            "right": 1320.19,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": 111.72,
+        "ctaVisibleInFirstScreen": true
+      },
+      "fontSizes": {
+        "h1": {
+          "selector": "#hero-title",
+          "text": "人可以下线， 项目别掉线。",
+          "fontSize": "72.72px",
+          "fontSizePx": 72.72,
+          "lineHeight": "82.9008px",
+          "fontWeight": "500",
+          "color": "rgb(232, 238, 233)",
+          "width": 545,
+          "height": 165.8
+        },
+        "heroSub": {
+          "selector": "#hero-title + p",
+          "text": "关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。",
+          "fontSize": "17px",
+          "fontSizePx": 17,
+          "lineHeight": "32.3px",
+          "fontWeight": "400",
+          "color": "rgb(179, 196, 187)",
+          "width": 512,
+          "height": 64.6
+        },
+        "heroNote": {
+          "selector": "[class*=\"heroNote\"]",
+          "text": "公开示例 · 不调用模型 · 不写入你的项目。",
+          "fontSize": "13.44px",
+          "fontSizePx": 13.44,
+          "lineHeight": "22.848px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 545,
+          "height": 22.8
+        },
+        "lensKicker": {
+          "selector": "[class*=\"lensKicker\"]",
+          "text": "公开示例 · 忆程参赛作品开发",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 172.6,
+          "height": 19.2
+        },
+        "lensMission": {
+          "selector": "[class*=\"lensMission\"]",
+          "text": "整理阶段汇报",
+          "fontSize": "22.4px",
+          "fontSizePx": 22.4,
+          "lineHeight": "31.36px",
+          "fontWeight": "500",
+          "color": "rgb(232, 238, 233)",
+          "width": 172.6,
+          "height": 31.4
+        },
+        "stageTab": {
+          "selector": "[class*=\"stageTab\"]",
+          "text": "01 离开时 02 期间 03 回来后",
+          "fontSize": "14px",
+          "fontSizePx": 14,
+          "lineHeight": "21.7px",
+          "fontWeight": "400",
+          "color": "rgb(232, 238, 233)",
+          "width": 612.5,
+          "height": 57
+        },
+        "rowLabel": {
+          "selector": "[class*=\"lensRow\"] dt",
+          "text": "原委托",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "600",
+          "color": "rgb(160, 179, 168)",
+          "width": 65.6,
+          "height": 50
+        },
+        "rowValue": {
+          "selector": "[class*=\"rowValue\"]",
+          "text": "用已有材料整理一份阶段汇报",
+          "fontSize": "15px",
+          "fontSizePx": 15,
+          "lineHeight": "25.5px",
+          "fontWeight": "400",
+          "color": "rgb(232, 238, 233)",
+          "width": 487.8,
+          "height": 25.5
+        },
+        "rowMeta": {
+          "selector": "[class*=\"rowMeta\"]",
+          "text": "原任务与草稿都留在原处",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "21.648px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 487.8,
+          "height": 21.7
+        },
+        "lensFoot": {
+          "selector": "[class*=\"lensFoot\"]",
+          "text": "冻结示例 · 不调用模型 · 与下方五步示例使用同一份素材",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "20.48px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 612.5,
+          "height": 40.7
+        },
+        "sectionKicker": {
+          "selector": "#missions [class*=\"kicker\"]",
+          "text": "01 离开以后",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "19.68px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 1220,
+          "height": 19.7
+        },
+        "sectionIntro": {
+          "selector": "#missions [class*=\"sectionIntro\"]",
+          "text": "同一个示例委托：来源、判断和等你决定的那一步，都留在原处。",
+          "fontSize": "16px",
+          "fontSizePx": 16,
+          "lineHeight": "30.4px",
+          "fontWeight": "400",
+          "color": "rgb(179, 196, 187)",
+          "width": 464,
+          "height": 30.4
+        },
+        "railLabel": {
+          "selector": "[class*=\"railLabel\"]",
+          "text": "来源",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "600",
+          "color": "rgb(160, 179, 168)",
+          "width": 280,
+          "height": 19.2
+        },
+        "railText": {
+          "selector": "[class*=\"railText\"]",
+          "text": "比赛材料、任务安排、老师建议，随时可以回到原文核对。",
+          "fontSize": "15px",
+          "fontSizePx": 15,
+          "lineHeight": "27px",
+          "fontWeight": "400",
+          "color": "rgb(179, 196, 187)",
+          "width": 280,
+          "height": 54
+        },
+        "demoNote": {
+          "selector": "[class*=\"demoNote\"]",
+          "text": "这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "26.64px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 581.2,
+          "height": 26.6
+        },
+        "storyFooter": {
+          "selector": "[class*=\"storyFooter\"] > p",
+          "text": "已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "21.76px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 460.8,
+          "height": 21.8
+        },
+        "paneHeading": {
+          "selector": "[class*=\"paneHeading\"] h4",
+          "text": "原始记录",
+          "fontSize": "15.2px",
+          "fontSizePx": 15.2,
+          "lineHeight": "22.8px",
+          "fontWeight": "650",
+          "color": "rgb(232, 238, 233)",
+          "width": 60.8,
+          "height": 22.8
+        },
+        "projectKicker": {
+          "selector": "[class*=\"projectKicker\"]",
+          "text": "内置公开示例",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 76.8,
+          "height": 18
+        },
+        "sourceButton": {
+          "selector": "[class*=\"sourceButton\"]",
+          "text": "任务安排 查看原文",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(145, 198, 181)",
+          "width": 136.2,
+          "height": 44
+        },
+        "videoMeta": {
+          "selector": "[class*=\"videoMeta\"]",
+          "text": "忆程 ProjectMemo · Bilibili · 新窗口打开",
+          "fontSize": "13.44px",
+          "fontSizePx": 13.44,
+          "lineHeight": "20.16px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 250.3,
+          "height": 20.2
+        },
+        "footerMeta": {
+          "selector": "[class*=\"footerMeta\"]",
+          "text": "竞赛 · 科研 · 课程项目",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "19.68px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 121.4,
+          "height": 19.7
+        },
+        "boundary": {
+          "selector": "[class*=\"boundary\"] p",
+          "text": "使用边界来源可以回看；没有依据的内容会标明缺口。建议需要你判断，重要操作在确认后才应用。模型分析与委托执行取决于实际配置。",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "26.64px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 1220,
+          "height": 26.6
+        },
+        "caption": {
+          "selector": "[class*=\"caption\"]",
+          "text": "界面示意 · 实际可用范围取决于部署与授权",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "22.304px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 574,
+          "height": 22.3
+        }
+      },
+      "smallTextBottom": [
+        {
+          "fontSizePx": 12.8,
+          "text": "公开示例·忆程参赛作品开发",
+          "tag": "p"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "·",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "等你确认",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "01",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "02",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "03",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "原委托",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "依据",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "变化",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "等你",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "冻结示例",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "不调用模型",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "与下方五步示例使用同一份素材",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "来源",
+          "tag": "p"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "判断改变",
+          "tag": "p"
+        }
+      ],
+      "headings": [
+        {
+          "tag": "h1",
+          "id": "hero-title",
+          "text": "人可以下线， 项目别掉线。",
+          "bbox": {
+            "x": 110,
+            "y": 166.11,
+            "width": 544.97,
+            "height": 165.78,
+            "bottom": 331.89,
+            "right": 654.97,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": null,
+          "text": "整理阶段汇报",
+          "bbox": {
+            "x": 738.03,
+            "y": 151.91,
+            "width": 172.63,
+            "height": 31.36,
+            "bottom": 183.27,
+            "right": 910.66,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "continuity-title",
+          "text": "新情况出现时，它带着出处回来。",
+          "bbox": {
+            "x": 110,
+            "y": 842.42,
+            "width": 610.25,
+            "height": 126.72,
+            "bottom": 969.14,
+            "right": 720.25,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "3 条来源保留原文",
+          "bbox": {
+            "x": 110,
+            "y": 1079.55,
+            "width": 280,
+            "height": 28.05,
+            "bottom": 1107.59,
+            "right": 390,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "发现一处没有回执",
+          "bbox": {
+            "x": 439,
+            "y": 1079.55,
+            "width": 256,
+            "height": 28.05,
+            "bottom": 1107.59,
+            "right": 695,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "先补演示结果，再写汇报",
+          "bbox": {
+            "x": 744,
+            "y": 1079.55,
+            "width": 256,
+            "height": 28.05,
+            "bottom": 1107.59,
+            "right": 1000,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "补充结果，或确认原计划",
+          "bbox": {
+            "x": 1049,
+            "y": 1079.55,
+            "width": 281,
+            "height": 28.05,
+            "bottom": 1107.59,
+            "right": 1330,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "experience-title",
+          "text": "同一份素材，走一遍接续。",
+          "bbox": {
+            "x": 110,
+            "y": 1476.64,
+            "width": 610.25,
+            "height": 63.36,
+            "bottom": 1540,
+            "right": 720.25,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "忆程参赛作品开发",
+          "bbox": {
+            "x": 190.19,
+            "y": 1610.67,
+            "width": 139.42,
+            "height": 24,
+            "bottom": 1634.67,
+            "right": 329.61,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": "source-title",
+          "text": "",
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "platform-title",
+          "text": "电脑上看依据，手机上回应。",
+          "bbox": {
+            "x": 110,
+            "y": 2523.98,
+            "width": 574,
+            "height": 126.72,
+            "bottom": 2650.7,
+            "right": 684,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "Web 工作台",
+          "bbox": {
+            "x": 783.59,
+            "y": 2561.06,
+            "width": 90.31,
+            "height": 25.5,
+            "bottom": 2586.56,
+            "right": 873.91,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "鸿蒙客户端",
+          "bbox": {
+            "x": 783.59,
+            "y": 2697.53,
+            "width": 85,
+            "height": 25.5,
+            "bottom": 2723.03,
+            "right": 868.59,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "moments-title",
+          "text": "竞赛、科研、课程设计。",
+          "bbox": {
+            "x": 110,
+            "y": 3020.28,
+            "width": 610.25,
+            "height": 63.36,
+            "bottom": 3083.64,
+            "right": 720.25,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "竞赛备赛",
+          "bbox": {
+            "x": 110,
+            "y": 3162.06,
+            "width": 377.66,
+            "height": 31.19,
+            "bottom": 3193.25,
+            "right": 487.66,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "科研训练",
+          "bbox": {
+            "x": 544.66,
+            "y": 3162.06,
+            "width": 349.67,
+            "height": 31.19,
+            "bottom": 3193.25,
+            "right": 894.33,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "课程设计",
+          "bbox": {
+            "x": 951.33,
+            "y": 3162.06,
+            "width": 378.66,
+            "height": 31.19,
+            "bottom": 3193.25,
+            "right": 1329.98,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "demo-title",
+          "text": "看一遍决赛演示。",
+          "bbox": {
+            "x": 110,
+            "y": 3495,
+            "width": 574,
+            "height": 63.36,
+            "bottom": 3558.36,
+            "right": 684,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "closing-title",
+          "text": "让你的下一段长期项目，接得上。",
+          "bbox": {
+            "x": 110,
+            "y": 3811.92,
+            "width": 638.66,
+            "height": 135.16,
+            "bottom": 3947.08,
+            "right": 748.66,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        }
+      ],
+      "videoLink": {
+        "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "text": "2026 C4-AI 决赛演示视频 忆程 ProjectMemo · Bilibili · 新窗口打开",
+        "bbox": {
+          "x": 756,
+          "y": 3501.22,
+          "width": 574,
+          "height": 96,
+          "bottom": 3597.22,
+          "right": 1330,
+          "inFirstScreen": false,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": true,
+          "display": "flex",
+          "visibility": "visible"
+        }
+      }
+    },
+    {
+      "label": "after-1280-light",
+      "width": 1280,
+      "height": 720,
+      "theme": "light",
+      "file": "evidence/final-sprint/20261103/b-brand-home/after/homepage-1280-light-after.png",
+      "fileBytes": 101268,
+      "fileSha256": "eec4713f55425d5510841e54b7ba1bc468a58d69df50b0ec2dd683305c811977",
+      "metricsFile": "homepage-1280-light.json",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 1280,
+        "innerWidth": 1280,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1042.06,
+            "y": 198.95,
+            "width": 196.14,
+            "height": 44,
+            "bottom": 242.95,
+            "right": 1238.2,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": 105.63,
+        "ctaVisibleInFirstScreen": true
+      },
+      "fontSizes": {
+        "h1": {
+          "selector": "#hero-title",
+          "text": "人可以下线， 项目别掉线。",
+          "fontSize": "64.64px",
+          "fontSizePx": 64.64,
+          "lineHeight": "73.6896px",
+          "fontWeight": "500",
+          "color": "rgb(28, 46, 44)",
+          "width": 546.3,
+          "height": 147.4
+        },
+        "heroSub": {
+          "selector": "#hero-title + p",
+          "text": "关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。",
+          "fontSize": "17px",
+          "fontSizePx": 17,
+          "lineHeight": "32.3px",
+          "fontWeight": "400",
+          "color": "rgb(83, 100, 94)",
+          "width": 512,
+          "height": 64.6
+        },
+        "heroNote": {
+          "selector": "[class*=\"heroNote\"]",
+          "text": "公开示例 · 不调用模型 · 不写入你的项目。",
+          "fontSize": "13.44px",
+          "fontSizePx": 13.44,
+          "lineHeight": "22.848px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 546.3,
+          "height": 22.8
+        },
+        "lensKicker": {
+          "selector": "[class*=\"lensKicker\"]",
+          "text": "公开示例 · 忆程参赛作品开发",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 172.6,
+          "height": 19.2
+        },
+        "lensMission": {
+          "selector": "[class*=\"lensMission\"]",
+          "text": "整理阶段汇报",
+          "fontSize": "22.4px",
+          "fontSizePx": 22.4,
+          "lineHeight": "31.36px",
+          "fontWeight": "500",
+          "color": "rgb(28, 46, 44)",
+          "width": 172.6,
+          "height": 31.4
+        },
+        "stageTab": {
+          "selector": "[class*=\"stageTab\"]",
+          "text": "01 离开时 02 期间 03 回来后",
+          "fontSize": "14px",
+          "fontSizePx": 14,
+          "lineHeight": "21.7px",
+          "fontWeight": "400",
+          "color": "rgb(28, 46, 44)",
+          "width": 614,
+          "height": 57
+        },
+        "rowLabel": {
+          "selector": "[class*=\"lensRow\"] dt",
+          "text": "原委托",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "600",
+          "color": "rgb(97, 114, 104)",
+          "width": 65.6,
+          "height": 50
+        },
+        "rowValue": {
+          "selector": "[class*=\"rowValue\"]",
+          "text": "用已有材料整理一份阶段汇报",
+          "fontSize": "15px",
+          "fontSizePx": 15,
+          "lineHeight": "25.5px",
+          "fontWeight": "400",
+          "color": "rgb(28, 46, 44)",
+          "width": 489.2,
+          "height": 25.5
+        },
+        "rowMeta": {
+          "selector": "[class*=\"rowMeta\"]",
+          "text": "原任务与草稿都留在原处",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "21.648px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 489.2,
+          "height": 21.7
+        },
+        "lensFoot": {
+          "selector": "[class*=\"lensFoot\"]",
+          "text": "冻结示例 · 不调用模型 · 与下方五步示例使用同一份素材",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "20.48px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 614,
+          "height": 40.7
+        },
+        "sectionKicker": {
+          "selector": "#missions [class*=\"kicker\"]",
+          "text": "01 离开以后",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "19.68px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 1216,
+          "height": 19.7
+        },
+        "sectionIntro": {
+          "selector": "#missions [class*=\"sectionIntro\"]",
+          "text": "同一个示例委托：来源、判断和等你决定的那一步，都留在原处。",
+          "fontSize": "16px",
+          "fontSizePx": 16,
+          "lineHeight": "30.4px",
+          "fontWeight": "400",
+          "color": "rgb(83, 100, 94)",
+          "width": 464,
+          "height": 30.4
+        },
+        "railLabel": {
+          "selector": "[class*=\"railLabel\"]",
+          "text": "来源",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "600",
+          "color": "rgb(97, 114, 104)",
+          "width": 279,
+          "height": 19.2
+        },
+        "railText": {
+          "selector": "[class*=\"railText\"]",
+          "text": "比赛材料、任务安排、老师建议，随时可以回到原文核对。",
+          "fontSize": "15px",
+          "fontSizePx": 15,
+          "lineHeight": "27px",
+          "fontWeight": "400",
+          "color": "rgb(83, 100, 94)",
+          "width": 279,
+          "height": 54
+        },
+        "demoNote": {
+          "selector": "[class*=\"demoNote\"]",
+          "text": "这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "26.64px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 582.4,
+          "height": 26.6
+        },
+        "storyFooter": {
+          "selector": "[class*=\"storyFooter\"] > p",
+          "text": "已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "21.76px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 460.8,
+          "height": 21.8
+        },
+        "paneHeading": {
+          "selector": "[class*=\"paneHeading\"] h4",
+          "text": "原始记录",
+          "fontSize": "15.2px",
+          "fontSizePx": 15.2,
+          "lineHeight": "22.8px",
+          "fontWeight": "650",
+          "color": "rgb(28, 46, 44)",
+          "width": 60.8,
+          "height": 22.8
+        },
+        "projectKicker": {
+          "selector": "[class*=\"projectKicker\"]",
+          "text": "内置公开示例",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 76.8,
+          "height": 18
+        },
+        "sourceButton": {
+          "selector": "[class*=\"sourceButton\"]",
+          "text": "任务安排 查看原文",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(39, 104, 93)",
+          "width": 136.2,
+          "height": 44
+        },
+        "videoMeta": {
+          "selector": "[class*=\"videoMeta\"]",
+          "text": "忆程 ProjectMemo · Bilibili · 新窗口打开",
+          "fontSize": "13.44px",
+          "fontSizePx": 13.44,
+          "lineHeight": "20.16px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 250.3,
+          "height": 20.2
+        },
+        "footerMeta": {
+          "selector": "[class*=\"footerMeta\"]",
+          "text": "竞赛 · 科研 · 课程项目",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "19.68px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 121.4,
+          "height": 19.7
+        },
+        "boundary": {
+          "selector": "[class*=\"boundary\"] p",
+          "text": "使用边界来源可以回看；没有依据的内容会标明缺口。建议需要你判断，重要操作在确认后才应用。模型分析与委托执行取决于实际配置。",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "26.64px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 1216,
+          "height": 26.6
+        },
+        "caption": {
+          "selector": "[class*=\"caption\"]",
+          "text": "界面示意 · 实际可用范围取决于部署与授权",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "22.304px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 576,
+          "height": 22.3
+        }
+      },
+      "smallTextBottom": [
+        {
+          "fontSizePx": 12.8,
+          "text": "公开示例·忆程参赛作品开发",
+          "tag": "p"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "·",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "等你确认",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "01",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "02",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "03",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "原委托",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "依据",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "变化",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "等你",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "冻结示例",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "不调用模型",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "与下方五步示例使用同一份素材",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "来源",
+          "tag": "p"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "判断改变",
+          "tag": "p"
+        }
+      ],
+      "headings": [
+        {
+          "tag": "h1",
+          "id": "hero-title",
+          "text": "人可以下线， 项目别掉线。",
+          "bbox": {
+            "x": 32,
+            "y": 160.02,
+            "width": 546.25,
+            "height": 147.38,
+            "bottom": 307.39,
+            "right": 578.25,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": null,
+          "text": "整理阶段汇报",
+          "bbox": {
+            "x": 654.59,
+            "y": 145.81,
+            "width": 172.63,
+            "height": 31.36,
+            "bottom": 177.17,
+            "right": 827.22,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "continuity-title",
+          "text": "新情况出现时，它带着出处回来。",
+          "bbox": {
+            "x": 32,
+            "y": 819.69,
+            "width": 611.52,
+            "height": 114.88,
+            "bottom": 934.56,
+            "right": 643.52,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "3 条来源保留原文",
+          "bbox": {
+            "x": 32,
+            "y": 1039.22,
+            "width": 279,
+            "height": 28.05,
+            "bottom": 1067.27,
+            "right": 311,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "发现一处没有回执",
+          "bbox": {
+            "x": 360,
+            "y": 1039.22,
+            "width": 255,
+            "height": 28.05,
+            "bottom": 1067.27,
+            "right": 615,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "先补演示结果，再写汇报",
+          "bbox": {
+            "x": 664,
+            "y": 1039.22,
+            "width": 255,
+            "height": 28.05,
+            "bottom": 1067.27,
+            "right": 919,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "补充结果，或确认原计划",
+          "bbox": {
+            "x": 968,
+            "y": 1039.22,
+            "width": 280,
+            "height": 28.05,
+            "bottom": 1067.27,
+            "right": 1248,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "experience-title",
+          "text": "同一份素材，走一遍接续。",
+          "bbox": {
+            "x": 32,
+            "y": 1417.13,
+            "width": 611.52,
+            "height": 57.44,
+            "bottom": 1474.56,
+            "right": 643.52,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "忆程参赛作品开发",
+          "bbox": {
+            "x": 112.19,
+            "y": 1545.23,
+            "width": 139.42,
+            "height": 24,
+            "bottom": 1569.23,
+            "right": 251.61,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": "source-title",
+          "text": "",
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "platform-title",
+          "text": "电脑上看依据，手机上回应。",
+          "bbox": {
+            "x": 32,
+            "y": 2439.36,
+            "width": 576,
+            "height": 57.44,
+            "bottom": 2496.8,
+            "right": 608,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "Web 工作台",
+          "bbox": {
+            "x": 699.59,
+            "y": 2476.44,
+            "width": 90.31,
+            "height": 25.5,
+            "bottom": 2501.94,
+            "right": 789.91,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "鸿蒙客户端",
+          "bbox": {
+            "x": 699.59,
+            "y": 2612.91,
+            "width": 85,
+            "height": 25.5,
+            "bottom": 2638.41,
+            "right": 784.59,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "moments-title",
+          "text": "竞赛、科研、课程设计。",
+          "bbox": {
+            "x": 32,
+            "y": 2916.47,
+            "width": 611.52,
+            "height": 57.44,
+            "bottom": 2973.91,
+            "right": 643.52,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "竞赛备赛",
+          "bbox": {
+            "x": 32,
+            "y": 3046.58,
+            "width": 376.33,
+            "height": 31.19,
+            "bottom": 3077.77,
+            "right": 408.33,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "科研训练",
+          "bbox": {
+            "x": 465.33,
+            "y": 3046.58,
+            "width": 348.33,
+            "height": 31.19,
+            "bottom": 3077.77,
+            "right": 813.66,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "课程设计",
+          "bbox": {
+            "x": 870.66,
+            "y": 3046.58,
+            "width": 377.34,
+            "height": 31.19,
+            "bottom": 3077.77,
+            "right": 1248,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "demo-title",
+          "text": "看一遍决赛演示。",
+          "bbox": {
+            "x": 32,
+            "y": 3360.33,
+            "width": 576,
+            "height": 57.44,
+            "bottom": 3417.77,
+            "right": 608,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "closing-title",
+          "text": "让你的下一段长期项目，接得上。",
+          "bbox": {
+            "x": 32,
+            "y": 3652.14,
+            "width": 574.8,
+            "height": 121.63,
+            "bottom": 3773.77,
+            "right": 606.8,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        }
+      ],
+      "videoLink": {
+        "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "text": "2026 C4-AI 决赛演示视频 忆程 ProjectMemo · Bilibili · 新窗口打开",
+        "bbox": {
+          "x": 672,
+          "y": 3363.59,
+          "width": 576,
+          "height": 96,
+          "bottom": 3459.59,
+          "right": 1248,
+          "inFirstScreen": false,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": true,
+          "display": "flex",
+          "visibility": "visible"
+        }
+      }
+    },
+    {
+      "label": "after-1280-dark",
+      "width": 1280,
+      "height": 720,
+      "theme": "dark",
+      "file": "evidence/final-sprint/20261103/b-brand-home/after/homepage-1280-dark-after.png",
+      "fileBytes": 97113,
+      "fileSha256": "0b4603c843b9c85707a89f10d81e6b7c57b985dbe794360a33ac9f994029295b",
+      "metricsFile": "homepage-1280-dark.json",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "dark",
+        "scrollWidth": 1280,
+        "innerWidth": 1280,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1042.06,
+            "y": 198.95,
+            "width": 196.14,
+            "height": 44,
+            "bottom": 242.95,
+            "right": 1238.2,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": 105.63,
+        "ctaVisibleInFirstScreen": true
+      },
+      "fontSizes": {
+        "h1": {
+          "selector": "#hero-title",
+          "text": "人可以下线， 项目别掉线。",
+          "fontSize": "64.64px",
+          "fontSizePx": 64.64,
+          "lineHeight": "73.6896px",
+          "fontWeight": "500",
+          "color": "rgb(232, 238, 233)",
+          "width": 546.3,
+          "height": 147.4
+        },
+        "heroSub": {
+          "selector": "#hero-title + p",
+          "text": "关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。",
+          "fontSize": "17px",
+          "fontSizePx": 17,
+          "lineHeight": "32.3px",
+          "fontWeight": "400",
+          "color": "rgb(179, 196, 187)",
+          "width": 512,
+          "height": 64.6
+        },
+        "heroNote": {
+          "selector": "[class*=\"heroNote\"]",
+          "text": "公开示例 · 不调用模型 · 不写入你的项目。",
+          "fontSize": "13.44px",
+          "fontSizePx": 13.44,
+          "lineHeight": "22.848px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 546.3,
+          "height": 22.8
+        },
+        "lensKicker": {
+          "selector": "[class*=\"lensKicker\"]",
+          "text": "公开示例 · 忆程参赛作品开发",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 172.6,
+          "height": 19.2
+        },
+        "lensMission": {
+          "selector": "[class*=\"lensMission\"]",
+          "text": "整理阶段汇报",
+          "fontSize": "22.4px",
+          "fontSizePx": 22.4,
+          "lineHeight": "31.36px",
+          "fontWeight": "500",
+          "color": "rgb(232, 238, 233)",
+          "width": 172.6,
+          "height": 31.4
+        },
+        "stageTab": {
+          "selector": "[class*=\"stageTab\"]",
+          "text": "01 离开时 02 期间 03 回来后",
+          "fontSize": "14px",
+          "fontSizePx": 14,
+          "lineHeight": "21.7px",
+          "fontWeight": "400",
+          "color": "rgb(232, 238, 233)",
+          "width": 614,
+          "height": 57
+        },
+        "rowLabel": {
+          "selector": "[class*=\"lensRow\"] dt",
+          "text": "原委托",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "600",
+          "color": "rgb(160, 179, 168)",
+          "width": 65.6,
+          "height": 50
+        },
+        "rowValue": {
+          "selector": "[class*=\"rowValue\"]",
+          "text": "用已有材料整理一份阶段汇报",
+          "fontSize": "15px",
+          "fontSizePx": 15,
+          "lineHeight": "25.5px",
+          "fontWeight": "400",
+          "color": "rgb(232, 238, 233)",
+          "width": 489.2,
+          "height": 25.5
+        },
+        "rowMeta": {
+          "selector": "[class*=\"rowMeta\"]",
+          "text": "原任务与草稿都留在原处",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "21.648px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 489.2,
+          "height": 21.7
+        },
+        "lensFoot": {
+          "selector": "[class*=\"lensFoot\"]",
+          "text": "冻结示例 · 不调用模型 · 与下方五步示例使用同一份素材",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "20.48px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 614,
+          "height": 40.7
+        },
+        "sectionKicker": {
+          "selector": "#missions [class*=\"kicker\"]",
+          "text": "01 离开以后",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "19.68px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 1216,
+          "height": 19.7
+        },
+        "sectionIntro": {
+          "selector": "#missions [class*=\"sectionIntro\"]",
+          "text": "同一个示例委托：来源、判断和等你决定的那一步，都留在原处。",
+          "fontSize": "16px",
+          "fontSizePx": 16,
+          "lineHeight": "30.4px",
+          "fontWeight": "400",
+          "color": "rgb(179, 196, 187)",
+          "width": 464,
+          "height": 30.4
+        },
+        "railLabel": {
+          "selector": "[class*=\"railLabel\"]",
+          "text": "来源",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "600",
+          "color": "rgb(160, 179, 168)",
+          "width": 279,
+          "height": 19.2
+        },
+        "railText": {
+          "selector": "[class*=\"railText\"]",
+          "text": "比赛材料、任务安排、老师建议，随时可以回到原文核对。",
+          "fontSize": "15px",
+          "fontSizePx": 15,
+          "lineHeight": "27px",
+          "fontWeight": "400",
+          "color": "rgb(179, 196, 187)",
+          "width": 279,
+          "height": 54
+        },
+        "demoNote": {
+          "selector": "[class*=\"demoNote\"]",
+          "text": "这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "26.64px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 582.4,
+          "height": 26.6
+        },
+        "storyFooter": {
+          "selector": "[class*=\"storyFooter\"] > p",
+          "text": "已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "21.76px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 460.8,
+          "height": 21.8
+        },
+        "paneHeading": {
+          "selector": "[class*=\"paneHeading\"] h4",
+          "text": "原始记录",
+          "fontSize": "15.2px",
+          "fontSizePx": 15.2,
+          "lineHeight": "22.8px",
+          "fontWeight": "650",
+          "color": "rgb(232, 238, 233)",
+          "width": 60.8,
+          "height": 22.8
+        },
+        "projectKicker": {
+          "selector": "[class*=\"projectKicker\"]",
+          "text": "内置公开示例",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 76.8,
+          "height": 18
+        },
+        "sourceButton": {
+          "selector": "[class*=\"sourceButton\"]",
+          "text": "任务安排 查看原文",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(145, 198, 181)",
+          "width": 136.2,
+          "height": 44
+        },
+        "videoMeta": {
+          "selector": "[class*=\"videoMeta\"]",
+          "text": "忆程 ProjectMemo · Bilibili · 新窗口打开",
+          "fontSize": "13.44px",
+          "fontSizePx": 13.44,
+          "lineHeight": "20.16px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 250.3,
+          "height": 20.2
+        },
+        "footerMeta": {
+          "selector": "[class*=\"footerMeta\"]",
+          "text": "竞赛 · 科研 · 课程项目",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "19.68px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 121.4,
+          "height": 19.7
+        },
+        "boundary": {
+          "selector": "[class*=\"boundary\"] p",
+          "text": "使用边界来源可以回看；没有依据的内容会标明缺口。建议需要你判断，重要操作在确认后才应用。模型分析与委托执行取决于实际配置。",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "26.64px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 1216,
+          "height": 26.6
+        },
+        "caption": {
+          "selector": "[class*=\"caption\"]",
+          "text": "界面示意 · 实际可用范围取决于部署与授权",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "22.304px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 576,
+          "height": 22.3
+        }
+      },
+      "smallTextBottom": [
+        {
+          "fontSizePx": 12.8,
+          "text": "公开示例·忆程参赛作品开发",
+          "tag": "p"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "·",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "等你确认",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "01",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "02",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "03",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "原委托",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "依据",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "变化",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "等你",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "冻结示例",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "不调用模型",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "与下方五步示例使用同一份素材",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "来源",
+          "tag": "p"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "判断改变",
+          "tag": "p"
+        }
+      ],
+      "headings": [
+        {
+          "tag": "h1",
+          "id": "hero-title",
+          "text": "人可以下线， 项目别掉线。",
+          "bbox": {
+            "x": 32,
+            "y": 160.02,
+            "width": 546.25,
+            "height": 147.38,
+            "bottom": 307.39,
+            "right": 578.25,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": null,
+          "text": "整理阶段汇报",
+          "bbox": {
+            "x": 654.59,
+            "y": 145.81,
+            "width": 172.63,
+            "height": 31.36,
+            "bottom": 177.17,
+            "right": 827.22,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "continuity-title",
+          "text": "新情况出现时，它带着出处回来。",
+          "bbox": {
+            "x": 32,
+            "y": 819.69,
+            "width": 611.52,
+            "height": 114.88,
+            "bottom": 934.56,
+            "right": 643.52,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "3 条来源保留原文",
+          "bbox": {
+            "x": 32,
+            "y": 1039.22,
+            "width": 279,
+            "height": 28.05,
+            "bottom": 1067.27,
+            "right": 311,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "发现一处没有回执",
+          "bbox": {
+            "x": 360,
+            "y": 1039.22,
+            "width": 255,
+            "height": 28.05,
+            "bottom": 1067.27,
+            "right": 615,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "先补演示结果，再写汇报",
+          "bbox": {
+            "x": 664,
+            "y": 1039.22,
+            "width": 255,
+            "height": 28.05,
+            "bottom": 1067.27,
+            "right": 919,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "补充结果，或确认原计划",
+          "bbox": {
+            "x": 968,
+            "y": 1039.22,
+            "width": 280,
+            "height": 28.05,
+            "bottom": 1067.27,
+            "right": 1248,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "experience-title",
+          "text": "同一份素材，走一遍接续。",
+          "bbox": {
+            "x": 32,
+            "y": 1417.13,
+            "width": 611.52,
+            "height": 57.44,
+            "bottom": 1474.56,
+            "right": 643.52,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "忆程参赛作品开发",
+          "bbox": {
+            "x": 112.19,
+            "y": 1545.23,
+            "width": 139.42,
+            "height": 24,
+            "bottom": 1569.23,
+            "right": 251.61,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": "source-title",
+          "text": "",
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "platform-title",
+          "text": "电脑上看依据，手机上回应。",
+          "bbox": {
+            "x": 32,
+            "y": 2439.36,
+            "width": 576,
+            "height": 57.44,
+            "bottom": 2496.8,
+            "right": 608,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "Web 工作台",
+          "bbox": {
+            "x": 699.59,
+            "y": 2476.44,
+            "width": 90.31,
+            "height": 25.5,
+            "bottom": 2501.94,
+            "right": 789.91,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "鸿蒙客户端",
+          "bbox": {
+            "x": 699.59,
+            "y": 2612.91,
+            "width": 85,
+            "height": 25.5,
+            "bottom": 2638.41,
+            "right": 784.59,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "moments-title",
+          "text": "竞赛、科研、课程设计。",
+          "bbox": {
+            "x": 32,
+            "y": 2916.47,
+            "width": 611.52,
+            "height": 57.44,
+            "bottom": 2973.91,
+            "right": 643.52,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "竞赛备赛",
+          "bbox": {
+            "x": 32,
+            "y": 3046.58,
+            "width": 376.33,
+            "height": 31.19,
+            "bottom": 3077.77,
+            "right": 408.33,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "科研训练",
+          "bbox": {
+            "x": 465.33,
+            "y": 3046.58,
+            "width": 348.33,
+            "height": 31.19,
+            "bottom": 3077.77,
+            "right": 813.66,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "课程设计",
+          "bbox": {
+            "x": 870.66,
+            "y": 3046.58,
+            "width": 377.34,
+            "height": 31.19,
+            "bottom": 3077.77,
+            "right": 1248,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "demo-title",
+          "text": "看一遍决赛演示。",
+          "bbox": {
+            "x": 32,
+            "y": 3360.33,
+            "width": 576,
+            "height": 57.44,
+            "bottom": 3417.77,
+            "right": 608,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "closing-title",
+          "text": "让你的下一段长期项目，接得上。",
+          "bbox": {
+            "x": 32,
+            "y": 3652.14,
+            "width": 574.8,
+            "height": 121.63,
+            "bottom": 3773.77,
+            "right": 606.8,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        }
+      ],
+      "videoLink": {
+        "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "text": "2026 C4-AI 决赛演示视频 忆程 ProjectMemo · Bilibili · 新窗口打开",
+        "bbox": {
+          "x": 672,
+          "y": 3363.59,
+          "width": 576,
+          "height": 96,
+          "bottom": 3459.59,
+          "right": 1248,
+          "inFirstScreen": false,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": true,
+          "display": "flex",
+          "visibility": "visible"
+        }
+      }
+    },
+    {
+      "label": "after-390-light",
+      "width": 390,
+      "height": 844,
+      "theme": "light",
+      "file": "evidence/final-sprint/20261103/b-brand-home/after/homepage-390-light-after.png",
+      "fileBytes": 65248,
+      "fileSha256": "c42d31e0041df911b3226ddfae657930d2147d34e08beb00d7cecc5469421502",
+      "metricsFile": "homepage-390-light.json",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 254.47,
+            "y": 469.27,
+            "width": 110.94,
+            "height": 44,
+            "bottom": 513.27,
+            "right": 365.41,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": 77,
+        "ctaVisibleInFirstScreen": true
+      },
+      "fontSizes": {
+        "h1": {
+          "selector": "#hero-title",
+          "text": "人可以下线， 项目别掉线。",
+          "fontSize": "35.1px",
+          "fontSizePx": 35.1,
+          "lineHeight": "41.418px",
+          "fontWeight": "500",
+          "color": "rgb(28, 46, 44)",
+          "width": 354,
+          "height": 82.8
+        },
+        "heroSub": {
+          "selector": "#hero-title + p",
+          "text": "关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。",
+          "fontSize": "15px",
+          "fontSizePx": 15,
+          "lineHeight": "27px",
+          "fontWeight": "400",
+          "color": "rgb(83, 100, 94)",
+          "width": 354,
+          "height": 54
+        },
+        "heroNote": {
+          "selector": "[class*=\"heroNote\"]",
+          "text": "公开示例 · 不调用模型 · 不写入你的项目。",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "21.76px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 354,
+          "height": 21.8
+        },
+        "lensKicker": {
+          "selector": "[class*=\"lensKicker\"]",
+          "text": "公开示例 · 忆程参赛作品开发",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 172.6,
+          "height": 19.2
+        },
+        "lensMission": {
+          "selector": "[class*=\"lensMission\"]",
+          "text": "整理阶段汇报",
+          "fontSize": "18.4px",
+          "fontSizePx": 18.4,
+          "lineHeight": "25.76px",
+          "fontWeight": "500",
+          "color": "rgb(28, 46, 44)",
+          "width": 172.6,
+          "height": 25.8
+        },
+        "stageTab": {
+          "selector": "[class*=\"stageTab\"]",
+          "text": "01 离开时 02 期间 03 回来后",
+          "fontSize": "14px",
+          "fontSizePx": 14,
+          "lineHeight": "21.7px",
+          "fontWeight": "400",
+          "color": "rgb(28, 46, 44)",
+          "width": 352,
+          "height": 54.6
+        },
+        "rowLabel": {
+          "selector": "[class*=\"lensRow\"] dt",
+          "text": "原委托",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "600",
+          "color": "rgb(97, 114, 104)",
+          "width": 57.6,
+          "height": 47.1
+        },
+        "rowValue": {
+          "selector": "[class*=\"rowValue\"]",
+          "text": "用已有材料整理一份阶段汇报",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "23.76px",
+          "fontWeight": "400",
+          "color": "rgb(28, 46, 44)",
+          "width": 253.6,
+          "height": 23.8
+        },
+        "rowMeta": {
+          "selector": "[class*=\"rowMeta\"]",
+          "text": "原任务与草稿都留在原处",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "20.48px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 253.6,
+          "height": 20.5
+        },
+        "lensFoot": {
+          "selector": "[class*=\"lensFoot\"]",
+          "text": "冻结示例 · 不调用模型 · 与下方五步示例使用同一份素材",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "20.48px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 352,
+          "height": 67.5
+        },
+        "sectionKicker": {
+          "selector": "#missions [class*=\"kicker\"]",
+          "text": "01 离开以后",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "19.68px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 354,
+          "height": 19.7
+        },
+        "sectionIntro": {
+          "selector": "#missions [class*=\"sectionIntro\"]",
+          "text": "同一个示例委托：来源、判断和等你决定的那一步，都留在原处。",
+          "fontSize": "15px",
+          "fontSizePx": 15,
+          "lineHeight": "27.75px",
+          "fontWeight": "400",
+          "color": "rgb(83, 100, 94)",
+          "width": 354,
+          "height": 55.5
+        },
+        "railLabel": {
+          "selector": "[class*=\"railLabel\"]",
+          "text": "来源",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "600",
+          "color": "rgb(97, 114, 104)",
+          "width": 332.4,
+          "height": 19.2
+        },
+        "railText": {
+          "selector": "[class*=\"railText\"]",
+          "text": "比赛材料、任务安排、老师建议，随时可以回到原文核对。",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "25.92px",
+          "fontWeight": "400",
+          "color": "rgb(83, 100, 94)",
+          "width": 332.4,
+          "height": 51.8
+        },
+        "demoNote": {
+          "selector": "[class*=\"demoNote\"]",
+          "text": "这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "26.64px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 354,
+          "height": 53.3
+        },
+        "storyFooter": {
+          "selector": "[class*=\"storyFooter\"] > p",
+          "text": "已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "21.76px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 219.2,
+          "height": 65.3
+        },
+        "paneHeading": {
+          "selector": "[class*=\"paneHeading\"] h4",
+          "text": "原始记录",
+          "fontSize": "14.08px",
+          "fontSizePx": 14.08,
+          "lineHeight": "21.12px",
+          "fontWeight": "650",
+          "color": "rgb(28, 46, 44)",
+          "width": 56.3,
+          "height": 21.1
+        },
+        "projectKicker": {
+          "selector": "[class*=\"projectKicker\"]",
+          "text": "内置公开示例",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 76.8,
+          "height": 18
+        },
+        "sourceButton": {
+          "selector": "[class*=\"sourceButton\"]",
+          "text": "任务安排 查看原文",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(39, 104, 93)",
+          "width": 136.2,
+          "height": 44
+        },
+        "videoMeta": {
+          "selector": "[class*=\"videoMeta\"]",
+          "text": "忆程 ProjectMemo · Bilibili · 新窗口打开",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 239.3,
+          "height": 19.2
+        },
+        "footerMeta": {
+          "selector": "[class*=\"footerMeta\"]",
+          "text": "竞赛 · 科研 · 课程项目",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 118.5,
+          "height": 19.2
+        },
+        "boundary": {
+          "selector": "[class*=\"boundary\"] p",
+          "text": "使用边界来源可以回看；没有依据的内容会标明缺口。建议需要你判断，重要操作在确认后才应用。模型分析与委托执行取决于实际配置。",
+          "fontSize": "13.44px",
+          "fontSizePx": 13.44,
+          "lineHeight": "24.864px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 354,
+          "height": 74.6
+        },
+        "caption": {
+          "selector": "[class*=\"caption\"]",
+          "text": "界面示意 · 实际可用范围取决于部署与授权",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "22.304px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 354,
+          "height": 22.3
+        }
+      },
+      "smallTextBottom": [
+        {
+          "fontSizePx": 12.8,
+          "text": "公开示例 · 不调用模型 · 不写入你的项目。",
+          "tag": "p"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "公开示例·忆程参赛作品开发",
+          "tag": "p"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "·",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "等你确认",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "01离开时",
+          "tag": "button"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "01",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "02期间",
+          "tag": "button"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "02",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "03回来后",
+          "tag": "button"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "03",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "原委托",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "原任务与草稿都留在原处",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "依据",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "3 条来源可回看原文",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "变化",
+          "tag": "dt"
+        }
+      ],
+      "headings": [
+        {
+          "tag": "h1",
+          "id": "hero-title",
+          "text": "人可以下线， 项目别掉线。",
+          "bbox": {
+            "x": 18,
+            "y": 112.19,
+            "width": 354,
+            "height": 82.81,
+            "bottom": 195,
+            "right": 372,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": null,
+          "text": "整理阶段汇报",
+          "bbox": {
+            "x": 34.19,
+            "y": 425.72,
+            "width": 172.63,
+            "height": 25.77,
+            "bottom": 451.48,
+            "right": 206.81,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "continuity-title",
+          "text": "新情况出现时， 它带着出处回来。",
+          "bbox": {
+            "x": 18,
+            "y": 1066.95,
+            "width": 354,
+            "height": 75.59,
+            "bottom": 1142.55,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "3 条来源保留原文",
+          "bbox": {
+            "x": 39.59,
+            "y": 1287.81,
+            "width": 332.41,
+            "height": 26.39,
+            "bottom": 1314.2,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "发现一处没有回执",
+          "bbox": {
+            "x": 39.59,
+            "y": 1447,
+            "width": 332.41,
+            "height": 26.39,
+            "bottom": 1473.39,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "先补演示结果，再写汇报",
+          "bbox": {
+            "x": 39.59,
+            "y": 1573.06,
+            "width": 332.41,
+            "height": 26.39,
+            "bottom": 1599.45,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "补充结果，或确认原计划",
+          "bbox": {
+            "x": 39.59,
+            "y": 1698.13,
+            "width": 332.41,
+            "height": 26.39,
+            "bottom": 1724.52,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "experience-title",
+          "text": "同一份素材， 走一遍接续。",
+          "bbox": {
+            "x": 18,
+            "y": 2040.39,
+            "width": 354,
+            "height": 75.59,
+            "bottom": 2115.98,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "忆程参赛作品开发",
+          "bbox": {
+            "x": 78.17,
+            "y": 2253.36,
+            "width": 136.03,
+            "height": 21.61,
+            "bottom": 2274.97,
+            "right": 214.2,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": "source-title",
+          "text": "",
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "platform-title",
+          "text": "电脑上看依据， 手机上回应。",
+          "bbox": {
+            "x": 18,
+            "y": 3249.78,
+            "width": 354,
+            "height": 75.59,
+            "bottom": 3325.38,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "Web 工作台",
+          "bbox": {
+            "x": 45.59,
+            "y": 3537.55,
+            "width": 90.31,
+            "height": 25.5,
+            "bottom": 3563.05,
+            "right": 135.91,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "鸿蒙客户端",
+          "bbox": {
+            "x": 45.59,
+            "y": 3664.42,
+            "width": 85,
+            "height": 25.5,
+            "bottom": 3689.92,
+            "right": 130.59,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "moments-title",
+          "text": "竞赛、科研、课程设计。",
+          "bbox": {
+            "x": 18,
+            "y": 3897.59,
+            "width": 354,
+            "height": 37.8,
+            "bottom": 3935.39,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "竞赛备赛",
+          "bbox": {
+            "x": 18,
+            "y": 3982.78,
+            "width": 354,
+            "height": 28.8,
+            "bottom": 4011.58,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "科研训练",
+          "bbox": {
+            "x": 18,
+            "y": 4114.45,
+            "width": 354,
+            "height": 28.8,
+            "bottom": 4143.25,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "课程设计",
+          "bbox": {
+            "x": 18,
+            "y": 4246.13,
+            "width": 354,
+            "height": 28.8,
+            "bottom": 4274.92,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "demo-title",
+          "text": "看一遍决赛演示。",
+          "bbox": {
+            "x": 18,
+            "y": 4479.09,
+            "width": 354,
+            "height": 37.8,
+            "bottom": 4516.89,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "closing-title",
+          "text": "让你的下一段长期项目，接得上。",
+          "bbox": {
+            "x": 18,
+            "y": 4794.78,
+            "width": 354,
+            "height": 76,
+            "bottom": 4870.78,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        }
+      ],
+      "videoLink": {
+        "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "text": "2026 C4-AI 决赛演示视频 忆程 ProjectMemo · Bilibili · 新窗口打开",
+        "bbox": {
+          "x": 18,
+          "y": 4618.78,
+          "width": 354,
+          "height": 84,
+          "bottom": 4702.78,
+          "right": 372,
+          "inFirstScreen": false,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": true,
+          "display": "flex",
+          "visibility": "visible"
+        }
+      }
+    },
+    {
+      "label": "after-390-dark",
+      "width": 390,
+      "height": 844,
+      "theme": "dark",
+      "file": "evidence/final-sprint/20261103/b-brand-home/after/homepage-390-dark-after.png",
+      "fileBytes": 64880,
+      "fileSha256": "bbf0accc31a9cea94c82e5e665fe9bd4f4b60a64620eacb0b6bfe29053bf37c8",
+      "metricsFile": "homepage-390-dark.json",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "dark",
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 254.47,
+            "y": 469.27,
+            "width": 110.94,
+            "height": 44,
+            "bottom": 513.27,
+            "right": 365.41,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": 77,
+        "ctaVisibleInFirstScreen": true
+      },
+      "fontSizes": {
+        "h1": {
+          "selector": "#hero-title",
+          "text": "人可以下线， 项目别掉线。",
+          "fontSize": "35.1px",
+          "fontSizePx": 35.1,
+          "lineHeight": "41.418px",
+          "fontWeight": "500",
+          "color": "rgb(232, 238, 233)",
+          "width": 354,
+          "height": 82.8
+        },
+        "heroSub": {
+          "selector": "#hero-title + p",
+          "text": "关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。",
+          "fontSize": "15px",
+          "fontSizePx": 15,
+          "lineHeight": "27px",
+          "fontWeight": "400",
+          "color": "rgb(179, 196, 187)",
+          "width": 354,
+          "height": 54
+        },
+        "heroNote": {
+          "selector": "[class*=\"heroNote\"]",
+          "text": "公开示例 · 不调用模型 · 不写入你的项目。",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "21.76px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 354,
+          "height": 21.8
+        },
+        "lensKicker": {
+          "selector": "[class*=\"lensKicker\"]",
+          "text": "公开示例 · 忆程参赛作品开发",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 172.6,
+          "height": 19.2
+        },
+        "lensMission": {
+          "selector": "[class*=\"lensMission\"]",
+          "text": "整理阶段汇报",
+          "fontSize": "18.4px",
+          "fontSizePx": 18.4,
+          "lineHeight": "25.76px",
+          "fontWeight": "500",
+          "color": "rgb(232, 238, 233)",
+          "width": 172.6,
+          "height": 25.8
+        },
+        "stageTab": {
+          "selector": "[class*=\"stageTab\"]",
+          "text": "01 离开时 02 期间 03 回来后",
+          "fontSize": "14px",
+          "fontSizePx": 14,
+          "lineHeight": "21.7px",
+          "fontWeight": "400",
+          "color": "rgb(232, 238, 233)",
+          "width": 352,
+          "height": 54.6
+        },
+        "rowLabel": {
+          "selector": "[class*=\"lensRow\"] dt",
+          "text": "原委托",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "600",
+          "color": "rgb(160, 179, 168)",
+          "width": 57.6,
+          "height": 47.1
+        },
+        "rowValue": {
+          "selector": "[class*=\"rowValue\"]",
+          "text": "用已有材料整理一份阶段汇报",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "23.76px",
+          "fontWeight": "400",
+          "color": "rgb(232, 238, 233)",
+          "width": 253.6,
+          "height": 23.8
+        },
+        "rowMeta": {
+          "selector": "[class*=\"rowMeta\"]",
+          "text": "原任务与草稿都留在原处",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "20.48px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 253.6,
+          "height": 20.5
+        },
+        "lensFoot": {
+          "selector": "[class*=\"lensFoot\"]",
+          "text": "冻结示例 · 不调用模型 · 与下方五步示例使用同一份素材",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "20.48px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 352,
+          "height": 67.5
+        },
+        "sectionKicker": {
+          "selector": "#missions [class*=\"kicker\"]",
+          "text": "01 离开以后",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "19.68px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 354,
+          "height": 19.7
+        },
+        "sectionIntro": {
+          "selector": "#missions [class*=\"sectionIntro\"]",
+          "text": "同一个示例委托：来源、判断和等你决定的那一步，都留在原处。",
+          "fontSize": "15px",
+          "fontSizePx": 15,
+          "lineHeight": "27.75px",
+          "fontWeight": "400",
+          "color": "rgb(179, 196, 187)",
+          "width": 354,
+          "height": 55.5
+        },
+        "railLabel": {
+          "selector": "[class*=\"railLabel\"]",
+          "text": "来源",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "600",
+          "color": "rgb(160, 179, 168)",
+          "width": 332.4,
+          "height": 19.2
+        },
+        "railText": {
+          "selector": "[class*=\"railText\"]",
+          "text": "比赛材料、任务安排、老师建议，随时可以回到原文核对。",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "25.92px",
+          "fontWeight": "400",
+          "color": "rgb(179, 196, 187)",
+          "width": 332.4,
+          "height": 51.8
+        },
+        "demoNote": {
+          "selector": "[class*=\"demoNote\"]",
+          "text": "这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "26.64px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 354,
+          "height": 53.3
+        },
+        "storyFooter": {
+          "selector": "[class*=\"storyFooter\"] > p",
+          "text": "已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "21.76px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 219.2,
+          "height": 65.3
+        },
+        "paneHeading": {
+          "selector": "[class*=\"paneHeading\"] h4",
+          "text": "原始记录",
+          "fontSize": "14.08px",
+          "fontSizePx": 14.08,
+          "lineHeight": "21.12px",
+          "fontWeight": "650",
+          "color": "rgb(232, 238, 233)",
+          "width": 56.3,
+          "height": 21.1
+        },
+        "projectKicker": {
+          "selector": "[class*=\"projectKicker\"]",
+          "text": "内置公开示例",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 76.8,
+          "height": 18
+        },
+        "sourceButton": {
+          "selector": "[class*=\"sourceButton\"]",
+          "text": "任务安排 查看原文",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(145, 198, 181)",
+          "width": 136.2,
+          "height": 44
+        },
+        "videoMeta": {
+          "selector": "[class*=\"videoMeta\"]",
+          "text": "忆程 ProjectMemo · Bilibili · 新窗口打开",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 239.3,
+          "height": 19.2
+        },
+        "footerMeta": {
+          "selector": "[class*=\"footerMeta\"]",
+          "text": "竞赛 · 科研 · 课程项目",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 118.5,
+          "height": 19.2
+        },
+        "boundary": {
+          "selector": "[class*=\"boundary\"] p",
+          "text": "使用边界来源可以回看；没有依据的内容会标明缺口。建议需要你判断，重要操作在确认后才应用。模型分析与委托执行取决于实际配置。",
+          "fontSize": "13.44px",
+          "fontSizePx": 13.44,
+          "lineHeight": "24.864px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 354,
+          "height": 74.6
+        },
+        "caption": {
+          "selector": "[class*=\"caption\"]",
+          "text": "界面示意 · 实际可用范围取决于部署与授权",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "22.304px",
+          "fontWeight": "400",
+          "color": "rgb(160, 179, 168)",
+          "width": 354,
+          "height": 22.3
+        }
+      },
+      "smallTextBottom": [
+        {
+          "fontSizePx": 12.8,
+          "text": "公开示例 · 不调用模型 · 不写入你的项目。",
+          "tag": "p"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "公开示例·忆程参赛作品开发",
+          "tag": "p"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "·",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "等你确认",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "01离开时",
+          "tag": "button"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "01",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "02期间",
+          "tag": "button"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "02",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "03回来后",
+          "tag": "button"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "03",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "原委托",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "原任务与草稿都留在原处",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "依据",
+          "tag": "dt"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "3 条来源可回看原文",
+          "tag": "span"
+        },
+        {
+          "fontSizePx": 12.8,
+          "text": "变化",
+          "tag": "dt"
+        }
+      ],
+      "headings": [
+        {
+          "tag": "h1",
+          "id": "hero-title",
+          "text": "人可以下线， 项目别掉线。",
+          "bbox": {
+            "x": 18,
+            "y": 112.19,
+            "width": 354,
+            "height": 82.81,
+            "bottom": 195,
+            "right": 372,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": null,
+          "text": "整理阶段汇报",
+          "bbox": {
+            "x": 34.19,
+            "y": 425.72,
+            "width": 172.63,
+            "height": 25.77,
+            "bottom": 451.48,
+            "right": 206.81,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "continuity-title",
+          "text": "新情况出现时， 它带着出处回来。",
+          "bbox": {
+            "x": 18,
+            "y": 1066.95,
+            "width": 354,
+            "height": 75.59,
+            "bottom": 1142.55,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "3 条来源保留原文",
+          "bbox": {
+            "x": 39.59,
+            "y": 1287.81,
+            "width": 332.41,
+            "height": 26.39,
+            "bottom": 1314.2,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "发现一处没有回执",
+          "bbox": {
+            "x": 39.59,
+            "y": 1447,
+            "width": 332.41,
+            "height": 26.39,
+            "bottom": 1473.39,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "先补演示结果，再写汇报",
+          "bbox": {
+            "x": 39.59,
+            "y": 1573.06,
+            "width": 332.41,
+            "height": 26.39,
+            "bottom": 1599.45,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "补充结果，或确认原计划",
+          "bbox": {
+            "x": 39.59,
+            "y": 1698.13,
+            "width": 332.41,
+            "height": 26.39,
+            "bottom": 1724.52,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "experience-title",
+          "text": "同一份素材， 走一遍接续。",
+          "bbox": {
+            "x": 18,
+            "y": 2040.39,
+            "width": 354,
+            "height": 75.59,
+            "bottom": 2115.98,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "忆程参赛作品开发",
+          "bbox": {
+            "x": 78.17,
+            "y": 2253.36,
+            "width": 136.03,
+            "height": 21.61,
+            "bottom": 2274.97,
+            "right": 214.2,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": "source-title",
+          "text": "",
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "bottom": 0,
+            "right": 0,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "platform-title",
+          "text": "电脑上看依据， 手机上回应。",
+          "bbox": {
+            "x": 18,
+            "y": 3249.78,
+            "width": 354,
+            "height": 75.59,
+            "bottom": 3325.38,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "Web 工作台",
+          "bbox": {
+            "x": 45.59,
+            "y": 3537.55,
+            "width": 90.31,
+            "height": 25.5,
+            "bottom": 3563.05,
+            "right": 135.91,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "鸿蒙客户端",
+          "bbox": {
+            "x": 45.59,
+            "y": 3664.42,
+            "width": 85,
+            "height": 25.5,
+            "bottom": 3689.92,
+            "right": 130.59,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "moments-title",
+          "text": "竞赛、科研、课程设计。",
+          "bbox": {
+            "x": 18,
+            "y": 3897.59,
+            "width": 354,
+            "height": 37.8,
+            "bottom": 3935.39,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "竞赛备赛",
+          "bbox": {
+            "x": 18,
+            "y": 3982.78,
+            "width": 354,
+            "height": 28.8,
+            "bottom": 4011.58,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "科研训练",
+          "bbox": {
+            "x": 18,
+            "y": 4114.45,
+            "width": 354,
+            "height": 28.8,
+            "bottom": 4143.25,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h3",
+          "id": null,
+          "text": "课程设计",
+          "bbox": {
+            "x": 18,
+            "y": 4246.13,
+            "width": 354,
+            "height": 28.8,
+            "bottom": 4274.92,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "demo-title",
+          "text": "看一遍决赛演示。",
+          "bbox": {
+            "x": 18,
+            "y": 4479.09,
+            "width": 354,
+            "height": 37.8,
+            "bottom": 4516.89,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        {
+          "tag": "h2",
+          "id": "closing-title",
+          "text": "让你的下一段长期项目，接得上。",
+          "bbox": {
+            "x": 18,
+            "y": 4794.78,
+            "width": 354,
+            "height": 76,
+            "bottom": 4870.78,
+            "right": 372,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "block",
+            "visibility": "visible"
+          }
+        }
+      ],
+      "videoLink": {
+        "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "text": "2026 C4-AI 决赛演示视频 忆程 ProjectMemo · Bilibili · 新窗口打开",
+        "bbox": {
+          "x": 18,
+          "y": 4618.78,
+          "width": 354,
+          "height": 84,
+          "bottom": 4702.78,
+          "right": 372,
+          "inFirstScreen": false,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": true,
+          "display": "flex",
+          "visibility": "visible"
+        }
+      }
+    }
+  ],
+  "heroStates": [
+    {
+      "state": "during",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/hero-states/hero-during.png",
+      "fileBytes": 117615,
+      "fileSha256": "e9ff06ef5bb7f8fc6d1f07de45a5ccec5c375e5c9df9671da2089d412a3df183",
+      "metricsFile": "hero-during.json",
+      "extra": {
+        "ariaSelected": {
+          "id": "stage-tab-during",
+          "label": "02 期间",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 924.88,
+            "y": 205.05,
+            "width": 195.66,
+            "height": 44,
+            "bottom": 249.05,
+            "right": 1120.53,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "panelTextLengthFrom": 144,
+        "panelTextLengthTo": 130,
+        "panelTextChanged": true,
+        "panelTextFirst80": "原委托 用已有材料整理一份阶段汇报 任务身份与范围不变 依据 已读 3 条来源 冻结示例，不连接服务器 变化 发现缺口：演示流程还没有完成回执 缺口不会被自动当",
+        "heroCopyTopTo": 111.72,
+        "h1TopTo": 166.11
+      },
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-during",
+          "label": "02 期间",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 924.88,
+            "y": 205.05,
+            "width": 195.66,
+            "height": 44,
+            "bottom": 249.05,
+            "right": 1120.53,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": 111.72,
+        "ctaVisibleInFirstScreen": true
+      },
+      "fontSizes": {
+        "h1": {
+          "selector": "#hero-title",
+          "text": "人可以下线， 项目别掉线。",
+          "fontSize": "72.72px",
+          "fontSizePx": 72.72,
+          "lineHeight": "82.9008px",
+          "fontWeight": "500",
+          "color": "rgb(28, 46, 44)",
+          "width": 545,
+          "height": 165.8
+        },
+        "heroSub": {
+          "selector": "#hero-title + p",
+          "text": "关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。",
+          "fontSize": "17px",
+          "fontSizePx": 17,
+          "lineHeight": "32.3px",
+          "fontWeight": "400",
+          "color": "rgb(83, 100, 94)",
+          "width": 512,
+          "height": 64.6
+        },
+        "heroNote": {
+          "selector": "[class*=\"heroNote\"]",
+          "text": "公开示例 · 不调用模型 · 不写入你的项目。",
+          "fontSize": "13.44px",
+          "fontSizePx": 13.44,
+          "lineHeight": "22.848px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 545,
+          "height": 22.8
+        },
+        "lensKicker": {
+          "selector": "[class*=\"lensKicker\"]",
+          "text": "公开示例 · 忆程参赛作品开发",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 172.6,
+          "height": 19.2
+        },
+        "lensMission": {
+          "selector": "[class*=\"lensMission\"]",
+          "text": "整理阶段汇报",
+          "fontSize": "22.4px",
+          "fontSizePx": 22.4,
+          "lineHeight": "31.36px",
+          "fontWeight": "500",
+          "color": "rgb(28, 46, 44)",
+          "width": 172.6,
+          "height": 31.4
+        },
+        "stageTab": {
+          "selector": "[class*=\"stageTab\"]",
+          "text": "01 离开时 02 期间 03 回来后",
+          "fontSize": "14px",
+          "fontSizePx": 14,
+          "lineHeight": "21.7px",
+          "fontWeight": "400",
+          "color": "rgb(28, 46, 44)",
+          "width": 612.5,
+          "height": 57
+        },
+        "rowLabel": {
+          "selector": "[class*=\"lensRow\"] dt",
+          "text": "原委托",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "600",
+          "color": "rgb(97, 114, 104)",
+          "width": 65.6,
+          "height": 50
+        },
+        "rowValue": {
+          "selector": "[class*=\"rowValue\"]",
+          "text": "用已有材料整理一份阶段汇报",
+          "fontSize": "15px",
+          "fontSizePx": 15,
+          "lineHeight": "25.5px",
+          "fontWeight": "400",
+          "color": "rgb(28, 46, 44)",
+          "width": 487.8,
+          "height": 25.5
+        },
+        "rowMeta": {
+          "selector": "[class*=\"rowMeta\"]",
+          "text": "任务身份与范围不变",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "21.648px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 487.8,
+          "height": 21.7
+        },
+        "lensFoot": {
+          "selector": "[class*=\"lensFoot\"]",
+          "text": "冻结示例 · 不调用模型 · 与下方五步示例使用同一份素材",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "20.48px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 612.5,
+          "height": 40.7
+        },
+        "sectionKicker": {
+          "selector": "#missions [class*=\"kicker\"]",
+          "text": "01 离开以后",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "19.68px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 1220,
+          "height": 19.7
+        },
+        "sectionIntro": {
+          "selector": "#missions [class*=\"sectionIntro\"]",
+          "text": "同一个示例委托：来源、判断和等你决定的那一步，都留在原处。",
+          "fontSize": "16px",
+          "fontSizePx": 16,
+          "lineHeight": "30.4px",
+          "fontWeight": "400",
+          "color": "rgb(83, 100, 94)",
+          "width": 464,
+          "height": 30.4
+        },
+        "railLabel": {
+          "selector": "[class*=\"railLabel\"]",
+          "text": "来源",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "600",
+          "color": "rgb(97, 114, 104)",
+          "width": 280,
+          "height": 19.2
+        },
+        "railText": {
+          "selector": "[class*=\"railText\"]",
+          "text": "比赛材料、任务安排、老师建议，随时可以回到原文核对。",
+          "fontSize": "15px",
+          "fontSizePx": 15,
+          "lineHeight": "27px",
+          "fontWeight": "400",
+          "color": "rgb(83, 100, 94)",
+          "width": 280,
+          "height": 54
+        },
+        "demoNote": {
+          "selector": "[class*=\"demoNote\"]",
+          "text": "这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "26.64px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 581.2,
+          "height": 26.6
+        },
+        "storyFooter": {
+          "selector": "[class*=\"storyFooter\"] > p",
+          "text": "已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "21.76px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 460.8,
+          "height": 21.8
+        },
+        "paneHeading": {
+          "selector": "[class*=\"paneHeading\"] h4",
+          "text": "原始记录",
+          "fontSize": "15.2px",
+          "fontSizePx": 15.2,
+          "lineHeight": "22.8px",
+          "fontWeight": "650",
+          "color": "rgb(28, 46, 44)",
+          "width": 60.8,
+          "height": 22.8
+        },
+        "projectKicker": {
+          "selector": "[class*=\"projectKicker\"]",
+          "text": "内置公开示例",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 76.8,
+          "height": 18
+        },
+        "sourceButton": {
+          "selector": "[class*=\"sourceButton\"]",
+          "text": "任务安排 查看原文",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(39, 104, 93)",
+          "width": 136.2,
+          "height": 44
+        },
+        "videoMeta": {
+          "selector": "[class*=\"videoMeta\"]",
+          "text": "忆程 ProjectMemo · Bilibili · 新窗口打开",
+          "fontSize": "13.44px",
+          "fontSizePx": 13.44,
+          "lineHeight": "20.16px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 250.3,
+          "height": 20.2
+        },
+        "footerMeta": {
+          "selector": "[class*=\"footerMeta\"]",
+          "text": "竞赛 · 科研 · 课程项目",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "19.68px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 121.4,
+          "height": 19.7
+        },
+        "boundary": {
+          "selector": "[class*=\"boundary\"] p",
+          "text": "使用边界来源可以回看；没有依据的内容会标明缺口。建议需要你判断，重要操作在确认后才应用。模型分析与委托执行取决于实际配置。",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "26.64px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 1220,
+          "height": 26.6
+        },
+        "caption": {
+          "selector": "[class*=\"caption\"]",
+          "text": "界面示意 · 实际可用范围取决于部署与授权",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "22.304px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 574,
+          "height": 22.3
+        }
+      }
+    },
+    {
+      "state": "evidence-open",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/hero-states/hero-evidence.png",
+      "fileBytes": 125826,
+      "fileSha256": "9b27cdd9868083d6ff6b89abbb7e75b94105237dd8da4605bef3a88ae781f107",
+      "metricsFile": "hero-evidence.json",
+      "extra": {
+        "state": "evidence-open",
+        "backStage": {
+          "selectedTab": {
+            "id": "stage-tab-back",
+            "label": "03 回来后",
+            "ariaSelected": "true"
+          },
+          "panelTextLength": 144,
+          "heroCopyTop": 111.71875
+        },
+        "leftTopInvariance": {
+          "defaultHeroCopyTop": 111.72,
+          "evidenceHeroCopyTop": 111.72,
+          "delta": 0,
+          "expected": "≈112（展开依据时左栏 top 不应移动）"
+        },
+        "h1TopFrom": 166.11,
+        "h1TopTo": 166.11,
+        "evidenceButton": {
+          "text": "收起依据",
+          "ariaExpanded": "true",
+          "ariaControls": "hero-evidence",
+          "bbox": {
+            "x": 738.03,
+            "y": 552.53,
+            "width": 106.14,
+            "height": 44,
+            "bottom": 596.53,
+            "right": 844.17,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidencePanel": {
+          "dataOpen": "true",
+          "textLength": 179,
+          "textFirst80": "原文来自内置公开素材，不读取你的项目。 比赛材料 示例素材 · 比赛要求摘录 初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。 任务安排 示例素材 · 项",
+          "bbox": {
+            "x": 738.03,
+            "y": 596.53,
+            "width": 569.36,
+            "height": 271.73,
+            "bottom": 868.27,
+            "right": 1307.39,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "grid",
+            "visibility": "visible"
+          },
+          "evidenceListVisible": true
+        },
+        "panelTextLengthFrom": 144,
+        "panelTextLengthTo": 325
+      },
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1124.53,
+            "y": 205.05,
+            "width": 195.66,
+            "height": 44,
+            "bottom": 249.05,
+            "right": 1320.19,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": true,
+        "imageCount": 1,
+        "heroCopyTop": 111.72,
+        "ctaVisibleInFirstScreen": true
+      },
+      "fontSizes": {
+        "h1": {
+          "selector": "#hero-title",
+          "text": "人可以下线， 项目别掉线。",
+          "fontSize": "72.72px",
+          "fontSizePx": 72.72,
+          "lineHeight": "82.9008px",
+          "fontWeight": "500",
+          "color": "rgb(28, 46, 44)",
+          "width": 545,
+          "height": 165.8
+        },
+        "heroSub": {
+          "selector": "#hero-title + p",
+          "text": "关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。",
+          "fontSize": "17px",
+          "fontSizePx": 17,
+          "lineHeight": "32.3px",
+          "fontWeight": "400",
+          "color": "rgb(83, 100, 94)",
+          "width": 512,
+          "height": 64.6
+        },
+        "heroNote": {
+          "selector": "[class*=\"heroNote\"]",
+          "text": "公开示例 · 不调用模型 · 不写入你的项目。",
+          "fontSize": "13.44px",
+          "fontSizePx": 13.44,
+          "lineHeight": "22.848px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 545,
+          "height": 22.8
+        },
+        "lensKicker": {
+          "selector": "[class*=\"lensKicker\"]",
+          "text": "公开示例 · 忆程参赛作品开发",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 172.6,
+          "height": 19.2
+        },
+        "lensMission": {
+          "selector": "[class*=\"lensMission\"]",
+          "text": "整理阶段汇报",
+          "fontSize": "22.4px",
+          "fontSizePx": 22.4,
+          "lineHeight": "31.36px",
+          "fontWeight": "500",
+          "color": "rgb(28, 46, 44)",
+          "width": 172.6,
+          "height": 31.4
+        },
+        "stageTab": {
+          "selector": "[class*=\"stageTab\"]",
+          "text": "01 离开时 02 期间 03 回来后",
+          "fontSize": "14px",
+          "fontSizePx": 14,
+          "lineHeight": "21.7px",
+          "fontWeight": "400",
+          "color": "rgb(28, 46, 44)",
+          "width": 612.5,
+          "height": 57
+        },
+        "rowLabel": {
+          "selector": "[class*=\"lensRow\"] dt",
+          "text": "原委托",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "600",
+          "color": "rgb(97, 114, 104)",
+          "width": 65.6,
+          "height": 50
+        },
+        "rowValue": {
+          "selector": "[class*=\"rowValue\"]",
+          "text": "用已有材料整理一份阶段汇报",
+          "fontSize": "15px",
+          "fontSizePx": 15,
+          "lineHeight": "25.5px",
+          "fontWeight": "400",
+          "color": "rgb(28, 46, 44)",
+          "width": 487.8,
+          "height": 25.5
+        },
+        "rowMeta": {
+          "selector": "[class*=\"rowMeta\"]",
+          "text": "原任务与草稿都留在原处",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "21.648px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 487.8,
+          "height": 21.7
+        },
+        "lensFoot": {
+          "selector": "[class*=\"lensFoot\"]",
+          "text": "冻结示例 · 不调用模型 · 与下方五步示例使用同一份素材",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "20.48px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 612.5,
+          "height": 40.7
+        },
+        "sectionKicker": {
+          "selector": "#missions [class*=\"kicker\"]",
+          "text": "01 离开以后",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "19.68px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 1220,
+          "height": 19.7
+        },
+        "sectionIntro": {
+          "selector": "#missions [class*=\"sectionIntro\"]",
+          "text": "同一个示例委托：来源、判断和等你决定的那一步，都留在原处。",
+          "fontSize": "16px",
+          "fontSizePx": 16,
+          "lineHeight": "30.4px",
+          "fontWeight": "400",
+          "color": "rgb(83, 100, 94)",
+          "width": 464,
+          "height": 30.4
+        },
+        "railLabel": {
+          "selector": "[class*=\"railLabel\"]",
+          "text": "来源",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "600",
+          "color": "rgb(97, 114, 104)",
+          "width": 280,
+          "height": 19.2
+        },
+        "railText": {
+          "selector": "[class*=\"railText\"]",
+          "text": "比赛材料、任务安排、老师建议，随时可以回到原文核对。",
+          "fontSize": "15px",
+          "fontSizePx": 15,
+          "lineHeight": "27px",
+          "fontWeight": "400",
+          "color": "rgb(83, 100, 94)",
+          "width": 280,
+          "height": 54
+        },
+        "demoNote": {
+          "selector": "[class*=\"demoNote\"]",
+          "text": "这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "26.64px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 581.2,
+          "height": 26.6
+        },
+        "storyFooter": {
+          "selector": "[class*=\"storyFooter\"] > p",
+          "text": "已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "21.76px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 460.8,
+          "height": 21.8
+        },
+        "paneHeading": {
+          "selector": "[class*=\"paneHeading\"] h4",
+          "text": "原始记录",
+          "fontSize": "15.2px",
+          "fontSizePx": 15.2,
+          "lineHeight": "22.8px",
+          "fontWeight": "650",
+          "color": "rgb(28, 46, 44)",
+          "width": 60.8,
+          "height": 22.8
+        },
+        "projectKicker": {
+          "selector": "[class*=\"projectKicker\"]",
+          "text": "内置公开示例",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 76.8,
+          "height": 18
+        },
+        "sourceButton": {
+          "selector": "[class*=\"sourceButton\"]",
+          "text": "任务安排 查看原文",
+          "fontSize": "12.8px",
+          "fontSizePx": 12.8,
+          "lineHeight": "19.2px",
+          "fontWeight": "400",
+          "color": "rgb(39, 104, 93)",
+          "width": 136.2,
+          "height": 44
+        },
+        "videoMeta": {
+          "selector": "[class*=\"videoMeta\"]",
+          "text": "忆程 ProjectMemo · Bilibili · 新窗口打开",
+          "fontSize": "13.44px",
+          "fontSizePx": 13.44,
+          "lineHeight": "20.16px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 250.3,
+          "height": 20.2
+        },
+        "footerMeta": {
+          "selector": "[class*=\"footerMeta\"]",
+          "text": "竞赛 · 科研 · 课程项目",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "19.68px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 121.4,
+          "height": 19.7
+        },
+        "boundary": {
+          "selector": "[class*=\"boundary\"] p",
+          "text": "使用边界来源可以回看；没有依据的内容会标明缺口。建议需要你判断，重要操作在确认后才应用。模型分析与委托执行取决于实际配置。",
+          "fontSize": "14.4px",
+          "fontSizePx": 14.4,
+          "lineHeight": "26.64px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 1220,
+          "height": 26.6
+        },
+        "caption": {
+          "selector": "[class*=\"caption\"]",
+          "text": "界面示意 · 实际可用范围取决于部署与授权",
+          "fontSize": "13.12px",
+          "fontSizePx": 13.12,
+          "lineHeight": "22.304px",
+          "fontWeight": "400",
+          "color": "rgb(97, 114, 104)",
+          "width": 574,
+          "height": 22.3
+        }
+      }
+    }
+  ],
+  "motionStates": [
+    {
+      "name": "hero-depth-exit",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/hero-states/hero-depth-exit.png",
+      "fileBytes": 117090,
+      "fileSha256": "025b1f38dce14d4bf80161c6ad77bb382d23cbd7b2fde05ef63ff4499562182d",
+      "metricsFile": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/hero-depth-exit.json",
+      "extra": {
+        "heroShift": "0.320",
+        "heroCopyTranslate": "0px 3.2px",
+        "heroLensTranslate": "0px -5.76px",
+        "baseHeroLayoutTop": 112,
+        "depthHeroLayoutTop": 112,
+        "baseLensLayoutTop": 112,
+        "depthLensLayoutTop": 112,
+        "layoutUnchanged": true,
+        "scrollY": 180
+      },
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1124.53,
+            "y": 19.29,
+            "width": 195.66,
+            "height": 44,
+            "bottom": 63.29,
+            "right": 1320.19,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": -65.08,
+        "ctaVisibleInFirstScreen": true
+      }
+    },
+    {
+      "name": "kicker-draw",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/hero-states/kicker-draw.png",
+      "fileBytes": 91576,
+      "fileSha256": "887d570a0ceaffe03afd3802f06b2ba44cfeecdb9557911448766159ac6db82c",
+      "metricsFile": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/kicker-draw.json",
+      "extra": {
+        "kickers": [
+          {
+            "text": "01 离开以后",
+            "dataDrawn": "true",
+            "afterTransform": "matrix(1, 0, 0, 1, 0, 0)"
+          },
+          {
+            "text": "02 公开交互示例",
+            "dataDrawn": null,
+            "afterTransform": "matrix(0, 0, 0, 1, 0, 0)"
+          },
+          {
+            "text": "03 同一个任务",
+            "dataDrawn": null,
+            "afterTransform": "matrix(0, 0, 0, 1, 0, 0)"
+          },
+          {
+            "text": "04 用在什么项目上",
+            "dataDrawn": null,
+            "afterTransform": "matrix(0, 0, 0, 1, 0, 0)"
+          },
+          {
+            "text": "05 决赛演示",
+            "dataDrawn": null,
+            "afterTransform": "matrix(0, 0, 0, 1, 0, 0)"
+          }
+        ],
+        "scrollY": 599
+      },
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1124.53,
+            "y": -411.95,
+            "width": 195.66,
+            "height": 44,
+            "bottom": -367.95,
+            "right": 1320.19,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": -477.28,
+        "ctaVisibleInFirstScreen": false
+      }
+    },
+    {
+      "name": "rail-1440-mid",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/rail-1440-mid.png",
+      "fileBytes": 102568,
+      "fileSha256": "c08f368894c847f4d18a8ec836019e91abf6b0dce342ba44644ffa0a4932fca1",
+      "metricsFile": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/rail-1440-mid.json",
+      "extra": {
+        "railAfterCapture": {
+          "scrollY": 472,
+          "progress": 0.5,
+          "activeCount": 2,
+          "activeLabels": [
+            "来源 3 条来源保留原文 比赛材料、任务",
+            "变化 发现一处没有回执 演示流程是否跑通"
+          ],
+          "railProgressTransform": "matrix(0.5, 0, 0, 1, 0, 0)",
+          "railProgressBBox": {
+            "x": 110,
+            "y": 548,
+            "width": 610,
+            "height": 2
+          },
+          "scrollProgressTransform": "matrix(0.141, 0, 0, 1, 0, 0)"
+        }
+      },
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1124.53,
+            "y": -282.06,
+            "width": 195.66,
+            "height": 44,
+            "bottom": -238.06,
+            "right": 1320.19,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": -351.89,
+        "ctaVisibleInFirstScreen": true
+      }
+    },
+    {
+      "name": "scroll-progress-mid",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/hero-states/scroll-progress-mid.png",
+      "fileBytes": 89390,
+      "fileSha256": "c979c8780a3105961efc34cd6a2e97e81e6ab48b223ff14172756fc8676453d5",
+      "metricsFile": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/scroll-progress-mid.json",
+      "extra": {
+        "scrollProgress": {
+          "exists": true,
+          "bbox": {
+            "x": 0,
+            "y": 56,
+            "width": 648,
+            "height": 2,
+            "bottom": 58,
+            "right": 648,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          "transform": "matrix(0.45, 0, 0, 1, 0, 0)",
+          "dataVisible": true
+        },
+        "scrollY": 1506,
+        "scrollable": 3347,
+        "expectedScaleX": 0.45
+      },
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1124.53,
+            "y": -1318.95,
+            "width": 195.66,
+            "height": 44,
+            "bottom": -1274.95,
+            "right": 1320.19,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": -1384.28,
+        "ctaVisibleInFirstScreen": false
+      }
+    }
+  ],
+  "motionAssertions": {
+    "readingProgressLine": {
+      "element": {
+        "exists": true,
+        "bbox": {
+          "x": 0,
+          "y": 56,
+          "width": 648,
+          "height": 2,
+          "bottom": 58,
+          "right": 648,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "block",
+          "visibility": "visible"
+        },
+        "transform": "matrix(0.45, 0, 0, 1, 0, 0)",
+        "dataVisible": true
+      },
+      "expectedScaleX": 0.45,
+      "scrollY": 1506,
+      "fixedUnderHeader": true
+    },
+    "railMidDesktop": {
+      "progressVar": 0.5,
+      "activeCount": 2,
+      "activeLabels": [
+        "来源 3 条来源保留原文 比赛材料、任务",
+        "变化 发现一处没有回执 演示流程是否跑通"
+      ],
+      "railProgressTransform": "matrix(0.5, 0, 0, 1, 0, 0)",
+      "targetProgress": 0.5
+    },
+    "kickerDraw": {
+      "kickers": [
+        {
+          "text": "01 离开以后",
+          "dataDrawn": "true",
+          "afterTransform": "matrix(1, 0, 0, 1, 0, 0)"
+        },
+        {
+          "text": "02 公开交互示例",
+          "dataDrawn": null,
+          "afterTransform": "matrix(0, 0, 0, 1, 0, 0)"
+        },
+        {
+          "text": "03 同一个任务",
+          "dataDrawn": null,
+          "afterTransform": "matrix(0, 0, 0, 1, 0, 0)"
+        },
+        {
+          "text": "04 用在什么项目上",
+          "dataDrawn": null,
+          "afterTransform": "matrix(0, 0, 0, 1, 0, 0)"
+        },
+        {
+          "text": "05 决赛演示",
+          "dataDrawn": null,
+          "afterTransform": "matrix(0, 0, 0, 1, 0, 0)"
+        }
+      ],
+      "scrollY": 599
+    },
+    "heroDepthExit": {
+      "heroShift": "0.320",
+      "heroCopyTranslate": "0px 3.2px",
+      "heroLensTranslate": "0px -5.76px",
+      "layoutUnchanged": true,
+      "scrollY": 180
+    }
+  },
+  "fontSizes1440Light": {
+    "h1": {
+      "selector": "#hero-title",
+      "text": "人可以下线， 项目别掉线。",
+      "fontSize": "72.72px",
+      "fontSizePx": 72.72,
+      "lineHeight": "82.9008px",
+      "fontWeight": "500",
+      "color": "rgb(28, 46, 44)",
+      "width": 545,
+      "height": 165.8
+    },
+    "heroSub": {
+      "selector": "#hero-title + p",
+      "text": "关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。",
+      "fontSize": "17px",
+      "fontSizePx": 17,
+      "lineHeight": "32.3px",
+      "fontWeight": "400",
+      "color": "rgb(83, 100, 94)",
+      "width": 512,
+      "height": 64.6
+    },
+    "heroNote": {
+      "selector": "[class*=\"heroNote\"]",
+      "text": "公开示例 · 不调用模型 · 不写入你的项目。",
+      "fontSize": "13.44px",
+      "fontSizePx": 13.44,
+      "lineHeight": "22.848px",
+      "fontWeight": "400",
+      "color": "rgb(97, 114, 104)",
+      "width": 545,
+      "height": 22.8
+    },
+    "lensKicker": {
+      "selector": "[class*=\"lensKicker\"]",
+      "text": "公开示例 · 忆程参赛作品开发",
+      "fontSize": "12.8px",
+      "fontSizePx": 12.8,
+      "lineHeight": "19.2px",
+      "fontWeight": "400",
+      "color": "rgb(97, 114, 104)",
+      "width": 172.6,
+      "height": 19.2
+    },
+    "lensMission": {
+      "selector": "[class*=\"lensMission\"]",
+      "text": "整理阶段汇报",
+      "fontSize": "22.4px",
+      "fontSizePx": 22.4,
+      "lineHeight": "31.36px",
+      "fontWeight": "500",
+      "color": "rgb(28, 46, 44)",
+      "width": 172.6,
+      "height": 31.4
+    },
+    "stageTab": {
+      "selector": "[class*=\"stageTab\"]",
+      "text": "01 离开时 02 期间 03 回来后",
+      "fontSize": "14px",
+      "fontSizePx": 14,
+      "lineHeight": "21.7px",
+      "fontWeight": "400",
+      "color": "rgb(28, 46, 44)",
+      "width": 612.5,
+      "height": 57
+    },
+    "rowLabel": {
+      "selector": "[class*=\"lensRow\"] dt",
+      "text": "原委托",
+      "fontSize": "12.8px",
+      "fontSizePx": 12.8,
+      "lineHeight": "19.2px",
+      "fontWeight": "600",
+      "color": "rgb(97, 114, 104)",
+      "width": 65.6,
+      "height": 50
+    },
+    "rowValue": {
+      "selector": "[class*=\"rowValue\"]",
+      "text": "用已有材料整理一份阶段汇报",
+      "fontSize": "15px",
+      "fontSizePx": 15,
+      "lineHeight": "25.5px",
+      "fontWeight": "400",
+      "color": "rgb(28, 46, 44)",
+      "width": 487.8,
+      "height": 25.5
+    },
+    "rowMeta": {
+      "selector": "[class*=\"rowMeta\"]",
+      "text": "原任务与草稿都留在原处",
+      "fontSize": "13.12px",
+      "fontSizePx": 13.12,
+      "lineHeight": "21.648px",
+      "fontWeight": "400",
+      "color": "rgb(97, 114, 104)",
+      "width": 487.8,
+      "height": 21.7
+    },
+    "lensFoot": {
+      "selector": "[class*=\"lensFoot\"]",
+      "text": "冻结示例 · 不调用模型 · 与下方五步示例使用同一份素材",
+      "fontSize": "12.8px",
+      "fontSizePx": 12.8,
+      "lineHeight": "20.48px",
+      "fontWeight": "400",
+      "color": "rgb(97, 114, 104)",
+      "width": 612.5,
+      "height": 40.7
+    },
+    "sectionKicker": {
+      "selector": "#missions [class*=\"kicker\"]",
+      "text": "01 离开以后",
+      "fontSize": "13.12px",
+      "fontSizePx": 13.12,
+      "lineHeight": "19.68px",
+      "fontWeight": "400",
+      "color": "rgb(97, 114, 104)",
+      "width": 1220,
+      "height": 19.7
+    },
+    "sectionIntro": {
+      "selector": "#missions [class*=\"sectionIntro\"]",
+      "text": "同一个示例委托：来源、判断和等你决定的那一步，都留在原处。",
+      "fontSize": "16px",
+      "fontSizePx": 16,
+      "lineHeight": "30.4px",
+      "fontWeight": "400",
+      "color": "rgb(83, 100, 94)",
+      "width": 464,
+      "height": 30.4
+    },
+    "railLabel": {
+      "selector": "[class*=\"railLabel\"]",
+      "text": "来源",
+      "fontSize": "12.8px",
+      "fontSizePx": 12.8,
+      "lineHeight": "19.2px",
+      "fontWeight": "600",
+      "color": "rgb(97, 114, 104)",
+      "width": 280,
+      "height": 19.2
+    },
+    "railText": {
+      "selector": "[class*=\"railText\"]",
+      "text": "比赛材料、任务安排、老师建议，随时可以回到原文核对。",
+      "fontSize": "15px",
+      "fontSizePx": 15,
+      "lineHeight": "27px",
+      "fontWeight": "400",
+      "color": "rgb(83, 100, 94)",
+      "width": 280,
+      "height": 54
+    },
+    "demoNote": {
+      "selector": "[class*=\"demoNote\"]",
+      "text": "这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。",
+      "fontSize": "14.4px",
+      "fontSizePx": 14.4,
+      "lineHeight": "26.64px",
+      "fontWeight": "400",
+      "color": "rgb(97, 114, 104)",
+      "width": 581.2,
+      "height": 26.6
+    },
+    "storyFooter": {
+      "selector": "[class*=\"storyFooter\"] > p",
+      "text": "已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。",
+      "fontSize": "12.8px",
+      "fontSizePx": 12.8,
+      "lineHeight": "21.76px",
+      "fontWeight": "400",
+      "color": "rgb(97, 114, 104)",
+      "width": 460.8,
+      "height": 21.8
+    },
+    "paneHeading": {
+      "selector": "[class*=\"paneHeading\"] h4",
+      "text": "原始记录",
+      "fontSize": "15.2px",
+      "fontSizePx": 15.2,
+      "lineHeight": "22.8px",
+      "fontWeight": "650",
+      "color": "rgb(28, 46, 44)",
+      "width": 60.8,
+      "height": 22.8
+    },
+    "projectKicker": {
+      "selector": "[class*=\"projectKicker\"]",
+      "text": "内置公开示例",
+      "fontSize": "12.8px",
+      "fontSizePx": 12.8,
+      "lineHeight": "19.2px",
+      "fontWeight": "400",
+      "color": "rgb(97, 114, 104)",
+      "width": 76.8,
+      "height": 18
+    },
+    "sourceButton": {
+      "selector": "[class*=\"sourceButton\"]",
+      "text": "任务安排 查看原文",
+      "fontSize": "12.8px",
+      "fontSizePx": 12.8,
+      "lineHeight": "19.2px",
+      "fontWeight": "400",
+      "color": "rgb(39, 104, 93)",
+      "width": 136.2,
+      "height": 44
+    },
+    "videoMeta": {
+      "selector": "[class*=\"videoMeta\"]",
+      "text": "忆程 ProjectMemo · Bilibili · 新窗口打开",
+      "fontSize": "13.44px",
+      "fontSizePx": 13.44,
+      "lineHeight": "20.16px",
+      "fontWeight": "400",
+      "color": "rgb(97, 114, 104)",
+      "width": 250.3,
+      "height": 20.2
+    },
+    "footerMeta": {
+      "selector": "[class*=\"footerMeta\"]",
+      "text": "竞赛 · 科研 · 课程项目",
+      "fontSize": "13.12px",
+      "fontSizePx": 13.12,
+      "lineHeight": "19.68px",
+      "fontWeight": "400",
+      "color": "rgb(97, 114, 104)",
+      "width": 121.4,
+      "height": 19.7
+    },
+    "boundary": {
+      "selector": "[class*=\"boundary\"] p",
+      "text": "使用边界来源可以回看；没有依据的内容会标明缺口。建议需要你判断，重要操作在确认后才应用。模型分析与委托执行取决于实际配置。",
+      "fontSize": "14.4px",
+      "fontSizePx": 14.4,
+      "lineHeight": "26.64px",
+      "fontWeight": "400",
+      "color": "rgb(97, 114, 104)",
+      "width": 1220,
+      "height": 26.6
+    },
+    "caption": {
+      "selector": "[class*=\"caption\"]",
+      "text": "界面示意 · 实际可用范围取决于部署与授权",
+      "fontSize": "13.12px",
+      "fontSizePx": 13.12,
+      "lineHeight": "22.304px",
+      "fontWeight": "400",
+      "color": "rgb(97, 114, 104)",
+      "width": 574,
+      "height": 22.3
+    }
+  },
+  "minVisibleFontSize1440Light": 12.8,
+  "performance": {
+    "file": "evidence/final-sprint/20261103/b-brand-home/b3/performance-after.json",
+    "navigation": {
+      "startTime": 0,
+      "redirectStart": 0,
+      "redirectEnd": 0,
+      "fetchStart": 0.1,
+      "domainLookupStart": 0.1,
+      "domainLookupEnd": 0.1,
+      "connectStart": 0.1,
+      "connectEnd": 0.1,
+      "secureConnectionStart": 0,
+      "requestStart": 0.8,
+      "responseStart": 221.5,
+      "responseEnd": 225.6,
+      "domInteractive": 235.8,
+      "domContentLoadedEventStart": 235.8,
+      "domContentLoadedEventEnd": 235.8,
+      "domComplete": 304.5,
+      "loadEventStart": 304.5,
+      "loadEventEnd": 304.5,
+      "transferSize": 18507,
+      "encodedBodySize": 18207,
+      "decodedBodySize": 74480,
+      "nextHopProtocol": "http/1.1",
+      "type": "reload"
+    },
+    "derived": {
+      "ttfbMs": 220.7,
+      "domContentLoadedMs": 235.8,
+      "loadEventEndMs": 304.5,
+      "domCompleteMs": 304.5,
+      "documentTransferSize": 18507,
+      "documentDecodedBodySize": 74480
+    },
+    "paint": [
+      {
+        "name": "first-paint",
+        "startTime": 276
+      },
+      {
+        "name": "first-contentful-paint",
+        "startTime": 276
+      }
+    ]
+  },
+  "resources": {
+    "file": "evidence/final-sprint/20261103/b-brand-home/b3/resources-after.json",
+    "totals": {
+      "resourceCount": 26,
+      "transferSize": 6600,
+      "decodedBodySize": 358120,
+      "byInitiatorType": {
+        "link": {
+          "count": 4,
+          "transferSize": 1200,
+          "decodedBodySize": 0
+        },
+        "script": {
+          "count": 18,
+          "transferSize": 5400,
+          "decodedBodySize": 0
+        },
+        "css": {
+          "count": 4,
+          "transferSize": 0,
+          "decodedBodySize": 358120
+        }
+      },
+      "fontResourceCount": 4,
+      "externalResourceCount": 0,
+      "bilibiliResourceCount": 0
+    },
+    "fontResources": [
+      {
+        "name": "http://127.0.0.1:34111/fonts/pm-serif-brand.ttf",
+        "initiatorType": "css",
+        "startTime": 236,
+        "duration": 0,
+        "transferSize": 0,
+        "encodedBodySize": 2209,
+        "decodedBodySize": 3012,
+        "nextHopProtocol": "http/1.1"
+      },
+      {
+        "name": "http://127.0.0.1:34111/fonts/pm-editorial-serif.ttf",
+        "initiatorType": "css",
+        "startTime": 236.1,
+        "duration": 0,
+        "transferSize": 0,
+        "encodedBodySize": 105395,
+        "decodedBodySize": 162052,
+        "nextHopProtocol": "http/1.1"
+      },
+      {
+        "name": "http://127.0.0.1:34111/fonts/manrope-variable.ttf",
+        "initiatorType": "css",
+        "startTime": 236.2,
+        "duration": 0,
+        "transferSize": 0,
+        "encodedBodySize": 68860,
+        "decodedBodySize": 164700,
+        "nextHopProtocol": "http/1.1"
+      },
+      {
+        "name": "http://127.0.0.1:34111/__nextjs_font/geist-latin.woff2",
+        "initiatorType": "css",
+        "startTime": 294.6,
+        "duration": 0,
+        "transferSize": 0,
+        "encodedBodySize": 28356,
+        "decodedBodySize": 28356,
+        "nextHopProtocol": "http/1.1"
+      }
+    ],
+    "externalResources": [],
+    "bilibiliResources": []
+  },
+  "network": {
+    "file": "evidence/final-sprint/20261103/b-brand-home/b3/network-after.json",
+    "totals": {
+      "requestRecords": 431,
+      "uniqueRequestUrls": 27,
+      "externalOriginRequests": 0,
+      "apiWriteRequests": 0,
+      "bilibiliRequests": 0,
+      "failures": 4,
+      "imageFontFailures": 0,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "userAbortedRequests": 0
+    },
+    "assertions": {
+      "noBilibiliRequestDuringLoad": true,
+      "noApiWrites": true,
+      "noExternalOrigins": true,
+      "noPageErrors": true
+    }
+  },
+  "files": [
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/after/homepage-1440-light-after.png",
+      "bytes": 119851,
+      "sha256": "73cfa0cd586fdc3613d68850069cc3d96745d8521fa1aa4025012c3104155603",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/after/homepage-1440-dark-after.png",
+      "bytes": 115298,
+      "sha256": "cd3a0d761a28700f0828231f31313d94cf74d352a2de924c90e7f229c48cc571",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/after/homepage-1280-light-after.png",
+      "bytes": 101268,
+      "sha256": "eec4713f55425d5510841e54b7ba1bc468a58d69df50b0ec2dd683305c811977",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/after/homepage-1280-dark-after.png",
+      "bytes": 97113,
+      "sha256": "0b4603c843b9c85707a89f10d81e6b7c57b985dbe794360a33ac9f994029295b",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/after/homepage-390-light-after.png",
+      "bytes": 65248,
+      "sha256": "c42d31e0041df911b3226ddfae657930d2147d34e08beb00d7cecc5469421502",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/after/homepage-390-dark-after.png",
+      "bytes": 64880,
+      "sha256": "bbf0accc31a9cea94c82e5e665fe9bd4f4b60a64620eacb0b6bfe29053bf37c8",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/hero-states/hero-during.png",
+      "bytes": 117615,
+      "sha256": "e9ff06ef5bb7f8fc6d1f07de45a5ccec5c375e5c9df9671da2089d412a3df183",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/hero-states/hero-evidence.png",
+      "bytes": 125826,
+      "sha256": "9b27cdd9868083d6ff6b89abbb7e75b94105237dd8da4605bef3a88ae781f107",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/hero-states/hero-depth-exit.png",
+      "bytes": 117090,
+      "sha256": "025b1f38dce14d4bf80161c6ad77bb382d23cbd7b2fde05ef63ff4499562182d",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/hero-states/kicker-draw.png",
+      "bytes": 91576,
+      "sha256": "887d570a0ceaffe03afd3802f06b2ba44cfeecdb9557911448766159ac6db82c",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/rail-1440-mid.png",
+      "bytes": 102568,
+      "sha256": "c08f368894c847f4d18a8ec836019e91abf6b0dce342ba44644ffa0a4932fca1",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/hero-states/scroll-progress-mid.png",
+      "bytes": 89390,
+      "sha256": "c979c8780a3105961efc34cd6a2e97e81e6ab48b223ff14172756fc8676453d5",
+      "kind": "screenshot"
+    },
+    {
+      "path": "homepage-1440-light.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "homepage-1440-dark.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "homepage-1280-light.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "homepage-1280-dark.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "homepage-390-light.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "homepage-390-dark.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "hero-during.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "hero-evidence.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/hero-depth-exit.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/kicker-draw.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/rail-1440-mid.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/scroll-progress-mid.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/performance-after.json",
+      "kind": "performance"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/resources-after.json",
+      "kind": "resources"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/network-after.json",
+      "kind": "network-audit"
+    }
+  ],
+  "anomalies": {
+    "captureErrors": [],
+    "horizontalOverflow": [],
+    "imageInventory": {
+      "note": "B2 首页已移除整幅工作区大图；唯一 <img> 是 SiteHeader 品牌 logo /logo.png（非产品截图），故无内容图片。Lead 的“本页已无 <img>”按内容图片理解成立，但 DOM 仍有 1 个 logo img。",
+      "perCapture": [
+        {
+          "label": "after-1440-light",
+          "imageCount": 1,
+          "srcs": [
+            "http://127.0.0.1:34111/logo.png"
+          ]
+        },
+        {
+          "label": "after-1440-dark",
+          "imageCount": 1,
+          "srcs": [
+            "http://127.0.0.1:34111/logo.png"
+          ]
+        },
+        {
+          "label": "after-1280-light",
+          "imageCount": 1,
+          "srcs": [
+            "http://127.0.0.1:34111/logo.png"
+          ]
+        },
+        {
+          "label": "after-1280-dark",
+          "imageCount": 1,
+          "srcs": [
+            "http://127.0.0.1:34111/logo.png"
+          ]
+        },
+        {
+          "label": "after-390-light",
+          "imageCount": 1,
+          "srcs": [
+            "http://127.0.0.1:34111/logo.png"
+          ]
+        },
+        {
+          "label": "after-390-dark",
+          "imageCount": 1,
+          "srcs": [
+            "http://127.0.0.1:34111/logo.png"
+          ]
+        }
+      ],
+      "nonLogoImages": []
+    },
+    "externalOrigins": [],
+    "bilibiliRequests": 0,
+    "apiWrites": 0,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "networkExplanation": {
+      "totalFailures": 4,
+      "breakdown": [
+        "4 条均为 goto+reload 打断的 dev 脚本 ERR_ABORTED（after-1440-light/dark、1280-light、motion 各 1），非页面/图片/字体失败。"
+      ],
+      "no401": true,
+      "note": "B2 首页为纯匿名静态内容，未出现 /api/auth/me 请求；api 写请求 0、外域 0、bilibili 0、page error 0。"
+    }
+  },
+  "caveats": [
+    "本机 dev 环境、本地回环网络；性能与体积数字不代表线上或所有用户体验。",
+    "dev 模式资源含 HMR/dev chunk，体积不代表生产构建。",
+    "Next dev 工具“N”为开发覆盖物（截图可见，dev-only）。",
+    "Bilibili 仅为外链：本轮未点击外链，未产生任何 bilibili 网络请求（见 network-after.json assertions.noBilibiliRequestDuringLoad=true）。"
+  ],
+  "fontSizeFindings": {
+    "minVisibleFontSizePx": 12.8,
+    "minVisibleFontSizeNote": "cc7c19f 收口后，六张 after 图与全部断点的最小可见字号均为 12.8px；承载解释的文字均 ≥12.8px（lensKicker 12.8、rowMeta 13.12、heroNote 13.44、lensFoot 12.8、storyFooter 12.8、paneHeading 15.2、railText 15、boundary 14.4）。原 0.65rem/0.7rem/0.72rem 元数据已全部消除。",
+    "requestedProbes": [
+      "lensFoot",
+      "lensKicker",
+      "rowMeta",
+      "heroNote",
+      "storyFooter",
+      "paneHeading"
+    ],
+    "requestedProbeValues": {
+      "lensFoot": 12.8,
+      "lensKicker": 12.8,
+      "rowMeta": 13.12,
+      "heroNote": 13.44,
+      "storyFooter": 12.8,
+      "paneHeading": 15.2
+    },
+    "mobileViewports": {
+      "390-light": 12.8,
+      "390-dark": 12.8
+    }
+  },
+  "finalCandidateSha": "9bae926e9475cedef118deedf5e002ec8365a23b",
+  "capturedOnSha": "cc7c19fed573c79a55f727eaa338ab84fd80cc3b",
+  "shaBinding": {
+    "finalCandidateSha": "9bae926e9475cedef118deedf5e002ec8365a23b",
+    "finalCandidateSubject": "官网：B3 终验修复（共享差异组件字号作用域 + 分组语义）",
+    "capturedOnSha": "cc7c19fed573c79a55f727eaa338ab84fd80cc3b",
+    "delta": "9bae926 相对 cc7c19f 仅：① components/HomeJourney.module.css 新增 .judgmentPane 作用域字号覆盖（共享 StateDiffView 的 text-xs / text-[11px] → 0.8rem=12.8px，仅影响五步第 3 步“查看判断”）；② components/HomeJourney.tsx / components/home/HomeHeroLens.tsx 补 role=\"group\"（无视觉变化）。不影响已采的 after 六图、断点、Hero 状态、rail/进度线/kicker/深度离场、reduced-motion、字体失败、dialog、回执、锚点与录屏路径。",
+    "targetedRecapture": "b3/states/judgment-step-1440-light.png 于 9bae926 直接补拍：比较基线 / 待确认 / 依据 2 项 / 主判断摘要 计算字号均 = 12.8px，pane 最小可见字号 12.8px；Hero lens role=group 已生效。"
+  }
+}

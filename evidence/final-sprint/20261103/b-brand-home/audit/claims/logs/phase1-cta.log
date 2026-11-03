@@ -1,0 +1,72 @@
+[PASS] anchor 1440x900 => {"target":"experience","hash":"#experience","scrollY":1274,"sectionTop":79.6,"headerBottom":57,"headingTop":202.6,"headingOccluded":false,"sectionClearance":22.6,"headerPosition":"sticky","horizontalOverflow":false}
+[PASS] anchor 1280x720 => {"target":"experience","hash":"#experience","scrollY":1224,"sectionTop":79.6,"headerBottom":57,"headingTop":193.1,"headingOccluded":false,"sectionClearance":22.6,"headerPosition":"sticky","horizontalOverflow":false}
+[PASS] anchor 1024x768 => {"target":"experience","hash":"#experience","scrollY":1149,"sectionTop":80,"headerBottom":57,"headingTop":193,"headingOccluded":false,"sectionClearance":23,"headerPosition":"sticky","horizontalOverflow":false}
+[PASS] anchor 390x844 => {"target":"experience","hash":"#experience","scrollY":1877,"sectionTop":79.7,"headerBottom":57,"headingTop":160.4,"headingOccluded":false,"sectionClearance":22.7,"headerPosition":"sticky","horizontalOverflow":false}
+[PASS] anchor 360x780 => {"target":"experience","hash":"#experience","scrollY":1928,"sectionTop":80,"headerBottom":57,"headingTop":160.7,"headingOccluded":false,"sectionClearance":23,"headerPosition":"sticky","horizontalOverflow":false}
+[PASS] anchor 320x780 => {"target":"experience","hash":"#experience","scrollY":2089,"sectionTop":80,"headerBottom":57,"headingTop":160.7,"headingOccluded":false,"sectionClearance":23,"headerPosition":"sticky","horizontalOverflow":false}
+[PASS] anchor 1440@200%等效720x450 => {"target":"experience","hash":"#experience","scrollY":1784,"sectionTop":80.3,"headerBottom":57,"headingTop":161,"headingOccluded":false,"sectionClearance":23.3,"headerPosition":"sticky","horizontalOverflow":false}
+[PASS] anchor 1280@200%等效640x360 => {"target":"experience","hash":"#experience","scrollY":1784,"sectionTop":80.3,"headerBottom":57,"headingTop":161,"headingOccluded":false,"sectionClearance":23.3,"headerPosition":"sticky","horizontalOverflow":false}
+[PASS] header-cta => {"name":"header-cta","matched":1,"finalUrl":"http://127.0.0.1:34111/login?from=%2Ffocus","title":"登录忆程｜忆程 ProjectMemo","loginFormVisible":true,"docs":[],"ok":true}
+[PASS] hero-secondary-cta => {"name":"hero-secondary-cta","matched":2,"finalUrl":"http://127.0.0.1:34111/login?from=%2Ffocus","title":"登录忆程｜忆程 ProjectMemo","loginFormVisible":true,"docs":[],"ok":true}
+[PASS] closing CTA => {"name":"closing-cta","matched":1,"finalUrl":"http://127.0.0.1:34111/login?from=%2Ffocus","title":"登录忆程｜忆程 ProjectMemo","loginFormVisible":true,"ok":true}
+INVENTORY {
+  "headerRect": {
+    "height": 57,
+    "position": "sticky",
+    "top": "0px"
+  },
+  "navAnchors": [
+    {
+      "text": "产品体验",
+      "href": "#experience",
+      "target": null
+    },
+    {
+      "text": "长期委托",
+      "href": "#missions",
+      "target": null
+    },
+    {
+      "text": "使用场景",
+      "href": "#moments",
+      "target": null
+    },
+    {
+      "text": "决赛演示",
+      "href": "#demo",
+      "target": null
+    },
+    {
+      "text": "进入工作台",
+      "href": "/focus",
+      "target": null
+    }
+  ],
+  "mainCtas": [
+    {
+      "text": "进入工作台",
+      "href": "/login?from=%2Ffocus"
+    },
+    {
+      "text": "2026 C4-AI 决赛演示视频忆程 ProjectMemo · Bilibili · 新窗口打开",
+      "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b"
+    },
+    {
+      "text": "进入工作台",
+      "href": "/login?from=%2Ffocus"
+    },
+    {
+      "text": "忆程 ProjectMemo",
+      "href": "/"
+    },
+    {
+      "text": "决赛演示",
+      "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b"
+    }
+  ],
+  "boundaries": [
+    "公开示例 · 不调用模型 · 不写入你的项目。",
+    "公开示例·忆程参赛作品开发",
+    "同一任务整理阶段汇报·公开示例"
+  ]
+}

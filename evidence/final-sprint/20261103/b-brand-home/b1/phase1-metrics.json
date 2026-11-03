@@ -1,0 +1,743 @@
+{
+  "phase": 1,
+  "kind": "prototype-comparison",
+  "capturedAt": "2026-11-03T03:51:07.355Z",
+  "sourceSha": "485d485378637e1da3280ed092739d441c8cf749",
+  "routes": [
+    {
+      "key": "a",
+      "path": "/prototype/hero-a",
+      "headingId": "proto-a-heading",
+      "title": "B1 原型 A｜原委托四问工作包"
+    },
+    {
+      "key": "b",
+      "path": "/prototype/hero-b",
+      "headingId": "proto-b-heading",
+      "title": "B1 原型 B｜来源变化因果镜头"
+    }
+  ],
+  "protocol": "同条件：同一 dev server、同一全局 header（非首页 SiteHeader）、同一示例素材与 CTA 文案；viewport 1440×900 / 390×844 × light/dark；localStorage theme 后 reload；等待 h1 可见、主题类生效、fonts.ready、动画 settle；scrollY=0；截整视口非全页。交互图仅桌面 1440 light。",
+  "mainCaptures": [
+    {
+      "route": "a",
+      "routePath": "/prototype/hero-a",
+      "width": 1440,
+      "height": 900,
+      "theme": "light",
+      "label": "proto-a-1440-light",
+      "state": "default",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light.png",
+      "fileBytes": 111190,
+      "fileSha256": "359808cfe7d3eb752bdf0a1e20f78b87278e5b2172ac9989fd0787e183ca3ca5",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "key": {
+        "title": "B1 原型 A｜原委托四问工作包",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "horizontalOverflow": false,
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "fontStatus": "loaded",
+        "selectedTab": {
+          "id": "proto-a-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1104.41,
+            "y": 243.47,
+            "width": 194.2,
+            "height": 44,
+            "bottom": 287.47,
+            "right": 1298.61,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceVisible": false,
+        "lensTextLength": 208,
+        "panelTextLength": 131,
+        "heroSectionTextLength": 330,
+        "headerProviderBadge": "演示模式",
+        "evidencePanelBbox": null,
+        "sourcePanelBbox": null
+      }
+    },
+    {
+      "route": "a",
+      "routePath": "/prototype/hero-a",
+      "width": 1440,
+      "height": 900,
+      "theme": "dark",
+      "label": "proto-a-1440-dark",
+      "state": "default",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-dark.png",
+      "fileBytes": 106453,
+      "fileSha256": "a63e09a7fcb929574ccd399168a967088937f64759d0132b122f0b6d1a088d1e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "key": {
+        "title": "B1 原型 A｜原委托四问工作包",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "dark",
+        "horizontalOverflow": false,
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "fontStatus": "loaded",
+        "selectedTab": {
+          "id": "proto-a-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1104.41,
+            "y": 243.47,
+            "width": 194.2,
+            "height": 44,
+            "bottom": 287.47,
+            "right": 1298.61,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceVisible": false,
+        "lensTextLength": 208,
+        "panelTextLength": 131,
+        "heroSectionTextLength": 330,
+        "headerProviderBadge": "演示模式",
+        "evidencePanelBbox": null,
+        "sourcePanelBbox": null
+      }
+    },
+    {
+      "route": "a",
+      "routePath": "/prototype/hero-a",
+      "width": 390,
+      "height": 844,
+      "theme": "light",
+      "label": "proto-a-390-light",
+      "state": "default",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-390-light.png",
+      "fileBytes": 51746,
+      "fileSha256": "fee4064291f0bef9ca506fc10844956ea2310439dee9959a27ce1042cfc72ac4",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "key": {
+        "title": "B1 原型 A｜原委托四问工作包",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "horizontalOverflow": false,
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "fontStatus": "loaded",
+        "selectedTab": {
+          "id": "proto-a-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 253.94,
+            "y": 562.89,
+            "width": 109.88,
+            "height": 44,
+            "bottom": 606.89,
+            "right": 363.81,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceVisible": false,
+        "lensTextLength": 208,
+        "panelTextLength": 131,
+        "heroSectionTextLength": 330,
+        "headerProviderBadge": null,
+        "evidencePanelBbox": null,
+        "sourcePanelBbox": null
+      }
+    },
+    {
+      "route": "a",
+      "routePath": "/prototype/hero-a",
+      "width": 390,
+      "height": 844,
+      "theme": "dark",
+      "label": "proto-a-390-dark",
+      "state": "default",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-390-dark.png",
+      "fileBytes": 51234,
+      "fileSha256": "7f765d2687855cf71983f8111ba07388091d592b5e03718c9d196a401b27f6dd",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "key": {
+        "title": "B1 原型 A｜原委托四问工作包",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "dark",
+        "horizontalOverflow": false,
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "fontStatus": "loaded",
+        "selectedTab": {
+          "id": "proto-a-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 253.94,
+            "y": 562.89,
+            "width": 109.88,
+            "height": 44,
+            "bottom": 606.89,
+            "right": 363.81,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceVisible": false,
+        "lensTextLength": 208,
+        "panelTextLength": 131,
+        "heroSectionTextLength": 330,
+        "headerProviderBadge": null,
+        "evidencePanelBbox": null,
+        "sourcePanelBbox": null
+      }
+    },
+    {
+      "route": "b",
+      "routePath": "/prototype/hero-b",
+      "width": 1440,
+      "height": 900,
+      "theme": "light",
+      "label": "proto-b-1440-light",
+      "state": "default",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-light.png",
+      "fileBytes": 120162,
+      "fileSha256": "98a492653f87ba77a9f105baf8ede3254e3213e97505e3465cfbd1cca5f63696",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "key": {
+        "title": "B1 原型 B｜来源变化因果镜头",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "horizontalOverflow": false,
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "fontStatus": "loaded",
+        "selectedTab": null,
+        "evidenceVisible": false,
+        "lensTextLength": 271,
+        "panelTextLength": 207,
+        "heroSectionTextLength": 393,
+        "headerProviderBadge": "演示模式",
+        "evidencePanelBbox": null,
+        "sourcePanelBbox": null
+      }
+    },
+    {
+      "route": "b",
+      "routePath": "/prototype/hero-b",
+      "width": 1440,
+      "height": 900,
+      "theme": "dark",
+      "label": "proto-b-1440-dark",
+      "state": "default",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-dark.png",
+      "fileBytes": 115108,
+      "fileSha256": "1377b614357fc6346fd69c6ff4ac75c46465a6239abaf844702239d9f0cf1f16",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "key": {
+        "title": "B1 原型 B｜来源变化因果镜头",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "dark",
+        "horizontalOverflow": false,
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "fontStatus": "loaded",
+        "selectedTab": null,
+        "evidenceVisible": false,
+        "lensTextLength": 271,
+        "panelTextLength": 207,
+        "heroSectionTextLength": 393,
+        "headerProviderBadge": "演示模式",
+        "evidencePanelBbox": null,
+        "sourcePanelBbox": null
+      }
+    },
+    {
+      "route": "b",
+      "routePath": "/prototype/hero-b",
+      "width": 390,
+      "height": 844,
+      "theme": "light",
+      "label": "proto-b-390-light",
+      "state": "default",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-390-light.png",
+      "fileBytes": 57113,
+      "fileSha256": "d37186065a43e21be7883d6ce5331421e8426899716dfba330b2aafe3bf1caf2",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "key": {
+        "title": "B1 原型 B｜来源变化因果镜头",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "horizontalOverflow": false,
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "fontStatus": "loaded",
+        "selectedTab": null,
+        "evidenceVisible": false,
+        "lensTextLength": 271,
+        "panelTextLength": 207,
+        "heroSectionTextLength": 393,
+        "headerProviderBadge": null,
+        "evidencePanelBbox": null,
+        "sourcePanelBbox": null
+      }
+    },
+    {
+      "route": "b",
+      "routePath": "/prototype/hero-b",
+      "width": 390,
+      "height": 844,
+      "theme": "dark",
+      "label": "proto-b-390-dark",
+      "state": "default",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-390-dark.png",
+      "fileBytes": 56333,
+      "fileSha256": "aa7f80365aff59f57f27f97890dfae07c52207fed5cfd6d2b0c1a2231db814b3",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "key": {
+        "title": "B1 原型 B｜来源变化因果镜头",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "dark",
+        "horizontalOverflow": false,
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "fontStatus": "loaded",
+        "selectedTab": null,
+        "evidenceVisible": false,
+        "lensTextLength": 271,
+        "panelTextLength": 207,
+        "heroSectionTextLength": 393,
+        "headerProviderBadge": null,
+        "evidencePanelBbox": null,
+        "sourcePanelBbox": null
+      }
+    }
+  ],
+  "interactionCaptures": [
+    {
+      "route": "a",
+      "state": "during",
+      "label": "proto-a-1440-light-during",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light-during.png",
+      "fileBytes": 110235,
+      "fileSha256": "474c8b964bd864562bff4dff81ac0d70c5951157e8a7cd6c2356ddcb55a3754f",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "key": {
+        "title": "B1 原型 A｜原委托四问工作包",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "horizontalOverflow": false,
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "fontStatus": "loaded",
+        "selectedTab": {
+          "id": "proto-a-tab-during",
+          "label": "02 期间",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 906.2,
+            "y": 243.47,
+            "width": 194.2,
+            "height": 44,
+            "bottom": 287.47,
+            "right": 1100.41,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceVisible": false,
+        "lensTextLength": 206,
+        "panelTextLength": 129,
+        "heroSectionTextLength": 328,
+        "headerProviderBadge": "演示模式",
+        "evidencePanelBbox": null,
+        "sourcePanelBbox": null
+      }
+    },
+    {
+      "route": "a",
+      "state": "evidence-open",
+      "label": "proto-a-1440-light-evidence",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light-evidence.png",
+      "fileBytes": 117762,
+      "fileSha256": "2969a0025d58bf3a6d65086ae92fc499f75789a5b15f3017e479da2a1a2b6996",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "key": {
+        "title": "B1 原型 A｜原委托四问工作包",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "horizontalOverflow": false,
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "fontStatus": "loaded",
+        "selectedTab": {
+          "id": "proto-a-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1104.41,
+            "y": 243.47,
+            "width": 194.2,
+            "height": 44,
+            "bottom": 287.47,
+            "right": 1298.61,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceVisible": true,
+        "lensTextLength": 391,
+        "panelTextLength": 314,
+        "heroSectionTextLength": 513,
+        "headerProviderBadge": "演示模式",
+        "evidencePanelBbox": {
+          "x": 720.02,
+          "y": 669.89,
+          "width": 566.59,
+          "height": 265.44,
+          "bottom": 935.33,
+          "right": 1286.61,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": true,
+          "display": "block",
+          "visibility": "visible"
+        },
+        "sourcePanelBbox": null
+      }
+    },
+    {
+      "route": "a",
+      "state": "evidence-open-scrolled",
+      "label": "proto-a-1440-light-evidence-full",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light-evidence-full.png",
+      "fileBytes": 119408,
+      "fileSha256": "920bd7ec3f03cd74de81bea62267d720a33132af7792267f5852dbf7840f4d60",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "key": {
+        "title": "B1 原型 A｜原委托四问工作包",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "horizontalOverflow": false,
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "fontStatus": "loaded",
+        "selectedTab": {
+          "id": "proto-a-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1104.41,
+            "y": 183.47,
+            "width": 194.2,
+            "height": 44,
+            "bottom": 227.47,
+            "right": 1298.61,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceVisible": true,
+        "lensTextLength": 391,
+        "panelTextLength": 314,
+        "heroSectionTextLength": 513,
+        "headerProviderBadge": "演示模式",
+        "evidencePanelBbox": {
+          "x": 720.02,
+          "y": 609.89,
+          "width": 566.59,
+          "height": 265.44,
+          "bottom": 875.33,
+          "right": 1286.61,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "block",
+          "visibility": "visible"
+        },
+        "sourcePanelBbox": null
+      }
+    },
+    {
+      "route": "b",
+      "state": "source-competition-materials",
+      "label": "proto-b-1440-light-evidence-materials",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-light-evidence-materials.png",
+      "fileBytes": 121150,
+      "fileSha256": "d897a8c2c534654b1cb583bd6c09dc448e362bc5f70e2f09fd6749b8b1ba315f",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "key": {
+        "title": "B1 原型 B｜来源变化因果镜头",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "horizontalOverflow": false,
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "fontStatus": "loaded",
+        "selectedTab": null,
+        "evidenceVisible": true,
+        "lensTextLength": 337,
+        "panelTextLength": 273,
+        "heroSectionTextLength": 459,
+        "headerProviderBadge": "演示模式",
+        "evidencePanelBbox": null,
+        "sourcePanelBbox": {
+          "x": 753.61,
+          "y": 361.44,
+          "width": 533,
+          "height": 104.72,
+          "bottom": 466.16,
+          "right": 1286.61,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "block",
+          "visibility": "visible"
+        }
+      }
+    },
+    {
+      "route": "b",
+      "state": "source-task-arrangement",
+      "label": "proto-b-1440-light-evidence-task",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-light-evidence-task.png",
+      "fileBytes": 121601,
+      "fileSha256": "9170602ed4db5c5a336841af47b053293d47435fffb026f1c964d73447d0a3b4",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "key": {
+        "title": "B1 原型 B｜来源变化因果镜头",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "horizontalOverflow": false,
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "fontStatus": "loaded",
+        "selectedTab": null,
+        "evidenceVisible": true,
+        "lensTextLength": 345,
+        "panelTextLength": 281,
+        "heroSectionTextLength": 467,
+        "headerProviderBadge": "演示模式",
+        "evidencePanelBbox": null,
+        "sourcePanelBbox": {
+          "x": 753.61,
+          "y": 361.44,
+          "width": 533,
+          "height": 104.72,
+          "bottom": 466.16,
+          "right": 1286.61,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "block",
+          "visibility": "visible"
+        }
+      }
+    }
+  ],
+  "fairness": [
+    {
+      "combo": "1440-light",
+      "a": {
+        "lensTextLength": 208,
+        "panelTextLength": 131,
+        "heroSectionTextLength": 330,
+        "h1Text": "人可以下线， 项目别掉线。"
+      },
+      "b": {
+        "lensTextLength": 271,
+        "panelTextLength": 207,
+        "heroSectionTextLength": 393,
+        "h1Text": "人可以下线， 项目别掉线。"
+      },
+      "delta": {
+        "lensTextLength": 63,
+        "panelTextLength": 76,
+        "heroSectionTextLength": 63
+      }
+    },
+    {
+      "combo": "390-light",
+      "a": {
+        "lensTextLength": 208,
+        "panelTextLength": 131,
+        "heroSectionTextLength": 330,
+        "h1Text": "人可以下线， 项目别掉线。"
+      },
+      "b": {
+        "lensTextLength": 271,
+        "panelTextLength": 207,
+        "heroSectionTextLength": 393,
+        "h1Text": "人可以下线， 项目别掉线。"
+      },
+      "delta": {
+        "lensTextLength": 63,
+        "panelTextLength": 76,
+        "heroSectionTextLength": 63
+      }
+    }
+  ],
+  "fairnessNote": "panelTextLength：A 取 #proto-a-panel（四问+操作+依据）；B 取主链 ol（四步因果链）。两者语义不同，不直接等同；更可比的指标是 heroSectionTextLength（整个 hero 区可见文字总量）与 lensTextLength（右侧工作包卡片文字总量）。",
+  "errors": [],
+  "interactionNotes": {
+    "aDefaultToDuring": {
+      "ariaSelectedChanged": true,
+      "selectedTab": "02 期间",
+      "panelTextChanged": true,
+      "panelTextLength": {
+        "from": 131,
+        "to": 129
+      },
+      "activeElementAfterClick": "button: 02 期间（焦点留在被点 Tab）",
+      "scrollHeight": 930
+    },
+    "aEvidenceOpen": {
+      "evidenceButtonAriaExpanded": "true",
+      "evidencePanelVisible": true,
+      "panelTextLength": {
+        "from": 131,
+        "to": 314
+      },
+      "panelTextFirst80UnchangedByDesign": true,
+      "evidencePanelBBox": {
+        "y": 669.89,
+        "bottom": 935.33,
+        "height": 265.44,
+        "clippedByViewport": true
+      },
+      "leftColumnShiftY": 139.92,
+      "activeElementAfterClick": "button: 收起依据（焦点留在触发按钮）",
+      "auxiliaryFullView": "proto-a-1440-light-evidence-full.png（scrollY=60，依据面板完整可见）"
+    },
+    "bDefaultToMaterials": {
+      "sourcePanelVisible": true,
+      "sourcePanelId": "proto-b-source-requirements",
+      "sourcePanelTextLength": 63,
+      "panelTextLength": {
+        "from": 207,
+        "to": 273
+      },
+      "chipAriaExpanded": "比赛材料=true",
+      "leftColumnShiftY": 57.16,
+      "activeElementAfterClick": "button: 比赛材料（焦点留在触发 chip）",
+      "cardBottom": 900.3
+    },
+    "bMaterialsToTask": {
+      "sourcePanelVisible": true,
+      "sourcePanelId": "proto-b-source-task",
+      "sourcePanelTextLength": 71,
+      "panelTextLength": {
+        "from": 273,
+        "to": 281
+      },
+      "chipAriaExpanded": "任务安排=true",
+      "activeElementAfterClick": "button: 任务安排（焦点留在触发 chip）"
+    },
+    "mobileFirstScreen": {
+      "390x844": "A/B 的右栏工作包卡片自 y=439 开始，A 卡 bottom=1107、B 卡 bottom=1215，均越过 844 视口；首屏只见标题/说明/CTA/卡片顶部（A 见 Tab 与四问开头，B 见 01 来源与 chips 顶部）。"
+    },
+    "devOnlyArtifacts": {
+      "devIndicator": "左下角 Next dev 工具按钮“N”在全部截图中可见（dev-only），390 宽时会覆盖面板左下文字；before/after 同环境保持一致。",
+      "compilingToast": "首次交互截图曾出现 “Compiling…” dev 提示，已通过等待 nextjs-portal 阴影 DOM 不再含 Compiling/Building 后重拍；最终 13 张均无该提示。"
+    }
+  },
+  "sourceState": {
+    "baselineSha": "485d485378637e1da3280ed092739d441c8cf749",
+    "prototypeCommit": "4be7a4b9465e9ed922d7028b969df1dcf164ec1b",
+    "prototypeCommitSubject": "官网：B1 两款 Hero 原型与信息结构裁决",
+    "prototypeCommitTimeLocal": "2026-11-03T11:50:05+08:00",
+    "note": "B1 原型源码在该提交中；原型文件 mtime 11:40:35–11:41:59，Phase 1 两轮采集（约 11:48:30 与 11:50:49–11:51:07）期间原型文件未再改动，两轮截图对同一源码内容。",
+    "concurrentB2EditsAfterCapture": [
+      "components/SiteHeader.tsx mtime 11:51:38",
+      "components/HomeJourney.tsx mtime 11:52:30"
+    ],
+    "concurrentEditImpact": "B2 首页改动发生在原型采集之后；原型页 pathname 非 / 时 SiteHeader 透传 layout header，两原型页不受首页营销页头改动影响。",
+    "evidenceCommitNote": "Lead 于 4be7a4b 提交了 Phase 1 第一轮快照；第二轮（含去除 dev “Compiling…” 覆盖物、新增 evidence-full 辅助视图、补解释字段）发生在提交之后，当前工作树证据需重新暂存。"
+  }
+}

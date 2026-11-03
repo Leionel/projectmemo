@@ -1,0 +1,851 @@
+/* 五步公开示例：只负责示例自身的版式与状态，页面骨架仍由 app/home.module.css 承担。 */
+
+.storyFrame {
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  border-radius: 1.25rem;
+  background: var(--paper-strong);
+  box-shadow: 0 30px 70px -58px rgb(28 46 44 / 45%);
+}
+:global(.dark) .storyFrame {
+  box-shadow: 0 30px 70px -58px rgb(0 0 0 / 70%);
+}
+
+.storyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.15rem 1.5rem;
+}
+.projectIdentity {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+.projectIcon {
+  display: grid;
+  flex-shrink: 0;
+  width: 2.6rem;
+  height: 2.6rem;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--teal) 18%, var(--rule));
+  border-radius: 0.7rem;
+  background: var(--teal-pale);
+  color: var(--teal);
+}
+.projectIdentity > div {
+  min-width: 0;
+}
+.projectKicker {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.projectIdentity h3 {
+  margin-top: 0.1rem;
+  font-size: 1rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+.projectMission {
+  margin-top: 0.1rem;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.resetButton {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  padding-inline: 0.4rem;
+  border-radius: 0.35rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: color 140ms ease;
+}
+.resetButton:hover {
+  color: var(--teal);
+}
+
+.storyTabs {
+  display: flex;
+  padding-inline: 1.25rem;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--ink) 2%, var(--paper-strong));
+}
+.storyTabs > button {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 0;
+  min-height: 56px;
+  padding: 0.75rem 0.4rem;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    background-color 140ms ease;
+}
+.storyTabs > button > span {
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+.storyTabs > button:hover {
+  background: color-mix(in srgb, var(--ink) 2%, transparent);
+  color: var(--ink);
+}
+.storyTabs > button[aria-selected="true"] {
+  border-bottom-color: var(--teal);
+  background: var(--paper-strong);
+  color: var(--teal);
+  font-weight: 650;
+}
+.storyTabs > button:active {
+  background: var(--teal-pale);
+}
+
+.storyBody {
+  display: grid;
+  grid-template-columns: 0.72fr 1.28fr;
+  gap: 2.5rem;
+  min-height: 30rem;
+  padding: 2rem;
+  background: var(--paper);
+}
+.storyContext {
+  padding-top: 0.35rem;
+}
+.contextLabel {
+  margin-bottom: 0.9rem;
+  color: var(--teal);
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  line-height: 1.6;
+}
+.storyContext h4 {
+  max-width: 17rem;
+  font-family: var(--editorial-font);
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.6;
+  text-wrap: balance;
+}
+.storyContext > p:not(.contextLabel) {
+  max-width: 18rem;
+  margin-top: 0.9rem;
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+  line-height: 1.85;
+  text-wrap: pretty;
+}
+.contextPosition {
+  margin-top: 2.25rem;
+  color: var(--teal);
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+.contextPosition > span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.storyContent {
+  min-width: 0;
+  align-self: start;
+  border: 1px solid var(--rule);
+  border-radius: 0.8rem;
+  background: var(--paper-strong);
+}
+
+.paneHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--rule);
+}
+.paneHeading h4 {
+  font-size: 0.95rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+.paneHeading > span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.record {
+  padding: 1.1rem 1.25rem 0.65rem;
+  border-bottom: 1px solid var(--rule);
+}
+.record:last-child {
+  border-bottom: 0;
+}
+.record > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ink-soft);
+}
+.record h5 {
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.record > p {
+  margin-top: 0.5rem;
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+  line-height: 1.8;
+}
+.sourceButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0.3rem 0.1rem;
+  border-radius: 0.3rem;
+  color: var(--teal);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  text-align: left;
+  cursor: pointer;
+}
+.sourceButton > span {
+  margin-left: 0.3rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.sourceButton:hover > span {
+  color: var(--teal);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.factRow {
+  padding: 1.15rem 1.25rem 0.55rem;
+  border-bottom: 1px solid var(--rule);
+}
+.factMark {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.factRow > p {
+  margin-top: 0.4rem;
+  font-size: 0.9375rem;
+  line-height: 1.8;
+}
+.unknownRow {
+  padding: 1.1rem 1.25rem 1.2rem;
+  border-left: 3px solid var(--amber);
+  background: color-mix(in srgb, var(--amber) 6%, var(--paper-strong));
+}
+.unknownRow > p {
+  margin-top: 0.5rem;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.waitingBadge,
+.exampleBadge,
+.confirmedBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.waitingBadge {
+  border: 1px solid color-mix(in srgb, var(--amber) 28%, var(--rule));
+  background: color-mix(in srgb, var(--amber) 8%, var(--paper-strong));
+  color: var(--amber);
+}
+.exampleBadge {
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink-soft);
+}
+.confirmedBadge {
+  background: var(--teal-pale);
+  color: var(--teal);
+}
+
+.receiptEvidence {
+  padding: 1rem 1.25rem 0.5rem;
+  border-top: 1px solid var(--rule);
+}
+.receiptEvidence > p {
+  margin-top: 0.45rem;
+  font-size: 0.9rem;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.judgmentPane > div:nth-child(2) {
+  padding: 1rem 1.25rem;
+}
+.suggestion {
+  margin: 0 1.25rem 1.25rem;
+  padding: 1.05rem 1.1rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--ink) 2%, var(--paper-strong));
+}
+.suggestion h5 {
+  margin-top: 0.35rem;
+  font-size: 1rem;
+  font-weight: 620;
+  line-height: 1.7;
+}
+.suggestion > p {
+  margin-top: 0.4rem;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.85;
+}
+.evidenceDetails {
+  margin-top: 0.7rem;
+  border-top: 1px solid var(--rule);
+}
+.evidenceDetails summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--teal);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.evidenceDetails summary::before {
+  content: "+";
+  margin-right: 0.5rem;
+  font-size: 0.95rem;
+}
+.evidenceDetails[open] summary::before {
+  content: "−";
+}
+.evidenceDetails > div {
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--rule);
+}
+.evidenceDetails > div > p {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  line-height: 1.85;
+}
+.detailNote {
+  margin-top: 0.5rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.8;
+}
+
+.actionProposal > h5 {
+  padding: 1.25rem 1.25rem 0;
+  font-size: 1.1rem;
+  font-weight: 620;
+  line-height: 1.65;
+}
+.proposalFields {
+  margin: 1rem 1.25rem;
+  border-top: 1px solid var(--rule);
+}
+.proposalFields > div {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+.proposalFields dt {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.proposalFields dd {
+  margin: 0;
+}
+.proposalFields dd > button {
+  margin-right: 0.7rem;
+}
+.actionProposal > .primary {
+  margin: 0 1.25rem 1.25rem;
+}
+
+.primary,
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 46px;
+  padding: 0.7rem 1.05rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    transform 110ms ease;
+}
+.primary {
+  border: 1px solid var(--teal);
+  background: var(--teal);
+  color: var(--paper-strong);
+}
+.primary:hover {
+  filter: brightness(0.94);
+}
+.primary:active,
+.secondary:active {
+  transform: scale(0.99);
+}
+.primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.secondary {
+  border: 1px solid var(--rule);
+  background: var(--paper-strong);
+  color: var(--ink);
+}
+.secondary:hover {
+  border-color: var(--rule-strong);
+}
+
+.confirmationResult {
+  padding: 0.25rem 1.25rem 1.25rem;
+}
+.confirmationResult > p {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+  color: var(--teal);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+.confirmationResult svg {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.receiptGate,
+.savedReceipt,
+.receiptPane form {
+  padding: 1.25rem;
+}
+.receiptGate > p {
+  margin-bottom: 1rem;
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+  line-height: 1.85;
+}
+.receiptPane label {
+  display: block;
+  margin-bottom: 0.55rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.receiptPane form > p {
+  margin-bottom: 0.8rem;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.8;
+}
+.receiptPane textarea {
+  display: block;
+  width: 100%;
+  min-height: 9rem;
+  margin-bottom: 1rem;
+  padding: 0.9rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 0.6rem;
+  background: var(--paper-strong);
+  color: var(--ink);
+  font-size: 0.9375rem;
+  line-height: 1.85;
+  resize: vertical;
+}
+.receiptPane textarea::placeholder {
+  color: var(--muted);
+  opacity: 0.85;
+}
+.receiptSavedTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--teal);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.savedReceipt blockquote {
+  margin: 1rem 0;
+  padding: 0.85rem 1rem;
+  border-left: 2px solid var(--teal);
+  background: var(--paper);
+  font-size: 0.9375rem;
+  line-height: 1.85;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.savedReceipt > p:not(.receiptSavedTitle) {
+  margin-bottom: 1rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.8;
+}
+
+.storyNotice {
+  border-top: 1px solid var(--rule);
+  background: var(--teal-pale);
+  padding: 0.8rem 1.5rem;
+  color: var(--teal);
+  font-size: 0.84rem;
+  line-height: 1.7;
+}
+
+.storyFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.8rem 1.5rem;
+  border-top: 1px solid var(--rule);
+  background: var(--paper-strong);
+}
+.storyFooter > p {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.7;
+}
+.storyFooter > div {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.5rem;
+}
+.storyFooter button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+.storyFooter button:hover {
+  border-color: var(--rule-strong);
+  background: var(--paper);
+}
+.storyFooter button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.sourceDialog {
+  width: min(38rem, calc(100% - 32px));
+  max-height: calc(100dvh - 48px);
+  margin: auto;
+  padding: 1.5rem 1.75rem 1.75rem;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--rule);
+  border-radius: 1rem;
+  background: var(--paper-strong);
+  color: var(--ink);
+  box-shadow: 0 32px 90px rgb(0 0 0 / 22%);
+}
+.sourceDialog::backdrop {
+  background: rgb(13 29 24 / 42%);
+}
+.dialogHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.dialogHeader > p {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.dialogHeader > button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 0.45rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.dialogHeader > button:hover {
+  background: var(--paper);
+}
+.sourceDialog h3 {
+  margin-top: 0.5rem;
+  font-size: 1.3rem;
+  font-weight: 620;
+  line-height: 1.5;
+}
+.sourceDialog blockquote {
+  margin: 1.15rem 0;
+  padding: 1.1rem 1.2rem;
+  border-left: 2px solid var(--teal);
+  background: var(--paper);
+  font-size: 0.9375rem;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.dialogProvenance {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.75;
+}
+
+@media (max-width: 1000px) {
+  .storyBody {
+    grid-template-columns: 0.7fr 1.3fr;
+    gap: 1.75rem;
+    padding: 1.5rem;
+  }
+  .storyContext h4 {
+    font-size: 1.35rem;
+  }
+}
+@media (max-width: 720px) {
+  .storyFrame {
+    border-radius: 1rem;
+  }
+  .storyHeader {
+    padding: 0.85rem 0.95rem;
+  }
+  .projectIdentity {
+    gap: 0.6rem;
+  }
+  .projectIcon {
+    width: 2.15rem;
+    height: 2.15rem;
+    border-radius: 0.55rem;
+  }
+  .projectKicker {
+    font-size: 0.8rem;
+  }
+  .projectIdentity h3 {
+    font-size: 0.9rem;
+  }
+  .projectMission {
+    font-size: 0.8rem;
+  }
+  .resetButton {
+    font-size: 0.8rem;
+  }
+  .storyTabs {
+    padding-inline: 0.3rem;
+  }
+  .storyTabs > button {
+    flex-direction: column;
+    gap: 0.15rem;
+    min-height: 56px;
+    padding: 0.55rem 0.1rem;
+    font-size: 0.8rem;
+  }
+  .storyTabs > button > span {
+    font-size: 0.8rem;
+  }
+  .storyBody {
+    display: block;
+    min-height: 0;
+    padding: 1rem 0.85rem;
+  }
+  .storyContext {
+    padding: 0 0.15rem 1rem;
+  }
+  .contextLabel {
+    margin-bottom: 0.45rem;
+    font-size: 0.8rem;
+  }
+  .storyContext h4 {
+    max-width: none;
+    font-size: 1.25rem;
+    line-height: 1.55;
+  }
+  .storyContext > p:not(.contextLabel) {
+    max-width: none;
+    margin-top: 0.45rem;
+    font-size: 0.875rem;
+    line-height: 1.8;
+  }
+  .contextPosition {
+    display: none;
+  }
+  .paneHeading {
+    padding: 0.85rem 1rem;
+  }
+  .paneHeading h4 {
+    font-size: 0.88rem;
+  }
+  .paneHeading > span {
+    font-size: 0.8rem;
+  }
+  .record {
+    padding: 1rem 1rem 0.55rem;
+  }
+  .record h5 {
+    font-size: 0.88rem;
+  }
+  .record > p {
+    font-size: 0.9rem;
+  }
+  .factRow {
+    padding-inline: 1rem;
+  }
+  .factRow > p {
+    font-size: 0.9rem;
+  }
+  .unknownRow,
+  .receiptEvidence {
+    padding-inline: 1rem;
+  }
+  .suggestion {
+    margin-inline: 1rem;
+    padding: 0.9rem;
+  }
+  .suggestion h5 {
+    font-size: 0.95rem;
+  }
+  .judgmentPane > div:nth-child(2) {
+    padding-inline: 1rem;
+  }
+  .actionProposal > h5 {
+    padding-inline: 1rem;
+    font-size: 1rem;
+  }
+  .proposalFields {
+    margin-inline: 1rem;
+  }
+  .proposalFields > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.2rem;
+    font-size: 0.88rem;
+  }
+  .proposalFields dt {
+    font-size: 0.8rem;
+  }
+  .actionProposal > .primary {
+    margin-inline: 1rem;
+  }
+  .receiptGate,
+  .savedReceipt,
+  .receiptPane form {
+    padding: 1rem;
+  }
+  .storyFooter {
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.7rem 0.95rem;
+  }
+  .storyFooter > p {
+    font-size: 0.8rem;
+  }
+  .storyFooter > div {
+    gap: 0.3rem;
+  }
+  .storyFooter button {
+    width: 44px;
+    height: 44px;
+  }
+  .storyNotice {
+    padding-inline: 1rem;
+    font-size: 0.8rem;
+  }
+  .sourceDialog {
+    padding: 1rem 1.1rem 1.25rem;
+    border-radius: 0.8rem;
+  }
+  .sourceDialog h3 {
+    font-size: 1.15rem;
+  }
+  .sourceDialog blockquote {
+    padding: 0.95rem 1rem;
+    font-size: 0.9rem;
+  }
+  .primary,
+  .secondary {
+    min-height: 46px;
+    font-size: 0.86rem;
+  }
+}
+@media (max-width: 380px) {
+  .projectIcon {
+    display: none;
+  }
+  .storyHeader {
+    gap: 0.5rem;
+  }
+  .storyTabs > button {
+    font-size: 0.8rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .storyFrame *,
+  .storyFrame *::before,
+  .storyFrame *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+@media (prefers-contrast: more) {
+  .storyFrame,
+  .storyContent,
+  .sourceDialog,
+  .suggestion {
+    border-color: var(--ink-soft);
+    box-shadow: none;
+  }
+}
+
+/* 首页五步示例里复用的共享状态差异组件：只在首页作用域内把 11–12px 元数据提升到 12.8px，不修改共享组件本身。 */
+.judgmentPane [class~="text-xs"] {
+  font-size: 0.8rem;
+  line-height: 1.65;
+}
+.judgmentPane [class~="text-[11px]"] {
+  font-size: 0.8rem;
+  line-height: 1.6;
+}

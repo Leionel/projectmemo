@@ -1,0 +1,2127 @@
+{
+  "generatedAt": "2026-11-03T04:29:14.069Z",
+  "base": "http://127.0.0.1:34111",
+  "candidateSha": "cc7c19fed573c79a55f727eaa338ab84fd80cc3b",
+  "mode": "anonymous playwright chromium 1440x900 read-only",
+  "notes": {
+    "externalAfterClick": "用户显式点击 Bilibili 外链后，由外部站点自行发起的请求不计入本站加载/交互阶段；其中包含外部站点的非 GET 请求（其自身行为，非本站发起）。",
+    "popupCanonicalization": "Bilibili 将 /video/BV1Qaxb6PE7G?vd_source=... 规范化为 /video/BV1Qaxb6PE7G/?vd_source=...（仅补斜杠，参数保留）。",
+    "logoImage": "首页仍加载页头品牌 logo.png（既有 BrandLink <Image priority unoptimized>）；无旧 workspace-*.jpg 请求。"
+  },
+  "summary": {
+    "totalRequests": 116,
+    "apiRequests": 0,
+    "apiWrites": 0,
+    "externalRequests": 61,
+    "externalBeforeVideoClick": 0,
+    "externalNonGetAfterVideoClick": 2,
+    "modelHintRequests": 0,
+    "imageRequests": 7,
+    "localImageRequests": 4,
+    "externalImagesAfterClick": 3,
+    "oldHeroImageRequests": 0,
+    "failedRequests": 0,
+    "pageErrors": 0,
+    "consoleErrorsWarnings": 3
+  },
+  "assertions": {
+    "noApiTraffic": true,
+    "noApiWrites": true,
+    "noExternalBeforeVideoClick": true,
+    "noModelCallsBeforeVideoClick": true,
+    "noOldHeroImages": true
+  },
+  "videoLinks": {
+    "mainCount": 1,
+    "footerCount": 1,
+    "main": {
+      "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "title": null,
+      "ariaLabel": null,
+      "text": "2026 C4-AI 决赛演示视频 忆程 ProjectMemo · Bilibili · 新窗口打开"
+    },
+    "footer": {
+      "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "title": null,
+      "ariaLabel": "决赛演示（Bilibili，在新窗口打开）",
+      "text": "决赛演示"
+    },
+    "iframes": 0,
+    "videos": 0,
+    "autoplay": 0
+  },
+  "steps": [
+    {
+      "name": "load-home",
+      "ok": true,
+      "value": {
+        "status": 200,
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "url": "http://127.0.0.1:34111/"
+      }
+    },
+    {
+      "name": "hero-default-stage",
+      "ok": true,
+      "value": {
+        "tabCount": 3,
+        "selected": "03 回来后",
+        "rows": "原委托\n用已有材料整理一份阶段汇报\n原任务与草稿都留在原处\n依据\n比赛材料、任务安排、老师建议\n3 条来源可回看原文\n变化\n演示流程缺少完成回执\n原判断“先写汇报草稿”需要你重新确认\n等你\n补充演示结果，或确认先按现有材料写汇报草稿\n确认后从原委托继续，不会另建任务",
+        "panel": "原委托\n用已有材料整理一份阶段汇报\n原任务与草稿都留在原处\n依据\n比赛材料、任务安排、老师建议\n3 条来源可回看原文\n变化\n演示流程缺少完成回执\n原判断“先写汇报草稿”需要你重新确认\n等你\n补充演示结果，或确认先按现有材料写汇报草稿\n确认后从原委托继续，不会另建任务\n查看依据\n回到原委托"
+      }
+    },
+    {
+      "name": "hero-stage-switch",
+      "ok": true,
+      "value": {
+        "panels": [
+          {
+            "index": 0,
+            "selected": "01 离开时",
+            "panel": "原委托\n用已有材料整理一份阶段汇报\n目标与结束条件已经确认\n依据\n比赛材料、任务安排、老师建议\n3 条来源已保存\n变化\n还没有开始核对\n离开期间不改变项目内容\n等你\n暂时不需要你操作\n关掉页面不会丢掉这条委托\n查看依据\n回到原委托"
+          },
+          {
+            "index": 1,
+            "selected": "02 期间",
+            "panel": "原委托\n用已有材料整理一份阶段汇报\n任务身份与范围不变\n依据\n已读 3 条来源\n冻结示例，不连接服务器\n变化\n发现缺口：演示流程还没有完成回执\n缺口不会被自动当成已完成\n等你\n回来后处理，期间不改变项目\n示例不模拟正在执行的 Worker\n查看依据\n回到原委托"
+          },
+          {
+            "index": 2,
+            "selected": "03 回来后",
+            "panel": "原委托\n用已有材料整理一份阶段汇报\n原任务与草稿都留在原处\n依据\n比赛材料、任务安排、老师建议\n3 条来源可回看原文\n变化\n演示流程缺少完成回执\n原判断“先写汇报草稿”需要你重新确认\n等你\n补充演示结果，或确认先按现有材料写汇报草稿\n确认后从原委托继续，不会另建任务\n查看依据\n回到原委托"
+          }
+        ],
+        "finalSelected": "03 回来后",
+        "finalMatchesBack": true
+      }
+    },
+    {
+      "name": "hero-evidence-expand",
+      "ok": true,
+      "value": {
+        "textBefore": "查看依据",
+        "textExpanded": "收起依据",
+        "expanded": "true",
+        "collapsed": "false",
+        "quoteCount": 3,
+        "text": "原文来自内置公开素材，不读取你的项目。\n\n比赛材料\n示例素材 · 比赛要求摘录\n\n初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。\n\n任务安排\n示例素材 · 项目任务记录\n\n目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。\n\n老师建议\n示例素材 · 指导意见摘录\n\n老师建议作品不要叫普通学习助手，要突出项目制学习和知识资产复用。"
+      }
+    },
+    {
+      "name": "hero-primary-cta-anchor",
+      "ok": true,
+      "value": {
+        "hash": "#experience",
+        "scrollY": 1274,
+        "sectionTop": 79.6,
+        "headerBottom": 57,
+        "headingTop": 202.6,
+        "headingOccluded": false,
+        "headerPosition": "sticky"
+      }
+    },
+    {
+      "name": "demo-receipt-gate-before-confirm",
+      "ok": true,
+      "value": {
+        "panel": "本页模拟操作\n\n完成了什么，由实际结果来说明\n\n确认示例行动后，试着填写一段模拟回执。保存后回到依据页，可以看到这段结果和原记录放在一起。\n\n5 / 5\n完成回执\n模拟数据\n\n先确认行动，再填写模拟回执。单纯切换到这一步，不会把行动标为完成。\n\n返回确认行动",
+        "gateVisible": true
+      }
+    },
+    {
+      "name": "demo-confirm-action",
+      "ok": true,
+      "value": {
+        "panel": "等待你的确认\n\n先核对提案，再决定是否创建\n\n建议还不是待办。查看行动要做什么、怎样记录结果，再由你确认。这里的操作只影响本页示例。\n\n4 / 5\n行动提案\n本页示例已确认\n验证一次资料录入到成果草稿的流程\n要做什么\n录入一条项目记录，查看生成的记忆，再整理一份成果草稿。\n完成后记录\n实际操作结果、失败位置，以及是否需要补充材料。\n来源\n任务安排\n查看原文\n比赛材料\n查看原文\n\n示例行动已确认，尚未填写完成结果。\n\n去填写模拟回执"
+      }
+    },
+    {
+      "name": "demo-save-simulated-receipt",
+      "ok": true,
+      "value": {
+        "panel": "本页模拟操作\n\n完成了什么，由实际结果来说明\n\n确认示例行动后，试着填写一段模拟回执。保存后回到依据页，可以看到这段结果和原记录放在一起。\n\n5 / 5\n完成回执\n模拟数据\n\n模拟回执已加入本页示例\n\n审计示例：假设已录入一条记录并生成草稿，来源还需要逐项核对。\n\n结果由你在本页填写，未经过实际操作核验。\n\n回到依据页查看"
+      }
+    },
+    {
+      "name": "demo-back-to-evidence-and-reset",
+      "ok": true,
+      "value": {
+        "receiptReflected": true,
+        "evidencePanel": "已知与待确认\n\n记录说了什么，哪些还不知道\n\n历史记录和当前状态分别看。没有找到新的完成结果，不能据此断言功能现在仍未完成。\n\n2 / 5\n已有依据\n示例整理\n记录中提到\n\n初赛需要作品说明文档和演示材料。\n\n比赛材料\n查看原文\n已有任务安排\n\n先完成项目创建、资料录入和成果生成流程。\n\n任务安排\n查看原文\n当前状态待确认\n\n下方是你填写的模拟结果，真实完成情况仍需实际回执。\n\n新增模拟回执\n\n审计示例：假设已录入一条记录并生成草稿，来源还需要逐项核对。\n\n模拟回执\n查看原文",
+        "resetOk": true,
+        "status": "示例已重置，未修改任何个人项目。"
+      }
+    },
+    {
+      "name": "demo-source-dialog",
+      "ok": true,
+      "value": {
+        "dialogOpen": 1,
+        "dialogText": "示例原始记录\n\n比赛材料\n初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。\n\n原文取自项目自带的演示素材，不是在线用户的个人记录。",
+        "dialogClosed": 0,
+        "focusAfter": {
+          "tag": "BUTTON",
+          "label": "查看原文：比赛材料",
+          "text": "比赛材料查看原文"
+        }
+      }
+    },
+    {
+      "name": "scroll-motion-sweep",
+      "ok": true,
+      "value": {
+        "scrollY": 3317,
+        "docHeight": 4217,
+        "railProgress": "1.000",
+        "activeRailSteps": 4,
+        "progressTransform": "matrix(1, 0, 0, 1, 0, 0)",
+        "dataMotion": "on"
+      }
+    },
+    {
+      "name": "video-link-attributes",
+      "ok": true,
+      "value": {
+        "mainCount": 1,
+        "footerCount": 1,
+        "main": {
+          "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+          "target": "_blank",
+          "rel": "noopener noreferrer",
+          "title": null,
+          "ariaLabel": null,
+          "text": "2026 C4-AI 决赛演示视频 忆程 ProjectMemo · Bilibili · 新窗口打开"
+        },
+        "footer": {
+          "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+          "target": "_blank",
+          "rel": "noopener noreferrer",
+          "title": null,
+          "ariaLabel": "决赛演示（Bilibili，在新窗口打开）",
+          "text": "决赛演示"
+        },
+        "iframes": 0,
+        "videos": 0,
+        "autoplay": 0
+      }
+    },
+    {
+      "name": "video-main-click",
+      "ok": true,
+      "value": {
+        "popup": {
+          "url": "https://www.bilibili.com/video/BV1Qaxb6PE7G/?vd_source=eaf1b5590706fdf5d967f5f1d697db8b"
+        },
+        "mainPageUrl": "http://127.0.0.1:34111/#experience",
+        "mainPageUnchanged": true
+      }
+    },
+    {
+      "name": "video-footer-click",
+      "ok": true,
+      "value": {
+        "popup": {
+          "url": "https://www.bilibili.com/video/BV1Qaxb6PE7G/?vd_source=eaf1b5590706fdf5d967f5f1d697db8b"
+        },
+        "mainPageUrl": "http://127.0.0.1:34111/#experience",
+        "mainPageUnchanged": true
+      }
+    },
+    {
+      "name": "screenshots",
+      "ok": true,
+      "value": "saved"
+    }
+  ],
+  "api": [],
+  "apiWrites": [],
+  "externalRequests": [
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+      "resourceType": "document",
+      "origin": "https://www.bilibili.com",
+      "path": "/video/BV1Qaxb6PE7G",
+      "local": false,
+      "at": "2026-11-03T04:28:59.597Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/font/regular.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/font/regular.css",
+      "local": false,
+      "at": "2026-11-03T04:29:02.177Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/font/medium.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/font/medium.css",
+      "local": false,
+      "at": "2026-11-03T04:29:02.179Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/core.e8cedf85.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/core.e8cedf85.js",
+      "local": false,
+      "at": "2026-11-03T04:29:02.179Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/map.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/map.css",
+      "local": false,
+      "at": "2026-11-03T04:29:02.180Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/light_u.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/light_u.css",
+      "local": false,
+      "at": "2026-11-03T04:29:02.180Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/light.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/light.css",
+      "local": false,
+      "at": "2026-11-03T04:29:02.181Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/log-reporter.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/log-reporter.js",
+      "local": false,
+      "at": "2026-11-03T04:29:02.531Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/video/css/video.0.8c3699a3aaf218112dadb300b3127b36bdacfe5c.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/video/css/video.0.8c3699a3aaf218112dadb300b3127b36bdacfe5c.css",
+      "local": false,
+      "at": "2026-11-03T04:29:02.532Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/b-mirror/biliMirror.umd.mini.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/b-mirror/biliMirror.umd.mini.js",
+      "local": false,
+      "at": "2026-11-03T04:29:02.532Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bmg/register/cmpt.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bmg/register/cmpt.js",
+      "local": false,
+      "at": "2026-11-03T04:29:02.533Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bmg/register/fallback.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bmg/register/fallback.js",
+      "local": false,
+      "at": "2026-11-03T04:29:02.533Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://i0.hdslb.com/bfs/static/jinkela/long/images/512.png",
+      "resourceType": "image",
+      "origin": "https://i0.hdslb.com",
+      "path": "/bfs/static/jinkela/long/images/512.png",
+      "local": false,
+      "at": "2026-11-03T04:29:02.533Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/cm/cm-sdk/static/js/bili-collect.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/cm/cm-sdk/static/js/bili-collect.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.652Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/risk-captcha-sdk/CaptchaLoader.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/risk-captcha-sdk/CaptchaLoader.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.653Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://www.bilibili.com/gentleman/polyfill.js?features=globalThis",
+      "resourceType": "script",
+      "origin": "https://www.bilibili.com",
+      "path": "/gentleman/polyfill.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.713Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/fehub/loki/unpkg/svgaplayerweb/svga.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/fehub/loki/unpkg/svgaplayerweb/svga.min.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.714Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/950.3cf17.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/950.3cf17.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.715Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/512.4a4c4.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/512.4a4c4.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.717Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/86.e192d.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/86.e192d.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.717Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/user-fingerprint/bili-user-fingerprint.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/user-fingerprint/bili-user-fingerprint.min.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.718Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/kv-sdk/index.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/kv-sdk/index.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.719Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-hz-mirrorakam.akamaized.net/upgcxcode/63/56/43242685663/43242685663-1-30032.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&mid=0&oi=1760166137&gen=playurlv3&og=cos&deadline=1793687341&nbs=1&uipk=5&platform=pc&trid=6f80f8a8abd34063bfb19434cb9da67u&os=akam&upsig=306b16cbd5374b527342e5e717348095&uparams=e,mid,oi,gen,og,deadline,nbs,uipk,platform,trid,os&hdnts=exp=1793687341~hmac=0b9d5fb7a85bb4d257bf3c4f7e5d887c84f88660ce5c4263703f1aa282cdd619&bvc=vod&nettype=0&bw=159935&lrs=0&V=v3.0.8&f=u_0_0&qn_dyeid=da5ef2b4592cbe04007d6e8c6ae9630d&agrr=0&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&build=0&dl=0&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-hz-mirrorakam.akamaized.net",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30032.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:04.856Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-sz-mirrorcosov.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&uipk=5&platform=pc&deadline=1793687341&nbs=1&og=cos&trid=6f80f8a8abd34063bfb19434cb9da67u&mid=0&oi=1760166137&gen=playurlv3&os=cosovbv&upsig=3ee5c87ebf42be576ed701799314191f&uparams=e,uipk,platform,deadline,nbs,og,trid,mid,oi,gen,os&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&dl=0&f=u_0_0&qn_dyeid=da5ef2b4592cbe04007d6e8c6ae9630d&agrr=0&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&build=0&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-sz-mirrorcosov.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:04.857Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.857Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/reporter-pb/index.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/reporter-pb/index.js",
+      "local": false,
+      "at": "2026-11-03T04:29:05.404Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+      "resourceType": "document",
+      "origin": "https://www.bilibili.com",
+      "path": "/video/BV1Qaxb6PE7G",
+      "local": false,
+      "at": "2026-11-03T04:29:06.442Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/font/regular.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/font/regular.css",
+      "local": false,
+      "at": "2026-11-03T04:29:07.946Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/font/medium.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/font/medium.css",
+      "local": false,
+      "at": "2026-11-03T04:29:07.947Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/core.e8cedf85.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/core.e8cedf85.js",
+      "local": false,
+      "at": "2026-11-03T04:29:07.947Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/map.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/map.css",
+      "local": false,
+      "at": "2026-11-03T04:29:07.947Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/light_u.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/light_u.css",
+      "local": false,
+      "at": "2026-11-03T04:29:07.948Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/light.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/light.css",
+      "local": false,
+      "at": "2026-11-03T04:29:07.950Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/log-reporter.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/log-reporter.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.158Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/video/css/video.0.8c3699a3aaf218112dadb300b3127b36bdacfe5c.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/video/css/video.0.8c3699a3aaf218112dadb300b3127b36bdacfe5c.css",
+      "local": false,
+      "at": "2026-11-03T04:29:08.159Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/b-mirror/biliMirror.umd.mini.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/b-mirror/biliMirror.umd.mini.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.159Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bmg/register/cmpt.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bmg/register/cmpt.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.160Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bmg/register/fallback.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bmg/register/fallback.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.161Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://i0.hdslb.com/bfs/static/jinkela/long/images/512.png",
+      "resourceType": "image",
+      "origin": "https://i0.hdslb.com",
+      "path": "/bfs/static/jinkela/long/images/512.png",
+      "local": false,
+      "at": "2026-11-03T04:29:08.161Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/cm/cm-sdk/static/js/bili-collect.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/cm/cm-sdk/static/js/bili-collect.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.731Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/risk-captcha-sdk/CaptchaLoader.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/risk-captcha-sdk/CaptchaLoader.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.759Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://www.bilibili.com/gentleman/polyfill.js?features=globalThis",
+      "resourceType": "script",
+      "origin": "https://www.bilibili.com",
+      "path": "/gentleman/polyfill.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.760Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/fehub/loki/unpkg/svgaplayerweb/svga.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/fehub/loki/unpkg/svgaplayerweb/svga.min.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.760Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/950.3cf17.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/950.3cf17.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.760Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/512.4a4c4.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/512.4a4c4.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.761Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/86.e192d.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/86.e192d.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.761Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/user-fingerprint/bili-user-fingerprint.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/user-fingerprint/bili-user-fingerprint.min.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.763Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/kv-sdk/index.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/kv-sdk/index.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.763Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-sz-mirrorcosov.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30032.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&mid=0&gen=playurlv3&os=cosovbv&og=cos&uipk=5&trid=9d0147a2527f49cd8aadf4a7cd8988fu&oi=1760166137&deadline=1793687346&nbs=1&platform=pc&upsig=47360b9a0b8c93dce6ba86733ce67868&uparams=e,mid,gen,os,og,uipk,trid,oi,deadline,nbs,platform&bvc=vod&nettype=0&bw=159935&lrs=0&V=v3.0.8&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&build=0&dl=0&f=u_0_0&qn_dyeid=a7c8642288a2389700df36b86ae96312&agrr=0&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-sz-mirrorcosov.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30032.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:08.825Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-sz-mirrorcosov.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&os=cosovbv&og=cos&trid=9d0147a2527f49cd8aadf4a7cd8988fu&nbs=1&platform=pc&oi=1760166137&mid=0&deadline=1793687346&uipk=5&gen=playurlv3&upsig=00fedcf765e20956ce2b4574107a436b&uparams=e,os,og,trid,nbs,platform,oi,mid,deadline,uipk,gen&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&qn_dyeid=a7c8642288a2389700df36b86ae96312&agrr=0&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&build=0&dl=0&f=u_0_0&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-sz-mirrorcosov.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:08.826Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.826Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "POST",
+      "url": "https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/x/internal/gaia-gateway/ExClimbWuzhi",
+      "local": false,
+      "at": "2026-11-03T04:29:09.110Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-sz-mirrorcosov.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&platform=pc&trid=9d0147a2527f49cd8aadf4a7cd8988fu&oi=1760166137&mid=0&deadline=1793687346&gen=playurlv3&og=ali&nbs=1&uipk=5&os=cosovbv&upsig=c9a3bd75ab2e35d464ac80381fbc9acf&uparams=e,platform,trid,oi,mid,deadline,gen,og,nbs,uipk,os&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&build=0&dl=0&f=u_0_0&qn_dyeid=a7c8642288a2389700df36b86ae96312&agrr=0&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-sz-mirrorcosov.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:09.227Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-sz-mirrorcosov.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&platform=pc&trid=9d0147a2527f49cd8aadf4a7cd8988fu&oi=1760166137&mid=0&deadline=1793687346&gen=playurlv3&og=ali&nbs=1&uipk=5&os=cosovbv&upsig=c9a3bd75ab2e35d464ac80381fbc9acf&uparams=e,platform,trid,oi,mid,deadline,gen,og,nbs,uipk,os&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&build=0&dl=0&f=u_0_0&qn_dyeid=a7c8642288a2389700df36b86ae96312&agrr=0&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-sz-mirrorcosov.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:09.228Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-sz-mirrorcosov.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&os=cosovbv&og=cos&trid=9d0147a2527f49cd8aadf4a7cd8988fu&nbs=1&platform=pc&oi=1760166137&mid=0&deadline=1793687346&uipk=5&gen=playurlv3&upsig=00fedcf765e20956ce2b4574107a436b&uparams=e,os,og,trid,nbs,platform,oi,mid,deadline,uipk,gen&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&qn_dyeid=a7c8642288a2389700df36b86ae96312&agrr=0&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&build=0&dl=0&f=u_0_0&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-sz-mirrorcosov.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:09.229Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "POST",
+      "url": "https://data.bilibili.com/log/web?0133241793680149105https%3A%2F%2Fwww.bilibili.com%2Fvideo%2FBV1Qaxb6PE7G%2F%3Fvd_source%3Deaf1b5590706fdf5d967f5f1d697db8b|333.788.fp.risk||1793680149105|||1440x900|1|{%22cookieEnabled%22:1,%22userAgent%22:%22Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20HeadlessChrome%2F149.0.7827.55%20Safari%2F537.36%22,%22webdriver%22:1,%22language%22:%22zh-CN%22,%22colorDepth%22:24,%22deviceMemory%22:16,%22hardwareConcurrency%22:28,%22screenResolution%22:%22900%2C%2C1440%22,%22availableScreenResolution%22:%22900%2C%2C1440%22,%22timezoneOffset%22:-480,%22timezone%22:%22Asia%2FSingapore%22,%22sessionStorage%22:1,%22localStorage%22:1,%22indexedDb%22:1,%22addBehavior%22:0,%22openDatabase%22:0,%22cpuClass%22:%22not%20available%22,%22platform%22:%22Win32%22,%22plugins%22:%22%22,%22canvas%22:%228gAAAABJRU5ErkJggg%3D%3D%22,%22webgl_str%22:%22%2F%2F8cxNnQAAAAZJREFUAwA1xAD%2FyjOy7AAAAABJRU5ErkJggg%3D%3D%22,%22webgl_params%22:%22extensions%3AANGLE_instanced_arrays%3BEXT_blend_minmax%3BEXT_clip_control%3BEXT_color_buffer_half_float%3BEXT_depth_clamp%3BEXT_float_blend%3BEXT_frag_depth%3BEXT_polygon_offset_clamp%3BEXT_shader_texture_lod%3BEXT_texture_compression_bptc%3BEXT_texture_compression_rgtc%3BEXT_texture_filter_anisotropic%3BEXT_texture_mirror_clamp_to_edge%3BEXT_sRGB%3BOES_element_index_uint%3BOES_fbo_render_mipmap%3BOES_standard_derivatives%3BOES_texture_float%3BOES_texture_float_linear%3BOES_texture_half_float%3BOES_texture_half_float_linear%3BOES_vertex_array_object%3BWEBGL_color_buffer_float%3BWEBGL_compressed_texture_astc%3BWEBGL_compressed_texture_etc%3BWEBGL_compressed_texture_etc1%3BWEBGL_compressed_texture_s3tc%3BWEBGL_compressed_texture_s3tc_srgb%3BWEBGL_debug_renderer_info%3BWEBGL_debug_shaders%3BWEBGL_depth_texture%3BWEBGL_draw_buffers%3BWEBGL_lose_context%3BWEBGL_multi_draw%3BWEBGL_polygon_mode%2C%2Cwebgl%20aliased%20line%20width%20range%3A%5B1%2C%201%5D%2C%2Cwebgl%20aliased%20point%20size%20range%3A%5B1%2C%201023%5D%2C%2Cwebgl%20alpha%20bits%3A8%2C%2Cwebgl%20antialiasing%3Ayes%2C%2Cwebgl%20blue%20bits%3A8%2C%2Cwebgl%20depth%20bits%3A24%2C%2Cwebgl%20green%20bits%3A8%2C%2Cwebgl%20max%20anisotropy%3A16%2C%2Cwebgl%20max%20combined%20texture%20image%20units%3A64%2C%2Cwebgl%20max%20cube%20map%20texture%20size%3A16384%2C%2Cwebgl%20max%20fragment%20uniform%20vectors%3A4096%2C%2Cwebgl%20max%20render%20buffer%20size%3A8192%2C%2Cwebgl%20max%20texture%20image%20units%3A32%2C%2Cwebgl%20max%20texture%20size%3A8192%2C%2Cwebgl%20max%20varying%20vectors%3A31%2C%2Cwebgl%20max%20vertex%20attribs%3A16%2C%2Cwebgl%20max%20vertex%20texture%20image%20units%3A32%2C%2Cwebgl%20max%20vertex%20uniform%20vectors%3A4096%2C%2Cwebgl%20max%20viewport%20dims%3A%5B8192%2C%208192%5D%2C%2Cwebgl%20red%20bits%3A8%2C%2Cwebgl%20renderer%3AWebKit%20WebGL%2C%2Cwebgl%20shading%20language%20version%3AWebGL%20GLSL%20ES%201.0%20(OpenGL%20ES%20GLSL%20ES%201.0%20Chromium)%2C%2Cwebgl%20stencil%20bits%3A0%2C%2Cwebgl%20vendor%3AWebKit%2C%2Cwebgl%20version%3AWebGL%201.0%20(OpenGL%20ES%202.0%20Chromium)%2C%2Cwebgl%20unmasked%20vendor%3AGoogle%20Inc.%20(Google)%2C%2Cwebgl%20unmasked%20renderer%3AANGLE%20(Google%2C%20Vulkan%201.3.0%20(SwiftShader%20Device%20(Subzero)%20(0x0000C0DE))%2C%20SwiftShader%20driver)%2C%2Cwebgl%20vertex%20shader%20high%20float%20precision%3A23%2C%2Cwebgl%20vertex%20shader%20high%20float%20precision%20rangeMin%3A127%2C%2Cwebgl%20vertex%20shader%20high%20float%20precision%20rangeMax%3A127%2C%2Cwebgl%20vertex%20shader%20medium%20float%20precision%3A10%2C%2Cwebgl%20vertex%20shader%20medium%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20medium%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20vertex%20shader%20low%20float%20precision%3A10%2C%2Cwebgl%20vertex%20shader%20low%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20low%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20fragment%20shader%20high%20float%20precision%3A23%2C%2Cwebgl%20fragment%20shader%20high%20float%20precision%20rangeMin%3A127%2C%2Cwebgl%20fragment%20shader%20high%20float%20precision%20rangeMax%3A127%2C%2Cwebgl%20fragment%20shader%20medium%20float%20precision%3A10%2C%2Cwebgl%20fragment%20shader%20medium%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20medium%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20fragment%20shader%20low%20float%20precision%3A10%2C%2Cwebgl%20fragment%20shader%20low%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20low%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20vertex%20shader%20high%20int%20precision%3A0%2C%2Cwebgl%20vertex%20shader%20high%20int%20precision%20rangeMin%3A31%2C%2Cwebgl%20vertex%20shader%20high%20int%20precision%20rangeMax%3A30%2C%2Cwebgl%20vertex%20shader%20medium%20int%20precision%3A0%2C%2Cwebgl%20vertex%20shader%20medium%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20medium%20int%20precision%20rangeMax%3A14%2C%2Cwebgl%20vertex%20shader%20low%20int%20precision%3A0%2C%2Cwebgl%20vertex%20shader%20low%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20low%20int%20precision%20rangeMax%3A14%2C%2Cwebgl%20fragment%20shader%20high%20int%20precision%3A0%2C%2Cwebgl%20fragment%20shader%20high%20int%20precision%20rangeMin%3A31%2C%2Cwebgl%20fragment%20shader%20high%20int%20precision%20rangeMax%3A30%2C%2Cwebgl%20fragment%20shader%20medium%20int%20precision%3A0%2C%2Cwebgl%20fragment%20shader%20medium%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20medium%20int%20precision%20rangeMax%3A14%2C%2Cwebgl%20fragment%20shader%20low%20int%20precision%3A0%2C%2Cwebgl%20fragment%20shader%20low%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20low%20int%20precision%20rangeMax%3A14%22,%22webglVendorAndRenderer%22:%22Google%20Inc.%20(Google)~ANGLE%20(Google%2C%20Vulkan%201.3.0%20(SwiftShader%20Device%20(Subzero)%20(0x0000C0DE))%2C%20SwiftShader%20driver)%22,%22hasLiedLanguages%22:0,%22hasLiedResolution%22:0,%22hasLiedOs%22:0,%22hasLiedBrowser%22:0,%22touchSupport%22:%220%2C%2C0%2C%2C0%22,%22fonts%22:%22Arial%2C%2CArial%20Black%2C%2CArial%20Narrow%2C%2CBook%20Antiqua%2C%2CBookman%20Old%20Style%2C%2CCalibri%2C%2CCambria%2C%2CCambria%20Math%2C%2CCentury%2C%2CCentury%20Gothic%2C%2CCentury%20Schoolbook%2C%2CComic%20Sans%20MS%2C%2CConsolas%2C%2CCourier%2C%2CCourier%20New%2C%2CGeorgia%2C%2CHelvetica%2C%2CImpact%2C%2CLucida%20Bright%2C%2CLucida%20Calligraphy%2C%2CLucida%20Console%2C%2CLucida%20Fax%2C%2CLucida%20Handwriting%2C%2CLucida%20Sans%2C%2CLucida%20Sans%20Typewriter%2C%2CLucida%20Sans%20Unicode%2C%2CMicrosoft%20Sans%20Serif%2C%2CMonotype%20Corsiva%2C%2CMS%20Gothic%2C%2CMS%20PGothic%2C%2CMS%20Reference%20Sans%20Serif%2C%2CMS%20Sans%20Serif%2C%2CMS%20Serif%2C%2CPalatino%20Linotype%2C%2CSegoe%20Print%2C%2CSegoe%20Script%2C%2CSegoe%20UI%2C%2CSegoe%20UI%20Light%2C%2CSegoe%20UI%20Semibold%2C%2CSegoe%20UI%20Symbol%2C%2CTahoma%2C%2CTimes%2C%2CTimes%20New%20Roman%2C%2CTrebuchet%20MS%2C%2CVerdana%2C%2CWingdings%2C%2CWingdings%202%2C%2CWingdings%203%22,%22audio%22:%22124.04347527516074%22,%22b_nut_h%22:1793678400,%22lsid%22:%2210425CA6D_1A19FAAF926%22,%22buvid_fp%22:%22bb391b810be394d3f95c4b34158727ad%22,%22buvid4%22:%22null%22,%22bsource_origin%22:%22empty%22,%22share_source_origin%22:%22empty%22}|{%22travel_trace_entry_label%22:%22new%22,%22auto_quality_display_mode%22:%221%22,%22travel_trace_map_provider%22:%22baidu%22,%22enable_codec_bitrate_priority%22:%22true%22,%22enable_startup_model_v2%22:%22true%22,%22enable_source_change_type%22:%22true%22,%22new_pip%22:%22true%22,%22travel_trace_multi_p%22:%22on%22,%22continuous_play_btn_visible%22:%22HIDE%22,%22travel_trace_subway_layer%22:%22on%22,%22changfan_v1%22:%222%22,%22webplayer%22:%2210%22,%22enable_line_health%22:%22true%22,%22login_toast%22:%22false%22,%22in_aa%22:%221%22,%22in_bb%22:%223%22,%22enable_unlogin_playbackrate_limit%22:%22true%22,%22in_a%22:%222%22,%22in_b%22:%224%22,%22oct_n%22:%222%22,%22in_d%22:%222%22,%22rcmd_tab_version%22:%22DISABLE%22,%22danmaku_report_version%22:%22V1%22,%22comment_version_hash%22:%22bee9afe43a%22,%22in_new_ab%22:true,%22ab_version%22:{%22travel_trace_entry_label%22:%22new%22,%22auto_quality_display_mode%22:%221%22,%22travel_trace_map_provider%22:%22baidu%22,%22enable_codec_bitrate_priority%22:%22true%22,%22enable_startup_model_v2%22:%22true%22,%22enable_source_change_type%22:%22true%22,%22new_pip%22:%22true%22,%22travel_trace_multi_p%22:%22on%22,%22continuous_play_btn_visible%22:%22HIDE%22,%22travel_trace_subway_layer%22:%22on%22,%22changfan_v1%22:%222%22,%22webplayer%22:%2210%22,%22enable_line_health%22:%22true%22,%22login_toast%22:%22false%22,%22in_aa%22:%221%22,%22in_bb%22:%223%22,%22enable_unlogin_playbackrate_limit%22:%22true%22,%22in_a%22:%222%22,%22in_b%22:%224%22,%22oct_n%22:%222%22,%22in_d%22:%222%22,%22rcmd_tab_version%22:%22DISABLE%22,%22danmaku_report_version%22:%22V1%22,%22comment_version_hash%22:%22bee9afe43a%22},%22ab_overrides%22:{},%22ab_sample_id%22:{%22webplayer%22:%2288570101%22,%22enable_line_health%22:%2288570101%22,%22login_toast%22:%2282753100%22,%22in_aa%22:%2283433101%22,%22in_bb%22:%2283433101%22,%22enable_unlogin_playbackrate_limit%22:%2273396101%22,%22in_a%22:%2280322100%22,%22in_b%22:%2280322100%22,%22oct_n%22:%2289171101%22,%22in_d%22:%2280326100%22},%22ab_split_num%22:{%22rcmd_tab_version%22:23,%22danmaku_report_version%22:22,%22comment_version_hash%22:199,%22travel_trace_entry_label%22:0,%22auto_quality_display_mode%22:0,%22travel_trace_map_provider%22:0,%22enable_codec_bitrate_priority%22:0,%22enable_startup_model_v2%22:0,%22enable_source_change_type%22:0,%22new_pip%22:0,%22travel_trace_multi_p%22:0,%22continuous_play_btn_visible%22:0,%22travel_trace_subway_layer%22:0,%22changfan_v1%22:0,%22webplayer%22:0,%22enable_line_health%22:0,%22login_toast%22:0,%22in_aa%22:0,%22in_bb%22:0,%22enable_unlogin_playbackrate_limit%22:0,%22in_a%22:0,%22in_b%22:0,%22oct_n%22:0,%22in_d%22:0},%22pageVersion%22:%22new_video%22,%22videoGoOldVersion%22:-1}||EA2BC71A-A154-117C-42CB-59228CD6F7D844691infoc|zh-CN|null|0",
+      "resourceType": "ping",
+      "origin": "https://data.bilibili.com",
+      "path": "/log/web",
+      "local": false,
+      "at": "2026-11-03T04:29:09.759Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-sz-mirrorcosov.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&platform=pc&trid=9d0147a2527f49cd8aadf4a7cd8988fu&oi=1760166137&mid=0&deadline=1793687346&gen=playurlv3&og=ali&nbs=1&uipk=5&os=cosovbv&upsig=c9a3bd75ab2e35d464ac80381fbc9acf&uparams=e,platform,trid,oi,mid,deadline,gen,og,nbs,uipk,os&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&build=0&dl=0&f=u_0_0&qn_dyeid=a7c8642288a2389700df36b86ae96312&agrr=0&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-sz-mirrorcosov.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:10.228Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-sz-mirrorcosov.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&os=cosovbv&og=cos&trid=9d0147a2527f49cd8aadf4a7cd8988fu&nbs=1&platform=pc&oi=1760166137&mid=0&deadline=1793687346&uipk=5&gen=playurlv3&upsig=00fedcf765e20956ce2b4574107a436b&uparams=e,os,og,trid,nbs,platform,oi,mid,deadline,uipk,gen&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&qn_dyeid=a7c8642288a2389700df36b86ae96312&agrr=0&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&build=0&dl=0&f=u_0_0&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-sz-mirrorcosov.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:10.350Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/img/ploading.png",
+      "resourceType": "image",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/img/ploading.png",
+      "local": false,
+      "at": "2026-11-03T04:29:10.808Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/video/video.8c3699a3aaf218112dadb300b3127b36bdacfe5c.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/video/video.8c3699a3aaf218112dadb300b3127b36bdacfe5c.js",
+      "local": false,
+      "at": "2026-11-03T04:29:11.359Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/reporter-pb/index.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/reporter-pb/index.js",
+      "local": false,
+      "at": "2026-11-03T04:29:11.401Z"
+    }
+  ],
+  "externalNonGetAfterVideoClick": [
+    {
+      "phase": "video-click",
+      "method": "POST",
+      "url": "https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/x/internal/gaia-gateway/ExClimbWuzhi",
+      "local": false,
+      "at": "2026-11-03T04:29:09.110Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "POST",
+      "url": "https://data.bilibili.com/log/web?0133241793680149105https%3A%2F%2Fwww.bilibili.com%2Fvideo%2FBV1Qaxb6PE7G%2F%3Fvd_source%3Deaf1b5590706fdf5d967f5f1d697db8b|333.788.fp.risk||1793680149105|||1440x900|1|{%22cookieEnabled%22:1,%22userAgent%22:%22Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20HeadlessChrome%2F149.0.7827.55%20Safari%2F537.36%22,%22webdriver%22:1,%22language%22:%22zh-CN%22,%22colorDepth%22:24,%22deviceMemory%22:16,%22hardwareConcurrency%22:28,%22screenResolution%22:%22900%2C%2C1440%22,%22availableScreenResolution%22:%22900%2C%2C1440%22,%22timezoneOffset%22:-480,%22timezone%22:%22Asia%2FSingapore%22,%22sessionStorage%22:1,%22localStorage%22:1,%22indexedDb%22:1,%22addBehavior%22:0,%22openDatabase%22:0,%22cpuClass%22:%22not%20available%22,%22platform%22:%22Win32%22,%22plugins%22:%22%22,%22canvas%22:%228gAAAABJRU5ErkJggg%3D%3D%22,%22webgl_str%22:%22%2F%2F8cxNnQAAAAZJREFUAwA1xAD%2FyjOy7AAAAABJRU5ErkJggg%3D%3D%22,%22webgl_params%22:%22extensions%3AANGLE_instanced_arrays%3BEXT_blend_minmax%3BEXT_clip_control%3BEXT_color_buffer_half_float%3BEXT_depth_clamp%3BEXT_float_blend%3BEXT_frag_depth%3BEXT_polygon_offset_clamp%3BEXT_shader_texture_lod%3BEXT_texture_compression_bptc%3BEXT_texture_compression_rgtc%3BEXT_texture_filter_anisotropic%3BEXT_texture_mirror_clamp_to_edge%3BEXT_sRGB%3BOES_element_index_uint%3BOES_fbo_render_mipmap%3BOES_standard_derivatives%3BOES_texture_float%3BOES_texture_float_linear%3BOES_texture_half_float%3BOES_texture_half_float_linear%3BOES_vertex_array_object%3BWEBGL_color_buffer_float%3BWEBGL_compressed_texture_astc%3BWEBGL_compressed_texture_etc%3BWEBGL_compressed_texture_etc1%3BWEBGL_compressed_texture_s3tc%3BWEBGL_compressed_texture_s3tc_srgb%3BWEBGL_debug_renderer_info%3BWEBGL_debug_shaders%3BWEBGL_depth_texture%3BWEBGL_draw_buffers%3BWEBGL_lose_context%3BWEBGL_multi_draw%3BWEBGL_polygon_mode%2C%2Cwebgl%20aliased%20line%20width%20range%3A%5B1%2C%201%5D%2C%2Cwebgl%20aliased%20point%20size%20range%3A%5B1%2C%201023%5D%2C%2Cwebgl%20alpha%20bits%3A8%2C%2Cwebgl%20antialiasing%3Ayes%2C%2Cwebgl%20blue%20bits%3A8%2C%2Cwebgl%20depth%20bits%3A24%2C%2Cwebgl%20green%20bits%3A8%2C%2Cwebgl%20max%20anisotropy%3A16%2C%2Cwebgl%20max%20combined%20texture%20image%20units%3A64%2C%2Cwebgl%20max%20cube%20map%20texture%20size%3A16384%2C%2Cwebgl%20max%20fragment%20uniform%20vectors%3A4096%2C%2Cwebgl%20max%20render%20buffer%20size%3A8192%2C%2Cwebgl%20max%20texture%20image%20units%3A32%2C%2Cwebgl%20max%20texture%20size%3A8192%2C%2Cwebgl%20max%20varying%20vectors%3A31%2C%2Cwebgl%20max%20vertex%20attribs%3A16%2C%2Cwebgl%20max%20vertex%20texture%20image%20units%3A32%2C%2Cwebgl%20max%20vertex%20uniform%20vectors%3A4096%2C%2Cwebgl%20max%20viewport%20dims%3A%5B8192%2C%208192%5D%2C%2Cwebgl%20red%20bits%3A8%2C%2Cwebgl%20renderer%3AWebKit%20WebGL%2C%2Cwebgl%20shading%20language%20version%3AWebGL%20GLSL%20ES%201.0%20(OpenGL%20ES%20GLSL%20ES%201.0%20Chromium)%2C%2Cwebgl%20stencil%20bits%3A0%2C%2Cwebgl%20vendor%3AWebKit%2C%2Cwebgl%20version%3AWebGL%201.0%20(OpenGL%20ES%202.0%20Chromium)%2C%2Cwebgl%20unmasked%20vendor%3AGoogle%20Inc.%20(Google)%2C%2Cwebgl%20unmasked%20renderer%3AANGLE%20(Google%2C%20Vulkan%201.3.0%20(SwiftShader%20Device%20(Subzero)%20(0x0000C0DE))%2C%20SwiftShader%20driver)%2C%2Cwebgl%20vertex%20shader%20high%20float%20precision%3A23%2C%2Cwebgl%20vertex%20shader%20high%20float%20precision%20rangeMin%3A127%2C%2Cwebgl%20vertex%20shader%20high%20float%20precision%20rangeMax%3A127%2C%2Cwebgl%20vertex%20shader%20medium%20float%20precision%3A10%2C%2Cwebgl%20vertex%20shader%20medium%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20medium%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20vertex%20shader%20low%20float%20precision%3A10%2C%2Cwebgl%20vertex%20shader%20low%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20low%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20fragment%20shader%20high%20float%20precision%3A23%2C%2Cwebgl%20fragment%20shader%20high%20float%20precision%20rangeMin%3A127%2C%2Cwebgl%20fragment%20shader%20high%20float%20precision%20rangeMax%3A127%2C%2Cwebgl%20fragment%20shader%20medium%20float%20precision%3A10%2C%2Cwebgl%20fragment%20shader%20medium%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20medium%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20fragment%20shader%20low%20float%20precision%3A10%2C%2Cwebgl%20fragment%20shader%20low%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20low%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20vertex%20shader%20high%20int%20precision%3A0%2C%2Cwebgl%20vertex%20shader%20high%20int%20precision%20rangeMin%3A31%2C%2Cwebgl%20vertex%20shader%20high%20int%20precision%20rangeMax%3A30%2C%2Cwebgl%20vertex%20shader%20medium%20int%20precision%3A0%2C%2Cwebgl%20vertex%20shader%20medium%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20medium%20int%20precision%20rangeMax%3A14%2C%2Cwebgl%20vertex%20shader%20low%20int%20precision%3A0%2C%2Cwebgl%20vertex%20shader%20low%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20low%20int%20precision%20rangeMax%3A14%2C%2Cwebgl%20fragment%20shader%20high%20int%20precision%3A0%2C%2Cwebgl%20fragment%20shader%20high%20int%20precision%20rangeMin%3A31%2C%2Cwebgl%20fragment%20shader%20high%20int%20precision%20rangeMax%3A30%2C%2Cwebgl%20fragment%20shader%20medium%20int%20precision%3A0%2C%2Cwebgl%20fragment%20shader%20medium%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20medium%20int%20precision%20rangeMax%3A14%2C%2Cwebgl%20fragment%20shader%20low%20int%20precision%3A0%2C%2Cwebgl%20fragment%20shader%20low%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20low%20int%20precision%20rangeMax%3A14%22,%22webglVendorAndRenderer%22:%22Google%20Inc.%20(Google)~ANGLE%20(Google%2C%20Vulkan%201.3.0%20(SwiftShader%20Device%20(Subzero)%20(0x0000C0DE))%2C%20SwiftShader%20driver)%22,%22hasLiedLanguages%22:0,%22hasLiedResolution%22:0,%22hasLiedOs%22:0,%22hasLiedBrowser%22:0,%22touchSupport%22:%220%2C%2C0%2C%2C0%22,%22fonts%22:%22Arial%2C%2CArial%20Black%2C%2CArial%20Narrow%2C%2CBook%20Antiqua%2C%2CBookman%20Old%20Style%2C%2CCalibri%2C%2CCambria%2C%2CCambria%20Math%2C%2CCentury%2C%2CCentury%20Gothic%2C%2CCentury%20Schoolbook%2C%2CComic%20Sans%20MS%2C%2CConsolas%2C%2CCourier%2C%2CCourier%20New%2C%2CGeorgia%2C%2CHelvetica%2C%2CImpact%2C%2CLucida%20Bright%2C%2CLucida%20Calligraphy%2C%2CLucida%20Console%2C%2CLucida%20Fax%2C%2CLucida%20Handwriting%2C%2CLucida%20Sans%2C%2CLucida%20Sans%20Typewriter%2C%2CLucida%20Sans%20Unicode%2C%2CMicrosoft%20Sans%20Serif%2C%2CMonotype%20Corsiva%2C%2CMS%20Gothic%2C%2CMS%20PGothic%2C%2CMS%20Reference%20Sans%20Serif%2C%2CMS%20Sans%20Serif%2C%2CMS%20Serif%2C%2CPalatino%20Linotype%2C%2CSegoe%20Print%2C%2CSegoe%20Script%2C%2CSegoe%20UI%2C%2CSegoe%20UI%20Light%2C%2CSegoe%20UI%20Semibold%2C%2CSegoe%20UI%20Symbol%2C%2CTahoma%2C%2CTimes%2C%2CTimes%20New%20Roman%2C%2CTrebuchet%20MS%2C%2CVerdana%2C%2CWingdings%2C%2CWingdings%202%2C%2CWingdings%203%22,%22audio%22:%22124.04347527516074%22,%22b_nut_h%22:1793678400,%22lsid%22:%2210425CA6D_1A19FAAF926%22,%22buvid_fp%22:%22bb391b810be394d3f95c4b34158727ad%22,%22buvid4%22:%22null%22,%22bsource_origin%22:%22empty%22,%22share_source_origin%22:%22empty%22}|{%22travel_trace_entry_label%22:%22new%22,%22auto_quality_display_mode%22:%221%22,%22travel_trace_map_provider%22:%22baidu%22,%22enable_codec_bitrate_priority%22:%22true%22,%22enable_startup_model_v2%22:%22true%22,%22enable_source_change_type%22:%22true%22,%22new_pip%22:%22true%22,%22travel_trace_multi_p%22:%22on%22,%22continuous_play_btn_visible%22:%22HIDE%22,%22travel_trace_subway_layer%22:%22on%22,%22changfan_v1%22:%222%22,%22webplayer%22:%2210%22,%22enable_line_health%22:%22true%22,%22login_toast%22:%22false%22,%22in_aa%22:%221%22,%22in_bb%22:%223%22,%22enable_unlogin_playbackrate_limit%22:%22true%22,%22in_a%22:%222%22,%22in_b%22:%224%22,%22oct_n%22:%222%22,%22in_d%22:%222%22,%22rcmd_tab_version%22:%22DISABLE%22,%22danmaku_report_version%22:%22V1%22,%22comment_version_hash%22:%22bee9afe43a%22,%22in_new_ab%22:true,%22ab_version%22:{%22travel_trace_entry_label%22:%22new%22,%22auto_quality_display_mode%22:%221%22,%22travel_trace_map_provider%22:%22baidu%22,%22enable_codec_bitrate_priority%22:%22true%22,%22enable_startup_model_v2%22:%22true%22,%22enable_source_change_type%22:%22true%22,%22new_pip%22:%22true%22,%22travel_trace_multi_p%22:%22on%22,%22continuous_play_btn_visible%22:%22HIDE%22,%22travel_trace_subway_layer%22:%22on%22,%22changfan_v1%22:%222%22,%22webplayer%22:%2210%22,%22enable_line_health%22:%22true%22,%22login_toast%22:%22false%22,%22in_aa%22:%221%22,%22in_bb%22:%223%22,%22enable_unlogin_playbackrate_limit%22:%22true%22,%22in_a%22:%222%22,%22in_b%22:%224%22,%22oct_n%22:%222%22,%22in_d%22:%222%22,%22rcmd_tab_version%22:%22DISABLE%22,%22danmaku_report_version%22:%22V1%22,%22comment_version_hash%22:%22bee9afe43a%22},%22ab_overrides%22:{},%22ab_sample_id%22:{%22webplayer%22:%2288570101%22,%22enable_line_health%22:%2288570101%22,%22login_toast%22:%2282753100%22,%22in_aa%22:%2283433101%22,%22in_bb%22:%2283433101%22,%22enable_unlogin_playbackrate_limit%22:%2273396101%22,%22in_a%22:%2280322100%22,%22in_b%22:%2280322100%22,%22oct_n%22:%2289171101%22,%22in_d%22:%2280326100%22},%22ab_split_num%22:{%22rcmd_tab_version%22:23,%22danmaku_report_version%22:22,%22comment_version_hash%22:199,%22travel_trace_entry_label%22:0,%22auto_quality_display_mode%22:0,%22travel_trace_map_provider%22:0,%22enable_codec_bitrate_priority%22:0,%22enable_startup_model_v2%22:0,%22enable_source_change_type%22:0,%22new_pip%22:0,%22travel_trace_multi_p%22:0,%22continuous_play_btn_visible%22:0,%22travel_trace_subway_layer%22:0,%22changfan_v1%22:0,%22webplayer%22:0,%22enable_line_health%22:0,%22login_toast%22:0,%22in_aa%22:0,%22in_bb%22:0,%22enable_unlogin_playbackrate_limit%22:0,%22in_a%22:0,%22in_b%22:0,%22oct_n%22:0,%22in_d%22:0},%22pageVersion%22:%22new_video%22,%22videoGoOldVersion%22:-1}||EA2BC71A-A154-117C-42CB-59228CD6F7D844691infoc|zh-CN|null|0",
+      "resourceType": "ping",
+      "origin": "https://data.bilibili.com",
+      "path": "/log/web",
+      "local": false,
+      "at": "2026-11-03T04:29:09.759Z"
+    }
+  ],
+  "modelHints": [],
+  "imageRequests": [
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/logo.png",
+      "resourceType": "image",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/logo.png",
+      "local": true,
+      "at": "2026-11-03T04:28:43.247Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/logo.png",
+      "resourceType": "image",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/logo.png",
+      "local": true,
+      "at": "2026-11-03T04:28:43.657Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://i0.hdslb.com/bfs/static/jinkela/long/images/512.png",
+      "resourceType": "image",
+      "origin": "https://i0.hdslb.com",
+      "path": "/bfs/static/jinkela/long/images/512.png",
+      "local": false,
+      "at": "2026-11-03T04:29:02.533Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://i0.hdslb.com/bfs/static/jinkela/long/images/512.png",
+      "resourceType": "image",
+      "origin": "https://i0.hdslb.com",
+      "path": "/bfs/static/jinkela/long/images/512.png",
+      "local": false,
+      "at": "2026-11-03T04:29:08.161Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/img/ploading.png",
+      "resourceType": "image",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/img/ploading.png",
+      "local": false,
+      "at": "2026-11-03T04:29:10.808Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/logo.png",
+      "resourceType": "image",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/logo.png",
+      "local": true,
+      "at": "2026-11-03T04:29:12.211Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/logo.png",
+      "resourceType": "image",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/logo.png",
+      "local": true,
+      "at": "2026-11-03T04:29:12.469Z"
+    }
+  ],
+  "failed": [],
+  "pageErrors": [],
+  "consoleMessages": [
+    {
+      "type": "warning",
+      "text": "The resource http://127.0.0.1:34111/logo.png was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+    },
+    {
+      "type": "warning",
+      "text": "The resource http://127.0.0.1:34111/logo.png was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+    },
+    {
+      "type": "warning",
+      "text": "The resource http://127.0.0.1:34111/logo.png was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+    }
+  ],
+  "requests": [
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/",
+      "resourceType": "document",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/",
+      "local": true,
+      "at": "2026-11-03T04:28:42.812Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/logo.png",
+      "resourceType": "image",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/logo.png",
+      "local": true,
+      "at": "2026-11-03T04:28:43.247Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_1m_kv2t8hd7hd._.css",
+      "resourceType": "stylesheet",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_1m_kv2t8hd7hd._.css",
+      "local": true,
+      "at": "2026-11-03T04:28:43.248Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_1jiib-2own1si._.css",
+      "resourceType": "stylesheet",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_1jiib-2own1si._.css",
+      "local": true,
+      "at": "2026-11-03T04:28:43.248Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0qva5cupmdgep._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0qva5cupmdgep._.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.249Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.249Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/1q96_modules_next_dist_compiled_react-dom_cjs_react-dom_development_1sqry0_53krp4.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/1q96_modules_next_dist_compiled_react-dom_cjs_react-dom_development_1sqry0_53krp4.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.250Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_react-dom_0grqycjrj6mju._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_react-dom_0grqycjrj6mju._.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.250Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.250Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.255Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.255Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.255Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.255Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqwj2323d._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqwj2323d._.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.255Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_1anvha4rlo79g._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_1anvha4rlo79g._.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.255Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/turbopack-_06rkbud3pyrlm._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/turbopack-_06rkbud3pyrlm._.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.256Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_219uq1sj0q91c._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_219uq1sj0q91c._.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.256Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_0_duo-exf6bfz._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_0_duo-exf6bfz._.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.256Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_0y6xgmo32juxh._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_0y6xgmo32juxh._.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.256Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_17f25dzi-5r2x._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_17f25dzi-5r2x._.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.256Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_1hulrz_f5p140._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_1hulrz_f5p140._.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.257Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_1a2xsjp5_07ye._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_1a2xsjp5_07ye._.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.257Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/fonts/pm-serif-brand.ttf",
+      "resourceType": "font",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/fonts/pm-serif-brand.ttf",
+      "local": true,
+      "at": "2026-11-03T04:28:43.291Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/fonts/pm-editorial-serif.ttf",
+      "resourceType": "font",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/fonts/pm-editorial-serif.ttf",
+      "local": true,
+      "at": "2026-11-03T04:28:43.477Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/fonts/manrope-variable.ttf",
+      "resourceType": "font",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/fonts/manrope-variable.ttf",
+      "local": true,
+      "at": "2026-11-03T04:28:43.478Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
+      "local": true,
+      "at": "2026-11-03T04:28:43.549Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/logo.png",
+      "resourceType": "image",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/logo.png",
+      "local": true,
+      "at": "2026-11-03T04:28:43.657Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/__nextjs_font/geist-latin.woff2",
+      "resourceType": "font",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/__nextjs_font/geist-latin.woff2",
+      "local": true,
+      "at": "2026-11-03T04:28:45.583Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+      "resourceType": "document",
+      "origin": "https://www.bilibili.com",
+      "path": "/video/BV1Qaxb6PE7G",
+      "local": false,
+      "at": "2026-11-03T04:28:59.597Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/font/regular.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/font/regular.css",
+      "local": false,
+      "at": "2026-11-03T04:29:02.177Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/font/medium.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/font/medium.css",
+      "local": false,
+      "at": "2026-11-03T04:29:02.179Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/core.e8cedf85.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/core.e8cedf85.js",
+      "local": false,
+      "at": "2026-11-03T04:29:02.179Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/map.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/map.css",
+      "local": false,
+      "at": "2026-11-03T04:29:02.180Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/light_u.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/light_u.css",
+      "local": false,
+      "at": "2026-11-03T04:29:02.180Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/light.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/light.css",
+      "local": false,
+      "at": "2026-11-03T04:29:02.181Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/log-reporter.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/log-reporter.js",
+      "local": false,
+      "at": "2026-11-03T04:29:02.531Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/video/css/video.0.8c3699a3aaf218112dadb300b3127b36bdacfe5c.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/video/css/video.0.8c3699a3aaf218112dadb300b3127b36bdacfe5c.css",
+      "local": false,
+      "at": "2026-11-03T04:29:02.532Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/b-mirror/biliMirror.umd.mini.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/b-mirror/biliMirror.umd.mini.js",
+      "local": false,
+      "at": "2026-11-03T04:29:02.532Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bmg/register/cmpt.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bmg/register/cmpt.js",
+      "local": false,
+      "at": "2026-11-03T04:29:02.533Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bmg/register/fallback.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bmg/register/fallback.js",
+      "local": false,
+      "at": "2026-11-03T04:29:02.533Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://i0.hdslb.com/bfs/static/jinkela/long/images/512.png",
+      "resourceType": "image",
+      "origin": "https://i0.hdslb.com",
+      "path": "/bfs/static/jinkela/long/images/512.png",
+      "local": false,
+      "at": "2026-11-03T04:29:02.533Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/cm/cm-sdk/static/js/bili-collect.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/cm/cm-sdk/static/js/bili-collect.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.652Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/risk-captcha-sdk/CaptchaLoader.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/risk-captcha-sdk/CaptchaLoader.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.653Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://www.bilibili.com/gentleman/polyfill.js?features=globalThis",
+      "resourceType": "script",
+      "origin": "https://www.bilibili.com",
+      "path": "/gentleman/polyfill.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.713Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/fehub/loki/unpkg/svgaplayerweb/svga.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/fehub/loki/unpkg/svgaplayerweb/svga.min.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.714Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/950.3cf17.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/950.3cf17.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.715Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/512.4a4c4.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/512.4a4c4.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.717Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/86.e192d.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/86.e192d.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.717Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/user-fingerprint/bili-user-fingerprint.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/user-fingerprint/bili-user-fingerprint.min.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.718Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/kv-sdk/index.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/kv-sdk/index.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.719Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-hz-mirrorakam.akamaized.net/upgcxcode/63/56/43242685663/43242685663-1-30032.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&mid=0&oi=1760166137&gen=playurlv3&og=cos&deadline=1793687341&nbs=1&uipk=5&platform=pc&trid=6f80f8a8abd34063bfb19434cb9da67u&os=akam&upsig=306b16cbd5374b527342e5e717348095&uparams=e,mid,oi,gen,og,deadline,nbs,uipk,platform,trid,os&hdnts=exp=1793687341~hmac=0b9d5fb7a85bb4d257bf3c4f7e5d887c84f88660ce5c4263703f1aa282cdd619&bvc=vod&nettype=0&bw=159935&lrs=0&V=v3.0.8&f=u_0_0&qn_dyeid=da5ef2b4592cbe04007d6e8c6ae9630d&agrr=0&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&build=0&dl=0&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-hz-mirrorakam.akamaized.net",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30032.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:04.856Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-sz-mirrorcosov.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&uipk=5&platform=pc&deadline=1793687341&nbs=1&og=cos&trid=6f80f8a8abd34063bfb19434cb9da67u&mid=0&oi=1760166137&gen=playurlv3&os=cosovbv&upsig=3ee5c87ebf42be576ed701799314191f&uparams=e,uipk,platform,deadline,nbs,og,trid,mid,oi,gen,os&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&dl=0&f=u_0_0&qn_dyeid=da5ef2b4592cbe04007d6e8c6ae9630d&agrr=0&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&build=0&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-sz-mirrorcosov.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:04.857Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "local": false,
+      "at": "2026-11-03T04:29:04.857Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/reporter-pb/index.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/reporter-pb/index.js",
+      "local": false,
+      "at": "2026-11-03T04:29:05.404Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+      "resourceType": "document",
+      "origin": "https://www.bilibili.com",
+      "path": "/video/BV1Qaxb6PE7G",
+      "local": false,
+      "at": "2026-11-03T04:29:06.442Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/font/regular.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/font/regular.css",
+      "local": false,
+      "at": "2026-11-03T04:29:07.946Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/font/medium.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/font/medium.css",
+      "local": false,
+      "at": "2026-11-03T04:29:07.947Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/core.e8cedf85.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/core.e8cedf85.js",
+      "local": false,
+      "at": "2026-11-03T04:29:07.947Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/map.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/map.css",
+      "local": false,
+      "at": "2026-11-03T04:29:07.947Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/light_u.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/light_u.css",
+      "local": false,
+      "at": "2026-11-03T04:29:07.948Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/light.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/light.css",
+      "local": false,
+      "at": "2026-11-03T04:29:07.950Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/log-reporter.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/log-reporter.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.158Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/video/css/video.0.8c3699a3aaf218112dadb300b3127b36bdacfe5c.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/video/css/video.0.8c3699a3aaf218112dadb300b3127b36bdacfe5c.css",
+      "local": false,
+      "at": "2026-11-03T04:29:08.159Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/b-mirror/biliMirror.umd.mini.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/b-mirror/biliMirror.umd.mini.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.159Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bmg/register/cmpt.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bmg/register/cmpt.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.160Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bmg/register/fallback.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bmg/register/fallback.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.161Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://i0.hdslb.com/bfs/static/jinkela/long/images/512.png",
+      "resourceType": "image",
+      "origin": "https://i0.hdslb.com",
+      "path": "/bfs/static/jinkela/long/images/512.png",
+      "local": false,
+      "at": "2026-11-03T04:29:08.161Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/cm/cm-sdk/static/js/bili-collect.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/cm/cm-sdk/static/js/bili-collect.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.731Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/risk-captcha-sdk/CaptchaLoader.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/risk-captcha-sdk/CaptchaLoader.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.759Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://www.bilibili.com/gentleman/polyfill.js?features=globalThis",
+      "resourceType": "script",
+      "origin": "https://www.bilibili.com",
+      "path": "/gentleman/polyfill.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.760Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/fehub/loki/unpkg/svgaplayerweb/svga.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/fehub/loki/unpkg/svgaplayerweb/svga.min.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.760Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/950.3cf17.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/950.3cf17.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.760Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/512.4a4c4.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/512.4a4c4.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.761Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/86.e192d.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/86.e192d.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.761Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/user-fingerprint/bili-user-fingerprint.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/user-fingerprint/bili-user-fingerprint.min.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.763Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/kv-sdk/index.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/kv-sdk/index.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.763Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-sz-mirrorcosov.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30032.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&mid=0&gen=playurlv3&os=cosovbv&og=cos&uipk=5&trid=9d0147a2527f49cd8aadf4a7cd8988fu&oi=1760166137&deadline=1793687346&nbs=1&platform=pc&upsig=47360b9a0b8c93dce6ba86733ce67868&uparams=e,mid,gen,os,og,uipk,trid,oi,deadline,nbs,platform&bvc=vod&nettype=0&bw=159935&lrs=0&V=v3.0.8&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&build=0&dl=0&f=u_0_0&qn_dyeid=a7c8642288a2389700df36b86ae96312&agrr=0&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-sz-mirrorcosov.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30032.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:08.825Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-sz-mirrorcosov.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&os=cosovbv&og=cos&trid=9d0147a2527f49cd8aadf4a7cd8988fu&nbs=1&platform=pc&oi=1760166137&mid=0&deadline=1793687346&uipk=5&gen=playurlv3&upsig=00fedcf765e20956ce2b4574107a436b&uparams=e,os,og,trid,nbs,platform,oi,mid,deadline,uipk,gen&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&qn_dyeid=a7c8642288a2389700df36b86ae96312&agrr=0&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&build=0&dl=0&f=u_0_0&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-sz-mirrorcosov.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:08.826Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "local": false,
+      "at": "2026-11-03T04:29:08.826Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "POST",
+      "url": "https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/x/internal/gaia-gateway/ExClimbWuzhi",
+      "local": false,
+      "at": "2026-11-03T04:29:09.110Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-sz-mirrorcosov.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&platform=pc&trid=9d0147a2527f49cd8aadf4a7cd8988fu&oi=1760166137&mid=0&deadline=1793687346&gen=playurlv3&og=ali&nbs=1&uipk=5&os=cosovbv&upsig=c9a3bd75ab2e35d464ac80381fbc9acf&uparams=e,platform,trid,oi,mid,deadline,gen,og,nbs,uipk,os&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&build=0&dl=0&f=u_0_0&qn_dyeid=a7c8642288a2389700df36b86ae96312&agrr=0&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-sz-mirrorcosov.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:09.227Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-sz-mirrorcosov.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&platform=pc&trid=9d0147a2527f49cd8aadf4a7cd8988fu&oi=1760166137&mid=0&deadline=1793687346&gen=playurlv3&og=ali&nbs=1&uipk=5&os=cosovbv&upsig=c9a3bd75ab2e35d464ac80381fbc9acf&uparams=e,platform,trid,oi,mid,deadline,gen,og,nbs,uipk,os&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&build=0&dl=0&f=u_0_0&qn_dyeid=a7c8642288a2389700df36b86ae96312&agrr=0&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-sz-mirrorcosov.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:09.228Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-sz-mirrorcosov.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&os=cosovbv&og=cos&trid=9d0147a2527f49cd8aadf4a7cd8988fu&nbs=1&platform=pc&oi=1760166137&mid=0&deadline=1793687346&uipk=5&gen=playurlv3&upsig=00fedcf765e20956ce2b4574107a436b&uparams=e,os,og,trid,nbs,platform,oi,mid,deadline,uipk,gen&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&qn_dyeid=a7c8642288a2389700df36b86ae96312&agrr=0&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&build=0&dl=0&f=u_0_0&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-sz-mirrorcosov.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:09.229Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "POST",
+      "url": "https://data.bilibili.com/log/web?0133241793680149105https%3A%2F%2Fwww.bilibili.com%2Fvideo%2FBV1Qaxb6PE7G%2F%3Fvd_source%3Deaf1b5590706fdf5d967f5f1d697db8b|333.788.fp.risk||1793680149105|||1440x900|1|{%22cookieEnabled%22:1,%22userAgent%22:%22Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20HeadlessChrome%2F149.0.7827.55%20Safari%2F537.36%22,%22webdriver%22:1,%22language%22:%22zh-CN%22,%22colorDepth%22:24,%22deviceMemory%22:16,%22hardwareConcurrency%22:28,%22screenResolution%22:%22900%2C%2C1440%22,%22availableScreenResolution%22:%22900%2C%2C1440%22,%22timezoneOffset%22:-480,%22timezone%22:%22Asia%2FSingapore%22,%22sessionStorage%22:1,%22localStorage%22:1,%22indexedDb%22:1,%22addBehavior%22:0,%22openDatabase%22:0,%22cpuClass%22:%22not%20available%22,%22platform%22:%22Win32%22,%22plugins%22:%22%22,%22canvas%22:%228gAAAABJRU5ErkJggg%3D%3D%22,%22webgl_str%22:%22%2F%2F8cxNnQAAAAZJREFUAwA1xAD%2FyjOy7AAAAABJRU5ErkJggg%3D%3D%22,%22webgl_params%22:%22extensions%3AANGLE_instanced_arrays%3BEXT_blend_minmax%3BEXT_clip_control%3BEXT_color_buffer_half_float%3BEXT_depth_clamp%3BEXT_float_blend%3BEXT_frag_depth%3BEXT_polygon_offset_clamp%3BEXT_shader_texture_lod%3BEXT_texture_compression_bptc%3BEXT_texture_compression_rgtc%3BEXT_texture_filter_anisotropic%3BEXT_texture_mirror_clamp_to_edge%3BEXT_sRGB%3BOES_element_index_uint%3BOES_fbo_render_mipmap%3BOES_standard_derivatives%3BOES_texture_float%3BOES_texture_float_linear%3BOES_texture_half_float%3BOES_texture_half_float_linear%3BOES_vertex_array_object%3BWEBGL_color_buffer_float%3BWEBGL_compressed_texture_astc%3BWEBGL_compressed_texture_etc%3BWEBGL_compressed_texture_etc1%3BWEBGL_compressed_texture_s3tc%3BWEBGL_compressed_texture_s3tc_srgb%3BWEBGL_debug_renderer_info%3BWEBGL_debug_shaders%3BWEBGL_depth_texture%3BWEBGL_draw_buffers%3BWEBGL_lose_context%3BWEBGL_multi_draw%3BWEBGL_polygon_mode%2C%2Cwebgl%20aliased%20line%20width%20range%3A%5B1%2C%201%5D%2C%2Cwebgl%20aliased%20point%20size%20range%3A%5B1%2C%201023%5D%2C%2Cwebgl%20alpha%20bits%3A8%2C%2Cwebgl%20antialiasing%3Ayes%2C%2Cwebgl%20blue%20bits%3A8%2C%2Cwebgl%20depth%20bits%3A24%2C%2Cwebgl%20green%20bits%3A8%2C%2Cwebgl%20max%20anisotropy%3A16%2C%2Cwebgl%20max%20combined%20texture%20image%20units%3A64%2C%2Cwebgl%20max%20cube%20map%20texture%20size%3A16384%2C%2Cwebgl%20max%20fragment%20uniform%20vectors%3A4096%2C%2Cwebgl%20max%20render%20buffer%20size%3A8192%2C%2Cwebgl%20max%20texture%20image%20units%3A32%2C%2Cwebgl%20max%20texture%20size%3A8192%2C%2Cwebgl%20max%20varying%20vectors%3A31%2C%2Cwebgl%20max%20vertex%20attribs%3A16%2C%2Cwebgl%20max%20vertex%20texture%20image%20units%3A32%2C%2Cwebgl%20max%20vertex%20uniform%20vectors%3A4096%2C%2Cwebgl%20max%20viewport%20dims%3A%5B8192%2C%208192%5D%2C%2Cwebgl%20red%20bits%3A8%2C%2Cwebgl%20renderer%3AWebKit%20WebGL%2C%2Cwebgl%20shading%20language%20version%3AWebGL%20GLSL%20ES%201.0%20(OpenGL%20ES%20GLSL%20ES%201.0%20Chromium)%2C%2Cwebgl%20stencil%20bits%3A0%2C%2Cwebgl%20vendor%3AWebKit%2C%2Cwebgl%20version%3AWebGL%201.0%20(OpenGL%20ES%202.0%20Chromium)%2C%2Cwebgl%20unmasked%20vendor%3AGoogle%20Inc.%20(Google)%2C%2Cwebgl%20unmasked%20renderer%3AANGLE%20(Google%2C%20Vulkan%201.3.0%20(SwiftShader%20Device%20(Subzero)%20(0x0000C0DE))%2C%20SwiftShader%20driver)%2C%2Cwebgl%20vertex%20shader%20high%20float%20precision%3A23%2C%2Cwebgl%20vertex%20shader%20high%20float%20precision%20rangeMin%3A127%2C%2Cwebgl%20vertex%20shader%20high%20float%20precision%20rangeMax%3A127%2C%2Cwebgl%20vertex%20shader%20medium%20float%20precision%3A10%2C%2Cwebgl%20vertex%20shader%20medium%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20medium%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20vertex%20shader%20low%20float%20precision%3A10%2C%2Cwebgl%20vertex%20shader%20low%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20low%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20fragment%20shader%20high%20float%20precision%3A23%2C%2Cwebgl%20fragment%20shader%20high%20float%20precision%20rangeMin%3A127%2C%2Cwebgl%20fragment%20shader%20high%20float%20precision%20rangeMax%3A127%2C%2Cwebgl%20fragment%20shader%20medium%20float%20precision%3A10%2C%2Cwebgl%20fragment%20shader%20medium%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20medium%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20fragment%20shader%20low%20float%20precision%3A10%2C%2Cwebgl%20fragment%20shader%20low%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20low%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20vertex%20shader%20high%20int%20precision%3A0%2C%2Cwebgl%20vertex%20shader%20high%20int%20precision%20rangeMin%3A31%2C%2Cwebgl%20vertex%20shader%20high%20int%20precision%20rangeMax%3A30%2C%2Cwebgl%20vertex%20shader%20medium%20int%20precision%3A0%2C%2Cwebgl%20vertex%20shader%20medium%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20medium%20int%20precision%20rangeMax%3A14%2C%2Cwebgl%20vertex%20shader%20low%20int%20precision%3A0%2C%2Cwebgl%20vertex%20shader%20low%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20low%20int%20precision%20rangeMax%3A14%2C%2Cwebgl%20fragment%20shader%20high%20int%20precision%3A0%2C%2Cwebgl%20fragment%20shader%20high%20int%20precision%20rangeMin%3A31%2C%2Cwebgl%20fragment%20shader%20high%20int%20precision%20rangeMax%3A30%2C%2Cwebgl%20fragment%20shader%20medium%20int%20precision%3A0%2C%2Cwebgl%20fragment%20shader%20medium%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20medium%20int%20precision%20rangeMax%3A14%2C%2Cwebgl%20fragment%20shader%20low%20int%20precision%3A0%2C%2Cwebgl%20fragment%20shader%20low%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20low%20int%20precision%20rangeMax%3A14%22,%22webglVendorAndRenderer%22:%22Google%20Inc.%20(Google)~ANGLE%20(Google%2C%20Vulkan%201.3.0%20(SwiftShader%20Device%20(Subzero)%20(0x0000C0DE))%2C%20SwiftShader%20driver)%22,%22hasLiedLanguages%22:0,%22hasLiedResolution%22:0,%22hasLiedOs%22:0,%22hasLiedBrowser%22:0,%22touchSupport%22:%220%2C%2C0%2C%2C0%22,%22fonts%22:%22Arial%2C%2CArial%20Black%2C%2CArial%20Narrow%2C%2CBook%20Antiqua%2C%2CBookman%20Old%20Style%2C%2CCalibri%2C%2CCambria%2C%2CCambria%20Math%2C%2CCentury%2C%2CCentury%20Gothic%2C%2CCentury%20Schoolbook%2C%2CComic%20Sans%20MS%2C%2CConsolas%2C%2CCourier%2C%2CCourier%20New%2C%2CGeorgia%2C%2CHelvetica%2C%2CImpact%2C%2CLucida%20Bright%2C%2CLucida%20Calligraphy%2C%2CLucida%20Console%2C%2CLucida%20Fax%2C%2CLucida%20Handwriting%2C%2CLucida%20Sans%2C%2CLucida%20Sans%20Typewriter%2C%2CLucida%20Sans%20Unicode%2C%2CMicrosoft%20Sans%20Serif%2C%2CMonotype%20Corsiva%2C%2CMS%20Gothic%2C%2CMS%20PGothic%2C%2CMS%20Reference%20Sans%20Serif%2C%2CMS%20Sans%20Serif%2C%2CMS%20Serif%2C%2CPalatino%20Linotype%2C%2CSegoe%20Print%2C%2CSegoe%20Script%2C%2CSegoe%20UI%2C%2CSegoe%20UI%20Light%2C%2CSegoe%20UI%20Semibold%2C%2CSegoe%20UI%20Symbol%2C%2CTahoma%2C%2CTimes%2C%2CTimes%20New%20Roman%2C%2CTrebuchet%20MS%2C%2CVerdana%2C%2CWingdings%2C%2CWingdings%202%2C%2CWingdings%203%22,%22audio%22:%22124.04347527516074%22,%22b_nut_h%22:1793678400,%22lsid%22:%2210425CA6D_1A19FAAF926%22,%22buvid_fp%22:%22bb391b810be394d3f95c4b34158727ad%22,%22buvid4%22:%22null%22,%22bsource_origin%22:%22empty%22,%22share_source_origin%22:%22empty%22}|{%22travel_trace_entry_label%22:%22new%22,%22auto_quality_display_mode%22:%221%22,%22travel_trace_map_provider%22:%22baidu%22,%22enable_codec_bitrate_priority%22:%22true%22,%22enable_startup_model_v2%22:%22true%22,%22enable_source_change_type%22:%22true%22,%22new_pip%22:%22true%22,%22travel_trace_multi_p%22:%22on%22,%22continuous_play_btn_visible%22:%22HIDE%22,%22travel_trace_subway_layer%22:%22on%22,%22changfan_v1%22:%222%22,%22webplayer%22:%2210%22,%22enable_line_health%22:%22true%22,%22login_toast%22:%22false%22,%22in_aa%22:%221%22,%22in_bb%22:%223%22,%22enable_unlogin_playbackrate_limit%22:%22true%22,%22in_a%22:%222%22,%22in_b%22:%224%22,%22oct_n%22:%222%22,%22in_d%22:%222%22,%22rcmd_tab_version%22:%22DISABLE%22,%22danmaku_report_version%22:%22V1%22,%22comment_version_hash%22:%22bee9afe43a%22,%22in_new_ab%22:true,%22ab_version%22:{%22travel_trace_entry_label%22:%22new%22,%22auto_quality_display_mode%22:%221%22,%22travel_trace_map_provider%22:%22baidu%22,%22enable_codec_bitrate_priority%22:%22true%22,%22enable_startup_model_v2%22:%22true%22,%22enable_source_change_type%22:%22true%22,%22new_pip%22:%22true%22,%22travel_trace_multi_p%22:%22on%22,%22continuous_play_btn_visible%22:%22HIDE%22,%22travel_trace_subway_layer%22:%22on%22,%22changfan_v1%22:%222%22,%22webplayer%22:%2210%22,%22enable_line_health%22:%22true%22,%22login_toast%22:%22false%22,%22in_aa%22:%221%22,%22in_bb%22:%223%22,%22enable_unlogin_playbackrate_limit%22:%22true%22,%22in_a%22:%222%22,%22in_b%22:%224%22,%22oct_n%22:%222%22,%22in_d%22:%222%22,%22rcmd_tab_version%22:%22DISABLE%22,%22danmaku_report_version%22:%22V1%22,%22comment_version_hash%22:%22bee9afe43a%22},%22ab_overrides%22:{},%22ab_sample_id%22:{%22webplayer%22:%2288570101%22,%22enable_line_health%22:%2288570101%22,%22login_toast%22:%2282753100%22,%22in_aa%22:%2283433101%22,%22in_bb%22:%2283433101%22,%22enable_unlogin_playbackrate_limit%22:%2273396101%22,%22in_a%22:%2280322100%22,%22in_b%22:%2280322100%22,%22oct_n%22:%2289171101%22,%22in_d%22:%2280326100%22},%22ab_split_num%22:{%22rcmd_tab_version%22:23,%22danmaku_report_version%22:22,%22comment_version_hash%22:199,%22travel_trace_entry_label%22:0,%22auto_quality_display_mode%22:0,%22travel_trace_map_provider%22:0,%22enable_codec_bitrate_priority%22:0,%22enable_startup_model_v2%22:0,%22enable_source_change_type%22:0,%22new_pip%22:0,%22travel_trace_multi_p%22:0,%22continuous_play_btn_visible%22:0,%22travel_trace_subway_layer%22:0,%22changfan_v1%22:0,%22webplayer%22:0,%22enable_line_health%22:0,%22login_toast%22:0,%22in_aa%22:0,%22in_bb%22:0,%22enable_unlogin_playbackrate_limit%22:0,%22in_a%22:0,%22in_b%22:0,%22oct_n%22:0,%22in_d%22:0},%22pageVersion%22:%22new_video%22,%22videoGoOldVersion%22:-1}||EA2BC71A-A154-117C-42CB-59228CD6F7D844691infoc|zh-CN|null|0",
+      "resourceType": "ping",
+      "origin": "https://data.bilibili.com",
+      "path": "/log/web",
+      "local": false,
+      "at": "2026-11-03T04:29:09.759Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-sz-mirrorcosov.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&platform=pc&trid=9d0147a2527f49cd8aadf4a7cd8988fu&oi=1760166137&mid=0&deadline=1793687346&gen=playurlv3&og=ali&nbs=1&uipk=5&os=cosovbv&upsig=c9a3bd75ab2e35d464ac80381fbc9acf&uparams=e,platform,trid,oi,mid,deadline,gen,og,nbs,uipk,os&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&build=0&dl=0&f=u_0_0&qn_dyeid=a7c8642288a2389700df36b86ae96312&agrr=0&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-sz-mirrorcosov.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:10.228Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://upos-sz-mirrorcosov.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&os=cosovbv&og=cos&trid=9d0147a2527f49cd8aadf4a7cd8988fu&nbs=1&platform=pc&oi=1760166137&mid=0&deadline=1793687346&uipk=5&gen=playurlv3&upsig=00fedcf765e20956ce2b4574107a436b&uparams=e,os,og,trid,nbs,platform,oi,mid,deadline,uipk,gen&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&qn_dyeid=a7c8642288a2389700df36b86ae96312&agrr=0&buvid=CFBEF5F6-4FE1-15F4-E136-7A272E0D6B4240307infoc&build=0&dl=0&f=u_0_0&orderid=0,2",
+      "resourceType": "xhr",
+      "origin": "https://upos-sz-mirrorcosov.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T04:29:10.350Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/img/ploading.png",
+      "resourceType": "image",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/img/ploading.png",
+      "local": false,
+      "at": "2026-11-03T04:29:10.808Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/video/video.8c3699a3aaf218112dadb300b3127b36bdacfe5c.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/video/video.8c3699a3aaf218112dadb300b3127b36bdacfe5c.js",
+      "local": false,
+      "at": "2026-11-03T04:29:11.359Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/reporter-pb/index.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/reporter-pb/index.js",
+      "local": false,
+      "at": "2026-11-03T04:29:11.401Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/",
+      "resourceType": "document",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/",
+      "local": true,
+      "at": "2026-11-03T04:29:11.836Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/logo.png",
+      "resourceType": "image",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/logo.png",
+      "local": true,
+      "at": "2026-11-03T04:29:12.211Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_1m_kv2t8hd7hd._.css",
+      "resourceType": "stylesheet",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_1m_kv2t8hd7hd._.css",
+      "local": true,
+      "at": "2026-11-03T04:29:12.211Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_1jiib-2own1si._.css",
+      "resourceType": "stylesheet",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_1jiib-2own1si._.css",
+      "local": true,
+      "at": "2026-11-03T04:29:12.211Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0qva5cupmdgep._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0qva5cupmdgep._.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.215Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.216Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/1q96_modules_next_dist_compiled_react-dom_cjs_react-dom_development_1sqry0_53krp4.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/1q96_modules_next_dist_compiled_react-dom_cjs_react-dom_development_1sqry0_53krp4.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.217Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_react-dom_0grqycjrj6mju._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_react-dom_0grqycjrj6mju._.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.218Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.218Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.221Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.222Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.223Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.223Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqwj2323d._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqwj2323d._.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.226Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_1anvha4rlo79g._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_1anvha4rlo79g._.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.227Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/turbopack-_06rkbud3pyrlm._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/turbopack-_06rkbud3pyrlm._.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.228Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_219uq1sj0q91c._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_219uq1sj0q91c._.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.228Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_0_duo-exf6bfz._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_0_duo-exf6bfz._.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.229Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_0y6xgmo32juxh._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_0y6xgmo32juxh._.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.229Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_17f25dzi-5r2x._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_17f25dzi-5r2x._.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.230Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_1hulrz_f5p140._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_1hulrz_f5p140._.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.230Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_1a2xsjp5_07ye._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_1a2xsjp5_07ye._.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.231Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/fonts/pm-editorial-serif.ttf",
+      "resourceType": "font",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/fonts/pm-editorial-serif.ttf",
+      "local": true,
+      "at": "2026-11-03T04:29:12.292Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/fonts/manrope-variable.ttf",
+      "resourceType": "font",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/fonts/manrope-variable.ttf",
+      "local": true,
+      "at": "2026-11-03T04:29:12.294Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/fonts/pm-serif-brand.ttf",
+      "resourceType": "font",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/fonts/pm-serif-brand.ttf",
+      "local": true,
+      "at": "2026-11-03T04:29:12.295Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
+      "local": true,
+      "at": "2026-11-03T04:29:12.360Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/logo.png",
+      "resourceType": "image",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/logo.png",
+      "local": true,
+      "at": "2026-11-03T04:29:12.469Z"
+    }
+  ]
+}

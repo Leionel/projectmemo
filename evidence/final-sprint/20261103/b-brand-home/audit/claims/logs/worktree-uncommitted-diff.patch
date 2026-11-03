@@ -1,0 +1,243 @@
+diff --git a/app/home.module.css b/app/home.module.css
+index e8e32d4..29fdeb8 100644
+--- a/app/home.module.css
++++ b/app/home.module.css
+@@ -25,6 +25,10 @@
+   color: var(--ink);
+   font-family: var(--landing-sans);
+   font-feature-settings: "tnum" 1;
++  scroll-margin-top: 5rem;
++}
++.home:focus {
++  outline: none;
+ }
+ .home *,
+ .home *::before,
+@@ -225,7 +229,7 @@
+   border-radius: 999px;
+   background: color-mix(in srgb, var(--amber) 8%, var(--paper-strong));
+   color: var(--amber);
+-  font-size: 0.78rem;
++  font-size: 0.8rem;
+   font-weight: 550;
+   line-height: 1.5;
+   white-space: nowrap;
+@@ -684,6 +688,21 @@
+ .pathList {
+   border-top: 1px solid var(--rule);
+ }
++.taskIdentity {
++  display: flex;
++  flex-wrap: wrap;
++  align-items: center;
++  gap: 0.45rem;
++  padding: 0.85rem 0;
++  border-bottom: 1px solid var(--rule);
++  color: var(--muted);
++  font-size: 0.85rem;
++  line-height: 1.5;
++}
++.taskIdentity > span:first-child {
++  color: var(--ink-soft);
++  font-weight: 600;
++}
+ .pathGroup {
+   padding: 1.45rem 0;
+   border-bottom: 1px solid var(--rule);
+@@ -1118,7 +1137,7 @@
+   }
+   .lensStatus {
+     padding: 0.25rem 0.5rem;
+-    font-size: 0.74rem;
++    font-size: 0.8rem;
+   }
+   .stageTabs {
+     padding: 0.35rem 0.35rem 0.25rem;
+diff --git a/app/page.tsx b/app/page.tsx
+index 25478c8..a128dcf 100644
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -12,6 +12,7 @@ import {
+ import { getSessionUser } from "@/lib/auth/serverSession";
+ import { HomeJourney } from "@/components/HomeJourney";
+ import { HomeHeroLens } from "@/components/home/HomeHeroLens";
++import { HomeMotion } from "@/components/home/HomeMotion";
+ import styles from "./home.module.css";
+ 
+ export const metadata: Metadata = {
+@@ -71,14 +72,15 @@ export default async function Home() {
+   const workspaceLabel = user ? "回到我的工作台" : "进入工作台";
+ 
+   return (
+-    <main id="main-content" className={styles.home}>
++    <main id="main-content" className={styles.home} tabIndex={-1}>
+       <section
+         id="home-heading"
+         className={styles.hero}
+         aria-labelledby="hero-title"
++        data-hero
+       >
+         <div className={styles.heroInner}>
+-          <div className={styles.heroCopy}>
++          <div className={styles.heroCopy} data-hero-copy>
+             <p className={styles.positioning}>
+               <span>面向大学生的</span>
+               <strong>个人项目 Agent</strong>
+@@ -115,7 +117,7 @@ export default async function Home() {
+       >
+         <div className={styles.shell}>
+           <header className={styles.sectionHead}>
+-            <p className={styles.kicker}>
++            <p className={styles.kicker} data-draw>
+               <span>01</span>
+               离开以后
+             </p>
+@@ -129,20 +131,24 @@ export default async function Home() {
+             </p>
+           </header>
+ 
+-          <ol className={styles.rail}>
+-            {continuitySteps.map((step) => (
+-              <li
+-                className={styles.railStep}
+-                key={step.label}
+-                data-state={step.state}
+-                data-emphasis={step.emphasis ? "true" : undefined}
+-              >
+-                <p className={styles.railLabel}>{step.label}</p>
+-                <h3>{step.title}</h3>
+-                <p className={styles.railText}>{step.text}</p>
+-              </li>
+-            ))}
+-          </ol>
++          <div className={styles.railFrame} data-rail>
++            <ol className={styles.rail}>
++              {continuitySteps.map((step) => (
++                <li
++                  className={styles.railStep}
++                  key={step.label}
++                  data-rail-step
++                  data-state={step.state}
++                  data-emphasis={step.emphasis ? "true" : undefined}
++                >
++                  <p className={styles.railLabel}>{step.label}</p>
++                  <h3>{step.title}</h3>
++                  <p className={styles.railText}>{step.text}</p>
++                </li>
++              ))}
++            </ol>
++            <span className={styles.railProgress} aria-hidden="true" />
++          </div>
+ 
+           <div className={styles.railFoot}>
+             <details className={styles.conditions}>
+@@ -169,7 +175,7 @@ export default async function Home() {
+       >
+         <div className={styles.shell}>
+           <header className={`${styles.sectionHead} ${styles.experienceHead}`}>
+-            <p className={styles.kicker}>
++            <p className={styles.kicker} data-draw>
+               <span>02</span>
+               公开交互示例
+             </p>
+@@ -189,7 +195,7 @@ export default async function Home() {
+       <section className={styles.section} aria-labelledby="platform-title">
+         <div className={`${styles.shell} ${styles.split}`}>
+           <header className={styles.splitHead}>
+-            <p className={styles.kicker}>
++            <p className={styles.kicker} data-draw>
+               <span>03</span>
+               同一个任务
+             </p>
+@@ -206,6 +212,12 @@ export default async function Home() {
+             </p>
+           </header>
+           <div className={styles.pathList}>
++            <p className={styles.taskIdentity}>
++              <span>同一任务</span>
++              整理阶段汇报
++              <span aria-hidden="true">·</span>
++              公开示例
++            </p>
+             <div className={styles.pathGroup}>
+               <div className={styles.pathTitle}>
+                 <Laptop size={18} aria-hidden="true" />
+@@ -249,7 +261,7 @@ export default async function Home() {
+       >
+         <div className={styles.shell}>
+           <header className={styles.sectionHead}>
+-            <p className={styles.kicker}>
++            <p className={styles.kicker} data-draw>
+               <span>04</span>
+               用在什么项目上
+             </p>
+@@ -273,7 +285,7 @@ export default async function Home() {
+       >
+         <div className={`${styles.shell} ${styles.demoSplit}`}>
+           <header className={styles.splitHead}>
+-            <p className={styles.kicker}>
++            <p className={styles.kicker} data-draw>
+               <span>05</span>
+               决赛演示
+             </p>
+@@ -311,10 +323,12 @@ export default async function Home() {
+       <section className={styles.closing} aria-labelledby="closing-title">
+         <div className={`${styles.shell} ${styles.closingInner}`}>
+           <div>
+-            <h2 id="closing-title">让你的下一段长期项目，接得上。</h2>
+-            <p>从自己的项目开始。已有账号可以直接进入工作台。</p>
++            <h2 id="closing-title" data-reveal>
++              让你的下一段长期项目，接得上。
++            </h2>
++            <p data-reveal>从自己的项目开始。已有账号可以直接进入工作台。</p>
+           </div>
+-          <div className={styles.closingActions}>
++          <div className={styles.closingActions} data-reveal>
+             <Link href={workspaceHref} className={styles.closingCta}>
+               {workspaceLabel}
+               <ArrowRight size={16} aria-hidden="true" />
+@@ -353,6 +367,7 @@ export default async function Home() {
+           <p className={styles.footerMeta}>竞赛 · 科研 · 课程项目</p>
+         </div>
+       </footer>
++      <HomeMotion />
+     </main>
+   );
+ }
+diff --git a/components/HomeJourney.module.css b/components/HomeJourney.module.css
+index de24ce9..fb55de2 100644
+--- a/components/HomeJourney.module.css
++++ b/components/HomeJourney.module.css
+@@ -582,6 +582,8 @@
+   max-height: calc(100dvh - 48px);
+   margin: auto;
+   padding: 1.5rem 1.75rem 1.75rem;
++  overflow: auto;
++  overscroll-behavior: contain;
+   border: 1px solid var(--rule);
+   border-radius: 1rem;
+   background: var(--paper-strong);
+diff --git a/components/SiteHeader.module.css b/components/SiteHeader.module.css
+index 2388c1a..ef45cfd 100644
+--- a/components/SiteHeader.module.css
++++ b/components/SiteHeader.module.css
+@@ -59,8 +59,8 @@
+   font-weight: 550;
+ }
+ .homeHeader .headerCta {
+-  height: 40px;
+-  min-height: 40px;
++  height: 44px;
++  min-height: 44px;
+   padding: 8px 14px;
+   border-color: var(--teal);
+   background: var(--teal);
+@@ -107,7 +107,7 @@
+   .homeNav .headerCta {
+     gap: 0.3rem;
+     padding-inline: 0.65rem;
+-    font-size: 0.7rem;
++    font-size: 0.8rem;
+   }
+   .homeHeader .siteHeaderInner {
+     height: 56px;

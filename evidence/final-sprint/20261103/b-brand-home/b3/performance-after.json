@@ -1,0 +1,71 @@
+{
+  "phase": 2,
+  "kind": "navigation-timing",
+  "capturedAt": "2026-11-03T04:35:04.937Z",
+  "sourceSha": "cc7c19fed573c79a55f727eaa338ab84fd80cc3b",
+  "url": "http://127.0.0.1:34111/",
+  "environment": {
+    "os": "win32 10.0.26300 (Windows 11 Home China)",
+    "arch": "x64",
+    "cpu": "Intel(R) Core(TM) i7-14700HX ×28",
+    "totalMemoryGiB": 15.78,
+    "node": "v24.16.0",
+    "browser": "chromium via @playwright/test 1.61.1 (headless)",
+    "deviceScaleFactor": 1,
+    "network": "localhost loopback（Next dev，同一台机器）",
+    "timezoneId": "Asia/Shanghai",
+    "locale": "zh-CN",
+    "mode": "Next dev（非生产构建）；LLM_MODE=mock、空 SQLite、无 Worker（由 Lead 提供）",
+    "caveat": "性能/体积数字仅代表本机本地 dev 环境，不宣称代表所有用户体验或生产构建。"
+  },
+  "note": "本机 Next dev（非生产构建）+ 本地回环网络；数字不代表线上或所有用户体验。",
+  "navigation": {
+    "startTime": 0,
+    "redirectStart": 0,
+    "redirectEnd": 0,
+    "fetchStart": 0.1,
+    "domainLookupStart": 0.1,
+    "domainLookupEnd": 0.1,
+    "connectStart": 0.1,
+    "connectEnd": 0.1,
+    "secureConnectionStart": 0,
+    "requestStart": 0.8,
+    "responseStart": 221.5,
+    "responseEnd": 225.6,
+    "domInteractive": 235.8,
+    "domContentLoadedEventStart": 235.8,
+    "domContentLoadedEventEnd": 235.8,
+    "domComplete": 304.5,
+    "loadEventStart": 304.5,
+    "loadEventEnd": 304.5,
+    "transferSize": 18507,
+    "encodedBodySize": 18207,
+    "decodedBodySize": 74480,
+    "nextHopProtocol": "http/1.1",
+    "type": "reload"
+  },
+  "derived": {
+    "ttfbMs": 220.7,
+    "domContentLoadedMs": 235.8,
+    "loadEventEndMs": 304.5,
+    "domCompleteMs": 304.5,
+    "documentTransferSize": 18507,
+    "documentDecodedBodySize": 74480
+  },
+  "paint": [
+    {
+      "name": "first-paint",
+      "startTime": 276
+    },
+    {
+      "name": "first-contentful-paint",
+      "startTime": 276
+    }
+  ],
+  "memory": {
+    "usedJSHeapSize": 76600000,
+    "totalJSHeapSize": 131000000
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+  "devicePixelRatio": 1
+}

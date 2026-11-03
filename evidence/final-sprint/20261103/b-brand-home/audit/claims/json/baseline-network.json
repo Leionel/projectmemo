@@ -1,0 +1,570 @@
+{
+  "generatedAt": "2026-11-03T03:41:25.485Z",
+  "base": "http://127.0.0.1:34111",
+  "mode": "anonymous-playwright-chromium-read-only",
+  "summary": {
+    "totalRequests": 27,
+    "apiRequests": 0,
+    "apiWriteRequests": 0,
+    "externalRequests": 0,
+    "modelHintRequests": 0,
+    "failedRequests": 0,
+    "pageErrors": 0,
+    "consoleErrorsWarnings": 0
+  },
+  "steps": [
+    {
+      "name": "goto-home",
+      "ok": true,
+      "value": {
+        "status": 200,
+        "url": "http://127.0.0.1:34111/",
+        "title": "忆程 ProjectMemo｜个人项目 Agent"
+      }
+    },
+    {
+      "name": "read-main-claims",
+      "ok": true,
+      "value": {
+        "h1": "项目隔了几天，\n再打开也接得上。",
+        "positioning": "面向大学生的\n个人项目 Agent",
+        "bodyText": "面向大学生的\n个人项目 Agent\n\n项目隔了几天，\n再打开也接得上。\n\n会议记录、实验结果、方案调整，都留在项目里。先看上次的进展与判断依据，再决定下一步。\n\n体验项目接续\n进入工作台\n\n下方示例无需登录。个人项目在工作台中管理。\n\n忆程工作区\n内置示例项目\n实际工作区界面，使用内置示例数据。\n\n先用一段项目经历试试看\n\n准备参赛作品，上次做到哪里了？\n\n示例取自项目自带的参赛素材。\n从原始记录开始，看看依据、建议和完成结果如何关联。\n\n内置示例项目\n忆程参赛作品开发\n重置示例\n1\n查看记录\n2\n核对依据\n3\n查看判断\n4\n确认行动\n5\n填写回执\n\n已有示例素材\n\n先看看上次留下了什么\n\n这份示例项目保留了任务安排、参赛要求和老师建议。先读原文，再判断现在该做什么。\n\n1 / 5\n原始记录\n3 条内置素材\n任务安排\n\n目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。\n\n任务安排\n查看原文\n比赛材料\n\n初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。\n\n比赛材料\n查看原文\n老师建议\n\n老师建议作品不要叫普通学习助手，要突出项目制学习和知识资产复用。\n\n老师建议\n查看原文\n\n已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。\n\n有些目标，需要分几次完成\n\n长期委托会保留进度，\n需要你时停下来。\n\n比如“用已有材料整理阶段汇报”。你可以回看执行步骤和草稿；缺材料时补充来源，需要批准时先核对提案。\n\n暂停后不会从头另建一个任务。继续前，服务端会重新检查授权、预算和材料是否仍然适用。\n\n哪些条件会影响执行？\n界面示例\n等待补充材料\n整理参赛项目的阶段汇报\n\n已有步骤和草稿保留在同一份委托里。\n\n✓\n读取项目记忆\n已找到参赛要求与任务安排\n?\n需要补充：演示流程的实际结果\n目前没有完成回执，不能确认流程已跑通\n继续整理汇报草稿\n补充材料并确认后，再检查是否能够继续\n\n这是界面说明，未启动委托或执行模型任务。\n\n项目里的具体用处\n\n竞赛、科研和课程项目，\n都有值得保留的过程。\n竞赛备赛\n把实验记录、报名要求和答辩材料放回同一个项目，整理汇报时能回看来源。\n科研训练\n查清方案为什么改过、结论用了哪些实验记录，以及哪些问题还没有依据。\n课程设计\n保留需求、问题和修改过程，完成一项行动后，把结果接回项目历史。\n\n电脑和手机上的同一个项目\n\n资料在电脑上整理，\n进展也能在手机上查看。\n\nWeb 与鸿蒙客户端使用同一项目后端。客户端连到同一服务并登录相应账号后，可以接着查看项目资料与行动。\n\nWeb 工作台\n\n项目\n记录与资料\n查看原件\n\n鸿蒙客户端\n\n项目\n资料\n附件原件\n\n来源可以回看；没有依据的内容会标明缺口。建议需要你判断，重要操作在确认后才应用。模型分析和委托执行取决于实际配置。\n\n从自己的项目开始。\n\n已有账号可以直接进入工作台。\n\n进入工作台\n忆程 ProjectMemo\n竞赛 · 科研 · 课程项目\n回到顶部 ↑"
+      }
+    },
+    {
+      "name": "font-and-image-checks",
+      "ok": true,
+      "value": {
+        "editorialLoaded": true,
+        "brandLoaded": true,
+        "fonts": [
+          {
+            "family": "PM Editorial",
+            "weight": "500",
+            "status": "loaded"
+          },
+          {
+            "family": "PM Brand",
+            "weight": "400",
+            "status": "loaded"
+          },
+          {
+            "family": "__nextjs-Geist",
+            "weight": "400 600",
+            "status": "unloaded"
+          },
+          {
+            "family": "__nextjs-Geist Mono",
+            "weight": "400 600",
+            "status": "unloaded"
+          },
+          {
+            "family": "__nextjs-Geist",
+            "weight": "400 600",
+            "status": "unloaded"
+          },
+          {
+            "family": "__nextjs-Geist Mono",
+            "weight": "400 600",
+            "status": "unloaded"
+          }
+        ],
+        "images": [
+          {
+            "src": "http://127.0.0.1:34111/logo.png",
+            "alt": "",
+            "complete": true,
+            "naturalWidth": 1254,
+            "naturalHeight": 1254
+          },
+          {
+            "src": "http://127.0.0.1:34111/home/workspace-desktop.jpg",
+            "alt": "忆程实际工作区：项目风险状态、记录依据与下一步入口",
+            "complete": true,
+            "naturalWidth": 1280,
+            "naturalHeight": 760
+          }
+        ]
+      }
+    },
+    {
+      "name": "click-hero-primary-cta",
+      "ok": true,
+      "value": {
+        "hash": "#experience",
+        "scrollY": 972,
+        "experienceTop": 88.171875,
+        "headerBottom": 57,
+        "headingTop": 168.5625,
+        "headingOccludedByHeader": false
+      }
+    },
+    {
+      "name": "demo-tab-walk",
+      "ok": true,
+      "value": {
+        "tabCount": 5,
+        "seen": [
+          {
+            "index": 0,
+            "selected": "true",
+            "panelLabel": "story-tab-0",
+            "panelText": "已有示例素材\n\n先看看上次留下了什么\n\n这份示例项目保留了任务安排、参赛要求和老师建议。先读原文，再判断现在该做什么。\n\n1 / 5\n原始记录\n3 条内置素材\n任务安排\n\n目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。\n\n任务安排\n查看原文\n比赛材料\n\n初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。\n\n比赛材料\n查看原文\n老师建议\n\n老师建议作品不要叫普通学习助手，要突出项目制学习和知识资产复用。\n\n老师建议\n查看原文"
+          },
+          {
+            "index": 1,
+            "selected": "true",
+            "panelLabel": "story-tab-1",
+            "panelText": "已知与待确认\n\n记录说了什么，哪些还不知道\n\n历史记录和当前状态分别看。没有找到新的完成结果，不能据此断言功能现在仍未完成。\n\n2 / 5\n已有依据\n示例整理\n记录中提到\n\n初赛需要作品说明文档和演示材料。\n\n比赛材料\n查看原文\n已有任务安排\n\n先完成项目创建、资料录入和成果生成流程。\n\n任务安排\n查看原文\n当前状态待确认\n\n上述任务现在是否已经完成？现有素材没有提供新的完成回执。"
+          },
+          {
+            "index": 2,
+            "selected": "true",
+            "panelLabel": "story-tab-2",
+            "panelText": "预设建议\n\n下一步建议，要能说清依据\n\n根据材料要求和已有任务记录，先验证一条最小演示流程。这里展示预设的建议读法，不进行实时模型推理。\n\n3 / 5\n判断与建议\n预设示例\n\n比较基线：已有记录 → 本页核对\n\n?\n待确认\n依据 2 项\n\n演示流程的当前完成情况还需要核对\n\n已有任务记录，但没有新的完成回执；当前状态待确认\n\n记忆 · 原文\n记忆 · 原文\n\n建议下一步\n先跑通一次最小演示流程\n\n参赛材料需要演示，任务记录也提到流程待完成。可以先验证一条记录能否整理为记忆，再生成一份草稿，并记录实际结果。\n\n展开这条建议的依据"
+          },
+          {
+            "index": 3,
+            "selected": "true",
+            "panelLabel": "story-tab-3",
+            "panelText": "等待你的确认\n\n先核对提案，再决定是否创建\n\n建议还不是待办。查看行动要做什么、怎样记录结果，再由你确认。这里的操作只影响本页示例。\n\n4 / 5\n行动提案\n待用户确认\n验证一次资料录入到成果草稿的流程\n要做什么\n录入一条项目记录，查看生成的记忆，再整理一份成果草稿。\n完成后记录\n实际操作结果、失败位置，以及是否需要补充材料。\n来源\n任务安排\n查看原文\n比赛材料\n查看原文\n在示例中确认行动"
+          },
+          {
+            "index": 4,
+            "selected": "true",
+            "panelLabel": "story-tab-4",
+            "panelText": "本页模拟操作\n\n完成了什么，由实际结果来说明\n\n确认示例行动后，试着填写一段模拟回执。保存后回到依据页，可以看到这段结果和原记录放在一起。\n\n5 / 5\n完成回执\n模拟数据\n\n先确认行动，再填写模拟回执。单纯切换到这一步，不会把行动标为完成。\n\n返回确认行动"
+          }
+        ]
+      }
+    },
+    {
+      "name": "open-source-dialog",
+      "ok": true,
+      "value": {
+        "dialogOpen": 1,
+        "text": "示例原始记录\n\n比赛材料\n初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。\n\n原文取自项目自带的演示素材，不是在线用户的个人记录。",
+        "dialogOpenAfterEsc": 0
+      }
+    },
+    {
+      "name": "confirm-example-action",
+      "ok": true,
+      "value": {
+        "panelText": "等待你的确认\n\n先核对提案，再决定是否创建\n\n建议还不是待办。查看行动要做什么、怎样记录结果，再由你确认。这里的操作只影响本页示例。\n\n4 / 5\n行动提案\n本页示例已确认\n验证一次资料录入到成果草稿的流程\n要做什么\n录入一条项目记录，查看生成的记忆，再整理一份成果草稿。\n完成后记录\n实际操作结果、失败位置，以及是否需要补充材料。\n来源\n任务安排\n查看原文\n比赛材料\n查看原文\n\n示例行动已确认，尚未填写完成结果。\n\n去填写模拟回执"
+      }
+    },
+    {
+      "name": "save-simulated-receipt",
+      "ok": true,
+      "value": {
+        "panelText": "本页模拟操作\n\n完成了什么，由实际结果来说明\n\n确认示例行动后，试着填写一段模拟回执。保存后回到依据页，可以看到这段结果和原记录放在一起。\n\n5 / 5\n完成回执\n模拟数据\n\n模拟回执已加入本页示例\n\n审计示例：假设已录入一条记录并生成草稿，来源还需要逐项核对。\n\n结果由你在本页填写，未经过实际操作核验。\n\n回到依据页查看"
+      }
+    },
+    {
+      "name": "back-to-evidence",
+      "ok": true,
+      "value": {
+        "panelText": "已知与待确认\n\n记录说了什么，哪些还不知道\n\n历史记录和当前状态分别看。没有找到新的完成结果，不能据此断言功能现在仍未完成。\n\n2 / 5\n已有依据\n示例整理\n记录中提到\n\n初赛需要作品说明文档和演示材料。\n\n比赛材料\n查看原文\n已有任务安排\n\n先完成项目创建、资料录入和成果生成流程。\n\n任务安排\n查看原文\n当前状态待确认\n\n下方是你填写的模拟结果，真实完成情况仍需实际回执。\n\n新增模拟回执\n\n审计示例：假设已录入一条记录并生成草稿，来源还需要逐项核对。\n\n模拟回执\n查看原文"
+      }
+    },
+    {
+      "name": "reset-demo",
+      "ok": true,
+      "value": {
+        "panelText": "已有示例素材\n\n先看看上次留下了什么\n\n这份示例项目保留了任务安排、参赛要求和老师建议。先读原文，再判断现在该做什么。\n\n1 / 5\n原始记录\n3 条内置素材\n任务安排\n\n目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。\n\n任务安排\n查看原文\n比赛材料\n\n初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。\n\n比赛材料\n查看原文\n老师建议\n\n老师建议作品不要叫普通学习助手，要突出项目制学习和知识资产复用。\n\n老师建议\n查看原文",
+        "statusText": "示例已重置，未修改任何个人项目。"
+      }
+    },
+    {
+      "name": "cta-hrefs-anonymous",
+      "ok": true,
+      "value": {
+        "heroTexts": [
+          "进入工作台",
+          "进入工作台"
+        ],
+        "hrefs": [
+          {
+            "text": "忆程 ProjectMemo",
+            "href": "/"
+          },
+          {
+            "text": "产品体验",
+            "href": "#experience"
+          },
+          {
+            "text": "长期委托",
+            "href": "#missions"
+          },
+          {
+            "text": "使用场景",
+            "href": "#moments"
+          },
+          {
+            "text": "进入工作台",
+            "href": "/focus"
+          },
+          {
+            "text": "体验项目接续",
+            "href": "#experience"
+          },
+          {
+            "text": "进入工作台",
+            "href": "/login?from=%2Ffocus"
+          },
+          {
+            "text": "进入工作台",
+            "href": "/login?from=%2Ffocus"
+          },
+          {
+            "text": "忆程 ProjectMemo",
+            "href": "/"
+          },
+          {
+            "text": "回到顶部 ↑",
+            "href": "#home-heading"
+          }
+        ]
+      }
+    },
+    {
+      "name": "screenshot-desktop",
+      "ok": true,
+      "value": "saved"
+    }
+  ],
+  "apiRequests": [],
+  "apiWrites": [],
+  "external": [],
+  "modelHints": [],
+  "failedRequests": [],
+  "pageErrors": [],
+  "consoleMessages": [],
+  "requests": [
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/",
+      "resourceType": "document",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/",
+      "kind": "document",
+      "at": "2026-11-03T03:41:15.515Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/logo.png",
+      "resourceType": "image",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/logo.png",
+      "kind": "static",
+      "at": "2026-11-03T03:41:17.243Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/app_0abjaqsdm6gbj._.css",
+      "resourceType": "stylesheet",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/app_0abjaqsdm6gbj._.css",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.244Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0qva5cupmdgep._.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0qva5cupmdgep._.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.244Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.244Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/1q96_modules_next_dist_compiled_react-dom_cjs_react-dom_development_1sqry0_53krp4.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/1q96_modules_next_dist_compiled_react-dom_cjs_react-dom_development_1sqry0_53krp4.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.244Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_react-dom_0grqycjrj6mju._.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_react-dom_0grqycjrj6mju._.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.244Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.244Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.244Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.244Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.245Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.245Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqwj2323d._.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqwj2323d._.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.245Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_1anvha4rlo79g._.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/_1anvha4rlo79g._.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.245Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/turbopack-_06rkbud3pyrlm._.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/turbopack-_06rkbud3pyrlm._.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.245Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_219uq1sj0q91c._.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/_219uq1sj0q91c._.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.246Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_1r5t5g85l2kgf._.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/_1r5t5g85l2kgf._.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.246Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_0y6xgmo32juxh._.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/node_modules_0y6xgmo32juxh._.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.246Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_17f25dzi-5r2x._.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/_17f25dzi-5r2x._.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.246Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_1clhl8l44f-u9._.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/_1clhl8l44f-u9._.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.246Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_1h9ipi_trw2-s._.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_1h9ipi_trw2-s._.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.246Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/home/workspace-desktop.jpg",
+      "resourceType": "image",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/home/workspace-desktop.jpg",
+      "kind": "asset",
+      "at": "2026-11-03T03:41:17.246Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/fonts/pm-serif-brand.ttf",
+      "resourceType": "font",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/fonts/pm-serif-brand.ttf",
+      "kind": "asset",
+      "at": "2026-11-03T03:41:17.411Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
+      "resourceType": "script",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
+      "kind": "next-static",
+      "at": "2026-11-03T03:41:17.528Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/fonts/pm-editorial-serif.ttf",
+      "resourceType": "font",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/fonts/pm-editorial-serif.ttf",
+      "kind": "asset",
+      "at": "2026-11-03T03:41:17.765Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/__nextjs_font/geist-latin.woff2",
+      "resourceType": "font",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/__nextjs_font/geist-latin.woff2",
+      "kind": "static",
+      "at": "2026-11-03T03:41:19.160Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/home/workspace-mobile.jpg",
+      "resourceType": "image",
+      "local": true,
+      "origin": "http://127.0.0.1:34111",
+      "protocol": "http:",
+      "path": "/home/workspace-mobile.jpg",
+      "kind": "asset",
+      "at": "2026-11-03T03:41:25.171Z"
+    }
+  ]
+}

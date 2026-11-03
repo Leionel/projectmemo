@@ -1,0 +1,113 @@
+# audit/a11y MANIFEST（Phase 0 + Phase 1 最终，9bae926）
+
+生成时间：2026-11-03T12:52:33+08:00
+基线 SHA：485d485378637e1da3280ed092739d441c8cf749
+最终冻结候选 SHA：9bae926e9475cedef118deedf5e002ec8365a23b
+说明：源码绑定 9bae926；644f33a 仅追加证据/回执，app/components 与 9bae926 完全一致（git diff 为空）。
+证据源码副本统一 .txt 后缀（避免 tsconfig **/*.tsx 收进 tsc）。
+
+```
+sha256  bytes  path
+47e6d16e448fa995a42e1a93b454d3c9c980d7a40ae191e450e9b4468372d44d  17445  A11Y_CHECKLIST.md
+e7b0b7e647fd2beb0a9b8b4b607cf4186bdfc856a9b7b77d0f6b7a576074dbed  24928  A11Y_FINDINGS.md
+7bd10d9871934e47bb993a89743b8680528ee51f3f36d128497dbdff5312546c  31528  BASELINE_INVENTORY.md
+9b4d95135e5362ebcf932d240d5a238667ef1d20098db016b84dc050c1a0831e  6647  baseline-src\app\auth.module.css
+5eeed9738fe7debfe04f967313c2303d8b6891a6584db9966f383a392aad041d  18256  baseline-src\app\globals.css
+39dc89d5df97a00580fa0131d33e0953fdea839406b45a4413ccc5b963f2f819  30127  baseline-src\app\home.module.css
+2507b16fd6268ab627a02dadb10a4a58f13899dfbca4d37cdc7f9ffe238c59f7  3701  baseline-src\app\layout.tsx.txt
+499b385c20b9db9daa11dbe10b1fc97577d2d89b29c5d8b76d78e9eb8113f4b0  10183  baseline-src\app\page.tsx.txt
+ca4639272841ca0ac51473acfd4b5e5b2f3ab276175d699368923e31f9f3e204  18367  baseline-src\components\HomeJourney.tsx.txt
+cb9ddfab9e41d6e9a8aa3e78c2d93490a3f44284552077977a15cfb160a09884  1622  baseline-src\components\SiteHeader.tsx.txt
+09ba67a6b2dba89405a248334311f956c4c60f7455107e4ce981a455cbd26544  3212  baseline-src\components\StateDiffView.tsx.txt
+a17f345ef35863afec34851c0888d59222f3b9557fcd88dcab35c3d90e65ed9d  64353  invalidated\baseline-account-forgot-password-1440.png
+81b700d508c6734570faa6d9b67acea22429b625d1ec9156598dac2fc202c1cc  37710  invalidated\baseline-account-forgot-password-390.png
+c3d248ddb82b3021faa2838a42729fab54df4a0446f09af23f11be912e17ed5d  62454  invalidated\baseline-account-login-1440.png
+d6ddd0a9b7e3bffee21f7dfcd82aa7584e70f58a0126ee215227a4da2d5c63af  35946  invalidated\baseline-account-login-390.png
+ca2135678ef6280fc7f447e463f37029e68e6f2dbf4da276a1f902b5f46639fc  73817  invalidated\baseline-account-register-1440.png
+141be4e691ad123987de2d1bc72f9c97a4cf2ddba09b342ff1c7db5365ac4f1f  42147  invalidated\baseline-account-register-390.png
+f427a9893e4f31800088ba44fdd1b211174f266162c5009b8c25b2ebe1a23622  76619  invalidated\baseline-anchor-experience-320.png
+f427a9893e4f31800088ba44fdd1b211174f266162c5009b8c25b2ebe1a23622  76619  invalidated\baseline-anchor-experience.png
+d41bbb97f7a7fe307c40c385dc27fec676f504b1b95a0637a1f9b4b42085b37d  419346  invalidated\baseline-dark-1440.png
+bd36a3fb0abe26b0e618dc1c14ba48ec2086b4dc71cc768e4f79eae7ed0f8301  63800  invalidated\baseline-dark-390.png
+8e28f2aefea2dacb8170fbac9dfe6cba6e39725ffa807823bffae32ed7347dd8  145488  invalidated\baseline-dialog-long-1440x900.png
+24b9db50d8053672cd2efa4cc88132140cfdc17f1c3e74f5a322e2b0bc718de1  84667  invalidated\baseline-dialog-long-720x450.png
+5900ae2680519a8c6a3be89abc8c4e1a5f9399d4dca734f269eeac575be72657  102715  invalidated\baseline-dialog-open.png
+5f7fe41c08838c630c159a705bcf62e721fc0a3819ae008d4fc646e62d88ce02  249404  invalidated\baseline-focus-hero-cta.png
+f896ec885b5e20e6a324fbb2e70c4b7fc1a2830be198dc7a5d50455d430c55fe  115690  invalidated\baseline-focus-skip-link.png
+f1fbdfc401e4ecb2176ab6c1d8eab2dc5a2a10fa3e420eda4710c73f5a372417  114848  invalidated\baseline-hero-entrance-normal.png
+df0ee64afced0bbfbd6d7b148e2418b7c6121a1c8f66892cbe4919ab9dfd8022  114798  invalidated\baseline-hero-entrance-reduced.png
+80ac14efbfe6ac619fba40cc36f4e7a818a57176b8e819c0ba41721e91428a01  75492  invalidated\baseline-hero-stage-normal.png
+145e5e85b9c1cbce5644180fa152b28ac7bca81bf7acddd15d3ab44995d3d206  112719  invalidated\baseline-hero-stage-reduced.png
+f1fbdfc401e4ecb2176ab6c1d8eab2dc5a2a10fa3e420eda4710c73f5a372417  114848  invalidated\baseline-image-failed.png
+2258e24c2024783525503578cbbabab146469937e71157c36986af8837888001  16848  invalidated\baseline-no-js.png
+274a9c4bcf68fb1648772ea52ba7f9a6f394cfb1b7a5abcdfeb4222de5caa54a  106077  invalidated\baseline-prefers-contrast-more.png
+129a4100e224a679ff71bedfcf0ff162e2ebde39c676848f721c76fcc4cd1e2c  80820  invalidated\baseline-reduced-motion.png
+b9e1aeb968fedf87166a5dd1d0e30746b174b7f4027cf38bc29da2176cb408c6  46405  invalidated\baseline-tabs-320.png
+672398ae60a24e320c97a52e1733c418f57f17bc77b2944ccedefbc92b6633be  134136  invalidated\baseline-targets-390.png
+f427a9893e4f31800088ba44fdd1b211174f266162c5009b8c25b2ebe1a23622  76619  invalidated\baseline-text-320.png
+8ddad98440c6bb40696bd74b7b3f83bd8080e91f9d29e4f43f2cb7a3252e8955  9576  invalidated\baseline-viewport-320x640.png
+03b8b715406070f37617495f2388d80b56b80a0d3fc177996994c90f8f04060c  43930  invalidated\baseline-viewport-720x450(200% zoom).png
+98e0178f42d9371d82ff6bee5b62c6da250ad10832aea6696f1caf3e039538fb  303615  invalidated\probe-baseline-contaminated.json
+95b8c1bcbb1d7f32a94de90b346f0948cb493095695702782e8c788e9b5a2e43  1335  invalidated\README.md
+5ea036b1e8ea5eaeed2cb6c2af8e3ed08147da9b0df3d6aa00c28e591b23fd73  56224  json\after-static-inventory.json
+d678ae4b34187542b8b17635309d055b726dddab35f14be24197c13918a5cf2d  84700  json\baseline-static-inventory.json
+d19e4043bff5e638b457bb172cc68560cb3bb1db1e695fdf0c5cd9d7b789e6b0  15386  json\f01-reverify-after.json
+3232f307bb9f019b6d3b14277b8a6aa4fa93bccd322e22afff972e4c2680200d  713978  json\probe-after.json
+ffb2852ff4b21ca2dcc06d8059642438af55e0e7acfeec023191bcb5109a658f  6402  json\supplement-after.json
+5f1eb470a6061e4a85215702e76eba3e0c827bfd41efad3c392123ce3da06963  1112  scripts\check-footer-top.mjs
+b7330dfbd33d02d9ab1b93e707cc26d0a691a00d0292a3dcc587f240ce06740f  1527  scripts\check-hero-cta-320.mjs
+d8845d2c22798c84363217d8ed5cd33e9d0afb9400467a9e99a377ed6ff0dd27  5508  scripts\inventory-after.mjs
+babc24bf8f38d4e41233f970bd589d48c9be733febe4110e3bf7b60c302f4342  15742  scripts\inventory-baseline.mjs
+d1ca2b560df6470281451bab226347c49f2423c7014d9570bc590de48d0fbd55  103150  scripts\probe-a11y.mjs
+713858b0122c9df0801562e03f05eebd4dc0d4e91442946eb596108809bc6d6f  10137  scripts\probe-f01-reverify.mjs
+7ff54dabe5f51f5a0371c246fc72534520ed9b60e764f4f08f3db398b5b9159a  11838  scripts\probe-supplement.mjs
+4fe5760a8284313fd7264fa399f5cbcf596c1f23dc4f3bb79d34e576e17061d0  62853  shots\after-account-forgot-password-1440.png
+80c8d256fdba28d00fd71dd75235720ebce9e3a9f40bd7f083a9585b088e937a  36687  shots\after-account-forgot-password-390.png
+07441ae41b81f4db0b6481643dbd8592de18a9c126ac118085f9db8619e65f51  61145  shots\after-account-login-1440.png
+f606b34be4267cb83a71399fc508004f4023f5de3a3deb79f6cf7b4648eb39e1  34891  shots\after-account-login-390.png
+7aed14f8c1eaaf8757c35313d9bd3bfbce38257c508c6622cde544a1f473130c  73242  shots\after-account-register-1440.png
+b49e22d84adf2d0940d83b8e65eb420093e8338ec8b4e7acee6dd0637b8e3e70  42283  shots\after-account-register-390.png
+f3a371dfef2004482fd2b8026c9472e6bed3e81623746eb3f2f2161613ea8ed9  43118  shots\after-anchor-experience-320.png
+9fc660cad6a5758bbeeb33b718ccd5652c213016aaa7fc04c5ccdc917f648964  43113  shots\after-anchor-experience.png
+9abcbcdb5572d6070c949347ac6f91d93308177128174a3184f2cb0bceb2dcc0  120763  shots\after-assets-failed.png
+b393c14549cb0747eeb8901e3bdf0e697930f8d2d32a16e6f61342b45f30aa45  427622  shots\after-dark-1440.png
+d600c656a977e469df5524f3d349f310843b2fc8ae6de4e051ce3d7b9d2bdd61  64876  shots\after-dark-390.png
+e3eff28fc5f769f42c521c962e85c45d14d29849f0849ab27abf7a146a952459  127706  shots\after-dialog-long-1440x900.png
+dc3cc5d277d319a17bc65f8508e6428eedbc6880da9d763679e2744624c79636  71133  shots\after-dialog-long-720x450.png
+863f029ed75d3f28468f50b7d23360f2e10f0e3e8e47385ff6656257c3c6a6a2  107889  shots\after-dialog-open.png
+73cfa0cd586fdc3613d68850069cc3d96745d8521fa1aa4025012c3104155603  119851  shots\after-evidence-collapsed.png
+9b27cdd9868083d6ff6b89abbb7e75b94105237dd8da4605bef3a88ae781f107  125826  shots\after-evidence-expanded-fonts.png
+9b27cdd9868083d6ff6b89abbb7e75b94105237dd8da4605bef3a88ae781f107  125826  shots\after-evidence-expanded.png
+635a62844986e245937639b4c5fa015489cc7cc40064208ec21053b3dbef30b1  99511  shots\after-f01-judgment-1440x900.png
+041f33e132bc8f4211381c4401bb8d8796c63995a85b1b6bad396e3f703a8fc6  45410  shots\after-f01-judgment-320x640.png
+39cef5fbd73aeaabd37bc690eb0cfa5fc74d598de05c91e41e60104ddbd65700  60203  shots\after-f01-judgment-390x844.png
+8fc62c54d83be63ac6519d331c852937613f2916b9338c2af3836203b475a3b1  99414  shots\after-f01-judgment-dark-1440.png
+26bbfd9d64e525be2216c94311a7477989e4cda76122c65138100775e331e61c  120702  shots\after-focus-hero-cta.png
+8ff018e58c6923000e69987c8311321ec0b08a7a7541de33f7798b7110d52a67  122223  shots\after-focus-skip-link.png
+83dff5ea3ea1e024c3ca391f41655f1edef63ae0f98888b4ca66e87d4005ada5  120300  shots\after-focus-stage-tab.png
+f6301a6053542e8bd632dad4d0e5470d77cdb5bf9a02e381a74556379cdd66f7  179674  shots\after-font-zoom-200.png
+74737deaa858cc75734ee39f22981a1aa4b5ab06e6fba1d0d7e0ec5a0ac449ca  130275  shots\after-footer-top.png
+b76c0e987b10c22c3bbe9db3a5be3c663d266dfc6b6450b101d643aa4871af01  43547  shots\after-hero-cta-320.png
+098007619e20e95442ff54f59a68ca804eb1c35bdc36ec36c59c818814232793  119857  shots\after-hero-entrance-normal.png
+5505d7ea060fb0b1c3e323a2baa0d5de31e758858bd8bdcdae713443186c375a  121149  shots\after-hero-entrance-reduced.png
+c27e496a1c4ac3da64da3f5941597f6f0a8cd319a7755760719ee26cacc0126f  39729  shots\after-hero-scroll-320.png
+4c19d4a08a9ef54db8dcd46dea59a8443207516bdc644132d4d155c201ce4869  81465  shots\after-hero-stage-normal.png
+f3e28b06a714db67e1d9327aeba62c89d498b013c29dea537dd8db1c9e56c2fa  118658  shots\after-hero-stage-reduced.png
+45f93a1bf4a07c15e8eff95559325744abbc621e9c34e24647955d2b5af4b5f5  99511  shots\after-judgment-step.png
+5bce562bb380cffbce057701d908fa46b0bfc8f68526067d429836e3bfb0f1a1  41764  shots\after-mobile-tabs-320x640.png
+279471573457685522af812e14ee96d05e216a11ae4fc9d134372c545bd52dbe  55882  shots\after-mobile-tabs-360x740.png
+d3a0ee786e49e0653122e980bd7e208dfdfa798ec5f5c6e0fc341193e2813c8f  16849  shots\after-no-js.png
+80ed651253962cc9e1ce2fe556fbd3e60aacde42403155d8f7056fc373a13841  110882  shots\after-prefers-contrast-more.png
+9164f6ebfc0bb4eb1fd5af7e3570e6f1fd5c3015d78c11bb9b1a5f3d954dfa9f  33570  shots\after-rail-320x640.png
+f5fc65b33ae1b0760e386c64fd6b01db3f8c955530d5b84c5a4102018386028f  34064  shots\after-rail-720x450(200% zoom).png
+69c560c998c0fd9cb4f8f139602232e1891bd84d9b0e2f4916cd582f6f35180d  81855  shots\after-reduced-motion.png
+1adbda7e9cb91c64922e5f7aac1c8c940cec891a5a67ea2f0da9173d7022b60b  99233  shots\after-scroll-motion-normal.png
+93265f3f6046de3173ce2d425818c9f1a8cc44a1c109bbebac3241feab080f5d  132166  shots\after-scroll-motion-reduced.png
+2957dba578a83d7fddcf1aad735ecd44986afb562c11fe22455b231eff49a98a  103838  shots\after-scroll-reveal-normal.png
+cdd7cac77e0658ac847cc5c966df5501b81cf4150b88230392b1c8d93d256f31  108936  shots\after-scroll-reveal-reduced.png
+a204eb8c5fd7797e41a0652e6b3c787fffdd1ff4a740d3d4324e05e876f5a6f0  37971  shots\after-tabs-320.png
+c42d31e0041df911b3226ddfae657930d2147d34e08beb00d7cecc5469421502  65248  shots\after-targets-390.png
+5bce562bb380cffbce057701d908fa46b0bfc8f68526067d429836e3bfb0f1a1  41764  shots\after-text-320.png
+ec2bdda8ca5946540b1d9e8bc2a7b5be6db9d890939360bed765587dce4942cb  41804  shots\after-viewport-320x640.png
+fcff9281f46e06e3fe880163faa18ffe72f5de4c321c3f2457fdaf2b06c0079f  42467  shots\after-viewport-720x450(200% zoom).png
+```

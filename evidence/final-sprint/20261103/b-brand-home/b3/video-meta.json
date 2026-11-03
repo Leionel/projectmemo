@@ -1,0 +1,52 @@
+{
+  "phase": 2,
+  "kind": "video-metadata",
+  "capturedAt": "2026-11-03T04:40:43.667Z",
+  "sourceSha": "9bae926e9475cedef118deedf5e002ec8365a23b",
+  "file": "evidence/final-sprint/20261103/b-brand-home/b3/interaction-20s.webm",
+  "fileBytes": 2155752,
+  "durationSeconds": 20.52,
+  "videoWidth": 1440,
+  "videoHeight": 900,
+  "wallClockMs": 20310,
+  "targetSeconds": 20,
+  "sequence": [
+    "加载 1440×900 light（含 Next dev 首帧）",
+    "Hero 切 02 期间 → 01 离开时 → 03 回来后",
+    "展开 查看依据 → 收起",
+    "平滑滚动到 01 节 rail 中段（进度线≈50%，前两个圆点点亮）",
+    "继续平滑滚动到 02 公开交互示例（五步 Demo）",
+    "打开「查看原文：任务安排」dialog",
+    "Esc 关闭 dialog",
+    "停留收尾"
+  ],
+  "frames": [
+    {
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-1_5s.png",
+      "bytes": 8442
+    },
+    {
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-5_5s.png",
+      "bytes": 340583
+    },
+    {
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-10_5s.png",
+      "bytes": 420270
+    },
+    {
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-13_8s.png",
+      "bytes": 336918
+    },
+    {
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-15_5s.png",
+      "bytes": 228703
+    },
+    {
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-19_5s.png",
+      "bytes": 321455
+    }
+  ],
+  "note": "时长由 Chromium HTMLVideoElement.duration 读取（Playwright ffmpeg 无 vp8 解码器）。",
+  "capturedOnSha": "cc7c19fed573c79a55f727eaa338ab84fd80cc3b",
+  "shaBindingNote": "录屏采集于 cc7c19f；绑定最终候选 9bae926（仅字号作用域/role 属性，不改变录屏路径视觉）。"
+}

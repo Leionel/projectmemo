@@ -1,0 +1,739 @@
+/* B1 隔离原型：两款 Hero 共用同一套字体、间距、CTA 与文案量级，只在信息组织上不同。 */
+
+.protoShell {
+  --proto-editorial: "PM Editorial", "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  min-height: calc(100dvh - 3rem);
+  padding-bottom: 3rem;
+  background: var(--paper);
+  color: var(--ink);
+}
+.protoShell *,
+.protoShell *::before,
+.protoShell *::after {
+  box-sizing: border-box;
+}
+.protoShell a:focus-visible,
+.protoShell button:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
+}
+.protoShell a,
+.protoShell button {
+  touch-action: manipulation;
+}
+
+.protoBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: min(1180px, calc(100% - 48px));
+  margin: 1.25rem auto 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.01em;
+  line-height: 1.6;
+}
+.protoBadge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--amber);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(2.25rem, 4.5vw, 4.75rem);
+  align-items: center;
+  width: min(1180px, calc(100% - 48px));
+  margin-inline: auto;
+  padding-block: clamp(2rem, 3.6vw, 3.75rem) clamp(2.5rem, 4vw, 4.5rem);
+}
+.copy {
+  min-width: 0;
+}
+.positioning {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.45rem;
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+}
+.positioning strong {
+  color: var(--teal);
+  font-size: 1rem;
+  font-weight: 650;
+}
+.headline {
+  margin-top: 1.05rem;
+  font-family: var(--proto-editorial);
+  font-size: clamp(2.75rem, 4.4vw, 4.35rem);
+  font-weight: 500;
+  line-height: 1.16;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.headline span {
+  display: block;
+  color: var(--teal);
+}
+.sub {
+  max-width: 31rem;
+  margin-top: 1.35rem;
+  color: var(--ink-soft);
+  font-size: 1.0625rem;
+  line-height: 1.9;
+  text-wrap: pretty;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+.primaryBtn,
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 48px;
+  padding-inline: 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    transform 120ms ease;
+}
+.primaryBtn {
+  border: 1px solid var(--teal);
+  background: var(--teal);
+  color: var(--paper-strong);
+}
+.primaryBtn:hover {
+  filter: brightness(0.94);
+}
+.secondaryBtn {
+  border: 1px solid var(--rule);
+  background: var(--paper-strong);
+  color: var(--ink);
+}
+.secondaryBtn:hover {
+  border-color: var(--rule-strong);
+}
+.primaryBtn:active,
+.secondaryBtn:active {
+  transform: scale(0.99);
+}
+.mockNote {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.05rem;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.75;
+}
+.mockNote::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--rule-strong);
+}
+
+/* 产品镜头：两款共用的卡片外框，内部信息组织不同。 */
+.lens {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  border-radius: 1.15rem;
+  background: var(--paper-strong);
+  box-shadow:
+    0 36px 80px -52px rgb(28 46 44 / 48%),
+    0 2px 8px -2px rgb(28 46 44 / 6%);
+}
+:global(.dark) .lens {
+  box-shadow:
+    0 36px 80px -52px rgb(0 0 0 / 72%),
+    0 1px 0 rgb(255 255 255 / 4%);
+}
+.lensTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.15rem 1.4rem 1rem;
+  border-bottom: 1px solid var(--rule);
+}
+.lensIdentity {
+  min-width: 0;
+}
+.kicker {
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  line-height: 1.6;
+}
+.lensTitle {
+  margin-top: 0.3rem;
+  font-size: 1.0625rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+.lensTitle span {
+  margin-left: 0.35rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+.statusWaiting {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--amber) 32%, var(--rule));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--amber) 9%, var(--paper-strong));
+  color: var(--amber);
+  font-size: 0.75rem;
+  font-weight: 550;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.stageTabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.55rem 0.65rem 0.35rem;
+  border-bottom: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--ink) 2.5%, var(--paper-strong));
+}
+.stageTabs button {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  border-bottom: 2px solid transparent;
+  border-radius: 0.4rem 0.4rem 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    background-color 140ms ease;
+}
+.stageTabs button > span {
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.65;
+}
+.stageTabs button:hover {
+  background: color-mix(in srgb, var(--ink) 2%, transparent);
+  color: var(--ink);
+}
+.stageTabs button[aria-selected="true"] {
+  border-bottom-color: var(--teal);
+  background: var(--paper-strong);
+  color: var(--teal);
+  font-weight: 650;
+}
+
+.lensBody {
+  min-height: 19rem;
+  padding: 1.15rem 1.4rem 1.25rem;
+}
+.questionList {
+  margin: 0;
+}
+.question {
+  display: grid;
+  grid-template-columns: 4.25rem minmax(0, 1fr);
+  gap: 0.35rem 1rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--rule) 70%, transparent);
+}
+.question:first-of-type {
+  padding-top: 0.15rem;
+}
+.question:last-of-type {
+  padding-bottom: 0.4rem;
+  border-bottom: 0;
+}
+.question dt {
+  padding-top: 0.1rem;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.question dd {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.9rem;
+  line-height: 1.75;
+}
+.questionMeta {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+}
+.question[data-tone="waiting"] {
+  margin-inline: -0.6rem;
+  padding-inline: 0.6rem;
+  border-bottom-color: transparent;
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--amber) 6%, transparent);
+}
+.question[data-tone="waiting"] dt {
+  color: var(--amber);
+}
+
+.lensActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--rule);
+}
+.ghostButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding-inline: 0.35rem;
+  border-radius: 0.3rem;
+  color: var(--teal);
+  font-size: 0.82rem;
+  font-weight: 550;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.ghostButton:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.22em;
+}
+.chevron {
+  transition: transform 160ms ease;
+}
+.chevron[data-open="true"] {
+  transform: rotate(180deg);
+}
+.cardLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.cardLink:hover {
+  color: var(--teal);
+}
+
+.evidencePanel {
+  margin-top: 0.9rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.6rem;
+  background: var(--paper);
+}
+.evidenceIntro {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.7;
+}
+.sourceList {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0.65rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.sourceList li {
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--rule);
+}
+.sourceList li:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+.sourceName {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+.sourceName span {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+.sourceList q,
+.sourcePanel q {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--ink-soft);
+  font-size: 0.84rem;
+  line-height: 1.8;
+  quotes: "「" "」";
+}
+
+.lensFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.7rem 1.4rem;
+  border-top: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--ink) 2%, var(--paper-strong));
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+/* 变体 B：来源 → 变化 → 判断 → 等你的因果链。 */
+.chain {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chainStep {
+  position: relative;
+  padding: 0 0 1.15rem 2.1rem;
+}
+.chainStep:last-child {
+  padding-bottom: 0.2rem;
+}
+.chainStep:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: 1.5rem;
+  bottom: 0.15rem;
+  left: 0.72rem;
+  width: 1px;
+  background: var(--rule);
+}
+.stepMark {
+  position: absolute;
+  top: 0.05rem;
+  left: 0;
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  background: var(--paper-strong);
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.chainStep[data-emphasis="true"] .stepMark {
+  border-color: var(--amber);
+  background: color-mix(in srgb, var(--amber) 8%, var(--paper-strong));
+  color: var(--amber);
+}
+.stepLabel {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+}
+.stepTitle {
+  margin-top: 0.3rem;
+  font-size: 0.9rem;
+  line-height: 1.75;
+}
+.stepNote {
+  margin-top: 0.3rem;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.75;
+}
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.6rem;
+}
+.evidenceChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 40px;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.4rem;
+  background: var(--paper-strong);
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    color 140ms ease;
+}
+.evidenceChip:hover {
+  border-color: var(--rule-strong);
+  color: var(--ink);
+}
+.evidenceChip[aria-expanded="true"] {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+.sourcePanel {
+  margin-top: 0.6rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.55rem;
+  background: var(--paper);
+}
+.sourceMeta {
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+.sourcePanel q {
+  color: var(--ink);
+  font-size: 0.86rem;
+}
+.sourceNote {
+  margin-top: 0.4rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.7;
+}
+.judgment {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+}
+.judgment p {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  font-size: 0.875rem;
+  line-height: 1.75;
+}
+.judgment p > span {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.oldJudgment {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--muted) 55%, transparent);
+}
+.newJudgment {
+  color: var(--ink);
+  font-weight: 550;
+}
+
+.anchorPlaceholder {
+  width: min(1180px, calc(100% - 48px));
+  margin-inline: auto;
+  padding: 2rem 0 3rem;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.8;
+  scroll-margin-top: 5rem;
+}
+
+@media (max-width: 1050px) {
+  .hero {
+    gap: 2.25rem;
+  }
+  .headline {
+    font-size: clamp(2.5rem, 4.8vw, 3.4rem);
+  }
+}
+@media (max-width: 980px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.25rem;
+    padding-block: 1.5rem 3rem;
+  }
+  .headline {
+    font-size: clamp(2.4rem, 7.2vw, 3.4rem);
+  }
+  .sub {
+    max-width: 38rem;
+  }
+  .lensBody {
+    min-height: 0;
+  }
+}
+@media (max-width: 720px) {
+  .protoBadge,
+  .hero,
+  .anchorPlaceholder {
+    width: calc(100% - 36px);
+  }
+  .protoBadge {
+    margin-top: 1rem;
+    font-size: 0.74rem;
+  }
+  .hero {
+    gap: 1.75rem;
+    padding-block: 1.25rem 2.5rem;
+  }
+  .headline {
+    font-size: clamp(2.05rem, 8.6vw, 2.7rem);
+    line-height: 1.2;
+  }
+  .sub {
+    margin-top: 1rem;
+    font-size: 0.94rem;
+  }
+  .actions {
+    gap: 0.55rem;
+    margin-top: 1.35rem;
+  }
+  .primaryBtn,
+  .secondaryBtn {
+    flex: 1 1 10rem;
+    min-height: 46px;
+    padding-inline: 0.9rem;
+    font-size: 0.875rem;
+  }
+  .mockNote {
+    margin-top: 0.85rem;
+    font-size: 0.78rem;
+  }
+  .lens {
+    border-radius: 0.9rem;
+  }
+  .lensTop {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.55rem;
+    padding: 0.95rem 1rem 0.85rem;
+  }
+  .lensTitle {
+    font-size: 0.98rem;
+  }
+  .stageTabs {
+    padding: 0.45rem 0.45rem 0.3rem;
+  }
+  .stageTabs button {
+    gap: 0.3rem;
+    font-size: 0.78rem;
+  }
+  .lensBody {
+    padding: 0.95rem 1rem 1.05rem;
+  }
+  .question {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.2rem;
+    padding: 0.7rem 0;
+  }
+  .question dt {
+    font-size: 0.78rem;
+  }
+  .question dd {
+    font-size: 0.87rem;
+  }
+  .questionMeta {
+    font-size: 0.8rem;
+  }
+  .lensActions {
+    margin-top: 0.85rem;
+    padding-top: 0.75rem;
+  }
+  .evidencePanel {
+    padding: 0.85rem 0.9rem;
+  }
+  .lensFoot {
+    padding: 0.65rem 1rem;
+    font-size: 0.75rem;
+  }
+  .chainStep {
+    padding-left: 1.9rem;
+  }
+  .stepTitle {
+    font-size: 0.87rem;
+  }
+  .stepNote {
+    font-size: 0.8rem;
+  }
+  .evidenceChip {
+    min-height: 44px;
+    font-size: 0.8rem;
+  }
+  .judgment p {
+    font-size: 0.84rem;
+  }
+}
+@media (max-width: 380px) {
+  .primaryBtn,
+  .secondaryBtn {
+    flex-basis: 100%;
+  }
+  .stageTabs button > span {
+    display: none;
+  }
+  .stepMark {
+    width: 1.35rem;
+    height: 1.35rem;
+    font-size: 0.58rem;
+  }
+  .chainStep {
+    padding-left: 1.75rem;
+  }
+  .chainStep:not(:last-child)::before {
+    left: 0.65rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .protoShell *,
+  .protoShell *::before,
+  .protoShell *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto;
+  }
+}
+@media (prefers-contrast: more) {
+  .lens,
+  .evidencePanel,
+  .sourcePanel,
+  .evidenceChip,
+  .primaryBtn,
+  .secondaryBtn {
+    border-color: var(--ink-soft);
+    box-shadow: none;
+  }
+}

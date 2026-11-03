@@ -1,0 +1,44 @@
+{
+  "generatedAt": "2026-11-03T04:35:38.087Z",
+  "base": "http://127.0.0.1:34112",
+  "mode": "production-next-start .next-build anonymous read-only",
+  "home": {
+    "url": "http://127.0.0.1:34112/",
+    "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+    "boundaryVisible": true,
+    "externalBeforeClick": 0,
+    "videoLinks": 2
+  },
+  "headerCta": {
+    "finalUrl": "http://127.0.0.1:34112/login?from=%2Ffocus",
+    "docs": [],
+    "loginFormVisible": true
+  },
+  "directFocus": {
+    "finalUrl": "http://127.0.0.1:34112/login?from=%2Ffocus",
+    "title": "登录忆程｜忆程 ProjectMemo",
+    "h1": "登录忆程",
+    "docs": [
+      {
+        "url": "http://127.0.0.1:34112/focus",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:34112/login?from=%2Ffocus",
+        "status": 200
+      }
+    ]
+  },
+  "totalRequests": 76,
+  "externalRequestsBeforeClick": [],
+  "docsAll": [
+    {
+      "url": "http://127.0.0.1:34112/focus",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:34112/login?from=%2Ffocus",
+      "status": 200
+    }
+  ]
+}

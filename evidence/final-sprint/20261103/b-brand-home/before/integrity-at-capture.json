@@ -1,0 +1,9 @@
+{
+  "capturedAt": "2026-11-03T11:41:39.8134605+08:00",
+  "head": "485d485378637e1da3280ed092739d441c8cf749",
+  "branch": "codex/final-b-brand-home",
+  "dirtyPaths": [
+    "?? components/home/"
+  ],
+  "note": "Phase 0 before 截图期间源码完整性快照（Lead 未修改业务文件时应为空）"
+}

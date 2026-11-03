@@ -1,0 +1,9 @@
+=== PHASE0 CAPTURE SUMMARY ===
+OK  1440-light   248341 bytes  class=light  scrollW=1440/innerW=1440  overflow=false  fonts=loaded  badge=null
+OK  1440-dark    247034 bytes  class=dark  scrollW=1440/innerW=1440  overflow=false  fonts=loaded  badge=null
+OK  1280-light   173519 bytes  class=light  scrollW=1280/innerW=1280  overflow=false  fonts=loaded  badge=null
+OK  1280-dark    172754 bytes  class=dark  scrollW=1280/innerW=1280  overflow=false  fonts=loaded  badge=null
+OK  390-light    99130 bytes  class=light  scrollW=390/innerW=390  overflow=false  fonts=loaded  badge=null
+OK  390-dark     98889 bytes  class=dark  scrollW=390/innerW=390  overflow=false  fonts=loaded  badge=null
+network: requests=186 unique=28 external=0 apiWrites=0 failures=2 consoleErrors=0 pageErrors=0
+output: evidence\final-sprint\20261103\b-brand-home\before

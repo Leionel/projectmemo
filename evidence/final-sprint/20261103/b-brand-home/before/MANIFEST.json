@@ -1,0 +1,289 @@
+{
+  "task": "task-4",
+  "track": "B",
+  "phase": 0,
+  "kind": "before",
+  "capturedAt": "2026-11-03T03:41:54.154Z",
+  "sourceSha": "485d485378637e1da3280ed092739d441c8cf749",
+  "worktree": "D:\\Projects\\hongmen-final-b-brand-home",
+  "branch": "codex/final-b-brand-home",
+  "baseURL": "http://127.0.0.1:34111",
+  "mode": "本地匿名公开示例页（未登录）",
+  "environment": {
+    "os": "win32 10.0.26300 (Windows 11 Home China)",
+    "arch": "x64",
+    "cpu": "Intel(R) Core(TM) i7-14700HX ×28",
+    "totalMemoryGiB": 15.78,
+    "node": "v24.16.0",
+    "browser": "chromium via @playwright/test 1.61.1 (headless)",
+    "deviceScaleFactor": 1,
+    "colorScheme": "light",
+    "reducedMotion": "no-preference",
+    "network": "localhost loopback（Next dev，同一台机器）",
+    "timezoneId": "Asia/Shanghai",
+    "locale": "zh-CN"
+  },
+  "providerMode": {
+    "LLM_MODE": "mock（环境由 Lead 提供；注意：首页 / 由 SiteHeader 渲染营销页头，不展示 layout 中的“演示模式”徽标，故本项不能由截图佐证）",
+    "database": "prisma/final-preparation.db 空库（由 Lead 提供）",
+    "worker": "无 Worker",
+    "seed": "无 seed",
+    "observableEvidence": "网络审计 186 条请求中外部 origin 0、/api 写请求 0、模型调用 0；页面为匿名公开示例。"
+  },
+  "sourceIntegrity": {
+    "headAtCapture": "485d485378637e1da3280ed092739d441c8cf749",
+    "headVerified": true,
+    "baselinePageFilesMtime": "2026-11-03T10:56:33+08:00（app/page.tsx、app/layout.tsx、app/home.module.css、components/SiteHeader.tsx 均为基线检出时间，before 采集期间未被改写）",
+    "dirtyTrackedFilesAtCapture": ["next-env.d.ts（M，工具自动生成）"],
+    "concurrentUntrackedWork": [
+      "components/home/（homeExample.ts、prototype.module.css、PrototypeHeroA.tsx、PrototypeHeroB.tsx；mtime 11:41:59）",
+      "app/prototype/hero-a/page.tsx、app/prototype/hero-b/page.tsx（mtime 11:41:44）"
+    ],
+    "concurrentWorkImpact": "上述未跟踪文件由 B1 原型实施产生，不改变 / 首页的 app/page.tsx、layout.tsx、home.module.css；before 六图对应基线首页，不受影响。",
+    "note": "before 截图与 HEAD=485d485 基线一致；另一实施者在本树并发写入原型文件，故 Phase 2 after 采集前须复核 app/page.tsx 等文件的新 SHA。"
+  },
+  "captureProtocol": "viewport 固定；localStorage.setItem('theme', theme) 后 reload；等待 h1 可见、documentElement 获得对应主题类、document.fonts.ready；scrollY=0；仅截页顶非全页。",
+  "captureMatrix": [
+    {
+      "width": 1440,
+      "height": 900,
+      "theme": "light",
+      "label": "1440-light",
+      "ok": true,
+      "error": null,
+      "file": "evidence/final-sprint/20261103/b-brand-home/before/homepage-1440-light-before.png",
+      "fileBytes": 248341,
+      "fileSha256": "df4e99cf848ea6067f018d868cd6885bd4391dd8dd0b3b09a0c8f71ecdd19a5f",
+      "metricsFile": "evidence/final-sprint/20261103/b-brand-home/before/metrics/homepage-1440-light.json",
+      "key": {
+        "title": "忆程 ProjectMemo｜个人项目 Agent",
+        "h1": "项目隔了几天， 再打开也接得上。",
+        "htmlClass": "light",
+        "bodyBackgroundColor": "rgb(247, 246, 242)",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "headerBadge": null,
+        "selectedTabText": "1\n查看记录"
+      }
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "theme": "dark",
+      "label": "1440-dark",
+      "ok": true,
+      "error": null,
+      "file": "evidence/final-sprint/20261103/b-brand-home/before/homepage-1440-dark-before.png",
+      "fileBytes": 247034,
+      "fileSha256": "0f5545244d779f6a65f535cf58178bf987567d6da46a2d0b5d6a3ab09e32fa10",
+      "metricsFile": "evidence/final-sprint/20261103/b-brand-home/before/metrics/homepage-1440-dark.json",
+      "key": {
+        "title": "忆程 ProjectMemo｜个人项目 Agent",
+        "h1": "项目隔了几天， 再打开也接得上。",
+        "htmlClass": "dark",
+        "bodyBackgroundColor": "rgb(21, 30, 28)",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "headerBadge": null,
+        "selectedTabText": "1\n查看记录"
+      }
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "theme": "light",
+      "label": "1280-light",
+      "ok": true,
+      "error": null,
+      "file": "evidence/final-sprint/20261103/b-brand-home/before/homepage-1280-light-before.png",
+      "fileBytes": 173519,
+      "fileSha256": "117451299cdae00258796684d1ef18542be42dd3337904b0a5c4b2ff3d7bba50",
+      "metricsFile": "evidence/final-sprint/20261103/b-brand-home/before/metrics/homepage-1280-light.json",
+      "key": {
+        "title": "忆程 ProjectMemo｜个人项目 Agent",
+        "h1": "项目隔了几天， 再打开也接得上。",
+        "htmlClass": "light",
+        "bodyBackgroundColor": "rgb(247, 246, 242)",
+        "scrollWidth": 1280,
+        "innerWidth": 1280,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "headerBadge": null,
+        "selectedTabText": "1\n查看记录"
+      }
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "theme": "dark",
+      "label": "1280-dark",
+      "ok": true,
+      "error": null,
+      "file": "evidence/final-sprint/20261103/b-brand-home/before/homepage-1280-dark-before.png",
+      "fileBytes": 172754,
+      "fileSha256": "99d46dcc5246b0ea2edcfccab8116c5a41eb2c18468a76dce523349d5c348d7e",
+      "metricsFile": "evidence/final-sprint/20261103/b-brand-home/before/metrics/homepage-1280-dark.json",
+      "key": {
+        "title": "忆程 ProjectMemo｜个人项目 Agent",
+        "h1": "项目隔了几天， 再打开也接得上。",
+        "htmlClass": "dark",
+        "bodyBackgroundColor": "rgb(21, 30, 28)",
+        "scrollWidth": 1280,
+        "innerWidth": 1280,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "headerBadge": null,
+        "selectedTabText": "1\n查看记录"
+      }
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "theme": "light",
+      "label": "390-light",
+      "ok": true,
+      "error": null,
+      "file": "evidence/final-sprint/20261103/b-brand-home/before/homepage-390-light-before.png",
+      "fileBytes": 99130,
+      "fileSha256": "83aa6e45a4f5a8f9542fd8fc796f9f4f632026d9074d581bec960b7dbfcff026",
+      "metricsFile": "evidence/final-sprint/20261103/b-brand-home/before/metrics/homepage-390-light.json",
+      "key": {
+        "title": "忆程 ProjectMemo｜个人项目 Agent",
+        "h1": "项目隔了几天， 再打开也接得上。",
+        "htmlClass": "light",
+        "bodyBackgroundColor": "rgb(247, 246, 242)",
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "headerBadge": null,
+        "selectedTabText": "1\n查看记录"
+      }
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "theme": "dark",
+      "label": "390-dark",
+      "ok": true,
+      "error": null,
+      "file": "evidence/final-sprint/20261103/b-brand-home/before/homepage-390-dark-before.png",
+      "fileBytes": 98889,
+      "fileSha256": "c3a42dc5a22a304b0b71555e2370ab5f2e6fba9215c9221ff54862f319f187ce",
+      "metricsFile": "evidence/final-sprint/20261103/b-brand-home/before/metrics/homepage-390-dark.json",
+      "key": {
+        "title": "忆程 ProjectMemo｜个人项目 Agent",
+        "h1": "项目隔了几天， 再打开也接得上。",
+        "htmlClass": "dark",
+        "bodyBackgroundColor": "rgb(21, 30, 28)",
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "headerBadge": null,
+        "selectedTabText": "1\n查看记录"
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/before/homepage-1440-light-before.png",
+      "bytes": 248341,
+      "sha256": "df4e99cf848ea6067f018d868cd6885bd4391dd8dd0b3b09a0c8f71ecdd19a5f",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/before/homepage-1440-dark-before.png",
+      "bytes": 247034,
+      "sha256": "0f5545244d779f6a65f535cf58178bf987567d6da46a2d0b5d6a3ab09e32fa10",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/before/homepage-1280-light-before.png",
+      "bytes": 173519,
+      "sha256": "117451299cdae00258796684d1ef18542be42dd3337904b0a5c4b2ff3d7bba50",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/before/homepage-1280-dark-before.png",
+      "bytes": 172754,
+      "sha256": "99d46dcc5246b0ea2edcfccab8116c5a41eb2c18468a76dce523349d5c348d7e",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/before/homepage-390-light-before.png",
+      "bytes": 99130,
+      "sha256": "83aa6e45a4f5a8f9542fd8fc796f9f4f632026d9074d581bec960b7dbfcff026",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/before/homepage-390-dark-before.png",
+      "bytes": 98889,
+      "sha256": "c3a42dc5a22a304b0b71555e2370ab5f2e6fba9215c9221ff54862f319f187ce",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/before/metrics/homepage-1440-light.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/before/metrics/homepage-1440-dark.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/before/metrics/homepage-1280-light.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/before/metrics/homepage-1280-dark.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/before/metrics/homepage-390-light.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/before/metrics/homepage-390-dark.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/before/network-baseline.json",
+      "kind": "network-audit"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/before/MANIFEST.json",
+      "kind": "manifest"
+    }
+  ],
+  "anomalies": {
+    "captureErrors": [],
+    "horizontalOverflowCaptures": [],
+    "nonLocalRequests": [],
+    "apiWrites": 0,
+    "imageFontFailures": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "benignRequestFailures": [
+      "capture-1440-dark 期间 2 条 GET /?_rsc=XKlrArlH2CwP-fXr（fetch）报 net::ERR_ABORTED，为 reload 打断进行中的 RSC 预取，非页面/图片/字体失败；文档请求本身 200。"
+    ],
+    "headerBadgeNullExplanation": "首页 / 的 header 由 components/SiteHeader.tsx 在 pathname === '/' 时渲染营销页头（产品体验/长期委托/使用场景/进入工作台），不渲染 app/layout.tsx 传入的“演示模式”徽标节点，故 headerBadge 为 null 属预期；provider 模式改由环境说明 + 网络审计佐证。"
+  },
+  "captureRun": {
+    "script": "evidence/final-sprint/20261103/b-brand-home/tools/capture-phase0.mjs",
+    "log": "evidence/final-sprint/20261103/b-brand-home/before/capture-run.log",
+    "integritySnapshot": "evidence/final-sprint/20261103/b-brand-home/before/integrity-at-capture.json",
+    "startedAtLocal": "2026-11-03T11:41:39+08:00",
+    "finishedAtLocal": "2026-11-03T11:41:54+08:00"
+  },
+  "caveats": [
+    "本机环境、本地回环网络，不宣称代表所有用户体验。",
+    "开发模式（Next dev）资源包含 HMR/dev chunk，体积不代表生产构建；资源体积与 Navigation Timing 留给 Phase 2 的 after 取证并注明环境。",
+    "截图与指标来自同一轮采集；页面处于匿名公开示例状态。",
+    "首屏度量以 1440×900 为例：hero section 高 1003px、工作区大图自 y≈363 延伸至 y≈1012，主视觉越过首屏下缘，文字 CTA 位于右栏 y≈242–290；这是 before 的视觉重心证据。",
+    "字体：本地 /fonts/pm-serif-brand.ttf 与 /fonts/pm-editorial-serif.ttf 均 loaded（document.fonts.status=loaded），无外部字体域请求；Geist 系 Next 内置字体在本页未使用（unloaded）。"
+  ]
+}

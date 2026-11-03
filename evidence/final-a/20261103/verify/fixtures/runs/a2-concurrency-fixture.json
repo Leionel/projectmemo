@@ -1,0 +1,179 @@
+{
+  "generatedAt": "2026-11-03T04:33:54.931Z",
+  "mode": "INDEPENDENT_FIXTURE_A2_CONCURRENCY",
+  "runner": "evidence/final-a/20261103/verify/fixtures/a2-concurrency-fixture.ts",
+  "sourceTree": "A2 final HEAD d428314 via git archive (source tree; untracked verify/ excluded)",
+  "database": {
+    "mechanism": "mkdtemp + better-sqlite3 replay prisma/migrations + second PrismaClient",
+    "temporaryDir": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-a2-concurrency-u4uwKG",
+    "migrationCount": 52
+  },
+  "env": {
+    "llmMode": "mock",
+    "modelProviderCalls": 0,
+    "externalWrites": 0
+  },
+  "connections": {
+    "main": "lib/db Prisma singleton",
+    "writer": "new PrismaClient({ adapter: PrismaBetterSqlite3 }) 同一 DATABASE_URL",
+    "writerDistinct": true
+  },
+  "summary": {
+    "total": 3,
+    "pass": 3,
+    "fail": 0
+  },
+  "checks": [
+    {
+      "id": "A2-IND-CONC-01",
+      "question": "阶段 A 环境压力：80 轮读取期间第二连接持续真实写入，每个响应内部版本一致且快照标记语义正确",
+      "verdict": "PASS",
+      "observed": {
+        "readerRounds": 80,
+        "writerCommits": 1,
+        "writerBusyRetries": 0,
+        "writerErrors": [],
+        "consistencyDistribution": {
+          "VERSION_STABLE": 80,
+          "RETRIED": 0,
+          "VERSION_ADVANCED": 0
+        },
+        "internalInconsistencies": 0,
+        "inconsistentSamples": [],
+        "sampleRounds": [
+          {
+            "consistency": "VERSION_STABLE",
+            "retries": 0,
+            "internalConsistent": true,
+            "snapshotCheckedAtMatchesReadAt": true,
+            "versions": {
+              "readbackMissionVersion": 2,
+              "workStateOriginalRef": 2,
+              "identityMissionVersion": 2,
+              "packetOriginalRef": 2,
+              "stoppedWorkStateOriginalRef": 2,
+              "requiresMissionVersion": 2
+            },
+            "blockerCodes": [
+              "WORKER_PRESENCE_UNOBSERVED"
+            ],
+            "missionVersion": 2
+          },
+          {
+            "consistency": "VERSION_STABLE",
+            "retries": 0,
+            "internalConsistent": true,
+            "snapshotCheckedAtMatchesReadAt": true,
+            "versions": {
+              "readbackMissionVersion": 2,
+              "workStateOriginalRef": 2,
+              "identityMissionVersion": 2,
+              "packetOriginalRef": 2,
+              "stoppedWorkStateOriginalRef": 2,
+              "requiresMissionVersion": 2
+            },
+            "blockerCodes": [
+              "WORKER_PRESENCE_UNOBSERVED"
+            ],
+            "missionVersion": 2
+          },
+          {
+            "consistency": "VERSION_STABLE",
+            "retries": 0,
+            "internalConsistent": true,
+            "snapshotCheckedAtMatchesReadAt": true,
+            "versions": {
+              "readbackMissionVersion": 2,
+              "workStateOriginalRef": 2,
+              "identityMissionVersion": 2,
+              "packetOriginalRef": 2,
+              "stoppedWorkStateOriginalRef": 2,
+              "requiresMissionVersion": 2
+            },
+            "blockerCodes": [
+              "WORKER_PRESENCE_UNOBSERVED"
+            ],
+            "missionVersion": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "A2-IND-CONC-02",
+      "question": "阶段 B 受控并发点：RETRIED(retries≥1) 与 VERSION_ADVANCED(retries=2 + SNAPSHOT_VERSION_ADVANCED 阻断) 标记正确，且两个响应内部版本仍一致",
+      "verdict": "PASS",
+      "observed": {
+        "retried": {
+          "consistency": "RETRIED",
+          "retries": 1,
+          "internalConsistent": true,
+          "snapshotCheckedAtMatchesReadAt": true,
+          "versions": {
+            "readbackMissionVersion": 3,
+            "workStateOriginalRef": 3,
+            "identityMissionVersion": 3,
+            "packetOriginalRef": 3,
+            "stoppedWorkStateOriginalRef": 3,
+            "requiresMissionVersion": 3
+          },
+          "blockerCodes": [
+            "WORKER_PRESENCE_UNOBSERVED"
+          ],
+          "missionVersion": 3
+        },
+        "advanced": {
+          "consistency": "VERSION_ADVANCED",
+          "retries": 2,
+          "internalConsistent": true,
+          "snapshotCheckedAtMatchesReadAt": true,
+          "versions": {
+            "readbackMissionVersion": 5,
+            "workStateOriginalRef": 5,
+            "identityMissionVersion": 5,
+            "packetOriginalRef": 5,
+            "stoppedWorkStateOriginalRef": 5,
+            "requiresMissionVersion": 5
+          },
+          "blockerCodes": [
+            "SNAPSHOT_VERSION_ADVANCED",
+            "WORKER_PRESENCE_UNOBSERVED"
+          ],
+          "missionVersion": 5
+        },
+        "lastMissionVersion": 6,
+        "writerCommits": 5,
+        "note": "受控点把第二连接的真实提交钉在“快照已读取、事务外复查尚未返回”的服务端窗口；注入 1 次 → RETRIED，注入 3 次 → VERSION_ADVANCED。与文档第 4 节允许的服务端受控并发点一致，不是 mock。"
+      }
+    },
+    {
+      "id": "A2-IND-CONC-03",
+      "question": "读取不写业务数据：事件/AgentRun/Step/Output/Receipt/指令事件计数前后一致；版本推进只来自第二连接",
+      "verdict": "PASS",
+      "observed": {
+        "countsBefore": {
+          "events": 1,
+          "runs": 0,
+          "steps": 0,
+          "outputs": 0,
+          "receipts": 0,
+          "directives": 0
+        },
+        "countsAfter": {
+          "events": 1,
+          "runs": 0,
+          "steps": 0,
+          "outputs": 0,
+          "receipts": 0,
+          "directives": 0
+        },
+        "missionVersionAfter": 6,
+        "writerCommits": 5,
+        "expectedVersionRange": {
+          "min": 1,
+          "max": 6
+        },
+        "note": "writerCommits 含受控点写入；作用域断言以读取侧零写入 + 版本只增为主。"
+      }
+    }
+  ]
+}

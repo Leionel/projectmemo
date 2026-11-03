@@ -1,0 +1,325 @@
+{
+  "generatedAt": "2026-11-03T03:39:35.2492445Z",
+  "role": "independent-verifier",
+  "stage": "BEFORE_A1",
+  "headSha": "485d485378637e1da3280ed092739d441c8cf749",
+  "branch": "codex/final-a-mission-packet",
+  "baseSha": "485d485378637e1da3280ed092739d441c8cf749",
+  "worktreeStatusPorcelainExcludingMyEvidence": [],
+  "schema": {
+    "sha256": "6d2d5f5440f06af31200773275b92a89f661d383fa29279528d7b6225ae0d5dc",
+    "modelCount": 79,
+    "models": [
+      "Project",
+      "Capture",
+      "KnowledgeCard",
+      "CardRelation",
+      "ActionRequirement",
+      "GeneratedArtifact",
+      "AgentIntervention",
+      "ActionItem",
+      "AgentRun",
+      "CopilotToolExecution",
+      "AgentMessage",
+      "Conversation",
+      "ConversationTurn",
+      "ConversationBinding",
+      "ConversationProject",
+      "ConversationAnchor",
+      "ConversationAnchorProjection",
+      "ConversationAnchorAction",
+      "ConversationEntryRequest",
+      "FocusProjectPreference",
+      "CardEmbedding",
+      "Attachment",
+      "MemoryLifecycleEvent",
+      "AttachmentRevision",
+      "ProjectStateSnapshot",
+      "ProjectStateCursor",
+      "ProjectStateFreshness",
+      "InterventionPolicy",
+      "InterventionBudgetLedger",
+      "InterventionPreference",
+      "InterventionDecision",
+      "InterventionFeedback",
+      "InterventionDelivery",
+      "ProjectEpisode",
+      "EpisodeRevision",
+      "SchedulePlan",
+      "ScheduleBlock",
+      "ActionReminder",
+      "ActionReminderRequest",
+      "MemoryMergeReceipt",
+      "Milestone",
+      "Deliverable",
+      "DeliverableEvidence",
+      "User",
+      "AgentDirectiveEvent",
+      "AccountSecurity",
+      "AuthRequestLimit",
+      "AccountToken",
+      "AccountCloudUsage",
+      "AuthSession",
+      "ProjectMembership",
+      "AgentMission",
+      "AgentMissionStep",
+      "AgentMissionEvent",
+      "AgentMissionApproval",
+      "AgentMissionOutput",
+      "ExternalSource",
+      "MissionArtifactReceipt",
+      "ProjectImpactJob",
+      "ProjectImpactEffect",
+      "DecisionScenarioProposal",
+      "DecisionReviewRequest",
+      "GoalQuestionPreference",
+      "AgentExperience",
+      "AgentExperienceUse",
+      "AgentExperienceEvent",
+      "SourceConnection",
+      "ExternalSignal",
+      "RepoSignalCommand",
+      "AgentClaim",
+      "AgentClaimEvent",
+      "UserMemoryPolicy",
+      "UserMemoryControlReceipt",
+      "AgentContextDigest",
+      "CalendarConnection",
+      "CalendarOAuthState",
+      "CalendarObservation",
+      "ProjectIntakeDraft",
+      "ProjectIntakeMaterial"
+    ],
+    "migrations": [
+      {
+        "name": "20260711000000_init",
+        "sha256": "2227d7bf59ad00e6ee2ae22089cdfcea4c446af459723aeef55971fe834860da"
+      },
+      {
+        "name": "20260713000000_agent_loop",
+        "sha256": "88adc31d42ec6e642d76ea7dfe34da27c38eacce2ae8374db5de357b773bfdb9"
+      },
+      {
+        "name": "20260715000000_projectmemo_v2",
+        "sha256": "6ab17f57b125b267caecf0c6f01e3967def55d80686297ebdf07100ef53e4845"
+      },
+      {
+        "name": "20260826000000_xiaoyi_adapter_receipts",
+        "sha256": "7b2488c3657ff120c48f96f942797c6a4269bb51594164d116d4eb3de959b4bc"
+      },
+      {
+        "name": "20260830000000_temporal_evidence_ledger",
+        "sha256": "775cdbf7bee48a675ab20b1d44a1e57beb3672f4b77c55acc6cdfcbecdbfb52a"
+      },
+      {
+        "name": "20260912000000_artifact_source_refs",
+        "sha256": "5d39134ffb103b42aa154dcbd07ddd792b33525400d94f186b55b3bca08f868d"
+      },
+      {
+        "name": "20260912010000_memory_lifecycle",
+        "sha256": "ea12326cc31dda95fd36277d775c323d4a96df538e3635b120eaa7355359453c"
+      },
+      {
+        "name": "20260912020000_project_state_snapshots",
+        "sha256": "f497752a3a33bea923a098be70324e8fa3e608666db06d9dc9e7c52bae2ab310"
+      },
+      {
+        "name": "20260912030000_intervention_policy",
+        "sha256": "8f175df6638247c20c1f868398c90d3714c7e66656d5cda7a828ce6ff29af612"
+      },
+      {
+        "name": "20260912040000_action_feasibility",
+        "sha256": "0bb88dba63a01e02a958b74c6916a052caa4c86b8e313954613a2e6c86c74ba7"
+      },
+      {
+        "name": "20260912210000_project_state_recurrence_key",
+        "sha256": "e1b97cb18b94c9982cfed5edb0511514cd566003dd4c72bf0da12446bd9b5778"
+      },
+      {
+        "name": "20260912220000_project_state_sequence",
+        "sha256": "bbedbcfadaf02ea89c332f2d8bff9e8b35ee7d884b2485b8d481e38c0fed7ed6"
+      },
+      {
+        "name": "20260912230000_artifact_claims",
+        "sha256": "1ce72c62599246fac7166bc7cc9251b37fdb4642ce09efda8fad7983232cb587"
+      },
+      {
+        "name": "20260914080000_phase1_reliability",
+        "sha256": "2f6844a2a56783f2afc67f88daaf1426f49cb3307359c9838cf220cc49037228"
+      },
+      {
+        "name": "20260915080000_phase2_consistency",
+        "sha256": "b7f4545e57d32feb1b99da33345124d77665bfd5c311b198c7e75b303d22f430"
+      },
+      {
+        "name": "20260915084500_notification_delivery_receipt",
+        "sha256": "5159b0ed825a4de726250b4c84584ea7c9276fe1570ff6cc0bdf6a5b99bfd981"
+      },
+      {
+        "name": "20260915120000_auth_and_project_membership",
+        "sha256": "9063c54d26a1d525eee5bc02c6ca739ab29f7a74ec10471c64203f82358c3fc7"
+      },
+      {
+        "name": "20260917120000_project_archive",
+        "sha256": "56b4974cb9c8807eb5b2c2bdf14b1307c645d16bbe6c1e9bda928f530f6ebfa1"
+      },
+      {
+        "name": "20260920100000_project_episode_schedule",
+        "sha256": "c21c6edc87895c65ecee794e15114402c6a797a546a1b71950b8b93dadd9eaca"
+      },
+      {
+        "name": "20260920140000_r2_correctness_and_sync",
+        "sha256": "85cc7171bce88bd28cf543f3008b97276b1e21da5486c069b807aac1142486e7"
+      },
+      {
+        "name": "20260921110000_memory_merge_idempotency",
+        "sha256": "f72769ac355b5ec79914f13fd42efe97375828704f193dda6bfe940eb00d6b04"
+      },
+      {
+        "name": "20260921160000_action_reminder_receipts",
+        "sha256": "2031d5b0ca3cb18f1de98acde168f6eccc2a2e911ac92331fccabc15227da32d"
+      },
+      {
+        "name": "20260921220000_action_reminder_request_receipts",
+        "sha256": "81224176fb185a587ca6a643458fbada33af8fe3e7dae73b3b9f388e894c1b16"
+      },
+      {
+        "name": "20261020080000_mission_runtime",
+        "sha256": "30a1f4808c4c9402bdf89e527834441eb9d8f028288dd994260aa7693ed268de"
+      },
+      {
+        "name": "20261020120000_mission_external_sources",
+        "sha256": "f551cee5a575d2d4cc1658f50c0757322448f89a6eb85d653210a92a4ce0fa7b"
+      },
+      {
+        "name": "20261021080000_mission_artifact_receipts",
+        "sha256": "345b3b7671b3750d69e0ba10a2dd09a5978f1962b76ae4302f6ee2c696c4d277"
+      },
+      {
+        "name": "20261023090000_self_registration",
+        "sha256": "47dacd67a592d6474c16716aff35855a289e0960b48dbf2d363bad4d42a0e4a4"
+      },
+      {
+        "name": "20261023140000_copilot_confirmation_receipts",
+        "sha256": "4494f65d41ae2224e66732fd9f0911b47dee946737576e844e7916b56f97fd29"
+      },
+      {
+        "name": "20261023160000_project_agent_focus",
+        "sha256": "b9c19b44e04eb4810d288bef23014c04591a0e9c5cf2e8393f8d41fd5a0e848e"
+      },
+      {
+        "name": "20261024010000_copilot_turn_identity",
+        "sha256": "f3a38d061d202c20b8fc85e3852bc19f7d68c4e3d866bacd5dbe4b27a0f42e09"
+      },
+      {
+        "name": "20261024020000_goal_decision_impact",
+        "sha256": "6ae38c53800df6696ff80ba7682e0d085e4df3825bcf1901aae17766b22eecfc"
+      },
+      {
+        "name": "20261024090000_experience",
+        "sha256": "0abad5a525fdce7f241fd8096fd6754d60be3e13eb2f110be9362d5a231d4f70"
+      },
+      {
+        "name": "20261024100000_repo_sensing",
+        "sha256": "b94fab25680fa9cba8863360b458f79c0057a70496353d4f97162f814bdefcad"
+      },
+      {
+        "name": "20261024120000_p3_review_boundaries",
+        "sha256": "979c6a72e69ead46d826d0a99c53c012192f6561d9ca650d9cf68f0a5fe60e9b"
+      },
+      {
+        "name": "20261026010000_focus_conversations",
+        "sha256": "4ff7502ef3603ade29f113dabf9fcea464579e57526354a30a1193145ce8a35e"
+      },
+      {
+        "name": "20261026020000_focus_anchor_projection",
+        "sha256": "d0ec9c0e04af48e15dc07c53408d90f25f6a608dfe10074d3b7f1b32ca7ceb18"
+      },
+      {
+        "name": "20261026120000_goal_change_reviews",
+        "sha256": "13b746c8b74775082c166022aa1afeca305eb63f6ef34109531aa8e89465ab99"
+      },
+      {
+        "name": "20261028010000_conversation_research",
+        "sha256": "24bde8494714e5c92ef7f0369ac0244a5006ee8f11ba3002bc622bd34d7d31cd"
+      },
+      {
+        "name": "20261028140000_continuity_directives",
+        "sha256": "20b0a4569c2ebda2f2f4ec43752e6264cb8fba64eeefaf135021261284b8c960"
+      },
+      {
+        "name": "20261030103000_ux2_signal_source_binding",
+        "sha256": "7f8d5d692462b7059c46fddd4e8f25bf4975dda0349d8cd77a088b2bc1f00590"
+      },
+      {
+        "name": "20261030110000_ux2_claim_history",
+        "sha256": "f134c5cae85cfe763124cd379ff85f4c483d8bc4d3f0a309e2e29f23aded816f"
+      },
+      {
+        "name": "20261030120000_ux2_context_digest",
+        "sha256": "6107ac05062b01f2a109873a37559beea2b227bbb47bd408462c17fc0563acda"
+      },
+      {
+        "name": "20261030123000_ux2_project_input_version",
+        "sha256": "b1ce32ce6f6f803fe10c646b130b99dcbfb277f7cc71e9c64127fff4af953545"
+      },
+      {
+        "name": "20261030190000_ct8_conditional_experience",
+        "sha256": "cbbde0b593bfd5095c6150373b9dda9908dce9fb9c33d557ccabf94155bb2929"
+      },
+      {
+        "name": "20261030220000_ct9b_calendar_connection",
+        "sha256": "b77abf4b20b1eb4106ed85ceb8f5789dfdff5bc50708408ecefd128a2b0d2995"
+      },
+      {
+        "name": "20261030233000_ct7_deployment_connections",
+        "sha256": "ca4bd44aa1a3b403ec67992d28ef250cb1e3a7ca8126bb39639fccf7e9150d84"
+      },
+      {
+        "name": "20261031090000_ct10_calendar_write",
+        "sha256": "a1e75d8774d588b1c49e1ad3124a535fb7d4e20694c36a10bb70bf45840f5f5e"
+      },
+      {
+        "name": "20261101170000_pm1_account_memory_scope",
+        "sha256": "f20bc0bfabc74b0924c68b492eb93002f2299c85e0177b49f245711139f63c16"
+      },
+      {
+        "name": "20261102010000_project_deletion_fence",
+        "sha256": "c10d4b678272cf8680084535a6684617d9f359d599471f27b8ad7710261890c7"
+      },
+      {
+        "name": "20261102011000_capture_processing_receipt",
+        "sha256": "5754cdda4aebf4cc3c02a9239c1589b7f7e483a90300e26ed257505359ce991f"
+      },
+      {
+        "name": "20261102140000_project_intake_draft",
+        "sha256": "df4d0895a32210fe3e3a82b14b640aaf7b9f56db60f558d31b00f5cc102db4bd"
+      }
+    ]
+  },
+  "keyFileSha256": {
+    "package-lock.json": "7e6e61a7512741c4dafebf11cf06b0e98ac18268e32b9ee510d3e3ec0b07f188",
+    "lib/mission/missionService.ts": "d2aa14fadca2866a396d5a35e28eb03063ddc31b9836863f462a38f1953fad92",
+    "lib/mission/readback.ts": "296347e10bb41aede4193cf47c871c5a9a182c48ee64b2647adc08707714d022",
+    "lib/mission/materialUseProjection.ts": "925030970e55311561be6251f243bf159bf936dc11ec6be567d3da16520dc876",
+    "lib/continuity/sourcePolicy.ts": "dc70d86b6ed2f6be4997e63bd9bcbebe92a89a957498df94e8cbba7f6a94ec6e",
+    "tests/missionWorkspaceSummary.test.ts": "ea1c3d0ed00b7ac5ec19a2c73204d043b6d6989fca5d4467576bcdc87c181663",
+    "lib/mission/workspaceSummary.ts": "b3fc05b15ced3f0cc9077b005bcafc7361e402ea48597c85a70a84f4db0847c3",
+    "tests/agentUxWorkState.test.ts": "28963b1e0e80967173b838484296861e6c406e4c14414c24fd0f2047735591d8",
+    "scripts/../package.json": "611efc64d64d00ce222b47f1c843df49b3f6a46d2f31273a337b979c44c31182",
+    "lib/types/workState.ts": "f6f5572fbbd723dc87404e490e6df19103295f916fb5f40099302de21fe7115f",
+    "vitest.config.ts": "355013a33c15379c514cdb873d7546c9d12ea9fdc42f07dcf74e06a83e01f845",
+    "lib/mission/workState.ts": "21571f0e0b38b06b03fa09f074ed377f47c3d2d15c0a84a81f358ba59bdce398",
+    "lib/mission/responsibility.ts": "f7c07a5303a909c8ea0df8deb1fb2a98f64ceb612bb7a2c7ecb56fdab01b15ca"
+  },
+  "docsTrackedInGitCount": 41,
+  "baselineClientFileCount": {
+    "components": 1,
+    "app": 1,
+    "harmonyos": 1,
+    "lib": 1,
+    "tests": 1,
+    "prisma": 1
+  },
+  "note": "A1/A2 落地后用它对比：schema/migrations 是否变化、客户端是否被改、docs 是否入 git。"
+}

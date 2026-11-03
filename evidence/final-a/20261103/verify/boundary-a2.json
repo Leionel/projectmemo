@@ -1,0 +1,122 @@
+{
+  "generatedAt": "2026-11-03T04:34:33.6046125Z",
+  "role": "independent-verifier",
+  "stage": "A2_BOUNDARY",
+  "headSha": "d42831468de0595304382a6021b1171a3cdd6f60",
+  "a1FinalHead": "304adfee664689d67c6c836dc8f711ca0bc2e10b",
+  "summary": {
+    "total": 8,
+    "pass": 8,
+    "fail": 0
+  },
+  "checks": [
+    {
+      "id": "A2-BOUND-01",
+      "question": "当前 HEAD 等于 Lead 给定的 A2 提交 d428314",
+      "verdict": "PASS",
+      "observed": {
+        "expected": "d42831468de0595304382a6021b1171a3cdd6f60",
+        "actual": "d42831468de0595304382a6021b1171a3cdd6f60",
+        "branch": "codex/final-a-mission-packet",
+        "a1FinalHead": "304adfee664689d67c6c836dc8f711ca0bc2e10b"
+      },
+      "note": ""
+    },
+    {
+      "id": "A2-BOUND-02",
+      "question": "A2 提交范围（304adfe..d428314）文件全部在 A2 声明清单内（4 lib + 2 tests + 1 script + samples/a2）",
+      "verdict": "PASS",
+      "observed": {
+        "changedFiles": [
+          "evidence/final-a/20261103/samples/a2/a2-cancelled.json",
+          "evidence/final-a/20261103/samples/a2/a2-daily-budget-waiting.json",
+          "evidence/final-a/20261103/samples/a2/a2-failed.json",
+          "evidence/final-a/20261103/samples/a2/a2-index.json",
+          "evidence/final-a/20261103/samples/a2/a2-legacy-server-without-workpacket.json",
+          "evidence/final-a/20261103/samples/a2/a2-observation-no-change.json",
+          "evidence/final-a/20261103/samples/a2/a2-paused.json",
+          "evidence/final-a/20261103/samples/a2/a2-queued.json",
+          "evidence/final-a/20261103/samples/a2/a2-running.json",
+          "evidence/final-a/20261103/samples/a2/a2-service-verification.json",
+          "evidence/final-a/20261103/samples/a2/a2-stop-requested.json",
+          "evidence/final-a/20261103/samples/a2/a2-succeeded.json",
+          "evidence/final-a/20261103/samples/a2/a2-unknown.json",
+          "evidence/final-a/20261103/samples/a2/a2-waiting-approval.json",
+          "evidence/final-a/20261103/samples/a2/a2-waiting-user.json",
+          "lib/mission/materialUseProjection.ts",
+          "lib/mission/missionService.ts",
+          "lib/mission/readback.ts",
+          "lib/mission/workspaceSummary.ts",
+          "scripts/final-a/generate-samples.ts",
+          "tests/finalAConcurrencyService.test.ts",
+          "tests/finalAWorkPacketService.test.ts"
+        ],
+        "outsideAllowed": []
+      },
+      "note": ""
+    },
+    {
+      "id": "A2-BOUND-03",
+      "question": "A2 无 prisma/schema 或 migrations 变更（schema SHA 相同、迁移目录数 51）",
+      "verdict": "PASS",
+      "observed": {
+        "prismaChangedFiles": [],
+        "schemaShaBase": "8e93d88ecc6fd90cad42302f7d41b7861c4d054a",
+        "schemaShaHead": "8e93d88ecc6fd90cad42302f7d41b7861c4d054a",
+        "migrationFilesIncludingLock": 52
+      },
+      "note": ""
+    },
+    {
+      "id": "A2-BOUND-04",
+      "question": "A2 无 app/components/harmonyos/官网布局或依赖改动",
+      "verdict": "PASS",
+      "observed": {
+        "changed": []
+      },
+      "note": ""
+    },
+    {
+      "id": "A2-BOUND-05",
+      "question": "A2 无新状态表/Runner/Planner/产品代码新 PrismaClient",
+      "verdict": "PASS",
+      "observed": {
+        "suspiciousNewFiles": [],
+        "modelAdds": [],
+        "prodPrismaClientSitesBase": 1,
+        "prodPrismaClientSitesHead": 1
+      },
+      "note": ""
+    },
+    {
+      "id": "A2-BOUND-06",
+      "question": "A2 无密钥/签名/证书/真实库文件进入提交",
+      "verdict": "PASS",
+      "observed": {
+        "binaryOrSecretFiles": [],
+        "patternHitCount": 0,
+        "patternHitSamples": []
+      },
+      "note": ""
+    },
+    {
+      "id": "A2-BOUND-07",
+      "question": "A2 范围未改动/未加入 docs（tracked docs 保持 41）",
+      "verdict": "PASS",
+      "observed": {
+        "docsChanged": [],
+        "trackedDocsCount": 41
+      },
+      "note": ""
+    },
+    {
+      "id": "A2-BOUND-08",
+      "question": "A2 提交后工作树无 tracked 修改（A2 已提交、无残留未提交产品改动）",
+      "verdict": "PASS",
+      "observed": {
+        "trackedModifications": []
+      },
+      "note": ""
+    }
+  ]
+}

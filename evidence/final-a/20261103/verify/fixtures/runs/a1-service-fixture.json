@@ -1,0 +1,639 @@
+{
+  "generatedAt": "2026-11-03T04:07:44.557Z",
+  "mode": "INDEPENDENT_FIXTURE_A1",
+  "runner": "evidence/final-a/20261103/verify/fixtures/a1-service-fixture.ts",
+  "sourceTree": "A1-HEAD clean shadow @543162f (git archive; A2 WIP excluded)",
+  "database": {
+    "mechanism": "mkdtemp + better-sqlite3 replay prisma/migrations",
+    "temporaryDir": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-a1-verify-service-ENebEF",
+    "migrationCount": 52,
+    "schemaTables": 79
+  },
+  "env": {
+    "llmMode": "mock",
+    "modelProviderCalls": 0,
+    "externalWrites": 0
+  },
+  "summary": {
+    "total": 17,
+    "pass": 16,
+    "fail": 0,
+    "notRun": 1
+  },
+  "checks": [
+    {
+      "id": "A1-IND-FS-A01-01",
+      "question": "SUCCEEDED + UNKNOWN：终态与未结算效果同时可见",
+      "verdict": "PASS",
+      "observed": {
+        "outerMissionStatus": "SUCCEEDED",
+        "workState": {
+          "phase": "COMPLETED",
+          "nextActor": "USER",
+          "requiresUser": true,
+          "reasonCode": "SUCCEEDED",
+          "reasonText": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+          "actionLabel": "查看原结果并核对未知调用",
+          "checkedAt": "2026-11-03T04:07:44.411Z",
+          "observedAt": null,
+          "nextCheckAt": null,
+          "nextBoundary": null,
+          "freshness": "FRESH",
+          "terminal": {
+            "status": "SUCCEEDED",
+            "at": "2026-11-02T12:00:00.000Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "SUCCEEDED"
+          },
+          "unsettledEffect": {
+            "present": true,
+            "code": "EXTERNAL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "NONE",
+            "requestedAt": null,
+            "settled": true,
+            "note": "原委托已完成；停止请求不再具有执行含义"
+          }
+        }
+      }
+    },
+    {
+      "id": "A1-IND-FS-A01-02",
+      "question": "SUCCEEDED 无 UNKNOWN：终态可见且未结算效果明确为不存在（对照）",
+      "verdict": "PASS",
+      "observed": {
+        "workState": {
+          "phase": "COMPLETED",
+          "nextActor": "NONE",
+          "requiresUser": false,
+          "reasonCode": "SUCCEEDED",
+          "reasonText": "委托完成条件已通过，现实效果以原结果为准",
+          "actionLabel": "查看原结果",
+          "checkedAt": "2026-11-03T04:07:44.422Z",
+          "observedAt": null,
+          "nextCheckAt": null,
+          "nextBoundary": null,
+          "freshness": "FRESH",
+          "terminal": {
+            "status": "SUCCEEDED",
+            "at": "2026-11-02T12:00:00.000Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "SUCCEEDED"
+          },
+          "unsettledEffect": {
+            "present": false,
+            "code": null,
+            "source": "NONE",
+            "reasonText": null,
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "NONE",
+            "requestedAt": null,
+            "settled": true,
+            "note": "原委托已完成；停止请求不再具有执行含义"
+          }
+        }
+      }
+    },
+    {
+      "id": "A1-IND-FS-A01-03",
+      "question": "CANCELLED + UNKNOWN：取消事实保留、不显示成功、未结算效果并列",
+      "verdict": "PASS",
+      "observed": {
+        "outerMissionStatus": "CANCELLED",
+        "workState": {
+          "phase": "COMPLETED",
+          "nextActor": "USER",
+          "requiresUser": true,
+          "reasonCode": "CANCELLED",
+          "reasonText": "原委托已取消，历史结果保留；仍有未知调用结果未结算，不能视为成功完成",
+          "actionLabel": "查看取消前原结果并核对未知调用",
+          "checkedAt": "2026-11-03T04:07:44.426Z",
+          "observedAt": null,
+          "nextCheckAt": null,
+          "nextBoundary": null,
+          "freshness": "FRESH",
+          "terminal": {
+            "status": "CANCELLED",
+            "at": "2026-11-02T12:00:00.000Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "CANCELLED"
+          },
+          "unsettledEffect": {
+            "present": true,
+            "code": "TOOL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "CANCEL_SETTLED",
+            "requestedAt": "2026-11-02T12:00:00.000Z",
+            "settled": true,
+            "note": "取消请求已结算：原委托已取消，历史结果保留，不能视为成功完成"
+          }
+        }
+      }
+    },
+    {
+      "id": "A1-IND-FS-A01-04",
+      "question": "CANCELLED：不可恢复/不出现继续派发主动作，且停止请求已结算",
+      "verdict": "PASS",
+      "observed": {
+        "actionLabel": "查看取消前原结果并核对未知调用",
+        "stopRequest": {
+          "state": "CANCEL_SETTLED",
+          "requestedAt": "2026-11-02T12:00:00.000Z",
+          "settled": true,
+          "note": "取消请求已结算：原委托已取消，历史结果保留，不能视为成功完成"
+        }
+      }
+    },
+    {
+      "id": "A1-IND-FS-A01-05",
+      "question": "CANCELLED 无 UNKNOWN（对照）：不可恢复且不显示成功",
+      "verdict": "PASS",
+      "observed": {
+        "workState": {
+          "phase": "COMPLETED",
+          "nextActor": "NONE",
+          "requiresUser": false,
+          "reasonCode": "CANCELLED",
+          "reasonText": "原委托已取消，历史结果与草稿保留，不能视为成功完成",
+          "actionLabel": "查看取消前的原结果",
+          "checkedAt": "2026-11-03T04:07:44.429Z",
+          "observedAt": null,
+          "nextCheckAt": null,
+          "nextBoundary": null,
+          "freshness": "FRESH",
+          "terminal": {
+            "status": "CANCELLED",
+            "at": "2026-11-02T12:00:00.000Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "CANCELLED"
+          },
+          "unsettledEffect": {
+            "present": false,
+            "code": null,
+            "source": "NONE",
+            "reasonText": null,
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "CANCEL_SETTLED",
+            "requestedAt": "2026-11-02T12:00:00.000Z",
+            "settled": true,
+            "note": "取消请求已结算：原委托已取消，历史结果保留，不能视为成功完成"
+          }
+        }
+      }
+    },
+    {
+      "id": "A1-IND-FS-A01-06",
+      "question": "missionDetail 服务路径与 readback 一致（终态/取消与 UNKNOWN 均可读）",
+      "verdict": "PASS",
+      "observed": {
+        "detailSucc": {
+          "phase": "COMPLETED",
+          "nextActor": "USER",
+          "requiresUser": true,
+          "reasonCode": "SUCCEEDED",
+          "reasonText": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+          "actionLabel": "查看原结果并核对未知调用",
+          "checkedAt": "2026-11-03T04:07:44.447Z",
+          "observedAt": null,
+          "nextCheckAt": null,
+          "nextBoundary": null,
+          "freshness": "FRESH",
+          "terminal": {
+            "status": "SUCCEEDED",
+            "at": "2026-11-02T12:00:00.000Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "SUCCEEDED"
+          },
+          "unsettledEffect": {
+            "present": true,
+            "code": "EXTERNAL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "NONE",
+            "requestedAt": null,
+            "settled": true,
+            "note": "原委托已完成；停止请求不再具有执行含义"
+          }
+        },
+        "detailCanc": {
+          "phase": "COMPLETED",
+          "nextActor": "USER",
+          "requiresUser": true,
+          "reasonCode": "CANCELLED",
+          "reasonText": "原委托已取消，历史结果保留；仍有未知调用结果未结算，不能视为成功完成",
+          "actionLabel": "查看取消前原结果并核对未知调用",
+          "checkedAt": "2026-11-03T04:07:44.456Z",
+          "observedAt": null,
+          "nextCheckAt": null,
+          "nextBoundary": null,
+          "freshness": "FRESH",
+          "terminal": {
+            "status": "CANCELLED",
+            "at": "2026-11-02T12:00:00.000Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "CANCELLED"
+          },
+          "unsettledEffect": {
+            "present": true,
+            "code": "TOOL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "CANCEL_SETTLED",
+            "requestedAt": "2026-11-02T12:00:00.000Z",
+            "settled": true,
+            "note": "取消请求已结算：原委托已取消，历史结果保留，不能视为成功完成"
+          }
+        }
+      }
+    },
+    {
+      "id": "A1-IND-FS-A01-07",
+      "question": "重复读取不核销 UNKNOWN（读取无副作用）",
+      "verdict": "PASS",
+      "observed": {
+        "secondReadUnsettled": {
+          "present": true,
+          "code": "EXTERNAL_UNKNOWN",
+          "source": "LAST_ERROR",
+          "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+          "resolvedByRead": false
+        }
+      }
+    },
+    {
+      "id": "A1-IND-FS-A02-01",
+      "question": "RUNNING + pauseRequestedAt：持久层仍 RUNNING 且请求时间已落库（原保护保留）",
+      "verdict": "PASS",
+      "observed": {
+        "status": "RUNNING",
+        "version": 3,
+        "pauseRequestedAt": "2026-11-03T04:07:44.470Z",
+        "cancelRequestedAt": null
+      }
+    },
+    {
+      "id": "A1-IND-FS-A02-02",
+      "question": "readback 显示“停止请求在途”：STOP_REQUESTED_IN_FLIGHT + 核对停止结算 + 不继续派发",
+      "verdict": "PASS",
+      "observed": {
+        "workState": {
+          "phase": "RUNNING",
+          "nextActor": "SYSTEM",
+          "requiresUser": false,
+          "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+          "reasonText": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤",
+          "actionLabel": "核对停止结算",
+          "checkedAt": "2026-11-03T04:07:44.476Z",
+          "observedAt": null,
+          "nextCheckAt": "2026-11-03T04:17:44.462Z",
+          "nextBoundary": "2026-11-03T04:17:44.462Z",
+          "freshness": "FRESH",
+          "terminal": null,
+          "unsettledEffect": {
+            "present": false,
+            "code": null,
+            "source": "NONE",
+            "reasonText": null,
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "PAUSE_REQUESTED",
+            "requestedAt": "2026-11-03T04:07:44.470Z",
+            "settled": false,
+            "note": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤"
+          }
+        }
+      }
+    },
+    {
+      "id": "A1-IND-FS-A02-03",
+      "question": "missionDetail 服务路径同样显示停止请求在途",
+      "verdict": "PASS",
+      "observed": {
+        "detailWorkState": {
+          "phase": "RUNNING",
+          "nextActor": "SYSTEM",
+          "requiresUser": false,
+          "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+          "reasonText": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤",
+          "actionLabel": "核对停止结算",
+          "checkedAt": "2026-11-03T04:07:44.481Z",
+          "observedAt": null,
+          "nextCheckAt": "2026-11-03T04:17:44.462Z",
+          "nextBoundary": "2026-11-03T04:17:44.462Z",
+          "freshness": "FRESH",
+          "terminal": null,
+          "unsettledEffect": {
+            "present": false,
+            "code": null,
+            "source": "NONE",
+            "reasonText": null,
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "PAUSE_REQUESTED",
+            "requestedAt": "2026-11-03T04:07:44.470Z",
+            "settled": false,
+            "note": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤"
+          }
+        },
+        "detailStatus": "RUNNING"
+      }
+    },
+    {
+      "id": "A1-IND-FS-A02-04",
+      "question": "RUNNING + cancelRequestedAt：持久层仍 RUNNING，readback 显示取消请求在途",
+      "verdict": "PASS",
+      "observed": {
+        "status": "RUNNING",
+        "cancelRequestedAt": "2026-11-03T04:07:44.486Z",
+        "workState": {
+          "phase": "RUNNING",
+          "nextActor": "SYSTEM",
+          "requiresUser": false,
+          "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+          "reasonText": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤",
+          "actionLabel": "核对停止结算",
+          "checkedAt": "2026-11-03T04:07:44.490Z",
+          "observedAt": null,
+          "nextCheckAt": null,
+          "nextBoundary": "2026-11-03T04:17:44.462Z",
+          "freshness": "FRESH",
+          "terminal": null,
+          "unsettledEffect": {
+            "present": false,
+            "code": null,
+            "source": "NONE",
+            "reasonText": null,
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "CANCEL_REQUESTED",
+            "requestedAt": "2026-11-03T04:07:44.486Z",
+            "settled": false,
+            "note": "已收到取消请求，等待本轮调用结算，不会继续派发新步骤"
+          }
+        }
+      }
+    },
+    {
+      "id": "A1-IND-FS-A02-05",
+      "question": "停止在途优先于非终态 UNKNOWN：主操作仍是核对停止结算，UNKNOWN 事实并列保留",
+      "verdict": "PASS",
+      "observed": {
+        "workState": {
+          "phase": "RUNNING",
+          "nextActor": "SYSTEM",
+          "requiresUser": false,
+          "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+          "reasonText": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤",
+          "actionLabel": "核对停止结算",
+          "checkedAt": "2026-11-03T04:07:44.495Z",
+          "observedAt": null,
+          "nextCheckAt": null,
+          "nextBoundary": "2026-11-03T04:17:44.462Z",
+          "freshness": "FRESH",
+          "terminal": null,
+          "unsettledEffect": {
+            "present": true,
+            "code": "TOOL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "PAUSE_REQUESTED",
+            "requestedAt": "2026-11-03T04:07:14.462Z",
+            "settled": false,
+            "note": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤"
+          }
+        }
+      }
+    },
+    {
+      "id": "A1-IND-FS-A02-06",
+      "question": "暂停结算后（PAUSED）：PAUSE_SETTLED 且不再是“在途”",
+      "verdict": "PASS",
+      "observed": {
+        "workState": {
+          "phase": "PAUSED",
+          "nextActor": "USER",
+          "requiresUser": true,
+          "reasonCode": "PAUSED",
+          "reasonText": "调查已暂停，恢复前需核对原条件",
+          "actionLabel": "查看原因与恢复条件",
+          "checkedAt": "2026-11-03T04:07:44.500Z",
+          "observedAt": null,
+          "nextCheckAt": "2026-11-03T04:17:44.462Z",
+          "nextBoundary": null,
+          "freshness": "FRESH",
+          "terminal": null,
+          "unsettledEffect": {
+            "present": false,
+            "code": null,
+            "source": "NONE",
+            "reasonText": null,
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "PAUSE_SETTLED",
+            "requestedAt": "2026-11-03T04:07:44.470Z",
+            "settled": true,
+            "note": "暂停请求已结算：原委托已暂停，不会继续派发新步骤"
+          }
+        }
+      }
+    },
+    {
+      "id": "A1-IND-FS-A02-07",
+      "question": "Focus 摘要（workspaceSummary）是否也显示停止请求在途",
+      "verdict": "NOT_RUN",
+      "observed": {
+        "summaryEnabled": true,
+        "totalActive": 4,
+        "containsThisRunningMission": true,
+        "summaryWorkState": {
+          "phase": "RUNNING",
+          "nextActor": "AGENT",
+          "requiresUser": false,
+          "reasonCode": "LEASE_ACTIVE",
+          "reasonText": "正在调查，进展来自已保存步骤",
+          "actionLabel": "查看委托进展",
+          "checkedAt": "2026-11-03T04:07:44.509Z",
+          "observedAt": null,
+          "nextCheckAt": null,
+          "nextBoundary": "2026-11-03T04:17:44.462Z",
+          "freshness": "FRESH",
+          "terminal": null,
+          "unsettledEffect": {
+            "present": false,
+            "code": null,
+            "source": "NONE",
+            "reasonText": null,
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "NONE",
+            "requestedAt": null,
+            "settled": true,
+            "note": null
+          }
+        }
+      },
+      "note": "workspaceSummary.ts 属 A2 写作用域；A1-HEAD 的 missionSummarySelect 未包含 pauseRequestedAt/cancelRequestedAt，摘要仍按 LEASE_ACTIVE 投影。列为 A2 必查残余风险，不算 A1 实现失败，也不能当作已签收。"
+    },
+    {
+      "id": "A1-IND-FS-A04-01",
+      "question": "反复 GET：workState.observedAt 固定、checkedAt 前进、readback.observedAt 是读取时刻",
+      "verdict": "PASS",
+      "observed": {
+        "first": {
+          "readbackObservedAt": "2026-11-03T04:07:44.515Z",
+          "workState": {
+            "phase": "QUEUED",
+            "nextActor": "AGENT",
+            "requiresUser": false,
+            "reasonCode": "READY",
+            "reasonText": "委托已保存，等待执行",
+            "actionLabel": "查看委托进展",
+            "checkedAt": "2026-11-03T04:07:44.513Z",
+            "observedAt": "2026-11-01T00:00:00.000Z",
+            "nextCheckAt": null,
+            "nextBoundary": "2026-12-01T00:00:00.000Z",
+            "freshness": "FRESH",
+            "terminal": null,
+            "unsettledEffect": {
+              "present": false,
+              "code": null,
+              "source": "NONE",
+              "reasonText": null,
+              "resolvedByRead": false
+            },
+            "stopRequest": {
+              "state": "NONE",
+              "requestedAt": null,
+              "settled": true,
+              "note": null
+            }
+          }
+        },
+        "second": {
+          "readbackObservedAt": "2026-11-03T04:07:44.553Z",
+          "workState": {
+            "phase": "QUEUED",
+            "nextActor": "AGENT",
+            "requiresUser": false,
+            "reasonCode": "READY",
+            "reasonText": "委托已保存，等待执行",
+            "actionLabel": "查看委托进展",
+            "checkedAt": "2026-11-03T04:07:44.551Z",
+            "observedAt": "2026-11-01T00:00:00.000Z",
+            "nextCheckAt": null,
+            "nextBoundary": "2026-12-01T00:00:00.000Z",
+            "freshness": "FRESH",
+            "terminal": null,
+            "unsettledEffect": {
+              "present": false,
+              "code": null,
+              "source": "NONE",
+              "reasonText": null,
+              "resolvedByRead": false
+            },
+            "stopRequest": {
+              "state": "NONE",
+              "requestedAt": null,
+              "settled": true,
+              "note": null
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "A1-IND-FS-A04-02",
+      "question": "失败后成功观察时间不前进，且不显示“无变化/刚检查成功”",
+      "verdict": "PASS",
+      "observed": {
+        "workState": {
+          "phase": "FAILED",
+          "nextActor": "SYSTEM",
+          "requiresUser": false,
+          "reasonCode": "TOOL_FAILED",
+          "reasonText": "工具执行失败",
+          "actionLabel": "查看原因与恢复条件",
+          "checkedAt": "2026-11-03T04:07:44.556Z",
+          "observedAt": "2026-11-01T00:00:00.000Z",
+          "nextCheckAt": null,
+          "nextBoundary": "2026-12-01T00:00:00.000Z",
+          "freshness": "FRESH",
+          "terminal": null,
+          "unsettledEffect": {
+            "present": false,
+            "code": null,
+            "source": "NONE",
+            "reasonText": null,
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "NONE",
+            "requestedAt": null,
+            "settled": true,
+            "note": null
+          }
+        }
+      }
+    },
+    {
+      "id": "A1-IND-FS-A03-01",
+      "question": "纯投影：READY+DAILY_BUDGET_WAITING+未来 nextAttemptAt → QUEUED/等待额度、budget 事件保留",
+      "verdict": "PASS",
+      "observed": {
+        "workState": {
+          "phase": "QUEUED",
+          "nextActor": "AGENT",
+          "requiresUser": false,
+          "reasonCode": "DAILY_BUDGET_WAITING",
+          "reasonText": "今日调用额度已用完，等待许可时区的次日；累计用量保留",
+          "actionLabel": "查看下次检查时间",
+          "checkedAt": "2026-11-03T04:00:00.000Z",
+          "observedAt": null,
+          "nextCheckAt": "2026-11-03T10:00:00.000Z",
+          "nextBoundary": null,
+          "freshness": "FRESH",
+          "terminal": null,
+          "unsettledEffect": {
+            "present": false,
+            "code": null,
+            "source": "NONE",
+            "reasonText": null,
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "NONE",
+            "requestedAt": null,
+            "settled": true,
+            "note": null
+          }
+        }
+      }
+    }
+  ]
+}

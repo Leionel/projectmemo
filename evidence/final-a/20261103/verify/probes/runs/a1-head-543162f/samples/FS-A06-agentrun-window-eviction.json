@@ -1,0 +1,166 @@
+{
+  "fixture": {
+    "projectRunCount": 46,
+    "missionRun": {
+      "id": "cmw06117x001naw8o9epu271z",
+      "createdAt": "2026-11-03T04:06:10.796Z"
+    },
+    "unrelatedRuns": 45,
+    "pointer": {
+      "id": "capture:cmw06117t001haw8ohy9gdirt",
+      "hash": "cfcd065b099fdd6ab8643f5f95e37d8ecbe267bedc970015dcf541c5761adbad"
+    }
+  },
+  "before": {
+    "materialUses": {
+      "schemaVersion": 1,
+      "questionId": "cmw06117u001jaw8oe9smjfo8",
+      "items": [
+        {
+          "sourcePointer": {
+            "id": "capture:cmw06117t001haw8ohy9gdirt",
+            "hash": "cfcd065b099fdd6ab8643f5f95e37d8ecbe267bedc970015dcf541c5761adbad"
+          },
+          "title": "2026-10-30 原记录：启动日志显示目标设备已启动，但只有安装自报，缺少后续验证。",
+          "availability": "CURRENT",
+          "facts": [
+            {
+              "kind": "SAVED",
+              "refId": "capture:cmw06117t001haw8ohy9gdirt"
+            },
+            {
+              "kind": "ASSOCIATED",
+              "refId": "cmw06117w001maw8oet2ta25z"
+            },
+            {
+              "kind": "CANDIDATE",
+              "refId": "cmw06117v001law8osymk3o50"
+            },
+            {
+              "kind": "BOUND",
+              "refId": "cmw06117v001kaw8oyjft0e4n"
+            },
+            {
+              "kind": "CONTEXT_POINTER",
+              "refId": "cmw06117x001naw8o9epu271z"
+            }
+          ],
+          "coverage": {
+            "loadedCharacters": 44,
+            "totalCharacters": 44,
+            "truncated": false,
+            "extractionStatus": "SUCCESS"
+          },
+          "bodyCoverage": "NOT_RECORDED",
+          "excerpt": "2026-10-30 原记录：启动日志显示目标设备已启动，但只有安装自报，缺少后续验证。"
+        }
+      ],
+      "coverage": {
+        "eventLimit": 80,
+        "eventsTruncated": false,
+        "stepLimit": 40,
+        "stepsTruncated": false,
+        "outputLimit": 20,
+        "outputsTruncated": false,
+        "receiptsTruncated": false,
+        "projectRunLimit": 40,
+        "runsTruncated": false,
+        "sourceLimit": 8,
+        "sourceLimitReached": false,
+        "mapping": "DIRECT_SOURCE_POINTERS_ONLY"
+      }
+    },
+    "callCoverage": {
+      "inspected": {
+        "agentRuns": 1,
+        "steps": 1,
+        "limit": 20,
+        "truncated": false
+      },
+      "models": {
+        "total": 1,
+        "succeeded": 1,
+        "failed": 0,
+        "partial": 0,
+        "fallback": 0,
+        "unknown": 0,
+        "usageRecorded": 1,
+        "usageUnknown": 0
+      }
+    }
+  },
+  "after": {
+    "materialUses": {
+      "schemaVersion": 1,
+      "questionId": "cmw06117u001jaw8oe9smjfo8",
+      "items": [
+        {
+          "sourcePointer": {
+            "id": "capture:cmw06117t001haw8ohy9gdirt",
+            "hash": "cfcd065b099fdd6ab8643f5f95e37d8ecbe267bedc970015dcf541c5761adbad"
+          },
+          "title": "2026-10-30 原记录：启动日志显示目标设备已启动，但只有安装自报，缺少后续验证。",
+          "availability": "CURRENT",
+          "facts": [
+            {
+              "kind": "SAVED",
+              "refId": "capture:cmw06117t001haw8ohy9gdirt"
+            },
+            {
+              "kind": "ASSOCIATED",
+              "refId": "cmw06117w001maw8oet2ta25z"
+            },
+            {
+              "kind": "CANDIDATE",
+              "refId": "cmw06117v001law8osymk3o50"
+            },
+            {
+              "kind": "BOUND",
+              "refId": "cmw06117v001kaw8oyjft0e4n"
+            }
+          ],
+          "coverage": {
+            "loadedCharacters": 44,
+            "totalCharacters": 44,
+            "truncated": false,
+            "extractionStatus": "SUCCESS"
+          },
+          "bodyCoverage": "NOT_RECORDED",
+          "excerpt": "2026-10-30 原记录：启动日志显示目标设备已启动，但只有安装自报，缺少后续验证。"
+        }
+      ],
+      "coverage": {
+        "eventLimit": 80,
+        "eventsTruncated": false,
+        "stepLimit": 40,
+        "stepsTruncated": false,
+        "outputLimit": 20,
+        "outputsTruncated": false,
+        "receiptsTruncated": false,
+        "projectRunLimit": 40,
+        "runsTruncated": true,
+        "sourceLimit": 8,
+        "sourceLimitReached": false,
+        "mapping": "DIRECT_SOURCE_POINTERS_ONLY"
+      }
+    },
+    "callCoverage": {
+      "inspected": {
+        "agentRuns": 1,
+        "steps": 1,
+        "limit": 20,
+        "truncated": false
+      },
+      "models": {
+        "total": 1,
+        "succeeded": 1,
+        "failed": 0,
+        "partial": 0,
+        "fallback": 0,
+        "unknown": 0,
+        "usageRecorded": 1,
+        "usageUnknown": 0
+      }
+    }
+  }
+}

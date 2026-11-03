@@ -35,7 +35,7 @@ npx.cmd tsx scripts/final-a/a1-contract-samples.ts      # A1 纯函数样本
 npm.cmd test -- tests/finalAWorkStateContract.test.ts tests/finalAWorkPacketContract.test.ts tests/agentUxWorkState.test.ts tests/missionWorkspaceSummary.test.ts
 ```
 
-A1 实测（最终 HEAD `3a62dce`）：两个纯合同文件 61 tests passed（31+30）；含既有锚点 `agentUxWorkState`（7）+`missionWorkspaceSummary`（4）共 4 files / 72 tests passed；`tsc --noEmit` exit 0。独立验收在 `git archive 3a62dce` 干净快照复核 61/61 passed（见 `verify/a1-verification.json`）。
+A1 实测（最终 HEAD `3a62dce`）：两个纯合同文件 61 tests passed（31+30）；含既有锚点 `agentUxWorkState`（7）+`missionWorkspaceSummary`（4）共 4 files / 72 tests passed；`tsc --noEmit` exit 0。独立验收在 `git archive 3a62dce` 干净快照复核 61/61 passed（见 `verify/a1-verification.json`：34 PASS / 0 FAIL / 6 NOT_RUN，A1 合同 ACCEPTED_SIGNED）。
 
 ## 2. 实际 JSON 样本（节选，完整文件见 `samples/a1-pure/`）
 

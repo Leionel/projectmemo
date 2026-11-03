@@ -14,6 +14,7 @@ import { useState } from "react";
 import { workPhaseLabel } from "@/lib/client/focusPresentation";
 import { MissionBasisEvidence } from "./MissionBasisEvidence";
 import type { MissionReadback as ReadbackData } from "@/lib/mission/readback";
+import type { WorkState } from "@/lib/types/workState";
 import type {
   WorkPacket,
   WorkPacketBlocker,
@@ -205,7 +206,8 @@ function budgetKeys(packet: WorkPacket): string[] {
 
 /** 旧后端或摘要构建失败：保留原委托详情，不构造默认四问/成功/费用 0。 */
 function LegacyPacketNotice({ readback }: { readback: ReadbackData }) {
-  const workState = readback.workState;
+  // 旧服务可能比 A2 legacy 样本更旧：缺 workState 时不能直接读 phase/reasonText/actionLabel。
+  const workState: WorkState | undefined = readback.workState;
   return (
     <section aria-label="原任务工作包暂未提供" className={styles.root}>
       <p className={styles.legacyTitle}>
@@ -214,20 +216,29 @@ function LegacyPacketNotice({ readback }: { readback: ReadbackData }) {
       <dl className={styles.facts}>
         <div>
           <dt>原状态</dt>
-          <dd>{readback.missionStatus}</dd>
+          <dd>{readback.missionStatus || "未记录"}</dd>
         </div>
-        <div>
-          <dt>显示阶段</dt>
-          <dd>{workPhaseLabel(workState.phase)}</dd>
-        </div>
-        <div>
-          <dt>原因</dt>
-          <dd>{workState.reasonText || "未记录"}</dd>
-        </div>
-        <div>
-          <dt>原动作</dt>
-          <dd>{workState.actionLabel || "未记录"}</dd>
-        </div>
+        {workState ? (
+          <>
+            <div>
+              <dt>显示阶段</dt>
+              <dd>{workPhaseLabel(workState.phase)}</dd>
+            </div>
+            <div>
+              <dt>原因</dt>
+              <dd>{workState.reasonText || "未记录"}</dd>
+            </div>
+            <div>
+              <dt>原动作</dt>
+              <dd>{workState.actionLabel || "未记录"}</dd>
+            </div>
+          </>
+        ) : (
+          <div>
+            <dt>显示阶段</dt>
+            <dd>原状态未提供（旧服务未返回委托工作状态）。</dd>
+          </div>
+        )}
       </dl>
       <p className={styles.note}>
         不显示默认四问、成功结论或费用 0；重新读取只读取原委托状态，不会推进成功观察。

@@ -284,6 +284,18 @@ function legacyReadback(): ReadbackData {
   } as unknown as ReadbackData;
 }
 
+/** 比 A2 legacy 样本更旧的响应：有 missionStatus，但没有 workState。 */
+function legacyReadbackWithoutWorkState(): ReadbackData {
+  return {
+    schemaVersion: 1,
+    missionId: MISSION_ID,
+    projectId: PROJECT_ID,
+    missionVersion: 1,
+    missionStatus: "READY",
+    observedAt: READ_AT,
+  } as unknown as ReadbackData;
+}
+
 function renderPacket(
   packet: WorkPacket | undefined,
   options: { readback?: ReadbackData | null; disabled?: boolean; targets?: boolean } = {},
@@ -560,6 +572,24 @@ describe("C1 四问工作包：快照与旧后端", () => {
     expect(text).not.toContain("现在等谁");
     expect(text).not.toContain("费用未知");
     expect(view.container.querySelectorAll("button")).toHaveLength(0);
+  });
+
+  it("旧后端缺 workState 也不抛错：仍提示摘要暂未提供，不构造成功或费用事实", () => {
+    let view: ReturnType<typeof renderPacket> | undefined;
+    expect(() => {
+      view = renderPacket(undefined, { readback: legacyReadbackWithoutWorkState() });
+    }).not.toThrow();
+    const text = view?.container.textContent ?? "";
+    expect(text).toContain("当前摘要暂未提供");
+    expect(text).toContain("不据此推断成功或无变化");
+    expect(text).toContain("READY");
+    expect(text).toContain("原状态未提供");
+    expect(text).not.toContain("做到哪");
+    expect(text).not.toContain("依据是什么");
+    expect(text).not.toContain("为何停下");
+    expect(text).not.toContain("现在等谁");
+    expect(text).not.toContain("费用未知");
+    expect(view?.container.querySelectorAll("button")).toHaveLength(0);
   });
 
   it("readback 为 null（加载/失败）时不渲染四问，也不报成功", () => {

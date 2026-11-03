@@ -4,6 +4,8 @@
 - 工作树：`D:/Projects/hongmen-final-a-mission-packet`，分支 `codex/final-a-mission-packet`
 - 准备基线：`485d485378637e1da3280ed092739d441c8cf749`
 - **A1 代码/探针提交：`f267aec674dbb9c28f6fa79bf428816016d2bee5`**（本回执为其后一份文档提交）
+- A1 合同回执提交：`543162f9424659c00f3f2abdee4a43fe2189aabc`
+- **A1 收尾补丁提交：`b243f62a2970ffc1bd070ba6c2933690c230d72f`**（RUNNING 执行中主操作、个人记忆边界重核、租约过期不误标 AUTHORITY）
 - 合同版本：`final-a-workpacket-v1`，`schemaVersion = 1`
 - 证据性质：纯函数 + 独立临时 SQLite 服务级探针；`LLM_MODE=mock`，0 次模型调用，无网络/无外部写入
 - 本切片**只证明合同与探针层**。FS-A01～A07 的服务级修复、真实并发与双端接线仍在 A2/验收阶段，未对外签收。
@@ -164,8 +166,9 @@ A1 实测：4 files / 69 tests passed；`tsc --noEmit` exit 0。
 | SUCCEEDED/CANCELLED + UNKNOWN | COMPLETED / USER | 原终态 | CHECK_UNKNOWN_EFFECT | 结算事实保留 | `unsettledEffect.present=true`；UNKNOWN 不被终态擦掉 |
 | PAUSED / FAILED + UNKNOWN | UNKNOWN / SYSTEM | `error.code` | RECHECK_AUTHORITY（`REVIEW_FAILURE` 用于 FAILED） | 事实保留 | `terminal=null` |
 | RUNNING + 有效 lease + 暂停/取消请求 | RUNNING / SYSTEM | STOP_REQUESTED_IN_FLIGHT | CHECK_STOP_SETTLEMENT | PAUSE/CANCEL_REQUESTED，settled=false | 旧 UNKNOWN 仍由 `unsettledEffect` 并列保留；不得出现继续派发建议 |
-| RUNNING + 有效 lease 无请求 | RUNNING / AGENT | LEASE_ACTIVE | WAIT_FOR_OBSERVATION | NONE | `nextBoundary=leaseUntil` |
-| RUNNING + lease 过期 | UNAVAILABLE / SYSTEM | LEASE_UNCONFIRMED | CHECK_STOP_SETTLEMENT（若停止在途）/ WAIT_FOR_OBSERVATION | 事实保留 | `freshness=UNAVAILABLE`；LEASE blocker |
+| RUNNING + 有效 lease 无请求 | RUNNING / AGENT | LEASE_ACTIVE | WAIT_FOR_OBSERVATION（“查看委托进展（执行中）”，waitingOn=SYSTEM_WORKER） | NONE | `nextBoundary=leaseUntil`；不出现继续/恢复文案 |
+| RUNNING + lease 过期 | UNAVAILABLE / SYSTEM | LEASE_UNCONFIRMED | WAIT_FOR_OBSERVATION（“等待租约重新确认”）；停止在途时 CHECK_STOP_SETTLEMENT | 事实保留 | `freshness=UNAVAILABLE`；LEASE blocker；**不**误标 AUTHORITY 许可重核 |
+| 个人记忆依赖边界越过（无新事件） | 原 phase 不变 | 原 reasonCode | RECHECK_AUTHORITY | 事实保留 | `TIME_BOUNDARY:PERSONAL_MEMORY_BOUNDARY_PASSED` blocker；`requires.boundaryAt`=最早边界 |
 | READY + DAILY_BUDGET_WAITING + 未来 nextAttemptAt | QUEUED / AGENT | DAILY_BUDGET_WAITING | WAIT_FOR_OBSERVATION | NONE | `nextCheckAt` 保留，累计用量不清零 |
 | PAUSED 已结算（用户暂停） | PAUSED / USER | PAUSED | RESUME_DELEGATION（重新核对条件） | PAUSE_SETTLED | — |
 | 任意终态 | COMPLETED | 原终态 | — | — | `terminal` 始终输出；操作类阻断不噪音展开，仅保留 UNKNOWN/SOURCE/版本类 |

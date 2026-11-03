@@ -132,12 +132,52 @@ async function collectMissionBack(
       "回执与指定草稿版本不一致，请从原成果重新进入",
       409,
     );
-  const fitRows = await tx.agentMissionEvent.findMany({ where: { missionId: id, type: "EVIDENCE_FIT_REVIEWED" }, orderBy: { seq: "desc" }, take: 21 });
+  // 证据审查窗口：先按选中 questionId 过滤再限额，其他 question 的新审查事件不能把目标问题挤出窗口。
+  // 选中原问题时用原生 SQL 的 json_extract 在库内过滤（避免先把全 Mission 窗口取回再丢弃），
+  // 未选中原问题时保留旧窗口行为（最近 20 条，不按问题过滤），并在 coverage 中诚实标注。
+  const EVIDENCE_REVIEW_WINDOW = 20;
+  const EVIDENCE_REVIEW_DISPLAY = 3;
   const selectedQuestionId = input.questionId ?? (m.waitStateJson as { questionId?: string } | null)?.questionId;
-  const selectedFitRows = fitRows.slice(0, 20).filter(e => (e.payloadJson as { evidenceFit?: { premise?: { questionId?: string } } }).evidenceFit?.premise?.questionId === selectedQuestionId).slice(0, 3);
+  const premiseQuestionIdOf = (payloadJson: unknown): unknown => {
+    const payload = record(payloadJson);
+    const evidenceFit = record(payload.evidenceFit);
+    const premise = record(evidenceFit.premise);
+    return premise.questionId;
+  };
+  type EvidenceFitWindowRow = { id: string; seq: number; createdAt: Date; payloadJson: unknown };
+  const rawFitRows: EvidenceFitWindowRow[] = (selectedQuestionId
+    ? await tx.$queryRaw<Array<{ id: string; seq: number | bigint; createdAt: Date | string | number; payloadJson: unknown }>>`
+        SELECT id, seq, "createdAt", "payloadJson" FROM "AgentMissionEvent"
+        WHERE "missionId" = ${id} AND "type" = 'EVIDENCE_FIT_REVIEWED'
+          AND json_extract("payloadJson", '$.evidenceFit.premise.questionId') = ${selectedQuestionId}
+        ORDER BY seq DESC LIMIT ${EVIDENCE_REVIEW_WINDOW + 1}`
+    : await tx.agentMissionEvent.findMany({
+        where: { missionId: id, type: "EVIDENCE_FIT_REVIEWED" },
+        orderBy: { seq: "desc" },
+        take: EVIDENCE_REVIEW_WINDOW + 1,
+      })
+  ).map(row => ({
+    id: row.id,
+    seq: Number(row.seq),
+    createdAt: row.createdAt instanceof Date ? row.createdAt : new Date(typeof row.createdAt === "number" ? row.createdAt : String(row.createdAt)),
+    payloadJson: typeof row.payloadJson === "string" ? (JSON.parse(row.payloadJson) as unknown) : row.payloadJson,
+  }));
+  const selectedFitRows = rawFitRows
+    .slice(0, EVIDENCE_REVIEW_WINDOW)
+    .filter(e => premiseQuestionIdOf(e.payloadJson) === selectedQuestionId)
+    .slice(0, EVIDENCE_REVIEW_DISPLAY);
   const evidenceReviews = {
     items: selectedFitRows.map(e => ({ eventId: e.id, observedAt: e.createdAt.toISOString(), ...fitContextSummary(e.payloadJson as unknown as NonNullable<Awaited<ReturnType<typeof assessEvidenceFit>>>)! })),
-    truncated: fitRows.length > 20,
+    truncated: rawFitRows.length > EVIDENCE_REVIEW_WINDOW,
+    // 覆盖说明（只增字段，旧客户端忽略）：窗口按选中原问题先过滤再限额；未找到只表示窗口覆盖不足，不等于从未发生。
+    questionFiltered: selectedQuestionId !== undefined && selectedQuestionId !== null,
+    questionId: selectedQuestionId ?? null,
+    windowLimit: EVIDENCE_REVIEW_WINDOW,
+    displayLimit: EVIDENCE_REVIEW_DISPLAY,
+    inspected: rawFitRows.length,
+    note: selectedQuestionId
+      ? "已按选中原问题先过滤 EVIDENCE_FIT_REVIEWED 再取最近 20 条窗口（最多展示 3 条）；truncated 只表示该问题窗口溢出，未命中只表示该问题在窗口内没有审查记录。"
+      : "未选中原问题，未按问题过滤；窗口只取最近 20 条 EVIDENCE_FIT_REVIEWED，未找到不代表从未发生。",
   };
   // 工作包只引用原证据审查摘要的确定性字段；truthVerified 恒为 false（不宣称现实成立）。
   const packetEvidenceReviews = {
@@ -152,7 +192,7 @@ async function collectMissionBack(
         truthVerified: false,
       };
     }),
-    truncated: fitRows.length > 20,
+    truncated: rawFitRows.length > EVIDENCE_REVIEW_WINDOW,
   };
   const actionIdCandidates = steps
     .map(s => (s.resultJson as { data?: { actionId?: string } } | null)?.data?.actionId)
@@ -219,7 +259,8 @@ async function collectMissionBack(
     nextCheckAt: m.nextAttemptAt?.toISOString() ?? null,
   };
   // 责任视图复用同一事务快照；它只读，且不构成第二份授权（原 /responsibility 仍是入口）。
-  const responsibility = await readMissionResponsibility(userId, id, tx);
+  // 同请求只读复用：m 已在本事务开头用 ownedMission 校验过归属，传给责任读取避免重复 ownedMission。
+  const responsibility = await readMissionResponsibility(userId, id, tx, m);
   // 工作包最近工作窗口：包含失败/待批/未知步骤，让“已经做了什么”不只看成功步骤。
   const windowSteps = await tx.agentMissionStep.findMany({
     where: { missionId: id }, orderBy: { ordinal: "desc" }, take: 6,
@@ -281,7 +322,12 @@ async function collectMissionBack(
         { name: "MATERIAL_SOURCE_EVENTS", limit: 80, returned: materialUses.coverage.eventsInspected, truncated: materialUses.coverage.eventsTruncated },
         { name: "MATERIAL_MISSION_RUNS", limit: 40, returned: materialUses.coverage.runsInspected, truncated: materialUses.coverage.runsTruncated, note: "窗口先按 trace.missionId 过滤再取最近本委托的 CHAT 运行；未找到不等于从未使用。" },
         { name: "MISSION_MODEL_RUNS", limit: 20, returned: callCoverage.inspected.agentRuns, truncated: callCoverage.inspected.truncated, note: "调用覆盖窗口先按 trace.missionId 过滤；未找到回执不等于从未发生。" },
-        { name: "EVIDENCE_REVIEWS", limit: 3, returned: evidenceReviews.items.length, truncated: evidenceReviews.truncated },
+        {
+          name: "EVIDENCE_REVIEWS", limit: EVIDENCE_REVIEW_DISPLAY, returned: evidenceReviews.items.length, truncated: evidenceReviews.truncated,
+          note: selectedQuestionId
+            ? "窗口先按选中原问题的 premise.questionId 过滤再取最近 20 条；truncated 只表示该问题窗口溢出。"
+            : "未选中原问题时保留旧窗口（最近 20 条审查事件）；未命中不代表从未发生。",
+        },
       ],
     },
   };

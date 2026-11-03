@@ -1,0 +1,1494 @@
+{
+  "status": "PROBE_COMPLETED",
+  "exitCode": 0,
+  "durationMs": 5725,
+  "command": "npx.cmd tsx scripts/final-a/perf-readback.ts --phase=BEFORE",
+  "method": {
+    "subject": "真实 readMissionBack(userId, missionId, {questionId})，独立临时 SQLite + 代表性 fixture；不调用模型/网络/Worker。",
+    "queryCount": "每次读取期间主连接在 better-sqlite3 驱动层实际 prepare 的 SQL 语句数（SELECT/PRAGMA 计为查询，BEGIN/COMMIT 单独计为事务语句）。",
+    "meterScope": "仅本脚本进程 + 本次临时库：启动时包装 better-sqlite3 Database.prototype.prepare/exec；不修改产品代码、lib/db.ts、Prisma schema 或其他测试，默认行为不变。",
+    "classification": "按 SQL 首关键字：SELECT/INSERT/UPDATE/DELETE/DDL/BEGIN/COMMIT/ROLLBACK/PRAGMA/OTHER。",
+    "transactionCount": "主连接 db.$transaction 进程内 spy 调用数，并与驱动级 BEGIN/COMMIT 语句数交叉核对。",
+    "sourcePolicyChecks": "readback.materialUses.coverage.sourcePolicyChecks：materialUseProjection 每个 item 的 currentUse 判定次数（只读数字，不改变判定）。",
+    "jsonBytes": "Buffer.byteLength(JSON.stringify(readback),'utf8')；Date 序列化为 ISO 字符串。",
+    "latency": "performance.now() 墙钟毫秒；百分位为最近邻法；SQLite 单机本地口径，不是线上/墙钟性能承诺。",
+    "zeroWrites": "量测窗口内驱动级 INSERT/UPDATE/DELETE/DDL 语句数 + 读前后业务表行数/Mission version/updatedAt 快照对比；受控重试写入由第二连接执行，量测窗口内暂停计数并单独记录。",
+    "controlledRetry": "spy db.$transaction：在快照已读取、第二只读复查事务返回前，用第二 PrismaClient（同一临时库文件）真实提交 Mission 版本推进；写法参照 tests/finalAConcurrencyService.test.ts。"
+  },
+  "environment": {
+    "phase": "BEFORE",
+    "capturedAt": "2026-11-03T07:13:06.941Z",
+    "timezone": "Asia/Shanghai (UTC+8)",
+    "runtime": {
+      "node": "v24.16.0",
+      "platform": "win32",
+      "arch": "x64",
+      "packageManager": "npm.cmd",
+      "typescriptRunner": "tsx",
+      "betterSqlite3": "12.11.1"
+    },
+    "git": {
+      "head": "4b696141435825a3582816e8e449c0e0cf013f29",
+      "branch": "codex/final-a-mission-packet",
+      "statusPorcelainEntries": 12,
+      "statusPorcelain": [
+        "M lib/mission/materialUseProjection.ts",
+        " M lib/mission/missionService.ts",
+        " M lib/mission/presentation.ts",
+        " M lib/mission/workspaceSummary.ts",
+        " M lib/server/globalFocus.ts",
+        " M lib/types/globalFocus.ts",
+        " M scripts/final-a/a1-contract-samples.ts",
+        "?? evidence/final-a/20261103/post-checkpoint/",
+        "?? scripts/final-a/perf-readback.ts",
+        "?? tests/finalAEvidenceReviewWindow.test.ts",
+        "?? tests/finalARequiresGuards.test.ts",
+        "?? tests/finalATerminalUnknownSummary.test.ts"
+      ]
+    },
+    "sourceTree": "working-tree @4b696141435825a3582816e8e449c0e0cf013f29 (BEFORE)",
+    "worktree": "D:\\Projects\\hongmen-final-a-mission-packet",
+    "database": {
+      "kind": "isolated-temporary-sqlite",
+      "url": "file:C:/Users/ADMINI~1/AppData/Local/Temp/pm-final-a-perf-readback-before-8LyTQB/probe.db",
+      "temporaryDir": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-final-a-perf-readback-before-8LyTQB",
+      "journalMode": "WAL",
+      "migrationsApplied": 52,
+      "schemaTables": 79,
+      "seededFrom": "prisma/migrations/*/migration.sql replayed with better-sqlite3 + WAL"
+    },
+    "provider": {
+      "llmMode": "mock",
+      "modelProviderCalls": 0,
+      "networkCalls": 0
+    },
+    "worker": {
+      "started": false,
+      "workerPresenceFile": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-final-a-perf-readback-before-8LyTQB\\worker-presence.json"
+    },
+    "sourceFilesSha256": {
+      "lib/mission/readback.ts": "0040dee2681d77595ae57d3fd257c8712325833a71c8cbfcffae3ea463f9c167",
+      "lib/mission/materialUseProjection.ts": "8f31859bafbe62121951df17faff58efdb9e74244b7ee156c95ebc76a3c62c85",
+      "lib/mission/responsibility.ts": "32c2a5e00dc14c021569f7a9e2fbe0d9d14041004f6f3ec4041468f404e33c42",
+      "lib/continuity/sourcePolicy.ts": "50f92ba9650fe1cf7a807479d50f1466b93fa1aa852fe826fda33974eeedd439",
+      "lib/db.ts": "0436588fd7570643d11b20722ad48dbf5433adf7e81a3cf6bcc9fcc3553880b6",
+      "lib/mission/workPacket.ts": "983df1837591bc560577d428afe217d15ae2ea620adfa61e9891c5dd14c84b64",
+      "scripts/final-a/perf-readback.ts": "eeaa6662eff4757e7d1a25316f501b64367b734fa36ad2b7deccd6c302389d2c"
+    }
+  },
+  "fixture": {
+    "label": "代表性 Mission：6 份项目材料 + 证据审查事件 + 2 个输出/成果回执 + 3 个动作回执 + 3 个 CHAT 运行回执 + 观察事件 + 1 个待批提案",
+    "missionId": "cmw0cpcfj0003408ohpbbja55",
+    "projectId": "cmw0cpcfa0001408oiukvvl23",
+    "questionId": "cmw0cpcfl0004408oau25cihi",
+    "eventCount": 40,
+    "materialCount": 6,
+    "materialPointerIds": [
+      "capture:cmw0cpcfn0005408orrvdx4jx",
+      "capture:cmw0cpcgh0009408odx5w175k",
+      "capture:cmw0cpcgo000d408or718668a",
+      "capture:cmw0cpcgs000g408o2gv1h5hj",
+      "capture:cmw0cpcgv000j408o154r6fku",
+      "capture:cmw0cpcgy000m408oixy8ks32"
+    ],
+    "outputRevisions": [
+      1,
+      2
+    ],
+    "receiptIds": [
+      "cmw0cpch8000q408ohw4h3ave",
+      "cmw0cpchb000t408ojua9r894"
+    ],
+    "actionReceiptIds": [
+      "cmw0cpche000u408ovfxkwery",
+      "cmw0cpchg000w408o9bioch9v",
+      "cmw0cpchj000y408oqhrz0aho"
+    ],
+    "runIds": [
+      "cmw0cpchn0010408oopb3o24a",
+      "cmw0cpcho0011408obx6e2ae4",
+      "cmw0cpchp0012408ojkermkcd"
+    ],
+    "targetReviewEventIds": [
+      "cmw0cpchy001a408owhvexglt",
+      "cmw0cpchz001b408ohbgh4w0b",
+      "cmw0cpci0001c408oa0ufn8co"
+    ],
+    "otherQuestionReviewEventIds": [
+      "cmw0cpci0001d408oz53c8l1g",
+      "cmw0cpci1001e408owdzpwy9y",
+      "cmw0cpci2001f408orgx5032k",
+      "cmw0cpci3001g408orjqm2yb8",
+      "cmw0cpci4001h408ort5103be",
+      "…"
+    ],
+    "expected": {
+      "materialItems": 6,
+      "materialItemFacts": [
+        "SAVED",
+        "BOUND",
+        "CANDIDATE",
+        "ASSOCIATED",
+        "OUTPUT_REFERENCE",
+        "EXACT_QUOTE",
+        "ARTIFACT_ADOPTION",
+        "CONTEXT_POINTER"
+      ],
+      "sourcePolicyChecks": 6,
+      "targetReviewsInDb": 3,
+      "otherReviewsInDb": 24
+    },
+    "materialUseItems": 6,
+    "materialUseFacts": [
+      "SAVED",
+      "CANDIDATE",
+      "BOUND",
+      "OUTPUT_REFERENCE",
+      "EXACT_QUOTE",
+      "ARTIFACT_ADOPTION",
+      "ASSOCIATED",
+      "CONTEXT_POINTER"
+    ],
+    "workPacketPresent": true,
+    "workPacketConsistency": "VERSION_STABLE",
+    "workPacketRetries": 0,
+    "workPacketEvidenceRows": 7
+  },
+  "stable": {
+    "warmup": 3,
+    "runs": 30,
+    "queryStats": {
+      "count": 30,
+      "min": 100,
+      "p50": 100,
+      "p95": 100,
+      "max": 100,
+      "mean": 100,
+      "method": "nearest-rank percentiles over recorded runs"
+    },
+    "queryUniqueValues": [
+      100
+    ],
+    "selectQueryStats": {
+      "count": 30,
+      "min": 100,
+      "p50": 100,
+      "p95": 100,
+      "max": 100,
+      "mean": 100,
+      "method": "nearest-rank percentiles over recorded runs"
+    },
+    "statementTotalStats": {
+      "count": 30,
+      "min": 104,
+      "p50": 104,
+      "p95": 104,
+      "max": 104,
+      "mean": 104,
+      "method": "nearest-rank percentiles over recorded runs"
+    },
+    "byKindTotals": {
+      "BEGIN": 60,
+      "SELECT": 3000,
+      "COMMIT": 60
+    },
+    "transactionStats": {
+      "count": 30,
+      "min": 2,
+      "p50": 2,
+      "p95": 2,
+      "max": 2,
+      "mean": 2,
+      "method": "nearest-rank percentiles over recorded runs"
+    },
+    "transactionUniqueValues": [
+      2
+    ],
+    "transactionCallsMatchBegin": true,
+    "commitMatchBegin": true,
+    "sourcePolicyCheckStats": {
+      "count": 30,
+      "min": 6,
+      "p50": 6,
+      "p95": 6,
+      "max": 6,
+      "mean": 6,
+      "method": "nearest-rank percentiles over recorded runs"
+    },
+    "sourcePolicyCheckUniqueValues": [
+      6
+    ],
+    "latencyMsStats": {
+      "count": 30,
+      "min": 56.699,
+      "p50": 72.429,
+      "p95": 228.125,
+      "max": 238.426,
+      "mean": 89.707,
+      "method": "nearest-rank percentiles over recorded runs"
+    },
+    "jsonBytesStats": {
+      "count": 30,
+      "min": 34649,
+      "p50": 34649,
+      "p95": 34649,
+      "max": 34649,
+      "mean": 34649,
+      "method": "nearest-rank percentiles over recorded runs"
+    },
+    "jsonBytesUniqueValues": [
+      34649
+    ],
+    "jsonBytesBreakdownMedian": {
+      "readback": 34649,
+      "workPacket": 19593,
+      "materialUses": 9581,
+      "evidenceReviews": 29,
+      "callCoverage": 1110
+    },
+    "consistencyDistribution": {
+      "VERSION_STABLE": 30
+    },
+    "writeStatementsTotal": 0,
+    "runsDetail": [
+      {
+        "label": "stable",
+        "run": 1,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 139.494,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 2,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 228.125,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 3,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 166.691,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 4,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 238.426,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 5,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 149.065,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 6,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 72.054,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 7,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 69.912,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 8,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 64.891,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 9,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 72.929,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 10,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 80.39,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 11,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 67.673,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 12,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 78.961,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 13,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 73.346,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 14,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 72.34,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 15,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 83.046,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 16,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 71.82,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 17,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 83.039,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 18,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 72.429,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 19,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 72.913,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 20,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 79.065,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 21,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 80.347,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 22,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 81.528,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 23,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 63.156,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 24,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 61.314,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 25,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 56.699,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 26,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 63.785,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 27,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 62.812,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 28,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 59.791,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 29,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 61.97,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      },
+      {
+        "label": "stable",
+        "run": 30,
+        "queries": 100,
+        "selectQueries": 100,
+        "statementsTotal": 104,
+        "byKind": {
+          "BEGIN": 2,
+          "SELECT": 100,
+          "COMMIT": 2
+        },
+        "beginStatements": 2,
+        "commitStatements": 2,
+        "transactionCalls": 2,
+        "sourcePolicyChecks": 6,
+        "jsonBytes": 34649,
+        "jsonBytesBreakdown": {
+          "readback": 34649,
+          "workPacket": 19593,
+          "materialUses": 9581,
+          "evidenceReviews": 29,
+          "callCoverage": 1110
+        },
+        "latencyMs": 63.187,
+        "writeStatements": 0,
+        "consistency": "VERSION_STABLE",
+        "retries": 0
+      }
+    ],
+    "queriesPerRead": {
+      "select": 100,
+      "begin": 2,
+      "commit": 2,
+      "statementsTotal": 104
+    },
+    "jsonBytesBreakdown": {
+      "readback": 34649,
+      "workPacket": 19593,
+      "materialUses": 9581,
+      "evidenceReviews": 29,
+      "callCoverage": 1110
+    },
+    "zeroWrites": {
+      "writeStatementsTotal": 0,
+      "sideEffectDiff": [],
+      "snapshotBefore": {
+        "counts": {
+          "events": 40,
+          "steps": 10,
+          "outputs": 2,
+          "receipts": 2,
+          "artifacts": 2,
+          "actions": 3,
+          "runs": 3,
+          "approvals": 1,
+          "directiveEvents": 0
+        },
+        "mission": {
+          "version": 7,
+          "updatedAt": "2026-11-03T07:13:02.887Z",
+          "nextEventSeq": 40,
+          "status": "WAITING_INPUT",
+          "planRevision": 3,
+          "contextVersion": 4
+        }
+      },
+      "snapshotAfter": {
+        "counts": {
+          "events": 40,
+          "steps": 10,
+          "outputs": 2,
+          "receipts": 2,
+          "artifacts": 2,
+          "actions": 3,
+          "runs": 3,
+          "approvals": 1,
+          "directiveEvents": 0
+        },
+        "mission": {
+          "version": 7,
+          "updatedAt": "2026-11-03T07:13:02.887Z",
+          "nextEventSeq": 40,
+          "status": "WAITING_INPUT",
+          "planRevision": 3,
+          "contextVersion": 4
+        }
+      }
+    }
+  },
+  "retried": {
+    "consistency": "RETRIED",
+    "retries": 1,
+    "queries": 200,
+    "selectQueries": 200,
+    "byKind": {
+      "BEGIN": 4,
+      "SELECT": 200,
+      "COMMIT": 4
+    },
+    "transactions": 4,
+    "transactionCalls": 4,
+    "sourcePolicyChecks": 6,
+    "jsonBytes": 34642,
+    "latencyMs": 191.733,
+    "injectedWrites": 1,
+    "writerWrites": 1,
+    "writerWriteWindow": "第二只读复查事务前（快照已读取、复查尚未返回）",
+    "missionVersionBefore": 7,
+    "missionVersionAfter": 8
+  },
+  "versionAdvanced": {
+    "consistency": "VERSION_ADVANCED",
+    "retries": 2,
+    "queries": 300,
+    "selectQueries": 300,
+    "byKind": {
+      "BEGIN": 6,
+      "SELECT": 300,
+      "COMMIT": 6
+    },
+    "transactions": 6,
+    "transactionCalls": 6,
+    "sourcePolicyChecks": 6,
+    "jsonBytes": 35326,
+    "latencyMs": 232.864,
+    "injectedWrites": 3,
+    "writerWrites": 3,
+    "writerWriteWindow": "第二只读复查事务前（快照已读取、复查尚未返回）",
+    "missionVersionBefore": 8,
+    "missionVersionAfter": 11
+  },
+  "windowCorrectness": {
+    "selectedQuestionId": "cmw0cpcfl0004408oau25cihi",
+    "targetReviewEventsInDb": 3,
+    "newerOtherQuestionReviewEventsInDb": 24,
+    "phase": "BEFORE",
+    "status": "REPRODUCED_SQUEEZE_BY_OTHER_QUESTIONS",
+    "hits": 0,
+    "hitQuestionIds": [],
+    "questionFilteredFieldPresent": false,
+    "truncated": true,
+    "returnedItems": 0,
+    "reviewWindow": 20,
+    "reviewDisplayLimit": 3,
+    "coverage": null,
+    "note": "BEFORE 代码先取全 Mission 最近 21 条 EVIDENCE_FIT_REVIEWED 再按 questionId 过滤：24 条更新的其他问题审查会挤出 3 条较早的目标问题审查，hits=0（缺陷复现，不是“从未发生”）。"
+  },
+  "queryHotspots": [
+    {
+      "count": 8,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`User`.`id`, `main`.`User`.`continuitySeq` FROM `main`.`User` WHERE (`main`.`User`.`id` = ? AND 1=1) LIMIT ? OFFSET ?",
+      "perRead": 8
+    },
+    {
+      "count": 8,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`AgentDirectiveEvent`.`id`, `main`.`AgentDirectiveEvent`.`ownerUserId`, `main`.`AgentDirectiveEvent`.`seq`, `main`.`AgentDirectiveEvent`.`commandId`, `main`.`AgentDirectiveEvent`.`eventIndex`, `main`.`AgentDirectiveEvent`.`inputHash`, `main`.`AgentDirectiveEvent`.`directiveId`, `main`.…",
+      "perRead": 8
+    },
+    {
+      "count": 8,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`AgentClaimEvent`.`id`, `main`.`AgentClaimEvent`.`claimId`, `main`.`AgentClaimEvent`.`ownerUserId`, `main`.`AgentClaimEvent`.`revision`, `main`.`AgentClaimEvent`.`requestId`, `main`.`AgentClaimEvent`.`payloadHash`, `main`.`AgentClaimEvent`.`eventKind`, `main`.`AgentClaimEvent`.`actorKi…",
+      "perRead": 8
+    },
+    {
+      "count": 8,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`AgentClaim`.`id`, `main`.`AgentClaim`.`ownerUserId`, `main`.`AgentClaim`.`projectId`, `main`.`AgentClaim`.`scopeType`, `main`.`AgentClaim`.`scopeKey`, `main`.`AgentClaim`.`conversationId`, `main`.`AgentClaim`.`missionId`, `main`.`AgentClaim`.`originKey`, `main`.`AgentClaim`.`originJso…",
+      "perRead": 8
+    },
+    {
+      "count": 6,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`Capture`.`id`, `main`.`Capture`.`processingJson`, `main`.`Capture`.`projectId`, `main`.`Capture`.`rawText`, `main`.`Capture`.`sourceType`, `main`.`Capture`.`requestId`, `main`.`Capture`.`requestHash`, `main`.`Capture`.`createdAt` FROM `main`.`Capture` WHERE (`main`.`Capture`.`id` = ? …",
+      "perRead": 6
+    },
+    {
+      "count": 6,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`KnowledgeCard`.`id`, `main`.`KnowledgeCard`.`captureId` FROM `main`.`KnowledgeCard` WHERE `main`.`KnowledgeCard`.`captureId` IN (?) LIMIT ? OFFSET ?",
+      "perRead": 6
+    },
+    {
+      "count": 6,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`Project`.`id`, `main`.`Project`.`deletionRequestedAt` FROM `main`.`Project` WHERE (`main`.`Project`.`id` = ? AND 1=1) LIMIT ? OFFSET ?",
+      "perRead": 6
+    },
+    {
+      "count": 6,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`Capture`.`id`, `main`.`Capture`.`sourceType` FROM `main`.`Capture` WHERE (`main`.`Capture`.`id` = ? AND `main`.`Capture`.`projectId` = ?) LIMIT ? OFFSET ?",
+      "perRead": 6
+    },
+    {
+      "count": 6,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`ExternalSignal`.`id` FROM `main`.`ExternalSignal` WHERE (`main`.`ExternalSignal`.`adoptedCaptureId` = ? AND `main`.`ExternalSignal`.`projectId` = ?) LIMIT ? OFFSET ?",
+      "perRead": 6
+    },
+    {
+      "count": 3,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`AgentMission`.`id`, `main`.`AgentMission`.`ownerUserId`, `main`.`AgentMission`.`projectId`, `main`.`AgentMission`.`createRequestId`, `main`.`AgentMission`.`createPayloadHash`, `main`.`AgentMission`.`goal`, `main`.`AgentMission`.`successCriteriaJson`, `main`.`AgentMission`.`constraints…",
+      "perRead": 3
+    },
+    {
+      "count": 3,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`ProjectMembership`.`id`, `main`.`ProjectMembership`.`userId`, `main`.`ProjectMembership`.`projectId`, `main`.`ProjectMembership`.`role`, `main`.`ProjectMembership`.`focusMissionId`, `main`.`ProjectMembership`.`personalMemoryMode`, `main`.`ProjectMembership`.`personalMemoryModeVersion`…",
+      "perRead": 3
+    },
+    {
+      "count": 2,
+      "kind": "BEGIN",
+      "sample": "BEGIN",
+      "perRead": 2
+    },
+    {
+      "count": 2,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`MissionArtifactReceipt`.`id`, `main`.`MissionArtifactReceipt`.`projectId`, `main`.`MissionArtifactReceipt`.`missionId`, `main`.`MissionArtifactReceipt`.`outputId`, `main`.`MissionArtifactReceipt`.`outputRevision`, `main`.`MissionArtifactReceipt`.`outputHash`, `main`.`MissionArtifactRe…",
+      "perRead": 2
+    },
+    {
+      "count": 2,
+      "kind": "SELECT",
+      "sample": "SELECT id FROM \"AgentRun\" WHERE \"projectId\"=? AND \"runType\"='CHAT' AND json_extract(trace, '$.missionId')=? ORDER BY \"createdAt\" DESC, id DESC LIMIT ?",
+      "perRead": 2
+    },
+    {
+      "count": 2,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`AgentMissionEvent`.`id`, `main`.`AgentMissionEvent`.`missionId`, `main`.`AgentMissionEvent`.`seq`, `main`.`AgentMissionEvent`.`type`, `main`.`AgentMissionEvent`.`payloadJson`, `main`.`AgentMissionEvent`.`commandRequestId`, `main`.`AgentMissionEvent`.`commandPayloadHash`, `main`.`Agent…",
+      "perRead": 2
+    },
+    {
+      "count": 2,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`AgentMissionApproval`.`id`, `main`.`AgentMissionApproval`.`missionId`, `main`.`AgentMissionApproval`.`stepId`, `main`.`AgentMissionApproval`.`proposalHash`, `main`.`AgentMissionApproval`.`proposalJson`, `main`.`AgentMissionApproval`.`expectedPlanRevision`, `main`.`AgentMissionApproval…",
+      "perRead": 2
+    },
+    {
+      "count": 2,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`ProjectMembership`.`id`, `main`.`ProjectMembership`.`role` FROM `main`.`ProjectMembership` WHERE ((`main`.`ProjectMembership`.`userId` = ? AND `main`.`ProjectMembership`.`projectId` = ?) AND 1=1) LIMIT ? OFFSET ?",
+      "perRead": 2
+    },
+    {
+      "count": 2,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`AgentMissionStep`.`id`, `main`.`AgentMissionStep`.`protocolJson` FROM `main`.`AgentMissionStep` WHERE `main`.`AgentMissionStep`.`missionId` = ? LIMIT ? OFFSET ?",
+      "perRead": 2
+    },
+    {
+      "count": 2,
+      "kind": "COMMIT",
+      "sample": "COMMIT",
+      "perRead": 2
+    },
+    {
+      "count": 1,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`AgentMissionEvent`.`id`, `main`.`AgentMissionEvent`.`missionId`, `main`.`AgentMissionEvent`.`seq`, `main`.`AgentMissionEvent`.`type`, `main`.`AgentMissionEvent`.`payloadJson`, `main`.`AgentMissionEvent`.`commandRequestId`, `main`.`AgentMissionEvent`.`commandPayloadHash`, `main`.`Agent…",
+      "perRead": 1
+    },
+    {
+      "count": 1,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`GeneratedArtifact`.`id`, `main`.`GeneratedArtifact`.`createdAt`, `main`.`GeneratedArtifact`.`artifactType` FROM `main`.`GeneratedArtifact` WHERE `main`.`GeneratedArtifact`.`id` IN (?,?) LIMIT ? OFFSET ?",
+      "perRead": 1
+    },
+    {
+      "count": 1,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`AgentMissionEvent`.`id`, `main`.`AgentMissionEvent`.`missionId`, `main`.`AgentMissionEvent`.`seq`, `main`.`AgentMissionEvent`.`type`, `main`.`AgentMissionEvent`.`payloadJson`, `main`.`AgentMissionEvent`.`commandRequestId`, `main`.`AgentMissionEvent`.`commandPayloadHash`, `main`.`Agent…",
+      "perRead": 1
+    },
+    {
+      "count": 1,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`AgentMissionStep`.`id`, `main`.`AgentMissionStep`.`resultJson` FROM `main`.`AgentMissionStep` WHERE (`main`.`AgentMissionStep`.`missionId` = ? AND `main`.`AgentMissionStep`.`status` = ?) ORDER BY `main`.`AgentMissionStep`.`ordinal` DESC LIMIT ? OFFSET ?",
+      "perRead": 1
+    },
+    {
+      "count": 1,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`AgentMissionEvent`.`id`, `main`.`AgentMissionEvent`.`missionId`, `main`.`AgentMissionEvent`.`seq`, `main`.`AgentMissionEvent`.`type`, `main`.`AgentMissionEvent`.`payloadJson`, `main`.`AgentMissionEvent`.`commandRequestId`, `main`.`AgentMissionEvent`.`commandPayloadHash`, `main`.`Agent…",
+      "perRead": 1
+    },
+    {
+      "count": 1,
+      "kind": "SELECT",
+      "sample": "SELECT `main`.`ActionItem`.`id`, `main`.`ActionItem`.`title`, `main`.`ActionItem`.`status`, `main`.`ActionItem`.`resultCardId`, `main`.`ActionItem`.`completedAt`, `main`.`ActionItem`.`isSimulated` FROM `main`.`ActionItem` WHERE (`main`.`ActionItem`.`id` IN (?,?,?) AND `main`.`ActionItem`.`projectId`…",
+      "perRead": 1
+    }
+  ],
+  "checks": {
+    "total": 18,
+    "passed": 18,
+    "failed": 0,
+    "items": [
+      {
+        "name": "stable.runs",
+        "expected": 30,
+        "actual": 30,
+        "pass": true
+      },
+      {
+        "name": "stable.consistency.all.VERSION_STABLE",
+        "expected": 30,
+        "actual": 30,
+        "pass": true
+      },
+      {
+        "name": "stable.transactions.perRead",
+        "expected": [
+          2
+        ],
+        "actual": [
+          2
+        ],
+        "pass": true
+      },
+      {
+        "name": "stable.transactionCallsMatchBegin",
+        "expected": true,
+        "actual": true,
+        "pass": true
+      },
+      {
+        "name": "stable.commitMatchBegin",
+        "expected": true,
+        "actual": true,
+        "pass": true
+      },
+      {
+        "name": "stable.sourcePolicyChecks",
+        "expected": [
+          6
+        ],
+        "actual": [
+          6
+        ],
+        "pass": true
+      },
+      {
+        "name": "stable.materialItems",
+        "expected": 6,
+        "actual": 6,
+        "pass": true
+      },
+      {
+        "name": "stable.writeStatementsTotal",
+        "expected": 0,
+        "actual": 0,
+        "pass": true
+      },
+      {
+        "name": "stable.sideEffects",
+        "expected": [],
+        "actual": [],
+        "pass": true
+      },
+      {
+        "name": "retried.consistency",
+        "expected": "RETRIED",
+        "actual": "RETRIED",
+        "pass": true
+      },
+      {
+        "name": "retried.retries",
+        "expected": 1,
+        "actual": 1,
+        "pass": true
+      },
+      {
+        "name": "retried.transactions",
+        "expected": 4,
+        "actual": 4,
+        "pass": true
+      },
+      {
+        "name": "retried.transactionCalls",
+        "expected": 4,
+        "actual": 4,
+        "pass": true
+      },
+      {
+        "name": "advanced.consistency",
+        "expected": "VERSION_ADVANCED",
+        "actual": "VERSION_ADVANCED",
+        "pass": true
+      },
+      {
+        "name": "advanced.retries",
+        "expected": 2,
+        "actual": 2,
+        "pass": true
+      },
+      {
+        "name": "advanced.transactions",
+        "expected": 6,
+        "actual": 6,
+        "pass": true
+      },
+      {
+        "name": "advanced.transactionCalls",
+        "expected": 6,
+        "actual": 6,
+        "pass": true
+      },
+      {
+        "name": "window.status",
+        "expected": "REPRODUCED_SQUEEZE_BY_OTHER_QUESTIONS",
+        "actual": "REPRODUCED_SQUEEZE_BY_OTHER_QUESTIONS",
+        "pass": true
+      }
+    ]
+  },
+  "remaining": [
+    "延迟是 SQLite 单机本地读数，不是线上或墙钟性能承诺；未测网络/HTTP/序列化之外的框架开销。",
+    "查询数是驱动层 SQL 语句数（含 Prisma 生成的内部查询），不等于 Prisma 引擎内部工作单元数；未量测 Prisma 引擎 CPU/内存。",
+    "N=30 只覆盖稳定快照；高并发多用户/大库/冷缓存不在本回执范围。",
+    "证据审查窗口修复只覆盖 readback 的 EVIDENCE_FIT_REVIEWED 窗口；本回执不替 Web/鸿蒙客户端签收 UI 文案。"
+  ]
+}

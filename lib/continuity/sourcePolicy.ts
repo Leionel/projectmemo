@@ -189,10 +189,16 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
   for (const child of new Set(childIds)) { const line = await sourceLineage(projectId, child, tx, next, budget); roots.push(...line.roots); known &&= line.known; blocked ||= line.blocked === true;blockedReason??=line.blockedReason; }
   return { roots: [...new Set(roots)], known, derived, blocked,blockedReason };
 }
-export async function sourceUse(userId: string, projectId: string, sourceId: string, tx: Tx = db, scope?: { conversationId?: string; missionId?: string }): Promise<SourceUse> {
+export async function sourceUse(userId: string, projectId: string, sourceId: string, tx: Tx = db, scope?: { conversationId?: string; missionId?: string },
+  /**
+   * 同请求只读复用：调用方已在同一事务用相同 user/project/mission scope 计算过 continuity view 时可传入，
+   * 跳过本函数内重复的 effectiveContinuity。仅省重复计算：逐 source 的 project/lineage/private/blocked/
+   * suppressed/known 判定逻辑、顺序与结果完全不变；不传时保持原行为，不做任何跨请求缓存。
+   */
+  precomputed?: { continuity: Awaited<ReturnType<typeof effectiveContinuity>> }): Promise<SourceUse> {
   const project = await tx.project.findUnique({ where: { id: projectId }, select: { deletionRequestedAt: true } });
   if (!project || project.deletionRequestedAt) return { state: "SUPPRESSED", roots: [], independentEvidence: false, reason: "项目已停用，来源不再允许消费" };
-  const view = await effectiveContinuity(userId, { projectId, ...scope }, tx);
+  const view = precomputed?.continuity ?? await effectiveContinuity(userId, { projectId, ...scope }, tx);
   const suppressed = new Set(view.directives.filter(d => d.kind === "USE_SUPPRESSION").flatMap(d => d.sourceIds));
   const line = await sourceLineage(projectId, sourceId, tx);
   const connectionIds=line.roots.filter(r=>r.startsWith("connection:")).map(r=>r.slice(11));

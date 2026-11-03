@@ -132,6 +132,8 @@ const materialUses = (currentUseState: "ALLOWED" | "SUPPRESSED" | "UNKNOWN"): Wo
     runScope: "MISSION_FILTERED",
     sourceLimit: 8, sourceLimitReached: false,
     mapping: "DIRECT_SOURCE_POINTERS_ONLY",
+    // 只读量测字段（A-新3）：本样本含 1 个 item 的 currentUse 判定。
+    sourcePolicyChecks: 1,
   },
 });
 

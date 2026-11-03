@@ -1,0 +1,530 @@
+{
+  "phase": 1,
+  "kind": "prototype",
+  "route": "/prototype/hero-a",
+  "routeKey": "a",
+  "state": "default",
+  "label": "proto-a-390-dark",
+  "capturedAt": "2026-11-03T03:48:18.192Z",
+  "sourceSha": "485d485378637e1da3280ed092739d441c8cf749",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "themeRequested": "dark",
+  "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-390-dark.png",
+  "fileBytes": 51234,
+  "fileSha256": "7f765d2687855cf71983f8111ba07388091d592b5e03718c9d196a401b27f6dd",
+  "metrics": {
+    "url": "http://127.0.0.1:34111/prototype/hero-a",
+    "title": "B1 原型 A｜原委托四问工作包",
+    "htmlClass": "dark",
+    "bodyBackgroundColor": "rgb(21, 30, 28)",
+    "h1Text": "人可以下线， 项目别掉线。",
+    "h1Color": "rgb(232, 238, 233)",
+    "localStorageTheme": "dark",
+    "prefersColorSchemeDark": false,
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "innerHeight": 844,
+    "horizontalOverflow": false,
+    "scrollHeight": 1324,
+    "scrollX": 0,
+    "scrollY": 0,
+    "fontStatus": "loaded",
+    "fontFaces": [
+      {
+        "family": "PM Editorial",
+        "weight": "500",
+        "status": "loaded"
+      },
+      {
+        "family": "PM Brand",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "weight": "400 600",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "weight": "400 600",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "weight": "400 600",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "weight": "400 600",
+        "status": "unloaded"
+      }
+    ],
+    "pmBrandFontAvailable": true,
+    "headerText": "忆程",
+    "headerProviderBadge": null,
+    "brokenImages": [],
+    "images": [
+      {
+        "src": "http://127.0.0.1:34111/logo.png",
+        "complete": true,
+        "naturalWidth": 1254
+      }
+    ],
+    "overflowers": [],
+    "activeElement": {
+      "tag": "body",
+      "text": "跳到主要内容 忆程 B1 隔离原型 A · 仅本地对照 · 不进入生产导航 面向大学生的 个人项目 Agent 人可以下"
+    },
+    "textMetrics": {
+      "heroSectionTextLength": 330,
+      "heroSectionTextFirst120": "面向大学生的 个人项目 Agent 人可以下线， 项目别掉线。 关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。 体验一段项目接续 进入工作台 公开示例 · 不调用模型 · 不写入你的项目 内置公",
+      "copyTextLength": 120,
+      "lensTextLength": 208,
+      "lensTextFirst120": "内置公开示例 忆程参赛作品开发· 整理阶段汇报 等你确认 01 离开时 02 期间 03 回来后 原委托 用已有材料整理一份阶段汇报 任务与草稿都留在原处 依据 比赛材料、任务安排、老师建议 3 条来源可以回看原文 变化 演示流程缺少完成回",
+      "panelTextLength": 131,
+      "panelTextFirst80": "原委托 用已有材料整理一份阶段汇报 任务与草稿都留在原处 依据 比赛材料、任务安排、老师建议 3 条来源可以回看原文 变化 演示流程缺少完成回执 原建议“先写汇",
+      "mainTextLength": 405
+    },
+    "tabs": [
+      {
+        "id": "proto-a-tab-away",
+        "label": "01 离开时",
+        "ariaSelected": "false",
+        "tabIndex": -1,
+        "bbox": {
+          "x": 26.19,
+          "y": 562.89,
+          "width": 109.88,
+          "height": 44,
+          "bottom": 606.89,
+          "right": 136.06,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "flex",
+          "visibility": "visible"
+        }
+      },
+      {
+        "id": "proto-a-tab-during",
+        "label": "02 期间",
+        "ariaSelected": "false",
+        "tabIndex": -1,
+        "bbox": {
+          "x": 140.06,
+          "y": 562.89,
+          "width": 109.88,
+          "height": 44,
+          "bottom": 606.89,
+          "right": 249.94,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "flex",
+          "visibility": "visible"
+        }
+      },
+      {
+        "id": "proto-a-tab-back",
+        "label": "03 回来后",
+        "ariaSelected": "true",
+        "tabIndex": 0,
+        "bbox": {
+          "x": 253.94,
+          "y": 562.89,
+          "width": 109.88,
+          "height": 44,
+          "bottom": 606.89,
+          "right": 363.81,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "flex",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "selectedTab": {
+      "id": "proto-a-tab-back",
+      "label": "03 回来后",
+      "ariaSelected": "true",
+      "tabIndex": 0,
+      "bbox": {
+        "x": 253.94,
+        "y": 562.89,
+        "width": 109.88,
+        "height": 44,
+        "bottom": 606.89,
+        "right": 363.81,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "flex",
+        "visibility": "visible"
+      }
+    },
+    "panelAriaLabelledby": "proto-a-tab-back",
+    "evidenceButton": {
+      "text": "查看依据",
+      "ariaExpanded": "false",
+      "ariaControls": "proto-a-evidence",
+      "bbox": {
+        "x": 35,
+        "y": 1004.56,
+        "width": 108.05,
+        "height": 44,
+        "bottom": 1048.56,
+        "right": 143.05,
+        "inFirstScreen": false,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": true,
+        "display": "flex",
+        "visibility": "visible"
+      }
+    },
+    "evidencePanelA": {
+      "visible": false
+    },
+    "chips": [],
+    "sourcePanelVisible": false,
+    "sourcePanels": [],
+    "targets": [
+      {
+        "tag": "a",
+        "text": "体验一段项目接续",
+        "width": 172.6,
+        "height": 46,
+        "minDimension": 46
+      },
+      {
+        "tag": "a",
+        "text": "进入工作台",
+        "width": 172.6,
+        "height": 46,
+        "minDimension": 46
+      },
+      {
+        "tag": "button",
+        "text": "01 离开时",
+        "width": 109.9,
+        "height": 44,
+        "minDimension": 44
+      },
+      {
+        "tag": "button",
+        "text": "02 期间",
+        "width": 109.9,
+        "height": 44,
+        "minDimension": 44
+      },
+      {
+        "tag": "button",
+        "text": "03 回来后",
+        "width": 109.9,
+        "height": 44,
+        "minDimension": 44
+      },
+      {
+        "tag": "button",
+        "text": "查看依据",
+        "width": 108,
+        "height": 44,
+        "minDimension": 44
+      },
+      {
+        "tag": "a",
+        "text": "回到原委托",
+        "width": 87,
+        "height": 44,
+        "minDimension": 44
+      }
+    ],
+    "elements": {
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 57,
+        "bottom": 57,
+        "right": 390,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "protoBadge": {
+        "x": 18,
+        "y": 73,
+        "width": 354,
+        "height": 18.94,
+        "bottom": 91.94,
+        "right": 372,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "heroSection": {
+        "x": 18,
+        "y": 91.94,
+        "width": 354,
+        "height": 1055.39,
+        "bottom": 1147.33,
+        "right": 372,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": true,
+        "display": "grid",
+        "visibility": "visible"
+      },
+      "copy": {
+        "x": 18,
+        "y": 111.94,
+        "width": 354,
+        "height": 299.08,
+        "bottom": 411.02,
+        "right": 372,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "h1": {
+        "x": 18,
+        "y": 154.33,
+        "width": 354,
+        "height": 80.5,
+        "bottom": 234.83,
+        "right": 372,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "sub": {
+        "x": 18,
+        "y": 250.83,
+        "width": 354,
+        "height": 57.16,
+        "bottom": 307.98,
+        "right": 372,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "actions": {
+        "x": 18,
+        "y": 329.58,
+        "width": 354,
+        "height": 46,
+        "bottom": 375.58,
+        "right": 372,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "primaryCta": {
+        "x": 18,
+        "y": 329.58,
+        "width": 172.59,
+        "height": 46,
+        "bottom": 375.58,
+        "right": 190.59,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "primaryCtaText": "体验一段项目接续",
+      "secondaryCta": {
+        "x": 199.39,
+        "y": 329.58,
+        "width": 172.61,
+        "height": 46,
+        "bottom": 375.58,
+        "right": 372,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "secondaryCtaText": "进入工作台",
+      "mockNote": {
+        "x": 18,
+        "y": 389.17,
+        "width": 354,
+        "height": 21.84,
+        "bottom": 411.02,
+        "right": 372,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "lens": {
+        "x": 18,
+        "y": 439.02,
+        "width": 354,
+        "height": 668.31,
+        "bottom": 1107.33,
+        "right": 372,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": true,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "lensTop": {
+        "x": 19,
+        "y": 440.02,
+        "width": 352,
+        "height": 115.69,
+        "bottom": 555.7,
+        "right": 371,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "lensTitle": {
+        "x": 35,
+        "y": 479.19,
+        "width": 233.23,
+        "height": 23.53,
+        "bottom": 502.72,
+        "right": 268.23,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "stageTabs": {
+        "x": 19,
+        "y": 555.7,
+        "width": 352,
+        "height": 56.98,
+        "bottom": 612.69,
+        "right": 371,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "chipRow": null,
+      "lensBody": {
+        "x": 19,
+        "y": 612.69,
+        "width": 352,
+        "height": 452.67,
+        "bottom": 1065.36,
+        "right": 371,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": true,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "panel": {
+        "x": 19,
+        "y": 612.69,
+        "width": 352,
+        "height": 452.67,
+        "bottom": 1065.36,
+        "right": 371,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": true,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "evidencePanel": null,
+      "sourcePanel": null,
+      "lensActions": {
+        "x": 35,
+        "y": 455.2,
+        "width": 233.23,
+        "height": 47.52,
+        "bottom": 502.72,
+        "right": 268.23,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "lensFoot": {
+        "x": 19,
+        "y": 1065.36,
+        "width": 352,
+        "height": 40.97,
+        "bottom": 1106.33,
+        "right": 371,
+        "inFirstScreen": false,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": true,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "anchorPlaceholder": {
+        "x": 18,
+        "y": 1147.33,
+        "width": 354,
+        "height": 128.25,
+        "bottom": 1275.58,
+        "right": 372,
+        "inFirstScreen": false,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": true,
+        "display": "block",
+        "visibility": "visible"
+      }
+    }
+  },
+  "network": {
+    "requestCount": 0,
+    "failures": []
+  }
+}

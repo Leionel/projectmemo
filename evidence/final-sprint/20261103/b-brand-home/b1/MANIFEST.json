@@ -1,0 +1,872 @@
+{
+  "task": "task-4",
+  "track": "B",
+  "phase": 1,
+  "kind": "prototype-comparison",
+  "capturedAt": "2026-11-03T03:48:30.387Z",
+  "sourceSha": "485d485378637e1da3280ed092739d441c8cf749",
+  "worktree": "D:\\Projects\\hongmen-final-b-brand-home",
+  "branch": "codex/final-b-brand-home",
+  "baseURL": "http://127.0.0.1:34111",
+  "routes": [
+    {
+      "key": "a",
+      "path": "/prototype/hero-a"
+    },
+    {
+      "key": "b",
+      "path": "/prototype/hero-b"
+    }
+  ],
+  "environment": {
+    "os": "win32 10.0.26300 (Windows 11 Home China)",
+    "cpu": "Intel(R) Core(TM) i7-14700HX ×28",
+    "totalMemoryGiB": 15.78,
+    "node": "v24.16.0",
+    "browser": "chromium via @playwright/test 1.61.1 (headless)",
+    "deviceScaleFactor": 1,
+    "colorScheme": "light",
+    "reducedMotion": "no-preference",
+    "network": "localhost loopback（Next dev，同一台机器）"
+  },
+  "sameConditions": [
+    "两路由使用同一 app 全局导航/header（pathname 非 /，SiteHeader 透传 layout header），两页完全相同",
+    "两页同一套示例素材（components/home/homeExample.ts）、同一 h1/副标题/CTA 文案、同一 mock 说明",
+    "同一浏览器/视口/主题/等待条件；默认状态：A=“回来后”阶段，B=完整因果链"
+  ],
+  "captureMatrix": {
+    "main": [
+      {
+        "label": "proto-a-1440-light",
+        "route": "a",
+        "width": 1440,
+        "height": 900,
+        "theme": "light",
+        "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light.png",
+        "fileBytes": 111190,
+        "fileSha256": "359808cfe7d3eb752bdf0a1e20f78b87278e5b2172ac9989fd0787e183ca3ca5",
+        "ok": true,
+        "key": {
+          "title": "B1 原型 A｜原委托四问工作包",
+          "h1Text": "人可以下线， 项目别掉线。",
+          "htmlClass": "light",
+          "horizontalOverflow": false,
+          "scrollWidth": 1440,
+          "innerWidth": 1440,
+          "fontStatus": "loaded",
+          "selectedTab": {
+            "id": "proto-a-tab-back",
+            "label": "03 回来后",
+            "ariaSelected": "true",
+            "tabIndex": 0,
+            "bbox": {
+              "x": 1104.41,
+              "y": 243.47,
+              "width": 194.2,
+              "height": 44,
+              "bottom": 287.47,
+              "right": 1298.61,
+              "inFirstScreen": true,
+              "clippedRight": false,
+              "clippedLeft": false,
+              "clippedBottom": false,
+              "display": "flex",
+              "visibility": "visible"
+            }
+          },
+          "evidenceVisible": false,
+          "lensTextLength": 208,
+          "panelTextLength": 131,
+          "heroSectionTextLength": 330,
+          "headerProviderBadge": "演示模式",
+          "evidencePanelBbox": null,
+          "sourcePanelBbox": null
+        }
+      },
+      {
+        "label": "proto-a-1440-dark",
+        "route": "a",
+        "width": 1440,
+        "height": 900,
+        "theme": "dark",
+        "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-dark.png",
+        "fileBytes": 106453,
+        "fileSha256": "a63e09a7fcb929574ccd399168a967088937f64759d0132b122f0b6d1a088d1e",
+        "ok": true,
+        "key": {
+          "title": "B1 原型 A｜原委托四问工作包",
+          "h1Text": "人可以下线， 项目别掉线。",
+          "htmlClass": "dark",
+          "horizontalOverflow": false,
+          "scrollWidth": 1440,
+          "innerWidth": 1440,
+          "fontStatus": "loaded",
+          "selectedTab": {
+            "id": "proto-a-tab-back",
+            "label": "03 回来后",
+            "ariaSelected": "true",
+            "tabIndex": 0,
+            "bbox": {
+              "x": 1104.41,
+              "y": 243.47,
+              "width": 194.2,
+              "height": 44,
+              "bottom": 287.47,
+              "right": 1298.61,
+              "inFirstScreen": true,
+              "clippedRight": false,
+              "clippedLeft": false,
+              "clippedBottom": false,
+              "display": "flex",
+              "visibility": "visible"
+            }
+          },
+          "evidenceVisible": false,
+          "lensTextLength": 208,
+          "panelTextLength": 131,
+          "heroSectionTextLength": 330,
+          "headerProviderBadge": "演示模式",
+          "evidencePanelBbox": null,
+          "sourcePanelBbox": null
+        }
+      },
+      {
+        "label": "proto-a-390-light",
+        "route": "a",
+        "width": 390,
+        "height": 844,
+        "theme": "light",
+        "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-390-light.png",
+        "fileBytes": 51746,
+        "fileSha256": "fee4064291f0bef9ca506fc10844956ea2310439dee9959a27ce1042cfc72ac4",
+        "ok": true,
+        "key": {
+          "title": "B1 原型 A｜原委托四问工作包",
+          "h1Text": "人可以下线， 项目别掉线。",
+          "htmlClass": "light",
+          "horizontalOverflow": false,
+          "scrollWidth": 390,
+          "innerWidth": 390,
+          "fontStatus": "loaded",
+          "selectedTab": {
+            "id": "proto-a-tab-back",
+            "label": "03 回来后",
+            "ariaSelected": "true",
+            "tabIndex": 0,
+            "bbox": {
+              "x": 253.94,
+              "y": 562.89,
+              "width": 109.88,
+              "height": 44,
+              "bottom": 606.89,
+              "right": 363.81,
+              "inFirstScreen": true,
+              "clippedRight": false,
+              "clippedLeft": false,
+              "clippedBottom": false,
+              "display": "flex",
+              "visibility": "visible"
+            }
+          },
+          "evidenceVisible": false,
+          "lensTextLength": 208,
+          "panelTextLength": 131,
+          "heroSectionTextLength": 330,
+          "headerProviderBadge": null,
+          "evidencePanelBbox": null,
+          "sourcePanelBbox": null
+        }
+      },
+      {
+        "label": "proto-a-390-dark",
+        "route": "a",
+        "width": 390,
+        "height": 844,
+        "theme": "dark",
+        "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-390-dark.png",
+        "fileBytes": 51234,
+        "fileSha256": "7f765d2687855cf71983f8111ba07388091d592b5e03718c9d196a401b27f6dd",
+        "ok": true,
+        "key": {
+          "title": "B1 原型 A｜原委托四问工作包",
+          "h1Text": "人可以下线， 项目别掉线。",
+          "htmlClass": "dark",
+          "horizontalOverflow": false,
+          "scrollWidth": 390,
+          "innerWidth": 390,
+          "fontStatus": "loaded",
+          "selectedTab": {
+            "id": "proto-a-tab-back",
+            "label": "03 回来后",
+            "ariaSelected": "true",
+            "tabIndex": 0,
+            "bbox": {
+              "x": 253.94,
+              "y": 562.89,
+              "width": 109.88,
+              "height": 44,
+              "bottom": 606.89,
+              "right": 363.81,
+              "inFirstScreen": true,
+              "clippedRight": false,
+              "clippedLeft": false,
+              "clippedBottom": false,
+              "display": "flex",
+              "visibility": "visible"
+            }
+          },
+          "evidenceVisible": false,
+          "lensTextLength": 208,
+          "panelTextLength": 131,
+          "heroSectionTextLength": 330,
+          "headerProviderBadge": null,
+          "evidencePanelBbox": null,
+          "sourcePanelBbox": null
+        }
+      },
+      {
+        "label": "proto-b-1440-light",
+        "route": "b",
+        "width": 1440,
+        "height": 900,
+        "theme": "light",
+        "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-light.png",
+        "fileBytes": 120162,
+        "fileSha256": "98a492653f87ba77a9f105baf8ede3254e3213e97505e3465cfbd1cca5f63696",
+        "ok": true,
+        "key": {
+          "title": "B1 原型 B｜来源变化因果镜头",
+          "h1Text": "人可以下线， 项目别掉线。",
+          "htmlClass": "light",
+          "horizontalOverflow": false,
+          "scrollWidth": 1440,
+          "innerWidth": 1440,
+          "fontStatus": "loaded",
+          "selectedTab": null,
+          "evidenceVisible": false,
+          "lensTextLength": 271,
+          "panelTextLength": 207,
+          "heroSectionTextLength": 393,
+          "headerProviderBadge": "演示模式",
+          "evidencePanelBbox": null,
+          "sourcePanelBbox": null
+        }
+      },
+      {
+        "label": "proto-b-1440-dark",
+        "route": "b",
+        "width": 1440,
+        "height": 900,
+        "theme": "dark",
+        "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-dark.png",
+        "fileBytes": 115108,
+        "fileSha256": "1377b614357fc6346fd69c6ff4ac75c46465a6239abaf844702239d9f0cf1f16",
+        "ok": true,
+        "key": {
+          "title": "B1 原型 B｜来源变化因果镜头",
+          "h1Text": "人可以下线， 项目别掉线。",
+          "htmlClass": "dark",
+          "horizontalOverflow": false,
+          "scrollWidth": 1440,
+          "innerWidth": 1440,
+          "fontStatus": "loaded",
+          "selectedTab": null,
+          "evidenceVisible": false,
+          "lensTextLength": 271,
+          "panelTextLength": 207,
+          "heroSectionTextLength": 393,
+          "headerProviderBadge": "演示模式",
+          "evidencePanelBbox": null,
+          "sourcePanelBbox": null
+        }
+      },
+      {
+        "label": "proto-b-390-light",
+        "route": "b",
+        "width": 390,
+        "height": 844,
+        "theme": "light",
+        "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-390-light.png",
+        "fileBytes": 57113,
+        "fileSha256": "d37186065a43e21be7883d6ce5331421e8426899716dfba330b2aafe3bf1caf2",
+        "ok": true,
+        "key": {
+          "title": "B1 原型 B｜来源变化因果镜头",
+          "h1Text": "人可以下线， 项目别掉线。",
+          "htmlClass": "light",
+          "horizontalOverflow": false,
+          "scrollWidth": 390,
+          "innerWidth": 390,
+          "fontStatus": "loaded",
+          "selectedTab": null,
+          "evidenceVisible": false,
+          "lensTextLength": 271,
+          "panelTextLength": 207,
+          "heroSectionTextLength": 393,
+          "headerProviderBadge": null,
+          "evidencePanelBbox": null,
+          "sourcePanelBbox": null
+        }
+      },
+      {
+        "label": "proto-b-390-dark",
+        "route": "b",
+        "width": 390,
+        "height": 844,
+        "theme": "dark",
+        "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-390-dark.png",
+        "fileBytes": 56333,
+        "fileSha256": "aa7f80365aff59f57f27f97890dfae07c52207fed5cfd6d2b0c1a2231db814b3",
+        "ok": true,
+        "key": {
+          "title": "B1 原型 B｜来源变化因果镜头",
+          "h1Text": "人可以下线， 项目别掉线。",
+          "htmlClass": "dark",
+          "horizontalOverflow": false,
+          "scrollWidth": 390,
+          "innerWidth": 390,
+          "fontStatus": "loaded",
+          "selectedTab": null,
+          "evidenceVisible": false,
+          "lensTextLength": 271,
+          "panelTextLength": 207,
+          "heroSectionTextLength": 393,
+          "headerProviderBadge": null,
+          "evidencePanelBbox": null,
+          "sourcePanelBbox": null
+        }
+      }
+    ],
+    "interactions": [
+      {
+        "label": "proto-a-1440-light-during",
+        "route": "a",
+        "state": "during",
+        "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light-during.png",
+        "fileBytes": 110235,
+        "fileSha256": "474c8b964bd864562bff4dff81ac0d70c5951157e8a7cd6c2356ddcb55a3754f",
+        "ok": true
+      },
+      {
+        "label": "proto-a-1440-light-evidence",
+        "route": "a",
+        "state": "evidence-open",
+        "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light-evidence.png",
+        "fileBytes": 119793,
+        "fileSha256": "bc154ba53e1117a1c0ebdbbfad3a917f13447a4175d1f4ab2339239ba0432c2f",
+        "ok": true
+      },
+      {
+        "label": "proto-b-1440-light-evidence-materials",
+        "route": "b",
+        "state": "source-competition-materials",
+        "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-light-evidence-materials.png",
+        "fileBytes": 121150,
+        "fileSha256": "d897a8c2c534654b1cb583bd6c09dc448e362bc5f70e2f09fd6749b8b1ba315f",
+        "ok": true
+      },
+      {
+        "label": "proto-b-1440-light-evidence-task",
+        "route": "b",
+        "state": "source-task-arrangement",
+        "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-light-evidence-task.png",
+        "fileBytes": 123552,
+        "fileSha256": "744763109ae5ce4e0bc1454cfcb10b72e2ed950a23c1fbda1501102291861dea",
+        "ok": true
+      }
+    ]
+  },
+  "fairness": [
+    {
+      "combo": "1440-light",
+      "a": {
+        "lensTextLength": 208,
+        "panelTextLength": 131,
+        "heroSectionTextLength": 330,
+        "h1Text": "人可以下线， 项目别掉线。"
+      },
+      "b": {
+        "lensTextLength": 271,
+        "panelTextLength": 207,
+        "heroSectionTextLength": 393,
+        "h1Text": "人可以下线， 项目别掉线。"
+      },
+      "delta": {
+        "lensTextLength": 63,
+        "panelTextLength": 76,
+        "heroSectionTextLength": 63
+      }
+    },
+    {
+      "combo": "390-light",
+      "a": {
+        "lensTextLength": 208,
+        "panelTextLength": 131,
+        "heroSectionTextLength": 330,
+        "h1Text": "人可以下线， 项目别掉线。"
+      },
+      "b": {
+        "lensTextLength": 271,
+        "panelTextLength": 207,
+        "heroSectionTextLength": 393,
+        "h1Text": "人可以下线， 项目别掉线。"
+      },
+      "delta": {
+        "lensTextLength": 63,
+        "panelTextLength": 76,
+        "heroSectionTextLength": 63
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light.png",
+      "bytes": 111190,
+      "sha256": "359808cfe7d3eb752bdf0a1e20f78b87278e5b2172ac9989fd0787e183ca3ca5",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-dark.png",
+      "bytes": 106453,
+      "sha256": "a63e09a7fcb929574ccd399168a967088937f64759d0132b122f0b6d1a088d1e",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-390-light.png",
+      "bytes": 51746,
+      "sha256": "fee4064291f0bef9ca506fc10844956ea2310439dee9959a27ce1042cfc72ac4",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-390-dark.png",
+      "bytes": 51234,
+      "sha256": "7f765d2687855cf71983f8111ba07388091d592b5e03718c9d196a401b27f6dd",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-light.png",
+      "bytes": 120162,
+      "sha256": "98a492653f87ba77a9f105baf8ede3254e3213e97505e3465cfbd1cca5f63696",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-dark.png",
+      "bytes": 115108,
+      "sha256": "1377b614357fc6346fd69c6ff4ac75c46465a6239abaf844702239d9f0cf1f16",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-390-light.png",
+      "bytes": 57113,
+      "sha256": "d37186065a43e21be7883d6ce5331421e8426899716dfba330b2aafe3bf1caf2",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-390-dark.png",
+      "bytes": 56333,
+      "sha256": "aa7f80365aff59f57f27f97890dfae07c52207fed5cfd6d2b0c1a2231db814b3",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light-during.png",
+      "bytes": 110235,
+      "sha256": "474c8b964bd864562bff4dff81ac0d70c5951157e8a7cd6c2356ddcb55a3754f",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light-evidence.png",
+      "bytes": 119793,
+      "sha256": "bc154ba53e1117a1c0ebdbbfad3a917f13447a4175d1f4ab2339239ba0432c2f",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-light-evidence-materials.png",
+      "bytes": 121150,
+      "sha256": "d897a8c2c534654b1cb583bd6c09dc448e362bc5f70e2f09fd6749b8b1ba315f",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-light-evidence-task.png",
+      "bytes": 123552,
+      "sha256": "744763109ae5ce4e0bc1454cfcb10b72e2ed950a23c1fbda1501102291861dea",
+      "kind": "screenshot"
+    }
+  ],
+  "fileCount": {
+    "screenshots": 12,
+    "metrics": 12
+  },
+  "network": {
+    "file": "evidence/final-sprint/20261103/b-brand-home/b1/network-proto.json",
+    "totals": {
+      "requestRecords": 593,
+      "uniqueRequestUrls": 29,
+      "externalOriginRequests": 0,
+      "apiWriteRequests": 0,
+      "failures": 95,
+      "imageFontFailures": 0,
+      "consoleErrors": 70,
+      "pageErrors": 0
+    }
+  },
+  "errors": [],
+  "anomalies": {
+    "horizontalOverflowCaptures": [],
+    "externalOrigins": [],
+    "apiWrites": 0,
+    "imageFontFailures": 0,
+    "consoleErrors": [
+      {
+        "capture": "capture-a-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-1440-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      }
+    ],
+    "pageErrors": []
+  }
+}

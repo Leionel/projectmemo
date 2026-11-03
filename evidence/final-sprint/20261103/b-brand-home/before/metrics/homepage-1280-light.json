@@ -1,0 +1,344 @@
+{
+  "phase": 0,
+  "kind": "before",
+  "label": "1280-light",
+  "capturedAt": "2026-11-03T03:41:49.760Z",
+  "sourceSha": "485d485378637e1da3280ed092739d441c8cf749",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "themeRequested": "light",
+  "file": "evidence/final-sprint/20261103/b-brand-home/before/homepage-1280-light-before.png",
+  "fileBytes": 173519,
+  "fileSha256": "117451299cdae00258796684d1ef18542be42dd3337904b0a5c4b2ff3d7bba50",
+  "metrics": {
+    "url": "http://127.0.0.1:34111/",
+    "title": "忆程 ProjectMemo｜个人项目 Agent",
+    "htmlClass": "light",
+    "htmlClassList": [
+      "light"
+    ],
+    "bodyBackgroundColor": "rgb(247, 246, 242)",
+    "bodyColor": "rgb(28, 46, 44)",
+    "h1Text": "项目隔了几天， 再打开也接得上。",
+    "h1Color": "rgb(28, 46, 44)",
+    "localStorageTheme": "light",
+    "prefersColorSchemeDark": false,
+    "scrollWidth": 1280,
+    "scrollHeight": 3486,
+    "innerWidth": 1280,
+    "innerHeight": 720,
+    "devicePixelRatio": 1,
+    "horizontalOverflow": false,
+    "scrollX": 0,
+    "scrollY": 0,
+    "fontStatus": "loaded",
+    "fontFaces": [
+      {
+        "family": "PM Editorial",
+        "weight": "500",
+        "style": "normal",
+        "status": "loaded"
+      },
+      {
+        "family": "PM Brand",
+        "weight": "400",
+        "style": "normal",
+        "status": "loaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "weight": "400 600",
+        "style": "normal",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "weight": "400 600",
+        "style": "normal",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "weight": "400 600",
+        "style": "normal",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "weight": "400 600",
+        "style": "normal",
+        "status": "unloaded"
+      }
+    ],
+    "pmBrandFontAvailable": true,
+    "headerBadge": null,
+    "tabCount": 5,
+    "selectedTabText": "1\n查看记录",
+    "images": [
+      {
+        "src": "http://127.0.0.1:34111/logo.png",
+        "alt": "",
+        "complete": true,
+        "naturalWidth": 1254,
+        "naturalHeight": 1254,
+        "displayedWidth": 28,
+        "displayedHeight": 28
+      },
+      {
+        "src": "http://127.0.0.1:34111/home/workspace-desktop.jpg",
+        "alt": "忆程实际工作区：项目风险状态、记录依据与下一步入口",
+        "complete": true,
+        "naturalWidth": 1280,
+        "naturalHeight": 760,
+        "displayedWidth": 1150.4,
+        "displayedHeight": 560.1
+      }
+    ],
+    "brokenImages": [],
+    "overflowers": [],
+    "elements": {
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 57,
+        "bottom": 57,
+        "right": 1280,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "skipLink": {
+        "x": 9.59,
+        "y": -60.91,
+        "width": 116,
+        "height": 44.06,
+        "bottom": -16.84,
+        "right": 125.59,
+        "inFirstScreen": false,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "main": {
+        "x": 0,
+        "y": 57,
+        "width": 1280,
+        "height": 3428.86,
+        "bottom": 3485.86,
+        "right": 1280,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "heroSection": {
+        "x": 50,
+        "y": 57,
+        "width": 1180,
+        "height": 1003.17,
+        "bottom": 1060.17,
+        "right": 1230,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "positioning": {
+        "x": 50,
+        "y": 113,
+        "width": 1180,
+        "height": 29.69,
+        "bottom": 142.69,
+        "right": 1230,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "h1": {
+        "x": 50,
+        "y": 186.55,
+        "width": 748,
+        "height": 143.97,
+        "bottom": 330.52,
+        "right": 798,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "heroDescription": {
+        "x": 862,
+        "y": 162.69,
+        "width": 368,
+        "height": 59.19,
+        "bottom": 221.88,
+        "right": 1230,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "heroActions": {
+        "x": 862,
+        "y": 241.88,
+        "width": 368,
+        "height": 48.5,
+        "bottom": 290.38,
+        "right": 1230,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "primaryCta": {
+        "x": 862,
+        "y": 241.88,
+        "width": 156.77,
+        "height": 48.5,
+        "bottom": 290.38,
+        "right": 1018.77,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "primaryCtaText": "体验项目接续",
+      "secondaryCta": {
+        "x": 1030.77,
+        "y": 241.88,
+        "width": 141.77,
+        "height": 48.5,
+        "bottom": 290.38,
+        "right": 1172.53,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "secondaryCtaText": "进入工作台",
+      "heroNote": {
+        "x": 862,
+        "y": 306.38,
+        "width": 368,
+        "height": 20.14,
+        "bottom": 326.52,
+        "right": 1230,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "heroFigure": {
+        "x": 50,
+        "y": 362.52,
+        "width": 1180,
+        "height": 649.66,
+        "bottom": 1012.17,
+        "right": 1230,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "heroImage": {
+        "x": 64.8,
+        "y": 411.83,
+        "width": 1150.41,
+        "height": 560.14,
+        "bottom": 971.97,
+        "right": 1215.2,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "figcaption": {
+        "x": 63.8,
+        "y": 972.97,
+        "width": 1152.41,
+        "height": 38.2,
+        "bottom": 1011.17,
+        "right": 1216.2,
+        "inFirstScreen": false,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "storySection": {
+        "x": 50,
+        "y": 1060.17,
+        "width": 1180,
+        "height": 948.55,
+        "bottom": 2008.72,
+        "right": 1230,
+        "inFirstScreen": false,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "storyHeading": {
+        "x": 50,
+        "y": 1140.56,
+        "width": 518.8,
+        "height": 55.55,
+        "bottom": 1196.11,
+        "right": 568.8,
+        "inFirstScreen": false,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "tablist": {
+        "x": 51,
+        "y": 1315.14,
+        "width": 1178,
+        "height": 53.2,
+        "bottom": 1368.34,
+        "right": 1229,
+        "inFirstScreen": false,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "closingCta": {
+        "x": 1104,
+        "y": 3310.88,
+        "width": 126,
+        "height": 45.69,
+        "bottom": 3356.56,
+        "right": 1230,
+        "inFirstScreen": false,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "display": "flex",
+        "visibility": "visible"
+      }
+    }
+  },
+  "network": {
+    "requestCount": 26,
+    "failures": []
+  }
+}

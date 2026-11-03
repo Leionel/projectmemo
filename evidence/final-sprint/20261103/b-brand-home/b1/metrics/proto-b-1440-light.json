@@ -1,0 +1,483 @@
+{
+  "phase": 1,
+  "kind": "prototype",
+  "route": "/prototype/hero-b",
+  "routeKey": "b",
+  "state": "default",
+  "label": "proto-b-1440-light",
+  "capturedAt": "2026-11-03T03:48:19.807Z",
+  "sourceSha": "485d485378637e1da3280ed092739d441c8cf749",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "themeRequested": "light",
+  "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-light.png",
+  "fileBytes": 120162,
+  "fileSha256": "98a492653f87ba77a9f105baf8ede3254e3213e97505e3465cfbd1cca5f63696",
+  "metrics": {
+    "url": "http://127.0.0.1:34111/prototype/hero-b",
+    "title": "B1 原型 B｜来源变化因果镜头",
+    "htmlClass": "light",
+    "bodyBackgroundColor": "rgb(247, 246, 242)",
+    "h1Text": "人可以下线， 项目别掉线。",
+    "h1Color": "rgb(28, 46, 44)",
+    "localStorageTheme": "light",
+    "prefersColorSchemeDark": false,
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "innerHeight": 900,
+    "horizontalOverflow": false,
+    "scrollHeight": 996,
+    "scrollX": 0,
+    "scrollY": 0,
+    "fontStatus": "loaded",
+    "fontFaces": [
+      {
+        "family": "PM Editorial",
+        "weight": "500",
+        "status": "loaded"
+      },
+      {
+        "family": "PM Brand",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "weight": "400 600",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "weight": "400 600",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "weight": "400 600",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "weight": "400 600",
+        "status": "unloaded"
+      }
+    ],
+    "pmBrandFontAvailable": true,
+    "headerText": "忆程 ProjectMemo MEMORY AGENT 演示模式 焦点 项目 记忆 行动 设置 登录",
+    "headerProviderBadge": "演示模式",
+    "brokenImages": [],
+    "images": [
+      {
+        "src": "http://127.0.0.1:34111/logo.png",
+        "complete": true,
+        "naturalWidth": 1254
+      }
+    ],
+    "overflowers": [],
+    "activeElement": {
+      "tag": "body",
+      "text": "跳到主要内容 忆程 ProjectMemo MEMORY AGENT 演示模式 焦点 项目 记忆 行动 设置 登录 B1"
+    },
+    "textMetrics": {
+      "heroSectionTextLength": 393,
+      "heroSectionTextFirst120": "面向大学生的 个人项目 Agent 人可以下线， 项目别掉线。 关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。 体验一段项目接续 进入工作台 公开示例 · 不调用模型 · 不写入你的项目 内置公",
+      "copyTextLength": 120,
+      "lensTextLength": 271,
+      "lensTextFirst120": "内置公开示例 忆程参赛作品开发· 整理阶段汇报 等你确认 01 来源 比赛材料要求有演示材料，任务安排写明“还没有完整 Demo”。 比赛材料 任务安排 老师建议 02 变化 核对当前记录：演示流程的实际结果缺失。 还没有完成回执，不能确认",
+      "panelTextLength": 207,
+      "panelTextFirst80": "01 来源 比赛材料要求有演示材料，任务安排写明“还没有完整 Demo”。 比赛材料 任务安排 老师建议 02 变化 核对当前记录：演示流程的实际结果缺失。 还",
+      "mainTextLength": 468
+    },
+    "tabs": [],
+    "selectedTab": null,
+    "panelAriaLabelledby": null,
+    "evidenceButton": null,
+    "evidencePanelA": {
+      "visible": false
+    },
+    "chips": [
+      {
+        "text": "比赛材料",
+        "ariaExpanded": "false",
+        "controls": "proto-b-source-requirements",
+        "bbox": {
+          "x": 753.61,
+          "y": 311.84,
+          "width": 94.06,
+          "height": 40,
+          "bottom": 351.84,
+          "right": 847.67,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "flex",
+          "visibility": "visible"
+        }
+      },
+      {
+        "text": "任务安排",
+        "ariaExpanded": "false",
+        "controls": "proto-b-source-task",
+        "bbox": {
+          "x": 854.86,
+          "y": 311.84,
+          "width": 94.06,
+          "height": 40,
+          "bottom": 351.84,
+          "right": 948.92,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "flex",
+          "visibility": "visible"
+        }
+      },
+      {
+        "text": "老师建议",
+        "ariaExpanded": "false",
+        "controls": "proto-b-source-advice",
+        "bbox": {
+          "x": 956.11,
+          "y": 311.84,
+          "width": 94.06,
+          "height": 40,
+          "bottom": 351.84,
+          "right": 1050.17,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "flex",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "sourcePanelVisible": false,
+    "sourcePanels": [],
+    "targets": [
+      {
+        "tag": "a",
+        "text": "体验一段项目接续",
+        "width": 187.6,
+        "height": 48,
+        "minDimension": 48
+      },
+      {
+        "tag": "a",
+        "text": "进入工作台",
+        "width": 142.6,
+        "height": 48,
+        "minDimension": 48
+      },
+      {
+        "tag": "button",
+        "text": "比赛材料",
+        "width": 94.1,
+        "height": 40,
+        "minDimension": 40
+      },
+      {
+        "tag": "button",
+        "text": "任务安排",
+        "width": 94.1,
+        "height": 40,
+        "minDimension": 40
+      },
+      {
+        "tag": "button",
+        "text": "老师建议",
+        "width": 94.1,
+        "height": 40,
+        "minDimension": 40
+      },
+      {
+        "tag": "a",
+        "text": "回到原委托",
+        "width": 108.4,
+        "height": 44,
+        "minDimension": 44
+      }
+    ],
+    "elements": {
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 57,
+        "bottom": 57,
+        "right": 1440,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "protoBadge": {
+        "x": 130,
+        "y": 77,
+        "width": 1180,
+        "height": 19.97,
+        "bottom": 96.97,
+        "right": 1310,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "heroSection": {
+        "x": 130,
+        "y": 96.97,
+        "width": 1180,
+        "height": 746.61,
+        "bottom": 843.58,
+        "right": 1310,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "grid",
+        "visibility": "visible"
+      },
+      "copy": {
+        "x": 130,
+        "y": 271.84,
+        "width": 501.83,
+        "height": 391.09,
+        "bottom": 662.94,
+        "right": 631.83,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "h1": {
+        "x": 130,
+        "y": 314.23,
+        "width": 501.83,
+        "height": 146.97,
+        "bottom": 461.2,
+        "right": 631.83,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "sub": {
+        "x": 130,
+        "y": 482.8,
+        "width": 496,
+        "height": 64.59,
+        "bottom": 547.39,
+        "right": 626,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "actions": {
+        "x": 130,
+        "y": 575.39,
+        "width": 501.83,
+        "height": 48,
+        "bottom": 623.39,
+        "right": 631.83,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "primaryCta": {
+        "x": 130,
+        "y": 575.39,
+        "width": 187.59,
+        "height": 48,
+        "bottom": 623.39,
+        "right": 317.59,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "primaryCtaText": "体验一段项目接续",
+      "secondaryCta": {
+        "x": 329.59,
+        "y": 575.39,
+        "width": 142.59,
+        "height": 48,
+        "bottom": 623.39,
+        "right": 472.19,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "secondaryCtaText": "进入工作台",
+      "mockNote": {
+        "x": 130,
+        "y": 640.19,
+        "width": 501.83,
+        "height": 22.75,
+        "bottom": 662.94,
+        "right": 631.83,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "lens": {
+        "x": 696.63,
+        "y": 148.8,
+        "width": 613.38,
+        "height": 637.19,
+        "bottom": 785.98,
+        "right": 1310,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "lensTop": {
+        "x": 697.63,
+        "y": 149.8,
+        "width": 611.38,
+        "height": 84.88,
+        "bottom": 234.67,
+        "right": 1309,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "lensTitle": {
+        "x": 720.02,
+        "y": 192.17,
+        "width": 252.38,
+        "height": 25.5,
+        "bottom": 217.67,
+        "right": 972.39,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "stageTabs": null,
+      "chipRow": {
+        "x": 753.61,
+        "y": 311.84,
+        "width": 533,
+        "height": 40,
+        "bottom": 351.84,
+        "right": 1286.61,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "lensBody": {
+        "x": 697.63,
+        "y": 234.67,
+        "width": 611.38,
+        "height": 506.97,
+        "bottom": 741.64,
+        "right": 1309,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "panel": {
+        "x": 720.02,
+        "y": 253.06,
+        "width": 566.59,
+        "height": 393.19,
+        "bottom": 646.25,
+        "right": 1286.61,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "evidencePanel": null,
+      "sourcePanel": null,
+      "lensActions": {
+        "x": 753.61,
+        "y": 311.84,
+        "width": 533,
+        "height": 40,
+        "bottom": 351.84,
+        "right": 1286.61,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "lensFoot": {
+        "x": 697.63,
+        "y": 741.64,
+        "width": 611.38,
+        "height": 43.34,
+        "bottom": 784.98,
+        "right": 1309,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "flex",
+        "visibility": "visible"
+      },
+      "anchorPlaceholder": {
+        "x": 130,
+        "y": 843.58,
+        "width": 1180,
+        "height": 104.63,
+        "bottom": 948.2,
+        "right": 1310,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": true,
+        "display": "block",
+        "visibility": "visible"
+      }
+    }
+  },
+  "network": {
+    "requestCount": 0,
+    "failures": []
+  }
+}

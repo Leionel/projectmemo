@@ -839,3 +839,13 @@
     box-shadow: none;
   }
 }
+
+/* 首页五步示例里复用的共享状态差异组件：只在首页作用域内把 11–12px 元数据提升到 12.8px，不修改共享组件本身。 */
+.judgmentPane [class~="text-xs"] {
+  font-size: 0.8rem;
+  line-height: 1.65;
+}
+.judgmentPane [class~="text-[11px]"] {
+  font-size: 0.8rem;
+  line-height: 1.6;
+}

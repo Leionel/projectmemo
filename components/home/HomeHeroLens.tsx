@@ -140,6 +140,7 @@ export function HomeHeroLens() {
     <div
       className={styles.lens}
       data-hero-lens
+      role="group"
       aria-label="公开示例：委托当前工作包"
     >
       <header className={styles.lensHead}>

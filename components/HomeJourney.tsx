@@ -127,7 +127,11 @@ export function HomeJourney() {
     );
   }
   return (
-    <div className={styles.storyFrame} aria-label="参赛项目交互示例">
+    <div
+      className={styles.storyFrame}
+      role="group"
+      aria-label="参赛项目交互示例"
+    >
       <div className={styles.storyHeader}>
         <div className={styles.projectIdentity}>
           <span className={styles.projectIcon}>

@@ -1,0 +1,57 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/loginResetRace.test.ts
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-final-auth
+
+ ❯ tests/loginResetRace.test.ts (2 tests | 2 failed) 329ms
+   × 密码重置已提交后，在途旧密码登录不得新建会话 262ms
+   × 校验后邮箱资格被撤回，在途登录不得新建会话 57ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/loginResetRace.test.ts > 密码重置已提交后，在途旧密码登录不得新建会话
+AssertionError: expected 200 to be 401 // Object.is equality
+
+- Expected
++ Received
+
+- 401
++ 200
+
+ ❯ tests/loginResetRace.test.ts:38:27
+     36|   });
+     37|   const response = await login(request({ username: account.username, p…
+     38|   expect(response.status).toBe(401);
+       |                           ^
+     39|   expect(response.headers.get("set-cookie")).toBeNull();
+     40|   expect(await db.authSession.count({ where: { userId: account.id, rev…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/loginResetRace.test.ts > 校验后邮箱资格被撤回，在途登录不得新建会话
+AssertionError: expected 200 to be 403 // Object.is equality
+
+- Expected
++ Received
+
+- 403
++ 200
+
+ ❯ tests/loginResetRace.test.ts:50:27
+     48|   });
+     49|   const response = await login(request({ username: account.username, p…
+     50|   expect(response.status).toBe(403);
+       |                           ^
+     51|   expect(response.headers.get("set-cookie")).toBeNull();
+     52|   expect(await db.authSession.count({ where: { userId: account.id } })…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  20:20:05
+   Duration  1.45s (transform 239ms, setup 0ms, import 894ms, tests 329ms, environment 0ms)
+

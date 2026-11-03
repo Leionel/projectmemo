@@ -1,0 +1,83 @@
+{
+  "checkedRelativeLinks": 126,
+  "newBrokenLinks": [],
+  "moves": 25,
+  "existingLocalOnlyTargets": [
+    {
+      "source": "docs/project/development/DEVELOPMENT.md",
+      "old": "docs/competition/projectmemo-ecs-backend-xiaoyi-hap-runbook.md",
+      "new": "../../competition/projectmemo-ecs-backend-xiaoyi-hap-runbook.md"
+    },
+    {
+      "source": "docs/project/development/DEVELOPMENT.md",
+      "old": "REMATCH_SUBMISSION_GATE_2026-09-14.md",
+      "new": "../../../REMATCH_SUBMISSION_GATE_2026-09-14.md"
+    },
+    {
+      "source": "docs/FINAL/Competition/COMPETITION_AGENT_PRODUCT_AUDIT.md",
+      "old": "../../../evidence/settings-ux-20261101/04-projects-final.jpeg",
+      "new": "../../../evidence/settings-ux-20261101/04-projects-final.jpeg"
+    },
+    {
+      "source": "docs/FINAL/Competition/COMPETITION_AGENT_PRODUCT_AUDIT.md",
+      "old": "../../../evidence/settings-ux-20261101/06-settings-new.jpeg",
+      "new": "../../../evidence/settings-ux-20261101/06-settings-new.jpeg"
+    },
+    {
+      "source": "docs/project/architecture/FOCUS_AGENT_ARCHITECTURE.md",
+      "old": "docs/FINAL/AGENT_REVIEW/NEXT_PHASE_IMPLEMENTATION_PLAN.md",
+      "new": "../../FINAL/AGENT_REVIEW/NEXT_PHASE_IMPLEMENTATION_PLAN.md"
+    },
+    {
+      "source": "docs/project/architecture/FOCUS_AGENT_ARCHITECTURE.md",
+      "old": "docs/FINAL/AGENT_REVIEW/NEXT_PHASE_IMPLEMENTATION_NOTES.md",
+      "new": "../../FINAL/AGENT_REVIEW/NEXT_PHASE_IMPLEMENTATION_NOTES.md"
+    },
+    {
+      "source": "docs/project/architecture/FOCUS_AGENT_ARCHITECTURE.md",
+      "old": "docs/FINAL/AGENT_REVIEW/NEXT_PHASE_AGENT_DEEPENING_DESIGN.md",
+      "new": "../../FINAL/AGENT_REVIEW/NEXT_PHASE_AGENT_DEEPENING_DESIGN.md"
+    },
+    {
+      "source": "docs/project/architecture/FOCUS_AGENT_ARCHITECTURE.md",
+      "old": "docs/FINAL/AGENT_REVIEW/NEXT_PHASE_DECISION_BRIEF.md",
+      "new": "../../FINAL/AGENT_REVIEW/NEXT_PHASE_DECISION_BRIEF.md"
+    },
+    {
+      "source": "docs/project/architecture/FOCUS_AGENT_ARCHITECTURE.md",
+      "old": "docs/FINAL/AGENT_REVIEW/NEXT_PHASE_RESEARCH_RECONCILIATION.md",
+      "new": "../../FINAL/AGENT_REVIEW/NEXT_PHASE_RESEARCH_RECONCILIATION.md"
+    },
+    {
+      "source": "docs/project/architecture/FOCUS_AGENT_ARCHITECTURE.md",
+      "old": "docs/FINAL/AGENT_REVIEW/NEXT_PHASE_EVALUATION_PROTOCOL.md",
+      "new": "../../FINAL/AGENT_REVIEW/NEXT_PHASE_EVALUATION_PROTOCOL.md"
+    },
+    {
+      "source": "docs/project/planning/FOCUS_AGENT_ROADMAP.md",
+      "old": "docs/FINAL/AGENT_REVIEW/NEXT_PHASE_IMPLEMENTATION_PLAN.md",
+      "new": "../../FINAL/AGENT_REVIEW/NEXT_PHASE_IMPLEMENTATION_PLAN.md"
+    },
+    {
+      "source": "docs/project/planning/FOCUS_AGENT_ROADMAP.md",
+      "old": "docs/FINAL/AGENT_REVIEW/NEXT_PHASE_IMPLEMENTATION_NOTES.md",
+      "new": "../../FINAL/AGENT_REVIEW/NEXT_PHASE_IMPLEMENTATION_NOTES.md"
+    },
+    {
+      "source": "docs/project/planning/FOCUS_AGENT_ROADMAP.md",
+      "old": "docs/FINAL/AGENT_REVIEW/NEXT_PHASE_AGENT_DEEPENING_DESIGN.md",
+      "new": "../../FINAL/AGENT_REVIEW/NEXT_PHASE_AGENT_DEEPENING_DESIGN.md"
+    },
+    {
+      "source": "docs/project/planning/PROJECTMEMO_R2_ENHANCEMENT_PLAN_2026-09-20.md",
+      "old": "PROJECTMEMO_IMPROVEMENT_PLAN_2026-09-14.md",
+      "new": "../../../PROJECTMEMO_IMPROVEMENT_PLAN_2026-09-14.md"
+    },
+    {
+      "source": "docs/project/planning/PROJECTMEMO_R2_ENHANCEMENT_PLAN_2026-09-20.md",
+      "old": "PROJECTMEMO_IMPROVEMENT_NOTES_2026-09-14.md",
+      "new": "../../../PROJECTMEMO_IMPROVEMENT_NOTES_2026-09-14.md"
+    }
+  ],
+  "validationScope": "Tracked destinations plus existing local files in the main workspace; local-only material is not newly committed."
+}

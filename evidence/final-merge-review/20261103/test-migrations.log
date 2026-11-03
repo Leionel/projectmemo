@@ -1,0 +1,9 @@
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+Datasource "db": SQLite database "test-vitest.db" at "file:D:/Projects/hongmen-final-auth/prisma/test-vitest.db"
+
+51 migrations found in prisma/migrations
+
+
+No pending migrations to apply.

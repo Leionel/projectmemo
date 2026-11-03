@@ -1,0 +1,65 @@
+
+> projectmemo@0.1.0 lint
+> eslint .
+
+
+D:\Projects\hongmen-final-auth\app\api\me\memory\route.ts
+  8:10  warning  'db' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-auth\components\NewProjectForm.tsx
+  44:7  warning  Do not use `window.location.assign()` to navigate to internal Next.js pages. Use `redirect()` in the render phase, or `useRouter().push()` in Client Components' event handlers instead. See: https://nextjs.org/docs/messages/no-location-assign-relative-destination  @next/next/no-location-assign-relative-destination
+
+D:\Projects\hongmen-final-auth\components\RepoSignalsCard.tsx
+  107:253  warning  Do not use `window.location.href` to navigate to internal Next.js pages. Use `redirect()` in the render phase, or `useRouter().push()` in Client Components' event handlers instead. See: https://nextjs.org/docs/messages/no-location-assign-relative-destination  @next/next/no-location-assign-relative-destination
+
+D:\Projects\hongmen-final-auth\components\UserNav.tsx
+  69:7  warning  Do not use `window.location.assign()` to navigate to internal Next.js pages. Use `redirect()` in the render phase, or `useRouter().push()` in Client Components' event handlers instead. See: https://nextjs.org/docs/messages/no-location-assign-relative-destination  @next/next/no-location-assign-relative-destination
+
+D:\Projects\hongmen-final-auth\lib\memory\personalMemoryService.ts
+  6:48  warning  'buildPersonalMemoryReadSet' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-auth\lib\types\workPacket.ts
+  16:48  warning  'WorkStateTerminal' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-auth\scripts\final-a\generate-samples.ts
+  59:6  warning  'PrismaLike' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-auth\scripts\final-a\probe-fs-a.ts
+  514:9  warning  'step' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-auth\scripts\final-a\probe-fs-a07-concurrency.ts
+  24:3  warning  'writeEvidence' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-auth\scripts\final-c\capture-web-evidence.mjs
+   144:10  warning  'notRun' is defined but never used                       @typescript-eslint/no-unused-vars
+   688:15  warning  'readback' is assigned a value but never used            @typescript-eslint/no-unused-vars
+   734:13  warning  'questionNavigation' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   965:15  warning  'readback' is assigned a value but never used            @typescript-eslint/no-unused-vars
+  1419:13  warning  'readback' is assigned a value but never used            @typescript-eslint/no-unused-vars
+  1528:15  warning  'readback' is assigned a value but never used            @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-auth\tests\finalARequiresGuards.test.ts
+  30:10  warning  'readMissionBack' is defined but never used  @typescript-eslint/no-unused-vars
+  32:10  warning  'event' is defined but never used            @typescript-eslint/no-unused-vars
+  41:18  warning  'postReplan' is defined but never used       @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-auth\tests\finalAWorkPacketContract.test.ts
+  536:21  warning  'at' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-auth\tests\finalAWorkPacketService.test.ts
+  244:25  warning  '_packet' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  244:42  warning  '_readAt' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  244:64  warning  '_observation' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-auth\tests\pm1PersonalMemoryScope.test.ts
+  11:51  warning  'policyInTx' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-auth\tests\pm3LongTermRecall.test.ts
+  12:10  warning  'jsonHash' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-auth\tests\ux2CorrectionControls.test.ts
+  31:9  warning  'second' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  46:9  warning  'view' is assigned a value but never used    @typescript-eslint/no-unused-vars
+
+✖ 26 problems (0 errors, 26 warnings)
+

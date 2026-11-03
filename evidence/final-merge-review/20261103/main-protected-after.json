@@ -1,0 +1,17 @@
+[
+  {
+    "path": "harmonyos/build-profile.json5",
+    "sha256": "442618A372BD9A74D204E7162FFE6844B6FC49DBF4C09B8CC5BC58C6709A1924",
+    "unchanged": true
+  },
+  {
+    "path": "next-env.d.ts",
+    "sha256": "7AD303E40D4FDDF44F156129E397511953A71481C5CFD86B1862649AAAF240CC",
+    "unchanged": true
+  },
+  {
+    "path": "tsconfig.json",
+    "sha256": "AF1B4FBD345A0D2B7E23394ACA3540B524A3D4826FCA6A51169B13B2A325EE4A",
+    "unchanged": true
+  }
+]

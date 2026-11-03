@@ -1,0 +1,128 @@
+{
+  "schema": "final-auth-verification/v1",
+  "generatedAtUtc8": "2026-11-03T18:30:00+08:00",
+  "worktree": "D:/Projects/hongmen-final-auth",
+  "branch": "codex/final-auth-email-login",
+  "base": "6f75c8b8a188f083b7f8f1bb33920fc7e1e5b3ae",
+  "candidateCommit": "bf5b1a0b6c1d00ee50d062b77a53e3564d38ecf0",
+  "scopeNote": "用户级：用户名或邮箱登录；注册/验证/重发/找回/重置链路核查；Web 与 HarmonyOS 调用方适配。无 schema 变化、无迁移。",
+  "checks": [
+    {
+      "id": "tsc",
+      "command": "npm.cmd exec tsc -- --noEmit",
+      "exitCode": 0,
+      "diagnostics": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "lint-full",
+      "command": "npm.cmd run lint",
+      "exitCode": 0,
+      "errors": 0,
+      "warnings": 26,
+      "warningNote": "均为仓库既有 warning；本次新增/修改文件定向 eslint 为 0",
+      "status": "PASS"
+    },
+    {
+      "id": "lint-changed-files",
+      "command": "npm.cmd exec -- eslint app/api/auth/login/route.ts lib/auth/loginIdentity.ts lib/auth/guard.ts components/AuthScreen.tsx e2e/login.spec.ts scripts/e2e-env.ts scripts/seed-e2e-auth.ts tests/loginIdentity.test.ts",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "targeted-tests",
+      "command": "npm.cmd test -- tests/loginIdentity.test.ts tests/registration.test.ts tests/accountMail.test.ts tests/auth.test.ts tests/sessionCookie.test.ts tests/pageAuth.test.ts tests/harmonyAttachmentAuth.test.ts tests/projectWorkspaceAuth.test.ts",
+      "exitCode": 0,
+      "testFiles": 8,
+      "tests": 82,
+      "failed": 0,
+      "newTests": "tests/loginIdentity.test.ts = 13",
+      "isolation": "tests/helpers/continuityDatabase.ts：导入 lib/db.ts 前设置独立临时 SQLite 并顺序重放 prisma/migrations；vitest fileParallelism=false 未改",
+      "mail": "MOCK 投递（lib/auth/mail.sendAccountMail mock）；登录/注册/验证/重置调用真实路由",
+      "log": "evidence/final-auth/20261103/targeted-tests.log",
+      "status": "PASS"
+    },
+    {
+      "id": "e2e-login-attempt1",
+      "command": "npm.cmd run test:e2e -- login.spec.ts",
+      "exitCode": 1,
+      "expected": 3,
+      "unexpected": 2,
+      "note": "失败原因是新增测试定位器 getByRole('alert') 同时匹配 #auth-error 与 Next route announcer（测试自身缺陷）；改为 #auth-error，未放宽任何断言。首次原始日志未落盘（终端输出）。",
+      "status": "TEST_INFRA_FAILURE_FIXED"
+    },
+    {
+      "id": "e2e-login",
+      "command": "npm.cmd run test:e2e -- login.spec.ts",
+      "exitCode": 0,
+      "expected": 5,
+      "unexpected": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "covered": [
+        "公开登录页：用户名或邮箱标签/占位、无预置凭据、登录成功",
+        "已验证邮箱（大写+首尾空格规范化）登录同账号并进入项目空间",
+        "未验证邮箱：提示重新验证与重发入口、保留输入、不显示密码错误",
+        "未知邮箱/错误密码：统一失败提示且保留标识"
+      ],
+      "log": "evidence/final-auth/20261103/e2e-login.log",
+      "structuredResult": "test-results/e2e-results.json",
+      "status": "PASS"
+    },
+    {
+      "id": "harmony-test",
+      "command": "npm.cmd run harmony:test",
+      "exitCode": 0,
+      "testsRun": 139,
+      "failure": 0,
+      "error": 0,
+      "pass": 139,
+      "ignore": 0,
+      "newTests": "harmonyos/entry/src/test/LoginIdentifier.test.ets = 4",
+      "log": "evidence/final-auth/20261103/harmony-test.log",
+      "status": "PASS"
+    },
+    {
+      "id": "harmony-build",
+      "command": "npm.cmd run harmony:build",
+      "exitCode": 0,
+      "hap": "harmonyos/entry/build/default/outputs/default/entry-default-unsigned.hap",
+      "hapSizeBytes": 8290641,
+      "hapSha256": "1bdd771fcf01c5fbc1b1ac1d17b90b7536e2be23b3f01e5725dececd4114d96d",
+      "signed": false,
+      "signingConfigs": [],
+      "note": "unsigned 产物只证明候选可构建，不是签名/安装/设备证据；hvigor 明确 No signingConfigs profile is configured",
+      "log": "evidence/final-auth/20261103/harmony-build.log",
+      "status": "PASS_UNSIGNED_NOT_SIGNED_EVIDENCE"
+    }
+  ],
+  "notRun": [
+    {
+      "id": "real-email-delivery",
+      "reason": "无授权测试收件人与发信凭据；本树无 .env；未读取/打印密钥；未向真实收件人发信",
+      "recovery": "提供授权收件人 + Resend/SMTP 配置 + AUTH_PUBLIC_BASE_URL(HTTPS) + 部署版本与数据库，按实施记录 §3 分五步留证"
+    },
+    {
+      "id": "signed-hap-install-and-harmony-device-journey",
+      "reason": "harmonyos/build-profile.json5 signingConfigs 为空、无受权签名、无稳定设备；unsigned HAP 不等于安装验收",
+      "recovery": "用户在 DevEco 为本工程配置受权签名并重建；设备在线后按 login/注册/验证/重置与账号切换旅程验收"
+    },
+    {
+      "id": "web-full-e2e-suite",
+      "reason": "本次只运行 login.spec.ts 以定向覆盖本任务；集成树既有固定指标核算 E2E 间歇失败与本任务无关，未删除/skip/放宽",
+      "recovery": "集成审查阶段按既有套件运行并单独记账"
+    },
+    {
+      "id": "deployment-and-production-config",
+      "reason": "未授权 push/部署；生产 AUTH_PUBLIC_BASE_URL、发信服务与数据库未配置到本候选",
+      "recovery": "按实施记录 §3/生产配置说明在部署环境配置后验收"
+    }
+  ],
+  "security": {
+    "envFileInWorktree": false,
+    "sendingCredentialsReadOrPrinted": false,
+    "realRecipientsContacted": false,
+    "secretsCommitted": false,
+    "schemaMigrationIssued": false
+  }
+}

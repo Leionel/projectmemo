@@ -1,0 +1,44 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/loginIdentity.test.ts tests/registration.test.ts tests/accountMail.test.ts tests/auth.test.ts tests/sessionCookie.test.ts tests/pageAuth.test.ts tests/harmonyAttachmentAuth.test.ts tests/projectWorkspaceAuth.test.ts
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-final-auth
+
+ ✓ tests/pageAuth.test.ts (12 tests) 11936ms
+     ✓ 无 Cookie 时恢复不出会话用户  425ms
+     ✓ 匿名访问项目列表页被重定向到登录页  3296ms
+     ✓ 匿名访问全局focus需登录，不能返回聚合内容  2362ms
+     ✓ 无关用户访问项目详情页按 404 处理，而不是 403  604ms
+     ✓ 无关用户访问成果生成页按 404 处理  4059ms
+ ✓ tests/loginIdentity.test.ts (13 tests) 4162ms
+     ✓ 7. ambiguous identifiers never pick an account arbitrarily  801ms
+     ✓ 8. account-level limit covers username/email switch and case changes  379ms
+     ✓ 9. register -> mock mail -> verify -> email login closes the loop  323ms
+     ✓ 10. links are purpose-bound, single-use, expire and are superseded by resend  359ms
+     ✓ 11. password reset revokes old sessions and old password for both identifiers  471ms
+     ✓ 13. login and mail requests cannot inject identity, role or email verification  316ms
+ ✓ tests/auth.test.ts (19 tests) 3928ms
+     ✓ 项目用户修改提醒策略时只更新自己的策略范围  509ms
+     ✓ 11b. 轮换 X-Forwarded-For 不能绕过登录限流（伪造头防护）  515ms
+     ✓ 12. 登录失败限流器正常生效  500ms
+stderr | tests/registration.test.ts > Public account lifecycle > verifies once, logs in through existing cookie/session and logs out server-side
+Promise returned by `expect(actual).resolves.toMatchObject(expected)` was not awaited. Vitest currently auto-awaits hanging assertions at the end of the test, but this will cause the test to fail in the next Vitest major. Please remember to await the assertion.
+    at D:/Projects/hongmen-final-auth/tests/registration.test.ts:185:6
+
+stderr | tests/registration.test.ts > Public account lifecycle > blocks all paid chat/embedding calls by default and atomically enforces a provisioned daily limit
+LLM structure failed; falling back to deterministic mock agent: 当前账号未开通云模型额度，可继续使用记录和规则模式
+
+ ✓ tests/registration.test.ts (14 tests) 1627ms
+     ✓ requires verified email, stores only hashes and grants no projects or cloud budget  427ms
+     ✓ resets password with a single-use purpose-bound token and revokes every old session  370ms
+ ✓ tests/harmonyAttachmentAuth.test.ts (7 tests) 149ms
+ ✓ tests/accountMail.test.ts (8 tests) 11ms
+ ✓ tests/projectWorkspaceAuth.test.ts (5 tests) 6ms
+ ✓ tests/sessionCookie.test.ts (4 tests) 3ms
+
+ Test Files  8 passed (8)
+      Tests  82 passed (82)
+   Start at  18:25:06
+   Duration  32.35s (transform 6.52s, setup 0ms, import 7.30s, tests 21.82s, environment 1ms)
+

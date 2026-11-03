@@ -138,6 +138,7 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
       {!terminal&&<button className={styles.cancel} disabled={busy} onClick={()=>void command("cancel")}>取消委托</button>}
      </div>
     </header>
+    <MissionReadback key={`readback:${mission.id}`} refreshKey={readbackRefreshKey} missionVersion={mission.version} missionId={mission.id} target={mission.id===initialMissionId?readTarget:undefined}/>
 {mission.status==="PAUSED"&&mission.budget&&mission.used&&<MissionBudgetReview budget={mission.budget} used={mission.used} busy={busy} onReview={totals=>void perform(async()=>{await api(`/api/missions/${mission.id}/budget-review`,"POST",{requestId:requestId({kind:"budget",version:mission.version,totals}),expectedVersion:mission.version,totals});await refresh(mission.id);})}/>}
     {mission.error&&<section className={styles.stoppedBlock} role={mission.status==="PAUSED"||mission.status==="FAILED"?"alert":"status"} aria-label="暂停原因与恢复条件">
       <strong>{mission.status==="PAUSED"?"执行已暂停，已有进度已保留":mission.status==="FAILED"?"执行失败，已执行的结果保留":"本次执行需要恢复，已有进度已保留"}</strong>
@@ -171,7 +172,6 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
     <DecisionScenarios key={`scenarios:${mission.id}`} missionId={mission.id} disabled={readState!=="fresh"||busy||terminal} onAdopted={()=>void refresh(mission.id).catch(handleError)}/>
     {mission.experience?.enabled&&<ExperienceSuggestions key={`exp:${mission.id}`} projectId={projectId} missionId={mission.id} suggestions={mission.experience.suggestions} onChanged={()=>void refresh(mission.id).catch(handleError)}/>}
     <GoalQuestion key={`question:${mission.id}`} projectId={projectId} missionId={mission.id} compact/>
-    <MissionReadback key={`readback:${mission.id}`} refreshKey={readbackRefreshKey} missionVersion={mission.version} missionId={mission.id} target={mission.id===initialMissionId?readTarget:undefined}/>
     {mission.outputs.length>0&&<section className={styles.results} aria-label="委托成果"><h4>成果草稿</h4>{mission.outputs.map((o,index)=><details className={styles.output} key={o.id} open={index===0}><summary><h5>草稿版本 {o.revision} · 内容待审核</h5></summary>{o.contentJson.blocks.map(b=><div className={styles.outputBlock} key={b.blockId}><p>{b.text}</p><small>{b.kind==="EXTERNAL_REFERENCE"?"外部参考":b.kind==="INFERENCE"?"推断或建议":"项目观察"}{b.sourceIds.length?` · ${b.sourceIds.join("、")}`:""}</small></div>)}<MissionClaimChecks checks={o.claimChecksJson} enabled={mission.semanticCheckEnabled===true}/>{readState==="fresh"&&mission.artifactAdoptionEnabled&&mission.status!=="CANCELLED"&&<MissionArtifactAdoption projectId={projectId} missionId={mission.id} outputId={o.id} revision={o.revision}/>}</details>)}</section>}
 
     <details className={styles.progress} id="mission-progress"><summary id="mission-progress-summary">执行详情与回执（{done} 个步骤已执行）</summary><section aria-label="执行记录"><div className={styles.sectionTitle}><h4>执行记录</h4><span>{done} 个步骤已执行</span></div>

@@ -869,8 +869,8 @@
   position: absolute;
   top: 1rem;
   left: 1.1rem;
-  color: color-mix(in srgb, var(--paper) 60%, transparent);
-  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--paper) 82%, transparent);
+  font-size: 0.85rem;
   letter-spacing: 0.04em;
   line-height: 1.5;
 }
@@ -1402,7 +1402,7 @@
   .videoFacadeCorner {
     top: 0.7rem;
     left: 0.8rem;
-    font-size: 0.76rem;
+    font-size: 0.8rem;
   }
   .videoFacadePlay {
     width: 52px;

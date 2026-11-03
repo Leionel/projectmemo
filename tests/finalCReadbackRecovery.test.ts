@@ -80,7 +80,8 @@ describe("读回并发与权限变化恢复", () => {
     render(createElement(MissionReadback, { missionId: "m", missionVersion: 3 }));
     // 首次读取成功：旧后端但保留原详情，明确摘要暂未提供。
     expect(await screen.findByText(/当前摘要暂未提供/)).toBeTruthy();
-    expect(screen.getByText("WAITING_INPUT")).toBeTruthy();
+    // C1 工作包已把原状态枚举中文化：旧后端降级同样显示中文状态。
+    expect(screen.getByText("等待补充信息")).toBeTruthy();
 
     mode = "conflict";
     fireEvent.click(screen.getByRole("button", { name: "重新读取状态与回执" }));

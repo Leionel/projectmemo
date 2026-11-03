@@ -1,0 +1,95 @@
+{
+  "fixture": {
+    "planJsonDelegationLastObservedAt": "2026-10-01T00:00:00.000Z"
+  },
+  "successReads": [
+    {
+      "readAt": "2026-11-03T03:51:27.701Z",
+      "readbackObservedAt": "2026-11-03T03:51:27.701Z",
+      "missionUpdatedAt": "2026-11-03T03:51:27.696Z",
+      "workState": {
+        "phase": "QUEUED",
+        "nextActor": "AGENT",
+        "reasonCode": "READY",
+        "reasonText": "委托已保存，等待执行",
+        "actionLabel": "查看委托进展",
+        "checkedAt": "2026-11-03T03:51:27.699Z",
+        "observedAt": "2026-10-01T00:00:00.000Z",
+        "nextCheckAt": null,
+        "nextBoundary": null,
+        "freshness": "FRESH"
+      }
+    },
+    {
+      "readAt": "2026-11-03T03:51:27.745Z",
+      "readbackObservedAt": "2026-11-03T03:51:27.745Z",
+      "missionUpdatedAt": "2026-11-03T03:51:27.696Z",
+      "workState": {
+        "phase": "QUEUED",
+        "nextActor": "AGENT",
+        "reasonCode": "READY",
+        "reasonText": "委托已保存，等待执行",
+        "actionLabel": "查看委托进展",
+        "checkedAt": "2026-11-03T03:51:27.743Z",
+        "observedAt": "2026-10-01T00:00:00.000Z",
+        "nextCheckAt": null,
+        "nextBoundary": null,
+        "freshness": "FRESH"
+      }
+    }
+  ],
+  "afterFailureReads": [
+    {
+      "readAt": "2026-11-03T03:51:27.750Z",
+      "readbackObservedAt": "2026-11-03T03:51:27.750Z",
+      "workState": {
+        "phase": "FAILED",
+        "nextActor": "SYSTEM",
+        "reasonCode": "TOOL_FAILED",
+        "reasonText": "工具执行失败，已保存进度",
+        "actionLabel": "查看原因与恢复条件",
+        "checkedAt": "2026-11-03T03:51:27.749Z",
+        "observedAt": "2026-10-01T00:00:00.000Z",
+        "nextCheckAt": null,
+        "nextBoundary": null,
+        "freshness": "FRESH"
+      }
+    },
+    {
+      "readAt": "2026-11-03T03:51:27.793Z",
+      "readbackObservedAt": "2026-11-03T03:51:27.793Z",
+      "workState": {
+        "phase": "FAILED",
+        "nextActor": "SYSTEM",
+        "reasonCode": "TOOL_FAILED",
+        "reasonText": "工具执行失败，已保存进度",
+        "actionLabel": "查看原因与恢复条件",
+        "checkedAt": "2026-11-03T03:51:27.792Z",
+        "observedAt": "2026-10-01T00:00:00.000Z",
+        "nextCheckAt": null,
+        "nextBoundary": null,
+        "freshness": "FRESH"
+      }
+    }
+  ],
+  "missionDetailAfterFailure": {
+    "status": "FAILED",
+    "error": {
+      "code": "TOOL_FAILED",
+      "message": "工具执行失败，已保存进度",
+      "phase": "TOOL"
+    },
+    "workState": {
+      "phase": "FAILED",
+      "nextActor": "SYSTEM",
+      "reasonCode": "TOOL_FAILED",
+      "reasonText": "工具执行失败，已保存进度",
+      "actionLabel": "查看原因与恢复条件",
+      "checkedAt": "2026-11-03T03:51:27.795Z",
+      "observedAt": "2026-10-01T00:00:00.000Z",
+      "nextCheckAt": null,
+      "nextBoundary": null,
+      "freshness": "FRESH"
+    }
+  }
+}

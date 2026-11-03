@@ -1,0 +1,1851 @@
+{
+  "mode": "BEFORE_FIX",
+  "probe": "probe-fs-a07-concurrency",
+  "status": "PROBE_COMPLETED",
+  "durationMs": 804,
+  "generatedAt": "2026-11-03T03:51:30.311Z",
+  "baseSha": "485d485378637e1da3280ed092739d441c8cf749",
+  "sourceTree": "pristine baseline snapshot @485d485 via git archive (working-tree A2 edits excluded; BEFORE_FIX)",
+  "environment": {
+    "database": "temp-independent",
+    "databaseUrl": "file:C:/Users/ADMINI~1/AppData/Local/Temp/pm-final-a-fs-a07-vcoW8M/probe.db",
+    "databaseFile": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-final-a-fs-a07-vcoW8M\\probe.db",
+    "temporaryDir": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-final-a-fs-a07-vcoW8M",
+    "migrationsApplied": 52,
+    "schemaTables": 79,
+    "llmMode": "mock",
+    "modelProviderCalls": 0,
+    "connections": {
+      "main": "lib/db Prisma singleton（PrismaBetterSqlite3 适配器）",
+      "writer": "new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: 同一 DATABASE_URL }) })",
+      "writerDistinct": true
+    }
+  },
+  "method": "每轮 3 次真实写（MISSION 修订 / SourceConnection 撤销恢复 / 项目级 USE_SUPPRESSION 指令）与 4 次真实读交替：missionDetail → write → readMissionResponsibility → readMissionBack → write → readMissionResponsibility。",
+  "counters": {
+    "iterations": 40,
+    "crossInterfaceVersionMismatch": 13,
+    "crossInterfaceConstraintsMismatch": 13,
+    "licenseChangedWithoutMissionVersionChange": 26,
+    "sameResponseInternalViolations": 0,
+    "readbackVsResponsibilityVersionMismatch": 13
+  },
+  "judgment": {
+    "跨接口一致性": "detail 与 responsibility 是两次独立读取/事务；写连接在两次之间推进修订时，同一读取组合会拿到不同 mission.version（responsibility 以 controlVersion 表达，detail 以 version 表达，二者不可直接对齐）。",
+    "同一响应内": "readMissionBack 在一个 SQLite 事务内组合，missionVersion/status 与 workState.originalRef 同修订，未观测到同响应内混用；但它不暴露 planRevision/controlVersion，跨接口对齐仍缺公共版本号。",
+    "旧操作资格": "来源撤销/USE_SUPPRESSION 会推进 controlVersion 而 mission.version 不变；只以 expectedVersion 守卫的写入路径无法从 version 发现许可变化。",
+    "双连接真实性": "writer 是第二个 PrismaClient（PrismaBetterSqlite3 适配器，同 DATABASE_URL），与主连接分别提交；写连接的更新能被主连接读到（missionVersionMatches=true）。"
+  },
+  "finalState": {
+    "missionVersion": 41,
+    "missionVersionExpected": 41,
+    "missionVersionMatches": true,
+    "planRevision": 41,
+    "constraintsVersion": 41,
+    "contextVersion": 41,
+    "sourceConnectionStatus": "ACTIVE",
+    "sourceConnectionRevision": 41,
+    "suppressionDirectiveCount": 40,
+    "sourcePolicyAfter": {
+      "state": "SUPPRESSED",
+      "reason": "ROOT_SUPPRESSED"
+    }
+  },
+  "writer": {
+    "counts": {
+      "MISSION": 40,
+      "SOURCE": 40,
+      "SUPPRESSION": 40
+    },
+    "errors": []
+  },
+  "mission": {
+    "id": "cmw05i6k30005ok8owi5xkx0v",
+    "initialVersion": 1,
+    "iterations": 40
+  },
+  "iterationSamples": [
+    {
+      "iteration": 0,
+      "writerModes": [
+        "MISSION",
+        "SOURCE",
+        "SUPPRESSION"
+      ],
+      "detail": {
+        "version": 2,
+        "planRevision": 2,
+        "constraintsVersion": 2,
+        "contextVersion": 2,
+        "constraintsHash": "84bcebd7b164414c",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "5afd8ff1b714f458e9f779fb7ccb61639bbee702e6df7238db389dabcfc3211f",
+        "workStateVersion": 2,
+        "constraintsHash": "84bcebd7b164414c",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 2,
+        "missionStatus": "READY",
+        "workStateVersion": 2,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "a23c74085a3a6f7dc879c110d2d480721f5164d89b31c7ce350460b1d682e2cc",
+        "workStateVersion": 2,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 1,
+      "writerModes": [
+        "SOURCE",
+        "SUPPRESSION",
+        "MISSION"
+      ],
+      "detail": {
+        "version": 2,
+        "planRevision": 2,
+        "constraintsVersion": 2,
+        "contextVersion": 2,
+        "constraintsHash": "84bcebd7b164414c",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "31e1cd24d292baa3cc20f0185bfe94cb06b3cd14cd52df4b7af7f50b0471324f",
+        "workStateVersion": 2,
+        "constraintsHash": "84bcebd7b164414c",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 2,
+        "missionStatus": "READY",
+        "workStateVersion": 2,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "639af6f156b1e68bc37bb96aae14afc08990cdde282ff1845605d63b5bd17d08",
+        "workStateVersion": 3,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": true
+      }
+    },
+    {
+      "iteration": 2,
+      "writerModes": [
+        "SUPPRESSION",
+        "MISSION",
+        "SOURCE"
+      ],
+      "detail": {
+        "version": 3,
+        "planRevision": 3,
+        "constraintsVersion": 3,
+        "contextVersion": 3,
+        "constraintsHash": "91a0ee6dc9e37166",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "84a4a85969a47f07ede32478e6ca7a66e593a55fbe7de7709279a4ce449f27bc",
+        "workStateVersion": 4,
+        "constraintsHash": "5896f7c27326ca62",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 4,
+        "missionStatus": "READY",
+        "workStateVersion": 4,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "e50d5e87dc827d819aec50eac49dbaef3513ac8f510e0a3d0178dca632390fcc",
+        "workStateVersion": 4,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": true,
+        "constraintsMismatch": true
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 3,
+      "writerModes": [
+        "MISSION",
+        "SOURCE",
+        "SUPPRESSION"
+      ],
+      "detail": {
+        "version": 5,
+        "planRevision": 5,
+        "constraintsVersion": 5,
+        "contextVersion": 5,
+        "constraintsHash": "45a06e4eb70137b3",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "4162bb05131669173beb2ccb689238453ee4502b586580196e638e5b570d03f0",
+        "workStateVersion": 5,
+        "constraintsHash": "45a06e4eb70137b3",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 5,
+        "missionStatus": "READY",
+        "workStateVersion": 5,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "09b274ce02e8985c1fd9327cf78a4ed75be5ccf337b496e949447eafcb7d25ce",
+        "workStateVersion": 5,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 4,
+      "writerModes": [
+        "SOURCE",
+        "SUPPRESSION",
+        "MISSION"
+      ],
+      "detail": {
+        "version": 5,
+        "planRevision": 5,
+        "constraintsVersion": 5,
+        "contextVersion": 5,
+        "constraintsHash": "45a06e4eb70137b3",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "71e37e881bbfb24b10ba5252feab38c4633831fb76768357578995e377dff9e2",
+        "workStateVersion": 5,
+        "constraintsHash": "45a06e4eb70137b3",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 5,
+        "missionStatus": "READY",
+        "workStateVersion": 5,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "4391aeb0d70e4f4cff40cccb904b7694f4ea3a0086e53c1462f87df51bdeaaf7",
+        "workStateVersion": 6,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": true
+      }
+    },
+    {
+      "iteration": 5,
+      "writerModes": [
+        "SUPPRESSION",
+        "MISSION",
+        "SOURCE"
+      ],
+      "detail": {
+        "version": 6,
+        "planRevision": 6,
+        "constraintsVersion": 6,
+        "contextVersion": 6,
+        "constraintsHash": "eed5c500a4aeaf0f",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "2d23b364c917e28f1f0c605937eb220aa7036ed048e858f24fd2855f8d8da401",
+        "workStateVersion": 7,
+        "constraintsHash": "1ed0f4c951e1938c",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 7,
+        "missionStatus": "READY",
+        "workStateVersion": 7,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "0d17f1e8835f5601310624f948a0a1cad026be39a9a3fc675abfcd613697c180",
+        "workStateVersion": 7,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": true,
+        "constraintsMismatch": true
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 6,
+      "writerModes": [
+        "MISSION",
+        "SOURCE",
+        "SUPPRESSION"
+      ],
+      "detail": {
+        "version": 8,
+        "planRevision": 8,
+        "constraintsVersion": 8,
+        "contextVersion": 8,
+        "constraintsHash": "dc607276be9c628f",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "989393ac12dd9f97631f5818293dfa9a9917f7e73c6eeccd27e90c13c369c54d",
+        "workStateVersion": 8,
+        "constraintsHash": "dc607276be9c628f",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 8,
+        "missionStatus": "READY",
+        "workStateVersion": 8,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "f8eb47e7582ba4975ea2a0f418f6e4c7f005b46164fc2d2f7ca563a44d91ac8f",
+        "workStateVersion": 8,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 7,
+      "writerModes": [
+        "SOURCE",
+        "SUPPRESSION",
+        "MISSION"
+      ],
+      "detail": {
+        "version": 8,
+        "planRevision": 8,
+        "constraintsVersion": 8,
+        "contextVersion": 8,
+        "constraintsHash": "dc607276be9c628f",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "a2db4096b3f68039111282b57b9cb62c2e23a878988a3959ad78353f78eb7abd",
+        "workStateVersion": 8,
+        "constraintsHash": "dc607276be9c628f",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 8,
+        "missionStatus": "READY",
+        "workStateVersion": 8,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "5437b1fd3f3300557f9b52a2b41ff358426f8a723e7dfadb3e2bbd7a51e40528",
+        "workStateVersion": 9,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": true
+      }
+    },
+    {
+      "iteration": 8,
+      "writerModes": [
+        "SUPPRESSION",
+        "MISSION",
+        "SOURCE"
+      ],
+      "detail": {
+        "version": 9,
+        "planRevision": 9,
+        "constraintsVersion": 9,
+        "contextVersion": 9,
+        "constraintsHash": "355bf9bef0c8a3b5",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "0836f8aff0aab10ba07294c3647966872d36d958fc1c6afb46f94c5c5c9e682b",
+        "workStateVersion": 10,
+        "constraintsHash": "d77d2efbd3ed7112",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 10,
+        "missionStatus": "READY",
+        "workStateVersion": 10,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "4053062b1317af2d272f4452bb9586d6f859ad06d32ff295e4e97c41636b88ac",
+        "workStateVersion": 10,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": true,
+        "constraintsMismatch": true
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 9,
+      "writerModes": [
+        "MISSION",
+        "SOURCE",
+        "SUPPRESSION"
+      ],
+      "detail": {
+        "version": 11,
+        "planRevision": 11,
+        "constraintsVersion": 11,
+        "contextVersion": 11,
+        "constraintsHash": "18881ce472ca04b9",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "be07c29fe7fb94b3bdf078df5bfadcc0cd0f008dc4c3a1d2d9d4f19d28caccdb",
+        "workStateVersion": 11,
+        "constraintsHash": "18881ce472ca04b9",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 11,
+        "missionStatus": "READY",
+        "workStateVersion": 11,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "a64696cc3f8f241cac531cc6b277797ab982792439b32ce6179978675ac2ffa6",
+        "workStateVersion": 11,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 10,
+      "writerModes": [
+        "SOURCE",
+        "SUPPRESSION",
+        "MISSION"
+      ],
+      "detail": {
+        "version": 11,
+        "planRevision": 11,
+        "constraintsVersion": 11,
+        "contextVersion": 11,
+        "constraintsHash": "18881ce472ca04b9",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "16cda9778fb5ad356b071a05e59c05593cc3a6e72320be9f15f1a8627cdcde85",
+        "workStateVersion": 11,
+        "constraintsHash": "18881ce472ca04b9",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 11,
+        "missionStatus": "READY",
+        "workStateVersion": 11,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "37520897b0d9ef2ebd6b52218e97be66446a2e6c28f9c1b06e3cf1aa27ed4f76",
+        "workStateVersion": 12,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": true
+      }
+    },
+    {
+      "iteration": 11,
+      "writerModes": [
+        "SUPPRESSION",
+        "MISSION",
+        "SOURCE"
+      ],
+      "detail": {
+        "version": 12,
+        "planRevision": 12,
+        "constraintsVersion": 12,
+        "contextVersion": 12,
+        "constraintsHash": "1a7ec8be8ac172ad",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "ca560347b160802569cda286e06c96476132c4f3f1ef07cc5993ab6837c6ef56",
+        "workStateVersion": 13,
+        "constraintsHash": "fe0510dabe6293f7",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 13,
+        "missionStatus": "READY",
+        "workStateVersion": 13,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "45247ae2f967e4e8ce5cefef0324bb21f38a6819f2fe007a07c2f06a09deb6db",
+        "workStateVersion": 13,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": true,
+        "constraintsMismatch": true
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 12,
+      "writerModes": [
+        "MISSION",
+        "SOURCE",
+        "SUPPRESSION"
+      ],
+      "detail": {
+        "version": 14,
+        "planRevision": 14,
+        "constraintsVersion": 14,
+        "contextVersion": 14,
+        "constraintsHash": "4a2b3425406212c6",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "86dd4e13a59f0025bb54900c6ab3c4dfda58f2808347b3da375e088a17a88c81",
+        "workStateVersion": 14,
+        "constraintsHash": "4a2b3425406212c6",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 14,
+        "missionStatus": "READY",
+        "workStateVersion": 14,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "0184c5513e460c31b2f7f35a12c76718dbf2cf8a5e22559e69bfe834a4a285bc",
+        "workStateVersion": 14,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 13,
+      "writerModes": [
+        "SOURCE",
+        "SUPPRESSION",
+        "MISSION"
+      ],
+      "detail": {
+        "version": 14,
+        "planRevision": 14,
+        "constraintsVersion": 14,
+        "contextVersion": 14,
+        "constraintsHash": "4a2b3425406212c6",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "eb895a13f3bf79b3ce4621546a2953dd69760e0b3309158b618eff7a180c3101",
+        "workStateVersion": 14,
+        "constraintsHash": "4a2b3425406212c6",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 14,
+        "missionStatus": "READY",
+        "workStateVersion": 14,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "d99fbb0fdc6345117d244d3c7bf7c0b49eb725b2f710056c3026d8554944cf80",
+        "workStateVersion": 15,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": true
+      }
+    },
+    {
+      "iteration": 14,
+      "writerModes": [
+        "SUPPRESSION",
+        "MISSION",
+        "SOURCE"
+      ],
+      "detail": {
+        "version": 15,
+        "planRevision": 15,
+        "constraintsVersion": 15,
+        "contextVersion": 15,
+        "constraintsHash": "5bee49e8dd234ec4",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "f9b0ccd88724969b1dbb9f45447f60fc828adf27d1230a6540f0f2b4d920912d",
+        "workStateVersion": 16,
+        "constraintsHash": "017c2203c1b079f9",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 16,
+        "missionStatus": "READY",
+        "workStateVersion": 16,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "579600a73c52a956fae9864d87eb38cc1ea36f9a3ed96f6f4d43da567a6d2776",
+        "workStateVersion": 16,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": true,
+        "constraintsMismatch": true
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 15,
+      "writerModes": [
+        "MISSION",
+        "SOURCE",
+        "SUPPRESSION"
+      ],
+      "detail": {
+        "version": 17,
+        "planRevision": 17,
+        "constraintsVersion": 17,
+        "contextVersion": 17,
+        "constraintsHash": "53b6322b4330015a",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "5c273ec54596a4a81ee8563e6e30d92cae18fdbebbe9423456987722925b8e25",
+        "workStateVersion": 17,
+        "constraintsHash": "53b6322b4330015a",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 17,
+        "missionStatus": "READY",
+        "workStateVersion": 17,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "d9d783fbb4013a1f3f9ab651fefd3f574a9a43615fea38e19b6850e9d7bba897",
+        "workStateVersion": 17,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 16,
+      "writerModes": [
+        "SOURCE",
+        "SUPPRESSION",
+        "MISSION"
+      ],
+      "detail": {
+        "version": 17,
+        "planRevision": 17,
+        "constraintsVersion": 17,
+        "contextVersion": 17,
+        "constraintsHash": "53b6322b4330015a",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "8975c038afd90e8e7dc0b92ac422218db33e5134a4bb680a10eb06417e993eea",
+        "workStateVersion": 17,
+        "constraintsHash": "53b6322b4330015a",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 17,
+        "missionStatus": "READY",
+        "workStateVersion": 17,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "a678429cf638e8c2f5e355581186a8fd0d2782c5ad8df8836102d65d46523142",
+        "workStateVersion": 18,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": true
+      }
+    },
+    {
+      "iteration": 17,
+      "writerModes": [
+        "SUPPRESSION",
+        "MISSION",
+        "SOURCE"
+      ],
+      "detail": {
+        "version": 18,
+        "planRevision": 18,
+        "constraintsVersion": 18,
+        "contextVersion": 18,
+        "constraintsHash": "2767a54b4256fbe5",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "7d4fe1af0d8d64a37685be5d1091a02a519a6ff1b362622a6629510d08a83223",
+        "workStateVersion": 19,
+        "constraintsHash": "352b14e07fc11309",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 19,
+        "missionStatus": "READY",
+        "workStateVersion": 19,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "45ebe64a6e5e8435de8631a6f3ab730162b498530ec949179c86940377d4916e",
+        "workStateVersion": 19,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": true,
+        "constraintsMismatch": true
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 18,
+      "writerModes": [
+        "MISSION",
+        "SOURCE",
+        "SUPPRESSION"
+      ],
+      "detail": {
+        "version": 20,
+        "planRevision": 20,
+        "constraintsVersion": 20,
+        "contextVersion": 20,
+        "constraintsHash": "63cebd17c35ae61c",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "f52af82f8562d542438c66799b6bff2e0db3e563ba8b5a8e48fedb4a8c594cf9",
+        "workStateVersion": 20,
+        "constraintsHash": "63cebd17c35ae61c",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 20,
+        "missionStatus": "READY",
+        "workStateVersion": 20,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "4e1ccfbc4a5f3e9835fbf8ca4b46f7613446827171305ad3a7f545bc49b3737c",
+        "workStateVersion": 20,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 19,
+      "writerModes": [
+        "SOURCE",
+        "SUPPRESSION",
+        "MISSION"
+      ],
+      "detail": {
+        "version": 20,
+        "planRevision": 20,
+        "constraintsVersion": 20,
+        "contextVersion": 20,
+        "constraintsHash": "63cebd17c35ae61c",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "017fe6382d326b1c37998ac11e23d592a4971bbcb3892c5cd3e38bb98b8fdb8c",
+        "workStateVersion": 20,
+        "constraintsHash": "63cebd17c35ae61c",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 20,
+        "missionStatus": "READY",
+        "workStateVersion": 20,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "191256708cecaeb778a6581c32d42c717226ffff2e27ae7a3d0f677a4244e189",
+        "workStateVersion": 21,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": true
+      }
+    },
+    {
+      "iteration": 20,
+      "writerModes": [
+        "SUPPRESSION",
+        "MISSION",
+        "SOURCE"
+      ],
+      "detail": {
+        "version": 21,
+        "planRevision": 21,
+        "constraintsVersion": 21,
+        "contextVersion": 21,
+        "constraintsHash": "f73126e56791dcf7",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "37348101c3f43b5b7a1a73d2f26a467d358c97da59ac8d3046fd10a132fbe409",
+        "workStateVersion": 22,
+        "constraintsHash": "6cc2dffef3c256bf",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 22,
+        "missionStatus": "READY",
+        "workStateVersion": 22,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "56e34f43785d8f8d65f45e068143bf3391b1538df1526b31120562f03451ae04",
+        "workStateVersion": 22,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": true,
+        "constraintsMismatch": true
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 21,
+      "writerModes": [
+        "MISSION",
+        "SOURCE",
+        "SUPPRESSION"
+      ],
+      "detail": {
+        "version": 23,
+        "planRevision": 23,
+        "constraintsVersion": 23,
+        "contextVersion": 23,
+        "constraintsHash": "963a1d9e7df769c1",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "c1f9b95a0d22c7dc011c1be39edb3b6be04baa09f1cc4c9d251bc97d25168706",
+        "workStateVersion": 23,
+        "constraintsHash": "963a1d9e7df769c1",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 23,
+        "missionStatus": "READY",
+        "workStateVersion": 23,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "d31b7f5309f6da50637cc4d187a60851425f014f1c8cf09bb658b1e4e63003a9",
+        "workStateVersion": 23,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 22,
+      "writerModes": [
+        "SOURCE",
+        "SUPPRESSION",
+        "MISSION"
+      ],
+      "detail": {
+        "version": 23,
+        "planRevision": 23,
+        "constraintsVersion": 23,
+        "contextVersion": 23,
+        "constraintsHash": "963a1d9e7df769c1",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "88a6b997c730c506b9bfe3ba8c1697d5b0951e4ba47ed487fcb02eef290329e3",
+        "workStateVersion": 23,
+        "constraintsHash": "963a1d9e7df769c1",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 23,
+        "missionStatus": "READY",
+        "workStateVersion": 23,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "9839c851062f7d7f108cbb7405e9fdb9ba65ecab126fa787cea2ec24a3a4959c",
+        "workStateVersion": 24,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": true
+      }
+    },
+    {
+      "iteration": 23,
+      "writerModes": [
+        "SUPPRESSION",
+        "MISSION",
+        "SOURCE"
+      ],
+      "detail": {
+        "version": 24,
+        "planRevision": 24,
+        "constraintsVersion": 24,
+        "contextVersion": 24,
+        "constraintsHash": "5de8bb6c351d53ca",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "58205a4339eec5fb42035b46200cd90d19172deec8793559821532ea019cc37d",
+        "workStateVersion": 25,
+        "constraintsHash": "f2a72c4d45011b73",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 25,
+        "missionStatus": "READY",
+        "workStateVersion": 25,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "8404be2d2d612f21aa4d304f926a805be9d11424c761b3e69dd45b8506779013",
+        "workStateVersion": 25,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": true,
+        "constraintsMismatch": true
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 24,
+      "writerModes": [
+        "MISSION",
+        "SOURCE",
+        "SUPPRESSION"
+      ],
+      "detail": {
+        "version": 26,
+        "planRevision": 26,
+        "constraintsVersion": 26,
+        "contextVersion": 26,
+        "constraintsHash": "bdf14889ed891f9d",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "b113c4ff27eb543a89ba425d36636b47a149ec55568fdd962d9bbe13657599e3",
+        "workStateVersion": 26,
+        "constraintsHash": "bdf14889ed891f9d",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 26,
+        "missionStatus": "READY",
+        "workStateVersion": 26,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "ae4459280ab22abf8a1eda4f424ecb3e127e30cb1cbba0a68295aaeae2cf214c",
+        "workStateVersion": 26,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 25,
+      "writerModes": [
+        "SOURCE",
+        "SUPPRESSION",
+        "MISSION"
+      ],
+      "detail": {
+        "version": 26,
+        "planRevision": 26,
+        "constraintsVersion": 26,
+        "contextVersion": 26,
+        "constraintsHash": "bdf14889ed891f9d",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "9ba433807ea6224b16450fb2256c856d5965125660b1455e9d2278592a6423f4",
+        "workStateVersion": 26,
+        "constraintsHash": "bdf14889ed891f9d",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 26,
+        "missionStatus": "READY",
+        "workStateVersion": 26,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "0e65e990c121c005122065a74e69e2a15a6bf7bfa5d0c1b1e248a7747af8fa6c",
+        "workStateVersion": 27,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": true
+      }
+    },
+    {
+      "iteration": 26,
+      "writerModes": [
+        "SUPPRESSION",
+        "MISSION",
+        "SOURCE"
+      ],
+      "detail": {
+        "version": 27,
+        "planRevision": 27,
+        "constraintsVersion": 27,
+        "contextVersion": 27,
+        "constraintsHash": "2987178ca089d31b",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "3ab878d39e207c7dd852c0ef692aee275ff7ed966855a047010a4e1a77dcb164",
+        "workStateVersion": 28,
+        "constraintsHash": "8db0e7292e6194cb",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 28,
+        "missionStatus": "READY",
+        "workStateVersion": 28,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "4a3777fca669d7a76390b222af0abe6c60d84e1defc55e70d1bb1abbdf9e8d97",
+        "workStateVersion": 28,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": true,
+        "constraintsMismatch": true
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 27,
+      "writerModes": [
+        "MISSION",
+        "SOURCE",
+        "SUPPRESSION"
+      ],
+      "detail": {
+        "version": 29,
+        "planRevision": 29,
+        "constraintsVersion": 29,
+        "contextVersion": 29,
+        "constraintsHash": "87e14ee25806fc7b",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "66e344e26eee18b4b09414b9dd44d31e4e3a3ca0606800db628c6c62035af8aa",
+        "workStateVersion": 29,
+        "constraintsHash": "87e14ee25806fc7b",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 29,
+        "missionStatus": "READY",
+        "workStateVersion": 29,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "ee3b02a74ff1d8c0862904085d2f2e19af316cf4f543bd7004d3ef1796a537c6",
+        "workStateVersion": 29,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 28,
+      "writerModes": [
+        "SOURCE",
+        "SUPPRESSION",
+        "MISSION"
+      ],
+      "detail": {
+        "version": 29,
+        "planRevision": 29,
+        "constraintsVersion": 29,
+        "contextVersion": 29,
+        "constraintsHash": "87e14ee25806fc7b",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "91893f2c61ca777f600823727d0c456546276b91907b822816f3e59679f9579e",
+        "workStateVersion": 29,
+        "constraintsHash": "87e14ee25806fc7b",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 29,
+        "missionStatus": "READY",
+        "workStateVersion": 29,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "d8090b0fab04a4fd5fc3285bffb0b272e5ce05f5dd0446fe76353021a71f2cd5",
+        "workStateVersion": 30,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": true
+      }
+    },
+    {
+      "iteration": 29,
+      "writerModes": [
+        "SUPPRESSION",
+        "MISSION",
+        "SOURCE"
+      ],
+      "detail": {
+        "version": 30,
+        "planRevision": 30,
+        "constraintsVersion": 30,
+        "contextVersion": 30,
+        "constraintsHash": "4325128e3a7a95b2",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "68b16c78ec4c8f7b07fff41c4cdbea0873d8cf63d81bacb46ae971e80600778c",
+        "workStateVersion": 31,
+        "constraintsHash": "f9195148383aeb45",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 31,
+        "missionStatus": "READY",
+        "workStateVersion": 31,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "454395c784de47726cabfacd895ae62b378e4e874bd6bf3d0051f384327df77a",
+        "workStateVersion": 31,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": true,
+        "constraintsMismatch": true
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 30,
+      "writerModes": [
+        "MISSION",
+        "SOURCE",
+        "SUPPRESSION"
+      ],
+      "detail": {
+        "version": 32,
+        "planRevision": 32,
+        "constraintsVersion": 32,
+        "contextVersion": 32,
+        "constraintsHash": "f54a379307a484ef",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "4926a03fe99559748165a3f0bd700d71f9f222b9bf28861e9096695f6c2ed922",
+        "workStateVersion": 32,
+        "constraintsHash": "f54a379307a484ef",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 32,
+        "missionStatus": "READY",
+        "workStateVersion": 32,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "1e0b47988c30a8382a2cb09e707c09d1e918b960af5b07aed4870692d84d9324",
+        "workStateVersion": 32,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 31,
+      "writerModes": [
+        "SOURCE",
+        "SUPPRESSION",
+        "MISSION"
+      ],
+      "detail": {
+        "version": 32,
+        "planRevision": 32,
+        "constraintsVersion": 32,
+        "contextVersion": 32,
+        "constraintsHash": "f54a379307a484ef",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "a779b5f03d7ef80960b1630f0322fee9869639900dbba9b106742fa57f5e1968",
+        "workStateVersion": 32,
+        "constraintsHash": "f54a379307a484ef",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 32,
+        "missionStatus": "READY",
+        "workStateVersion": 32,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "dbbd6c34362f61b9ae98ac3ea2e6e8cc8abbd6ff6429c9ed5ff27d21b566e7a4",
+        "workStateVersion": 33,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": true
+      }
+    },
+    {
+      "iteration": 32,
+      "writerModes": [
+        "SUPPRESSION",
+        "MISSION",
+        "SOURCE"
+      ],
+      "detail": {
+        "version": 33,
+        "planRevision": 33,
+        "constraintsVersion": 33,
+        "contextVersion": 33,
+        "constraintsHash": "f39b4abf92025f7d",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "e58dbc15909d40bef7169b40898cee7515df9177681c1634f998a30cc93482ef",
+        "workStateVersion": 34,
+        "constraintsHash": "4fdbe581a7070c0a",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 34,
+        "missionStatus": "READY",
+        "workStateVersion": 34,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "1aa265ceff4d4a9140900f16097d13f5c90e5386a75bc1c0f2e5c499a3e2fedd",
+        "workStateVersion": 34,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": true,
+        "constraintsMismatch": true
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 33,
+      "writerModes": [
+        "MISSION",
+        "SOURCE",
+        "SUPPRESSION"
+      ],
+      "detail": {
+        "version": 35,
+        "planRevision": 35,
+        "constraintsVersion": 35,
+        "contextVersion": 35,
+        "constraintsHash": "d2f7352645aeeae8",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "01826e09dc19e0ce7a400402fa4a670871bd7fc332ba8774e81c8209fafe4814",
+        "workStateVersion": 35,
+        "constraintsHash": "d2f7352645aeeae8",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 35,
+        "missionStatus": "READY",
+        "workStateVersion": 35,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "0863120d8066826601ffe84e864ec2f9e49fac496ea0c8dba2f4371aa964e8d2",
+        "workStateVersion": 35,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 34,
+      "writerModes": [
+        "SOURCE",
+        "SUPPRESSION",
+        "MISSION"
+      ],
+      "detail": {
+        "version": 35,
+        "planRevision": 35,
+        "constraintsVersion": 35,
+        "contextVersion": 35,
+        "constraintsHash": "d2f7352645aeeae8",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "ae8a0a043058b84c638caaddb020842a69c1f0e24f36e6f26494c477c773e828",
+        "workStateVersion": 35,
+        "constraintsHash": "d2f7352645aeeae8",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 35,
+        "missionStatus": "READY",
+        "workStateVersion": 35,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "3f2e9e86e0d86ae724799293285408d8a75e6e537c5a9a1779ba38fd862bc8a6",
+        "workStateVersion": 36,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": true
+      }
+    },
+    {
+      "iteration": 35,
+      "writerModes": [
+        "SUPPRESSION",
+        "MISSION",
+        "SOURCE"
+      ],
+      "detail": {
+        "version": 36,
+        "planRevision": 36,
+        "constraintsVersion": 36,
+        "contextVersion": 36,
+        "constraintsHash": "1bb22491537993e5",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "7055895a5ed3634e433d8959ed6a3a384da984bc7e2a91916fd298a81d7ab44f",
+        "workStateVersion": 37,
+        "constraintsHash": "ac67692e438e7bea",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 37,
+        "missionStatus": "READY",
+        "workStateVersion": 37,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "46d1ed4fb7b4a519029108cad569fcff4e43e0c7edf05391e16edb0178f6b51c",
+        "workStateVersion": 37,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": true,
+        "constraintsMismatch": true
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 36,
+      "writerModes": [
+        "MISSION",
+        "SOURCE",
+        "SUPPRESSION"
+      ],
+      "detail": {
+        "version": 38,
+        "planRevision": 38,
+        "constraintsVersion": 38,
+        "contextVersion": 38,
+        "constraintsHash": "70408b6ddbfb7bd7",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "9efa3a8c82f50bc33e5d4f791131665deb6dde9f0815fc6fd77d9a5316b8d755",
+        "workStateVersion": 38,
+        "constraintsHash": "70408b6ddbfb7bd7",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 38,
+        "missionStatus": "READY",
+        "workStateVersion": 38,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "483b6a457a89b7ed45b3b41bd93055d9815bf23758b5cfb46869718c78561299",
+        "workStateVersion": 38,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 37,
+      "writerModes": [
+        "SOURCE",
+        "SUPPRESSION",
+        "MISSION"
+      ],
+      "detail": {
+        "version": 38,
+        "planRevision": 38,
+        "constraintsVersion": 38,
+        "contextVersion": 38,
+        "constraintsHash": "70408b6ddbfb7bd7",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "d538235eea7a9ca4093bc84b7738fe2a43cd0098a99dd9d56dee607000935c7d",
+        "workStateVersion": 38,
+        "constraintsHash": "70408b6ddbfb7bd7",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 38,
+        "missionStatus": "READY",
+        "workStateVersion": 38,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "ab52601b3096208808a9d7194e604a2030b723efd3f6511d51113a405f20c020",
+        "workStateVersion": 39,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": true
+      }
+    },
+    {
+      "iteration": 38,
+      "writerModes": [
+        "SUPPRESSION",
+        "MISSION",
+        "SOURCE"
+      ],
+      "detail": {
+        "version": 39,
+        "planRevision": 39,
+        "constraintsVersion": 39,
+        "contextVersion": 39,
+        "constraintsHash": "15f217db39b78d5c",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "44faf6e1194ae989583676d6e0a167332a51d79774f94143998c79cad3901baf",
+        "workStateVersion": 40,
+        "constraintsHash": "8c0a7bcc698067b6",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 40,
+        "missionStatus": "READY",
+        "workStateVersion": 40,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "1dde70a763e0091b1b60eee825e2ea780a74df4acde701b2b548cb2cef6c1282",
+        "workStateVersion": 40,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": true,
+        "constraintsMismatch": true
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    },
+    {
+      "iteration": 39,
+      "writerModes": [
+        "MISSION",
+        "SOURCE",
+        "SUPPRESSION"
+      ],
+      "detail": {
+        "version": 41,
+        "planRevision": 41,
+        "constraintsVersion": 41,
+        "contextVersion": 41,
+        "constraintsHash": "6c2ff3c11dac8ff4",
+        "continuationPolicyMode": "BOUNDED_INVESTIGATION"
+      },
+      "responsibility1": {
+        "controlVersion": "f5bfdd00ec3437519a619254ccc17b79b4d0a5c7fba441f7ca4cdd910d3809f4",
+        "workStateVersion": 41,
+        "constraintsHash": "6c2ff3c11dac8ff4",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "cumulativeModels": 2
+      },
+      "readback": {
+        "missionVersion": 41,
+        "missionStatus": "READY",
+        "workStateVersion": 41,
+        "internalViolations": []
+      },
+      "responsibility2": {
+        "controlVersion": "80cd17a88367c84c8dffc0e211d7bfff335a2cad9f3c3cf74d7816f30e197f7f",
+        "workStateVersion": 41,
+        "permissionState": "WITHIN_TIME_BOUNDARY"
+      },
+      "crossInterface": {
+        "versionMismatch": false,
+        "constraintsMismatch": false
+      },
+      "crossCallReadbackVsResponsibility": {
+        "versionMismatch": false
+      }
+    }
+  ],
+  "inconsistencySamples": [
+    {
+      "iteration": 2,
+      "writerModeBetweenViews": "MISSION",
+      "missionDetailSnapshot": {
+        "missionVersion": 3,
+        "planRevision": 3,
+        "constraintsVersion": 3,
+        "contextVersion": 3,
+        "constraintsHash": "91a0ee6dc9e37166",
+        "constraints": {
+          "deadline": "2026-11-08T03:51:31.249Z",
+          "executionBoundary": "READ_ANALYZE",
+          "llmContextApproved": false,
+          "rehearsalRun": 1,
+          "priority": 2
+        }
+      },
+      "responsibilitySnapshot": {
+        "controlVersion": "84a4a85969a47f07ede32478e6ca7a66e593a55fbe7de7709279a4ce449f27bc",
+        "workStateOriginalRefVersion": 4,
+        "constraintsHash": "5896f7c27326ca62",
+        "constraints": {
+          "deadline": "2026-11-08T03:51:31.249Z",
+          "executionBoundary": "READ_ANALYZE",
+          "llmContextApproved": false,
+          "rehearsalRun": 2,
+          "priority": 3
+        },
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "budgetCumulativeModels": 2
+      },
+      "note": "同一次读取组合里 detail 与 responsibility 属于不同修订；responsibility 只有 controlVersion 哈希，detail 只有 version，调用方无法对齐两个修订号。"
+    },
+    {
+      "iteration": 5,
+      "writerModeBetweenViews": "MISSION",
+      "missionDetailSnapshot": {
+        "missionVersion": 6,
+        "planRevision": 6,
+        "constraintsVersion": 6,
+        "contextVersion": 6,
+        "constraintsHash": "eed5c500a4aeaf0f",
+        "constraints": {
+          "deadline": "2026-11-08T03:51:31.249Z",
+          "executionBoundary": "READ_ANALYZE",
+          "llmContextApproved": false,
+          "rehearsalRun": 4,
+          "priority": 5
+        }
+      },
+      "responsibilitySnapshot": {
+        "controlVersion": "2d23b364c917e28f1f0c605937eb220aa7036ed048e858f24fd2855f8d8da401",
+        "workStateOriginalRefVersion": 7,
+        "constraintsHash": "1ed0f4c951e1938c",
+        "constraints": {
+          "deadline": "2026-11-08T03:51:31.249Z",
+          "executionBoundary": "READ_ANALYZE",
+          "llmContextApproved": false,
+          "rehearsalRun": 5,
+          "priority": 1
+        },
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "budgetCumulativeModels": 2
+      },
+      "note": "同一次读取组合里 detail 与 responsibility 属于不同修订；responsibility 只有 controlVersion 哈希，detail 只有 version，调用方无法对齐两个修订号。"
+    },
+    {
+      "iteration": 8,
+      "writerModeBetweenViews": "MISSION",
+      "missionDetailSnapshot": {
+        "missionVersion": 9,
+        "planRevision": 9,
+        "constraintsVersion": 9,
+        "contextVersion": 9,
+        "constraintsHash": "355bf9bef0c8a3b5",
+        "constraints": {
+          "deadline": "2026-11-08T03:51:31.249Z",
+          "executionBoundary": "READ_ANALYZE",
+          "llmContextApproved": false,
+          "rehearsalRun": 7,
+          "priority": 3
+        }
+      },
+      "responsibilitySnapshot": {
+        "controlVersion": "0836f8aff0aab10ba07294c3647966872d36d958fc1c6afb46f94c5c5c9e682b",
+        "workStateOriginalRefVersion": 10,
+        "constraintsHash": "d77d2efbd3ed7112",
+        "constraints": {
+          "deadline": "2026-11-08T03:51:31.249Z",
+          "executionBoundary": "READ_ANALYZE",
+          "llmContextApproved": false,
+          "rehearsalRun": 8,
+          "priority": 4
+        },
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "budgetCumulativeModels": 2
+      },
+      "note": "同一次读取组合里 detail 与 responsibility 属于不同修订；responsibility 只有 controlVersion 哈希，detail 只有 version，调用方无法对齐两个修订号。"
+    }
+  ],
+  "licenseChangeSamples": [
+    {
+      "iteration": 1,
+      "writerModeBetweenViews": "SUPPRESSION",
+      "missionVersionUnchanged": 2,
+      "previousControlVersion": "a23c74085a3a6f7dc879c110d2d480721f5164d89b31c7ce350460b1d682e2cc",
+      "controlVersion": "31e1cd24d292baa3cc20f0185bfe94cb06b3cd14cd52df4b7af7f50b0471324f",
+      "permissionState": "WITHIN_TIME_BOUNDARY",
+      "detailConstraintsHash": "84bcebd7b164414c",
+      "responsibilityConstraintsHash": "84bcebd7b164414c",
+      "note": "来源撤销/USE_SUPPRESSION 推进了 controlVersion，但 mission.version 在两次读取之间未变；只带 expectedVersion 的调用方无法用 version 发现许可变化。"
+    },
+    {
+      "iteration": 3,
+      "writerModeBetweenViews": "SOURCE",
+      "missionVersionUnchanged": 5,
+      "previousControlVersion": "e50d5e87dc827d819aec50eac49dbaef3513ac8f510e0a3d0178dca632390fcc",
+      "controlVersion": "4162bb05131669173beb2ccb689238453ee4502b586580196e638e5b570d03f0",
+      "permissionState": "WITHIN_TIME_BOUNDARY",
+      "detailConstraintsHash": "45a06e4eb70137b3",
+      "responsibilityConstraintsHash": "45a06e4eb70137b3",
+      "note": "来源撤销/USE_SUPPRESSION 推进了 controlVersion，但 mission.version 在两次读取之间未变；只带 expectedVersion 的调用方无法用 version 发现许可变化。"
+    },
+    {
+      "iteration": 4,
+      "writerModeBetweenViews": "SUPPRESSION",
+      "missionVersionUnchanged": 5,
+      "previousControlVersion": "09b274ce02e8985c1fd9327cf78a4ed75be5ccf337b496e949447eafcb7d25ce",
+      "controlVersion": "71e37e881bbfb24b10ba5252feab38c4633831fb76768357578995e377dff9e2",
+      "permissionState": "WITHIN_TIME_BOUNDARY",
+      "detailConstraintsHash": "45a06e4eb70137b3",
+      "responsibilityConstraintsHash": "45a06e4eb70137b3",
+      "note": "来源撤销/USE_SUPPRESSION 推进了 controlVersion，但 mission.version 在两次读取之间未变；只带 expectedVersion 的调用方无法用 version 发现许可变化。"
+    }
+  ],
+  "notes": [
+    "本探针不使用 mock、不使用前端 stale 标签；读写都在同一临时 SQLite 的真实双连接上。",
+    "同一事件循环内的两个连接按 await 边界交错提交，写入是真实事务提交，读取看到的是已提交状态；不是 JS 线程级并行。",
+    "FS-A07 的失败判据是“不得混用新旧事实或签发旧操作资格”，本文件只做记录与计数，修复留 A2。",
+    "readMissionBack 无 planRevision/controlVersion 字段（证据中 readback 仅 missionVersion/status/workState），跨接口公共版本号本身缺失。"
+  ]
+}

@@ -1,0 +1,306 @@
+{
+  "mode": "PURE_PROJECTION_REFERENCE",
+  "probe": "probe-work-state-pure",
+  "status": "PROBE_COMPLETED",
+  "durationMs": 2,
+  "generatedAt": "2026-11-03T03:51:34.114Z",
+  "baseSha": "485d485378637e1da3280ed092739d441c8cf749",
+  "sourceTree": "pristine baseline snapshot @485d485 via git archive (working-tree A2 edits excluded; BEFORE_FIX)",
+  "disclaimer": "纯投影 ≠ 服务缺陷已确认：本文件只验证 missionWorkState 纯函数的显示行为，不连接数据库、不调用服务、不代表修复或最终签收。服务级证据见 probe-fs-a01-a07.json / probe-concurrency.json。",
+  "fixtureTime": "2026-11-03T03:00:00.000Z",
+  "referenceFile": "docs/FINAL/ProjectMemo_2026_11_03-12_决赛冲刺规划/00_总控/preparation-20261103/WORK_STATE_PROBE.json",
+  "implementation": {
+    "script": "scripts/final-a/probe-work-state-pure.ts",
+    "command": "npx.cmd tsx scripts/final-a/probe-work-state-pure.ts",
+    "pureFunction": "lib/mission/workState.ts:missionWorkState"
+  },
+  "cases": [
+    {
+      "id": "PURE-FS-A01-CANCELLED",
+      "input": {
+        "status": "CANCELLED",
+        "version": 3,
+        "lastErrorJson": null,
+        "leaseUntil": null,
+        "nextAttemptAt": null,
+        "planJson": {},
+        "pauseRequestedAt": null,
+        "cancelRequestedAt": null,
+        "eventTypes": []
+      },
+      "result": {
+        "phase": "COMPLETED",
+        "nextActor": "NONE",
+        "requiresUser": false,
+        "reasonCode": "CANCELLED",
+        "reasonText": "委托已取消，历史结果保留",
+        "actionLabel": "查看原结果",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "synthetic-pure-projection-mission",
+          "version": 3
+        },
+        "checkedAt": "2026-11-03T03:00:00.000Z",
+        "observedAt": null,
+        "nextCheckAt": null,
+        "nextBoundary": null,
+        "freshness": "FRESH"
+      },
+      "note": "只有取消、没有 UNKNOWN：phase=COMPLETED、reasonCode=CANCELLED，取消事实由 reasonCode/文案保留（与 preparation WORK_STATE_PROBE 一致）。"
+    },
+    {
+      "id": "PURE-FS-A01-SUCCEEDED-UNKNOWN",
+      "input": {
+        "status": "SUCCEEDED",
+        "version": 3,
+        "lastErrorJson": {
+          "code": "EXTERNAL_UNKNOWN"
+        },
+        "leaseUntil": null,
+        "nextAttemptAt": null,
+        "planJson": {},
+        "pauseRequestedAt": null,
+        "cancelRequestedAt": null,
+        "eventTypes": []
+      },
+      "result": {
+        "phase": "UNKNOWN",
+        "nextActor": "SYSTEM",
+        "requiresUser": false,
+        "reasonCode": "EXTERNAL_UNKNOWN",
+        "reasonText": "原请求状态待核对，已用预算保留",
+        "actionLabel": "查询原请求",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "synthetic-pure-projection-mission",
+          "version": 3
+        },
+        "checkedAt": "2026-11-03T03:00:00.000Z",
+        "observedAt": null,
+        "nextCheckAt": null,
+        "nextBoundary": null,
+        "freshness": "FRESH"
+      },
+      "note": "成功终态 + UNKNOWN：phase=UNKNOWN，成功终态在 workState 内不可见（只保留 reasonCode=EXTERNAL_UNKNOWN）。"
+    },
+    {
+      "id": "PURE-FS-A01-CANCELLED-UNKNOWN",
+      "input": {
+        "status": "CANCELLED",
+        "version": 3,
+        "lastErrorJson": {
+          "code": "EXTERNAL_UNKNOWN"
+        },
+        "leaseUntil": null,
+        "nextAttemptAt": null,
+        "planJson": {},
+        "pauseRequestedAt": null,
+        "cancelRequestedAt": null,
+        "eventTypes": []
+      },
+      "result": {
+        "phase": "UNKNOWN",
+        "nextActor": "SYSTEM",
+        "requiresUser": false,
+        "reasonCode": "EXTERNAL_UNKNOWN",
+        "reasonText": "原请求状态待核对，已用预算保留",
+        "actionLabel": "查询原请求",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "synthetic-pure-projection-mission",
+          "version": 3
+        },
+        "checkedAt": "2026-11-03T03:00:00.000Z",
+        "observedAt": null,
+        "nextCheckAt": null,
+        "nextBoundary": null,
+        "freshness": "FRESH"
+      },
+      "note": "取消终态 + UNKNOWN：phase=UNKNOWN，workState 内取消终态不可见；没有“已取消”事实，也没有成功勾选。"
+    },
+    {
+      "id": "PURE-FS-A02-PAUSE-IN-FLIGHT",
+      "input": {
+        "status": "RUNNING",
+        "version": 3,
+        "lastErrorJson": null,
+        "leaseUntil": "2026-11-03T03:10:00.000Z",
+        "nextAttemptAt": null,
+        "planJson": {},
+        "pauseRequestedAt": "(input 类型不含该字段，仅作为运行时多余属性验证)",
+        "cancelRequestedAt": null,
+        "eventTypes": []
+      },
+      "result": {
+        "phase": "RUNNING",
+        "nextActor": "AGENT",
+        "requiresUser": false,
+        "reasonCode": "LEASE_ACTIVE",
+        "reasonText": "正在调查，进展来自已保存步骤",
+        "actionLabel": "查看委托进展",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "synthetic-pure-projection-mission",
+          "version": 3
+        },
+        "checkedAt": "2026-11-03T03:00:00.000Z",
+        "observedAt": null,
+        "nextCheckAt": null,
+        "nextBoundary": "2026-11-03T03:10:00.000Z",
+        "freshness": "FRESH"
+      },
+      "note": "RUNNING + 有效 lease + pauseRequestedAt：phase=RUNNING、reasonCode=LEASE_ACTIVE；输入类型没有请求字段，纯投影无法表达“已请求停止、未结算”。"
+    },
+    {
+      "id": "PURE-FS-A02-CANCEL-IN-FLIGHT",
+      "input": {
+        "status": "RUNNING",
+        "version": 3,
+        "lastErrorJson": null,
+        "leaseUntil": "2026-11-03T03:10:00.000Z",
+        "nextAttemptAt": null,
+        "planJson": {},
+        "pauseRequestedAt": null,
+        "cancelRequestedAt": "(input 类型不含该字段，仅作为运行时多余属性验证)",
+        "eventTypes": []
+      },
+      "result": {
+        "phase": "RUNNING",
+        "nextActor": "AGENT",
+        "requiresUser": false,
+        "reasonCode": "LEASE_ACTIVE",
+        "reasonText": "正在调查，进展来自已保存步骤",
+        "actionLabel": "查看委托进展",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "synthetic-pure-projection-mission",
+          "version": 3
+        },
+        "checkedAt": "2026-11-03T03:00:00.000Z",
+        "observedAt": null,
+        "nextCheckAt": null,
+        "nextBoundary": "2026-11-03T03:10:00.000Z",
+        "freshness": "FRESH"
+      },
+      "note": "RUNNING + 有效 lease + cancelRequestedAt：与 PAUSE 完全同形，纯投影没有取消请求维度。"
+    },
+    {
+      "id": "PURE-FS-A03-DAILY-BUDGET-WAITING",
+      "input": {
+        "status": "READY",
+        "version": 2,
+        "lastErrorJson": null,
+        "leaseUntil": null,
+        "nextAttemptAt": "2026-11-03T05:00:00.000Z",
+        "planJson": {},
+        "pauseRequestedAt": null,
+        "cancelRequestedAt": null,
+        "eventTypes": [
+          "DAILY_BUDGET_WAITING"
+        ]
+      },
+      "result": {
+        "phase": "QUEUED",
+        "nextActor": "AGENT",
+        "requiresUser": false,
+        "reasonCode": "DAILY_BUDGET_WAITING",
+        "reasonText": "今日调用额度已用完，等待许可时区的次日；累计用量保留",
+        "actionLabel": "查看下次检查时间",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "synthetic-pure-projection-mission",
+          "version": 2
+        },
+        "checkedAt": "2026-11-03T03:00:00.000Z",
+        "observedAt": null,
+        "nextCheckAt": "2026-11-03T05:00:00.000Z",
+        "nextBoundary": null,
+        "freshness": "FRESH"
+      },
+      "note": "READY + nextAttemptAt + DAILY_BUDGET_WAITING 事件直接传入：纯投影能给出 QUEUED/DAILY_BUDGET_WAITING/“今日调用额度已用完”；服务层是否把该事件传进来由 probe-fs-a.ts 单独验证。"
+    },
+    {
+      "id": "PURE-FS-A03-WITHOUT-EVENT",
+      "input": {
+        "status": "READY",
+        "version": 2,
+        "lastErrorJson": null,
+        "leaseUntil": null,
+        "nextAttemptAt": "2026-11-03T05:00:00.000Z",
+        "planJson": {},
+        "pauseRequestedAt": null,
+        "cancelRequestedAt": null,
+        "eventTypes": []
+      },
+      "result": {
+        "phase": "QUEUED",
+        "nextActor": "AGENT",
+        "requiresUser": false,
+        "reasonCode": "READY",
+        "reasonText": "委托已保存，等待执行",
+        "actionLabel": "查看委托进展",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "synthetic-pure-projection-mission",
+          "version": 2
+        },
+        "checkedAt": "2026-11-03T03:00:00.000Z",
+        "observedAt": null,
+        "nextCheckAt": "2026-11-03T05:00:00.000Z",
+        "nextBoundary": null,
+        "freshness": "FRESH"
+      },
+      "note": "同样的 READY + 未来 nextAttemptAt，但不传 DAILY_BUDGET_WAITING：退化为 QUEUED/READY（服务路径当前表现）。"
+    },
+    {
+      "id": "PURE-FS-A04-FIXED-OBSERVATION",
+      "input": {
+        "status": "READY",
+        "version": 2,
+        "lastErrorJson": null,
+        "leaseUntil": null,
+        "nextAttemptAt": null,
+        "planJson": {
+          "delegation": {
+            "lastObservedAt": "2026-10-01T00:00:00.000Z"
+          }
+        },
+        "pauseRequestedAt": null,
+        "cancelRequestedAt": null,
+        "eventTypes": []
+      },
+      "result": {
+        "phase": "QUEUED",
+        "nextActor": "AGENT",
+        "requiresUser": false,
+        "reasonCode": "READY",
+        "reasonText": "委托已保存，等待执行",
+        "actionLabel": "查看委托进展",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "synthetic-pure-projection-mission",
+          "version": 2
+        },
+        "checkedAt": "2026-11-03T03:00:00.000Z",
+        "observedAt": "2026-10-01T00:00:00.000Z",
+        "nextCheckAt": null,
+        "nextBoundary": null,
+        "freshness": "FRESH"
+      },
+      "note": "固定 delegation.lastObservedAt：checkedAt=fixtureTime（读取时刻），observedAt=2026-10-01T00:00:00.000Z（成功观察时刻），两者不互相覆盖。"
+    }
+  ],
+  "summary": {
+    "total": 8,
+    "displayObservations": {
+      "终态+UNKNOWN": "phase 被 UNKNOWN 覆盖；终态只可能在 readback 外层 missionStatus 保留（本纯函数看不到）。",
+      "停止请求在途": "纯函数输入无 pauseRequestedAt/cancelRequestedAt，无法表达“请求已收到、未结算”。",
+      "额度等待": "只要调用方把 DAILY_BUDGET_WAITING 作为最新事件传入，纯函数可以正确显示；缺口在服务层事件筛选（见服务级证据）。",
+      "观察时间": "checkedAt 与 observedAt 分离，读取不会推进成功观察时间。"
+    }
+  },
+  "notes": [
+    "与 preparation-20261103/WORK_STATE_PROBE.json 叠加核对：CANCELLED phase=COMPLETED、终态+UNKNOWN 显示 UNKNOWN、在途暂停请求没有独立显示字段，三条结论一致。",
+    "本探针不作为“业务取消被执行成成功”“Runner 无停止保护”或“来源/权限守卫失效”的证据；这些问题只能由服务级/并发/独立验收证据回答。"
+  ]
+}

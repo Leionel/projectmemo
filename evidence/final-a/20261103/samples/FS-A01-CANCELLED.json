@@ -1,0 +1,294 @@
+{
+  "fixture": {
+    "status": "CANCELLED",
+    "lastErrorJson": {
+      "code": "EXTERNAL_UNKNOWN"
+    }
+  },
+  "readMissionBack": {
+    "workState": {
+      "phase": "UNKNOWN",
+      "nextActor": "SYSTEM",
+      "requiresUser": false,
+      "reasonCode": "EXTERNAL_UNKNOWN",
+      "reasonText": "原请求状态待核对，已用预算保留",
+      "actionLabel": "查询原请求",
+      "originalRef": {
+        "kind": "MISSION",
+        "id": "cmw05i3rp0004zs8o37it2bdq",
+        "version": 3
+      },
+      "exactQuestionRef": null,
+      "exactApprovalRef": null,
+      "checkedAt": "2026-11-03T03:51:27.641Z",
+      "observedAt": null,
+      "nextCheckAt": null,
+      "nextBoundary": null,
+      "freshness": "FRESH"
+    },
+    "schemaVersion": 1,
+    "missionId": "cmw05i3rp0004zs8o37it2bdq",
+    "projectId": "cmw05i3pm0001zs8o599x8g1l",
+    "missionVersion": 3,
+    "missionStatus": "CANCELLED",
+    "observedAt": "2026-11-03T03:51:27.643Z",
+    "missionUpdatedAt": "2026-11-03T03:51:27.637Z",
+    "materialUses": {
+      "schemaVersion": 1,
+      "questionId": null,
+      "items": [],
+      "coverage": {
+        "eventLimit": 80,
+        "eventsTruncated": false,
+        "stepLimit": 40,
+        "stepsTruncated": false,
+        "outputLimit": 20,
+        "outputsTruncated": false,
+        "receiptsTruncated": false,
+        "projectRunLimit": 40,
+        "runsTruncated": false,
+        "sourceLimit": 8,
+        "sourceLimitReached": false,
+        "mapping": "DIRECT_SOURCE_POINTERS_ONLY"
+      }
+    },
+    "evidenceReviews": {
+      "items": [],
+      "truncated": false
+    },
+    "reviewProgress": {
+      "schemaVersion": 1,
+      "classes": [
+        {
+          "key": "executed",
+          "label": "已执行",
+          "count": 0,
+          "note": "工具步骤确实运行过；不等于结论成立或目标达成"
+        },
+        {
+          "key": "observed",
+          "label": "已观察",
+          "count": 0,
+          "note": "执行时带回了可引用来源"
+        },
+        {
+          "key": "independentlySupported",
+          "label": "已独立支持",
+          "count": 0,
+          "note": "逐句核对支持 0 条；当前未提供独立核验回执"
+        },
+        {
+          "key": "userReported",
+          "label": "用户报告",
+          "count": 0,
+          "note": "行动已完成并留下复盘回执；仍是用户报告"
+        },
+        {
+          "key": "counterExamples",
+          "label": "反例",
+          "count": 0,
+          "note": "原文与主张冲突，保留冲突"
+        },
+        {
+          "key": "unknown",
+          "label": "未知",
+          "count": 0,
+          "note": "未核验或信息不足，不当作失败或没有"
+        }
+      ],
+      "counts": {
+        "executed": {
+          "steps": 0,
+          "actions": 0
+        },
+        "observed": {
+          "steps": 0
+        },
+        "independentlySupported": {
+          "claims": 0
+        },
+        "textuallySupported": {
+          "claims": 0
+        },
+        "userReported": {
+          "actionReceipts": 0
+        },
+        "counterExamples": {
+          "claims": 0
+        },
+        "unknown": {
+          "claims": 0,
+          "steps": 0
+        }
+      },
+      "policy": "PROJECTION_FROM_EXISTING_STEPS_OUTPUTS_ACTIONS_RECEIPTS_NOT_REALITY_COMPLETION",
+      "coverage": {
+        "outputsInspected": 0,
+        "stepsInspected": 0,
+        "actionsInspected": 0
+      }
+    },
+    "callCoverage": {
+      "schemaVersion": 1,
+      "scope": "MISSION_AGENTRUN_AND_STEP_RECEIPTS",
+      "inspected": {
+        "agentRuns": 0,
+        "steps": 0,
+        "limit": 20,
+        "truncated": false
+      },
+      "models": {
+        "total": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "partial": 0,
+        "fallback": 0,
+        "unknown": 0,
+        "usageRecorded": 0,
+        "usageUnknown": 0
+      },
+      "tools": {
+        "total": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "failedCodes": [],
+      "dedupe": "AGENTRUN_ID_AND_STEP_ID",
+      "pricing": {
+        "state": "UNPRICED",
+        "estimate": null,
+        "billedAmount": null,
+        "currency": null,
+        "rateSource": null,
+        "applicableFrom": null,
+        "reason": "没有绑定费率来源、适用时间、模型/工具版本与币种；只能给出已记录的调用与 token，不能估价或声称完整账单。"
+      },
+      "summary": "可核对调用：模型尚未找到回执· 工具已检查 0 次（成功 0 / 失败 0）",
+      "notes": [
+        "尚未找到本委托的模型调用回执，不能据此判断没有调用。",
+        "费用与估算保持未知：未绑定费率、币种与账单，不把次数换算成金额。",
+        "范围仅当前委托的原回执；不含建项预览、其他独立讨论或跨项目用量。"
+      ]
+    },
+    "resourceUsage": {
+      "schemaVersion": 1,
+      "scope": "MISSION_RECORDED_COUNTERS_ONLY",
+      "models": null,
+      "tools": null,
+      "inputTokens": null,
+      "outputTokens": null,
+      "unknownCalls": null,
+      "monetaryCost": null,
+      "pricingState": "UNPRICED",
+      "summary": "模型 待核对 次 · 工具 待核对 次",
+      "coverageNote": "未知请求数量尚未记录，当前用量覆盖不明。",
+      "costNote": "费用尚不能核算：这些记录未绑定费率与账单。"
+    },
+    "sourceConversation": null,
+    "selected": {
+      "question": null,
+      "approval": null,
+      "output": null,
+      "receipt": null
+    },
+    "adoptions": [],
+    "actionReceipts": [],
+    "realityOutcome": "NOT_INFERRED"
+  },
+  "missionDetail": {
+    "workState": {
+      "phase": "UNKNOWN",
+      "nextActor": "SYSTEM",
+      "requiresUser": false,
+      "reasonCode": "EXTERNAL_UNKNOWN",
+      "reasonText": "原请求状态待核对，已用预算保留",
+      "actionLabel": "查询原请求",
+      "originalRef": {
+        "kind": "MISSION",
+        "id": "cmw05i3rp0004zs8o37it2bdq",
+        "version": 3
+      },
+      "exactQuestionRef": null,
+      "exactApprovalRef": null,
+      "checkedAt": "2026-11-03T03:51:27.645Z",
+      "observedAt": null,
+      "nextCheckAt": null,
+      "nextBoundary": null,
+      "freshness": "FRESH"
+    },
+    "workingObjective": null,
+    "nextBoundary": null,
+    "experimentObserverEnabled": false,
+    "academicResearchEnabled": false,
+    "sandboxVerificationEnabled": false,
+    "documentDeepReadEnabled": false,
+    "investigationDelegationEnabled": false,
+    "delegation": null,
+    "evidencePremise": null,
+    "completion": {
+      "criteriaPassed": null,
+      "criteriaCheckedAt": null,
+      "draftVerification": null,
+      "adoptionCount": 0,
+      "latestArtifactId": null,
+      "realityOutcome": "NOT_INFERRED"
+    },
+    "experience": {
+      "enabled": true,
+      "suggestions": [],
+      "note": "建议不改变权限；影子观察不注入模型上下文。"
+    },
+    "semanticCheckEnabled": false,
+    "artifactAdoptionEnabled": true,
+    "id": "cmw05i3rp0004zs8o37it2bdq",
+    "projectId": "cmw05i3pm0001zs8o599x8g1l",
+    "goal": "探针委托：核对状态合同",
+    "status": "CANCELLED",
+    "version": 3,
+    "contextVersion": 1,
+    "planRevision": 1,
+    "continuationPolicy": {
+      "mode": "MANUAL"
+    },
+    "autoContinuationEnabled": false,
+    "successCriteria": [
+      "DRAFT_EXISTS"
+    ],
+    "constraints": {},
+    "constraintsVersion": 1,
+    "researchScope": {},
+    "researchScopeVersion": 1,
+    "pauseReason": null,
+    "pauseRequestedAt": null,
+    "cancelRequestedAt": null,
+    "error": {
+      "code": "EXTERNAL_UNKNOWN",
+      "message": "外部写入结果未确认，需查询原请求后再判断是否重试",
+      "phase": "EXTERNAL_WRITE"
+    },
+    "budget": {
+      "models": 12,
+      "tools": 16,
+      "searches": 3,
+      "fetches": 4,
+      "browserRequests": 40,
+      "browserBytes": 4000000,
+      "calendarRequests": 8,
+      "externalWrites": 2,
+      "activeMs": 180000,
+      "reservedOutputTokens": 12000
+    },
+    "used": {},
+    "question": null,
+    "steps": [],
+    "approvals": [],
+    "outputs": []
+  },
+  "missionWorkspaceSummary": {
+    "enabled": true,
+    "totalActive": 0,
+    "items": []
+  }
+}

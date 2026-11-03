@@ -1,0 +1,284 @@
+{
+  "contractVersion": "final-a-workpacket-v1",
+  "schemaVersion": 1,
+  "fixture": "PURE_FUNCTION_NO_DATABASE_NO_MODEL",
+  "generatedAt": "2026-11-03T04:02:06.504Z",
+  "caseId": "FS-A01-SUCCEEDED-UNKNOWN",
+  "question": "成功终态与未知调用结果同时可见，取消不显示成功、不提供恢复",
+  "workState": {
+    "phase": "COMPLETED",
+    "nextActor": "USER",
+    "requiresUser": true,
+    "reasonCode": "SUCCEEDED",
+    "reasonText": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+    "actionLabel": "查看原结果并核对未知调用",
+    "originalRef": {
+      "kind": "MISSION",
+      "id": "synthetic-final-a-mission",
+      "version": 7
+    },
+    "exactQuestionRef": null,
+    "exactApprovalRef": null,
+    "checkedAt": "2026-11-03T03:00:00.000Z",
+    "observedAt": "2026-11-01T08:00:00.000Z",
+    "nextCheckAt": null,
+    "nextBoundary": null,
+    "freshness": "FRESH",
+    "terminal": {
+      "status": "SUCCEEDED",
+      "at": "2026-11-02T12:00:00.000Z",
+      "atSource": "FINISHED_AT",
+      "reasonCode": "SUCCEEDED"
+    },
+    "unsettledEffect": {
+      "present": true,
+      "code": "EXTERNAL_UNKNOWN",
+      "source": "LAST_ERROR",
+      "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+      "resolvedByRead": false
+    },
+    "stopRequest": {
+      "state": "NONE",
+      "requestedAt": null,
+      "settled": true,
+      "note": "原委托已完成；停止请求不再具有执行含义"
+    }
+  },
+  "workPacket": {
+    "schemaVersion": 1,
+    "contractVersion": "final-a-workpacket-v1",
+    "readAt": "2026-11-03T03:00:00.000Z",
+    "identity": {
+      "missionId": "synthetic-final-a-mission",
+      "projectId": "synthetic-project",
+      "missionVersion": 7,
+      "missionStatus": "SUCCEEDED",
+      "planRevision": 4,
+      "contextVersion": 3,
+      "constraintsVersion": 2,
+      "researchScopeVersion": 1,
+      "controlVersion": "control-v7",
+      "originalRef": {
+        "kind": "MISSION",
+        "id": "synthetic-final-a-mission",
+        "version": 7
+      }
+    },
+    "snapshot": {
+      "mode": "SINGLE_READ_TRANSACTION",
+      "consistency": "VERSION_STABLE",
+      "retries": 0,
+      "checkedAt": "2026-11-03T03:00:00.000Z",
+      "note": "同一只读事务内读取；身份与版本来自同一快照。"
+    },
+    "authority": {
+      "controlVersion": "control-v7",
+      "permissionState": "WITHIN_TIME_BOUNDARY",
+      "permissionExpiresAt": null,
+      "deadline": null,
+      "nextBoundary": null,
+      "effectiveNextCheckAt": null,
+      "workerPresence": "RECENT",
+      "budget": {
+        "limits": {
+          "models": 12,
+          "tools": 16
+        },
+        "cumulativeUsed": {
+          "models": 5,
+          "tools": 2,
+          "inputTokens": 900,
+          "outputTokens": 120,
+          "unknownCalls": 1
+        },
+        "policy": "CUMULATIVE_NOT_RESET_ON_RESTART_OR_DATE",
+        "monetaryCost": null
+      },
+      "note": "VIEW_ONLY_NO_EXECUTION_PERMISSION"
+    },
+    "observations": {
+      "readAt": "2026-11-03T03:00:00.000Z",
+      "state": "OBSERVED",
+      "lastSuccessfulAt": "2026-11-01T08:00:00.000Z",
+      "lastFailedAt": null,
+      "lastNoNewInformationAt": null,
+      "nextCheckAt": null,
+      "authority": "ORIGINAL_DELEGATION_RECORDS_ONLY"
+    },
+    "done": {
+      "recentSteps": [
+        {
+          "id": "step-2",
+          "ordinal": 2,
+          "toolName": "inspect_project",
+          "status": "SUCCEEDED",
+          "at": "2026-11-02T10:00:00.000Z",
+          "note": "读取项目"
+        }
+      ],
+      "latestOutput": {
+        "id": "output-3",
+        "revision": 3,
+        "createdAt": "2026-11-02T11:00:00.000Z"
+      },
+      "progress": null,
+      "actionReceipts": [],
+      "note": "最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。",
+      "coverage": {
+        "limit": 5,
+        "truncated": false
+      }
+    },
+    "basis": {
+      "questionId": null,
+      "materialUses": null,
+      "evidenceReviews": null,
+      "currentUsePolicy": "SOURCE_POLICY_APPLIED",
+      "note": "依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 本次没有读取资料使用窗口，未找到记录不等于从未使用。 本次没有读取证据审查窗口，未找到记录不等于从未发生。"
+    },
+    "stopped": {
+      "workState": {
+        "phase": "COMPLETED",
+        "nextActor": "USER",
+        "requiresUser": true,
+        "reasonCode": "SUCCEEDED",
+        "reasonText": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+        "actionLabel": "查看原结果并核对未知调用",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "synthetic-final-a-mission",
+          "version": 7
+        },
+        "exactQuestionRef": null,
+        "exactApprovalRef": null,
+        "checkedAt": "2026-11-03T03:00:00.000Z",
+        "observedAt": "2026-11-01T08:00:00.000Z",
+        "nextCheckAt": null,
+        "nextBoundary": null,
+        "freshness": "FRESH",
+        "terminal": {
+          "status": "SUCCEEDED",
+          "at": "2026-11-02T12:00:00.000Z",
+          "atSource": "FINISHED_AT",
+          "reasonCode": "SUCCEEDED"
+        },
+        "unsettledEffect": {
+          "present": true,
+          "code": "EXTERNAL_UNKNOWN",
+          "source": "LAST_ERROR",
+          "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+          "resolvedByRead": false
+        },
+        "stopRequest": {
+          "state": "NONE",
+          "requestedAt": null,
+          "settled": true,
+          "note": "原委托已完成；停止请求不再具有执行含义"
+        }
+      },
+      "missionStatus": "SUCCEEDED",
+      "primaryBlock": {
+        "kind": "UNKNOWN_EFFECT",
+        "code": "EXTERNAL_UNKNOWN",
+        "text": "原请求或外部效果尚未结算，读取不会自动核销",
+        "at": null,
+        "blocksActions": true,
+        "originalRef": {
+          "kind": "OUTPUT",
+          "id": "output-3"
+        }
+      },
+      "blockers": [
+        {
+          "kind": "UNKNOWN_EFFECT",
+          "code": "EXTERNAL_UNKNOWN",
+          "text": "原请求或外部效果尚未结算，读取不会自动核销",
+          "at": null,
+          "blocksActions": true,
+          "originalRef": {
+            "kind": "OUTPUT",
+            "id": "output-3"
+          }
+        }
+      ],
+      "unknownEffect": {
+        "present": true,
+        "code": "EXTERNAL_UNKNOWN",
+        "source": "LAST_ERROR",
+        "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+        "resolvedByRead": false
+      },
+      "stopRequest": {
+        "state": "NONE",
+        "requestedAt": null,
+        "settled": true,
+        "note": "原委托已完成；停止请求不再具有执行含义"
+      },
+      "note": "原生命周期 SUCCEEDED；显示阶段 COMPLETED；停止请求 NONE（已结算/无请求）；未结算效果存在。工作包不改变原生命周期，也不构成执行授权。"
+    },
+    "next": {
+      "nextActor": "USER",
+      "primaryAction": {
+        "kind": "CHECK_UNKNOWN_EFFECT",
+        "label": "查看原结果并核对未知调用",
+        "target": {
+          "kind": "OUTPUT",
+          "id": "output-3",
+          "version": 3
+        },
+        "requires": {
+          "missionVersion": 7,
+          "planRevision": 4,
+          "contextVersion": 3,
+          "constraintsVersion": 2,
+          "researchScopeVersion": 1,
+          "controlVersion": "control-v7",
+          "questionId": null,
+          "approvalId": null,
+          "proposalHash": null,
+          "requiredSourceRevisions": [],
+          "boundaryAt": null
+        },
+        "submissionGuard": "SERVER_RECHECKS_OWNER_PROJECT_VERSION_SOURCE_PERMISSION_LEASE_BUDGET_IDEMPOTENCY",
+        "readOnly": true
+      },
+      "nextCheckAt": null,
+      "nextBoundary": null,
+      "waitingOn": "NONE",
+      "note": "终态与未结算效果并列保留：先核对原结果与未知调用，读取工作包不会自动结算，也不能重新派发。"
+    },
+    "blockers": [
+      {
+        "kind": "UNKNOWN_EFFECT",
+        "code": "EXTERNAL_UNKNOWN",
+        "text": "原请求或外部效果尚未结算，读取不会自动核销",
+        "at": null,
+        "blocksActions": true,
+        "originalRef": {
+          "kind": "OUTPUT",
+          "id": "output-3"
+        }
+      }
+    ],
+    "coverage": {
+      "windows": [
+        {
+          "name": "RECENT_STEPS",
+          "limit": 5,
+          "returned": 1,
+          "truncated": false,
+          "note": "有界窗口内未找到记录只表示覆盖不足，不等于从未发生。"
+        },
+        {
+          "name": "ACTION_RECEIPTS",
+          "limit": 5,
+          "returned": 0,
+          "truncated": false,
+          "note": "有界窗口内未找到记录只表示覆盖不足，不等于从未发生。"
+        }
+      ],
+      "policy": "NOT_FOUND_IS_NOT_NEVER"
+    },
+    "realityOutcome": "NOT_INFERRED"
+  }
+}

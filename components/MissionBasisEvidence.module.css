@@ -1,0 +1,263 @@
+/* C2 依据/原文/纠正入口。只使用全局主题变量，暗色沿用同一组 token，不新增固定色值。 */
+.basis {
+  min-width: 0;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--rule);
+  color: var(--ink);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.basis :is(h3, h4, h5) {
+  margin: 0;
+  font-family: inherit;
+  letter-spacing: normal;
+}
+.basis p,
+.basis blockquote,
+.basis dl,
+.basis dd {
+  margin-inline: 0;
+}
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.heading {
+  font-size: 0.9375rem;
+  font-weight: 650;
+}
+.lead {
+  margin: 0.375rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.legacyWarning {
+  margin: 0.625rem 0 0;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--amber);
+  border-left: 3px solid var(--amber);
+  border-radius: 0.375rem;
+  background: var(--paper-strong);
+  color: var(--ink);
+  font-size: 0.75rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.items {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+.item {
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  background: var(--paper);
+}
+.itemHead {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+.itemTitle {
+  font-size: 0.8125rem;
+  font-weight: 650;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.pointer {
+  margin: 0;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.6875rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.statusList {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.625rem 0 0;
+}
+.statusRow {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: start;
+  min-width: 0;
+}
+.statusRow dt {
+  color: var(--muted);
+  font-size: 0.6875rem;
+  line-height: 1.6;
+}
+.statusRow dd {
+  margin: 0;
+  min-width: 0;
+  font-size: 0.75rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.statusRow[data-state="ALLOWED"] dd,
+.statusRow[data-state="CURRENT"] dd {
+  color: var(--teal-strong);
+}
+.statusRow[data-state="SUPPRESSED"] dd,
+.statusRow[data-state="UNKNOWN"] dd,
+.statusRow[data-state="UNRECOGNIZED"] dd,
+.statusRow[data-state="MISSING"] dd,
+.statusRow[data-state="UNAVAILABLE"] dd {
+  color: var(--ink-soft);
+}
+.excerpt {
+  margin-top: 0.625rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--rule);
+  min-width: 0;
+}
+.excerpt summary {
+  display: flex;
+  align-items: center;
+  min-height: 2rem;
+  padding-block: 0.25rem;
+  color: var(--teal-strong);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.excerptBody {
+  margin: 0.5rem 0 0;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--rule);
+  color: var(--ink-soft);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.75rem;
+  line-height: 1.75;
+}
+.excerptWarning {
+  margin: 0.25rem 0 0;
+  color: var(--brick);
+  font-size: 0.75rem;
+  line-height: 1.7;
+}
+.excerptNote {
+  margin: 0.375rem 0 0;
+  color: var(--muted);
+  font-size: 0.6875rem;
+  line-height: 1.7;
+}
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin-top: 0.625rem;
+  min-width: 0;
+}
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  color: var(--teal-strong);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  overflow-wrap: anywhere;
+}
+.link:hover {
+  color: var(--teal);
+}
+.link:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
+}
+.locationNote,
+.scopeNote,
+.coverageNote,
+.correctionNote,
+.empty,
+.reviewLead,
+.reviewMeta {
+  margin: 0.5rem 0 0;
+  color: var(--muted);
+  font-size: 0.6875rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.correction {
+  display: grid;
+  gap: 0.375rem;
+  margin-top: 0.625rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--rule);
+}
+.correction :is(button, a, summary):focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
+}
+.correctionFallback {
+  display: grid;
+  gap: 0.375rem;
+  margin-top: 0.75rem;
+  padding-top: 0.625rem;
+  border-top: 1px solid var(--rule);
+  min-width: 0;
+}
+.reviews {
+  margin-top: 0.875rem;
+  padding-top: 0.625rem;
+  border-top: 1px solid var(--rule);
+  min-width: 0;
+}
+.reviewTitle {
+  font-size: 0.8125rem;
+  font-weight: 650;
+}
+.reviewList {
+  display: grid;
+  gap: 0.375rem;
+  margin: 0.375rem 0 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+.reviewItem {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.reviewItem > p {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.7;
+}
+.reviewMeta {
+  margin-top: 0.125rem;
+}
+@media (max-width: 30rem) {
+  .statusRow {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.125rem;
+  }
+}
+@media (pointer: coarse) {
+  .link,
+  .excerpt summary {
+    min-height: 2.75rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .link {
+    transition: none;
+  }
+}

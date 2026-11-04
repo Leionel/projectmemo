@@ -141,6 +141,7 @@ export function UserNav({ isMenuItem = false, liveLlm = false }: { isMenuItem?: 
       <button
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label="账号与设置"
+        title={user.displayName || user.username}
         aria-expanded={menuOpen}
         className="focus-ring grid h-10 w-10 place-items-center rounded-full bg-[var(--teal-pale)] text-sm font-bold text-[var(--teal-strong)] transition hover:shadow-[inset_0_0_0_1px_var(--teal)]"
       >

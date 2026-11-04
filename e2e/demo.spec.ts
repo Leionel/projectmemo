@@ -181,7 +181,7 @@ test("project dashboard surfaces attention state and snoozed reminder history", 
   const simulated = simulatedCards.first();
   await expect(simulated).toBeVisible();
   const beforeSnooze = await simulatedCards.count();
-  await simulated.getByRole("button", { name: "稍后" }).click();
+  await simulated.getByRole("button", { name: "明天提醒" }).click();
   await expect(simulatedCards).toHaveCount(beforeSnooze - 1);
   await interventions.getByText(/最近处理/).click();
   await expect(interventions.getByText(/再提醒/).first()).toBeVisible();

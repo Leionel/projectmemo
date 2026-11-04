@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpen, LogIn, LogOut, User, LoaderCircle } from "lucide-react";
+import { BookOpen, LogIn, LogOut, User, LoaderCircle, ShieldCheck } from "lucide-react";
 import { bindConversationDraftOwner, clearConversationDrafts } from "@/lib/client/conversationDrafts";
 import { bindCaptureDraftOwner, clearCaptureDrafts, captureGeneration } from "@/lib/client/captureDrafts";
 
@@ -156,6 +156,14 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
               className="focus-ring mt-1 flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-[var(--ink-soft)] transition hover:bg-[var(--paper-strong)] hover:text-[var(--teal-strong)]"
             >
               <BookOpen size={14} /> 我的记忆
+            </Link>
+            <Link
+              href="/settings/model"
+              prefetch={false}
+              onClick={() => setMenuOpen(false)}
+              className="focus-ring flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-[var(--ink-soft)] transition hover:bg-[var(--paper-strong)] hover:text-[var(--teal)]"
+            >
+              <ShieldCheck size={14} /> 模型与安全
             </Link>
             <button
               onClick={handleLogout}

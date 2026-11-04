@@ -576,7 +576,7 @@ describe("C1 四问工作包：正常状态", () => {
     expect(visible).not.toContain("WAITING_USER");
     expect(visible).not.toContain("PAUSE_REQUESTED");
     // 原投影说明保留可查，默认收起
-    const technical = screen.getByText("技术说明（原投影）").closest("details") as HTMLDetailsElement;
+    const technical = screen.getByText("技术说明").closest("details") as HTMLDetailsElement;
     expect(technical.open).toBe(false);
     expect(technical.textContent).toContain("原生命周期 WAITING_INPUT");
   });

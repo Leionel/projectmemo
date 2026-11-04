@@ -43,6 +43,11 @@
 .stoppedGroup > summary { display:flex; align-items:center; gap:.5rem; min-height:44px; padding:.75rem 1.2rem; font-size:.8125rem; color:var(--ink-soft); cursor:pointer; }
 .stoppedGroup > summary:focus-visible { outline:2px solid var(--teal); outline-offset:-2px; }
 .stoppedGroup[open] > summary { color:var(--ink); }
+.stoppedGroup > summary { list-style:none; }
+.stoppedGroup > summary::-webkit-details-marker { display:none; }
+.stoppedGroup > summary::before { content:""; width:.4rem; height:.4rem; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform:rotate(-45deg); transition:transform 120ms; flex-shrink:0; }
+.stoppedGroup[open] > summary::before { transform:rotate(45deg); }
+@media(prefers-reduced-motion:reduce) { .stoppedGroup > summary::before { transition:none; } }
 .item h3 { font-size:.875rem; font-weight:600; line-height:1.6; margin:.25rem 0; }
 .excerpt { color:var(--ink-soft); font-size:.75rem; line-height:1.8; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
 .discuss { display:inline-flex; align-items:center; gap:.35rem; margin-top:.45rem; font-size:.75rem; color:var(--teal-strong); min-height:1.5rem; }

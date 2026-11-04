@@ -435,31 +435,31 @@ export function MissionWorkPacket({ readback, packet, missionId, onReload, disab
               ))}
             </ul>
           )}
-          <p className={styles.note}>{done.note}</p>
-          <p className={styles.note}>
-            步骤窗口上限 {done.coverage.limit} 条{done.coverage.truncated ? "，已截断" : ""}；窗口内没有记录只表示覆盖不足。
-          </p>
-          <p className={styles.note}>
-            现实结果：未从委托状态推断（{packet.realityOutcome}），以原行动回执为准。
-          </p>
+          <details className={styles.details}>
+            <summary>口径说明</summary>
+            <p className={styles.note}>{done.note}</p>
+            <p className={styles.note}>
+              步骤窗口上限 {done.coverage.limit} 条{done.coverage.truncated ? "，已截断" : ""}；窗口内没有记录只表示覆盖不足。
+            </p>
+            <p className={styles.note}>
+              现实结果：未从委托状态推断（{packet.realityOutcome}），以原行动回执为准。
+            </p>
+          </details>
         </section>
 
         <section aria-label="依据是什么" className={styles.question}>
           <h4>依据是什么</h4>
-          <p>关联原问题：{basis.questionId ?? "未记录"}</p>
+          {basis.questionId && <p>关联原问题：{basis.questionId}</p>}
           <p>
             原资料使用 {materialCount === null ? "未记录" : `${materialCount} 项`} · 证据审查{" "}
             {reviewCount === null ? "未记录" : `${reviewCount} 条`}
           </p>
-          <p>
-            {basis.currentUsePolicy === "SOURCE_POLICY_APPLIED"
-              ? "当前依据可用性已按来源策略判定；历史留痕不等于当前可用。"
-              : "旧服务或未应用来源策略：当前依据可用性未知，不能当作允许。"}
-          </p>
-          <p className={styles.note}>{basis.note}</p>
+          {basis.currentUsePolicy !== "SOURCE_POLICY_APPLIED" && <p>旧服务或未应用来源策略：当前依据可用性未知，不能当作允许。</p>}
           <details className={styles.details}>
             <summary>展开依据、原文与纠正入口</summary>
             {readback ? (
+              <>
+              <p className={styles.note}>{basis.note}</p>
               <MissionBasisEvidence
                 packet={packet}
                 readback={readback}
@@ -467,6 +467,7 @@ export function MissionWorkPacket({ readback, packet, missionId, onReload, disab
                 onReload={onReload}
                 disabled={disabled}
               />
+              </>
             ) : (
               <p className={styles.note}>读回详情暂不可用，暂不能展开依据。</p>
             )}
@@ -476,19 +477,19 @@ export function MissionWorkPacket({ readback, packet, missionId, onReload, disab
         <section aria-label="为何停下" className={styles.question}>
           <h4>为何停下</h4>
           <p>
-            当前阶段：{workPhaseLabel(stopped.workState.phase)} · 原状态：{missionStatusText(stopped.missionStatus)}
+            当前阶段：{workPhaseLabel(stopped.workState.phase)}
+            {missionStatusText(stopped.missionStatus) !== workPhaseLabel(stopped.workState.phase) && ` · 原状态：${missionStatusText(stopped.missionStatus)}`}
           </p>
           <p>
             {stopped.workState.reasonText || "原因未记录"}
-            {stopped.workState.reasonCode ? `（${stopped.workState.reasonCode}）` : ""}
           </p>
           {primaryBlock && (
             <p>
               首要阻断：{primaryBlock.text} <span className={styles.code}>{primaryBlock.code}</span>
             </p>
           )}
-          <p>{stopRequestText(stopped.stopRequest)}</p>
-          <p>{unknownEffectText(stopped.unknownEffect)}</p>
+          {stopped.stopRequest && stopped.stopRequest.state !== "NONE" && <p>{stopRequestText(stopped.stopRequest)}</p>}
+          {stopped.unknownEffect?.present && <p>{unknownEffectText(stopped.unknownEffect)}</p>}
           {packet.blockers.length > 0 && (
             <details className={styles.details}>
               <summary>全部阻断（{packet.blockers.length} 项）</summary>
@@ -506,21 +507,29 @@ export function MissionWorkPacket({ readback, packet, missionId, onReload, disab
               </ul>
             </details>
           )}
-          {stopped.note && (
-            <details className={styles.details}>
-              <summary>技术说明（原投影）</summary>
-              <p className={styles.note}>{stopped.note}</p>
-            </details>
-          )}
+          <details className={styles.details}>
+            <summary>技术说明</summary>
+            {stopped.workState.reasonCode && <p className={styles.note}>原因代码：<span className={styles.code}>{stopped.workState.reasonCode}</span></p>}
+            {!(stopped.stopRequest && stopped.stopRequest.state !== "NONE") && <p className={styles.note}>{stopRequestText(stopped.stopRequest)}</p>}
+            {!stopped.unknownEffect?.present && <p className={styles.note}>{unknownEffectText(stopped.unknownEffect)}</p>}
+            {stopped.note && <p className={styles.note}>{stopped.note}</p>}
+          </details>
         </section>
 
         <section aria-label="现在等谁" className={styles.question}>
           <h4>现在等谁</h4>
           <p>等待：{WAITING_ON_LABELS[next.waitingOn] ?? "未记录"}</p>
           <p>下一步由谁：{NEXT_ACTOR_LABELS[next.nextActor] ?? next.nextActor}</p>
-          <p>下次检查时间：{formatTime(next.nextCheckAt)}</p>
-          <p>有效边界：{formatTime(next.nextBoundary)}</p>
+          {next.nextCheckAt && <p>下次检查时间：{formatTime(next.nextCheckAt)}</p>}
+          {next.nextBoundary && <p>有效边界：{formatTime(next.nextBoundary)}</p>}
           <p className={styles.note}>{next.note}</p>
+          {(!next.nextCheckAt || !next.nextBoundary) && (
+            <details className={styles.details}>
+              <summary>时间口径</summary>
+              {!next.nextCheckAt && <p className={styles.note}>下次检查时间：{formatTime(next.nextCheckAt)}</p>}
+              {!next.nextBoundary && <p className={styles.note}>有效边界：{formatTime(next.nextBoundary)}</p>}
+            </details>
+          )}
         </section>
       </div>
 

@@ -81,7 +81,7 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
  const done=mission?.steps.filter(s=>s.status==="SUCCEEDED").length??0;
  return <section id="mission-agent" className={styles.panel} aria-labelledby="mission-heading">
   <header className={styles.header}>
-   <div><h2 id="mission-heading">长期项目委托</h2><p>交给 Agent 一个目标，在同一委托中持续推进、补充材料和审阅成果。</p></div>
+   <h2 id="mission-heading" className="sr-only">长期项目委托</h2>
    <span className={styles.count}>已加载 {list.length} 项委托</span>
   </header>
   {error&&<div role="alert" className={styles.error}><p>{error}</p><button disabled={busy} onClick={()=>void perform(()=>refresh(mission?.id??selectedId.current??undefined),true)}>刷新重试</button></div>}
@@ -130,10 +130,10 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
    </aside>
    <div className={styles.detail} aria-busy={busy}>
    {!mission?<div className={styles.empty} role="status">{readState==="unavailable"&&!error?<><h3>正在读取委托</h3><p>正在核对已有委托和执行进度。</p></>:list.length>0?<><h3>{error?"委托详情暂不可用":"正在读取委托详情"}</h3><p>{error?"已有委托仍保留，可以选择其他委托，或重新读取当前结果。":"已有进度、待回应事项和结果将在这里显示。"}</p></>:<><h3>委托一个需要持续跟进的目标</h3><p>从「委托新目标」开始。需要补充材料或批准时，会在同一委托中等你处理。</p></>}</div>:<fieldset disabled={readState!=="fresh"} className="contents">
-    {!["SUCCEEDED","CANCELLED"].includes(mission.status)&&<ProjectAgentFocusButton projectId={projectId} missionId={mission.id}/>}
     <header className={styles.detailHeader}>
-     <div className={styles.detailMeta}>{mission.workState?<WorkStateBadges state={mission.workState}/>:<span className={styles.badge} data-status={mission.status}>{labels[mission.status]??"状态待确认"}</span>}{nextActorLabel(mission.workState?.nextActor)&&<span>下一步：<strong>{nextActorLabel(mission.workState?.nextActor)}</strong></span>}<span>{done} 个步骤已执行 · {mission.outputs.length} 份草稿</span></div>
-     <Link className="workspace-link focus-ring" href={"/focus?entryKind=MISSION&entryId="+mission.id+"&entryProject="+projectId}>调整当前重点／继续讨论</Link>{mission.workingObjective&&<p>当前重点：{mission.workingObjective}</p>}<h3 className={styles.goal}>{mission.goal.length>90?`${[...mission.goal].slice(0,90).join("")}…`:mission.goal}</h3>{mission.goal.length>90&&<details><summary>查看完整委托目标</summary><p>{mission.goal}</p></details>}
+     <div className={styles.detailTop}><div className={styles.detailMeta}>{mission.workState?<WorkStateBadges state={mission.workState}/>:<span className={styles.badge} data-status={mission.status}>{labels[mission.status]??"状态待确认"}</span>}{nextActorLabel(mission.workState?.nextActor)&&<span>下一步：<strong>{nextActorLabel(mission.workState?.nextActor)}</strong></span>}<span>{done} 个步骤已执行 · {mission.outputs.length} 份草稿</span></div>
+     <div className={styles.detailTools}><Link className="workspace-link focus-ring" href={"/focus?entryKind=MISSION&entryId="+mission.id+"&entryProject="+projectId}>调整当前重点／继续讨论</Link>{!["SUCCEEDED","CANCELLED"].includes(mission.status)&&<ProjectAgentFocusButton projectId={projectId} missionId={mission.id}/>}</div></div>
+     {mission.workingObjective&&<p>当前重点：{mission.workingObjective}</p>}<h3 className={styles.goal}>{mission.goal.length>90?`${[...mission.goal].slice(0,90).join("")}…`:mission.goal}</h3>{mission.goal.length>90&&<details><summary>查看完整委托目标</summary><p>{mission.goal}</p></details>}
      <p className={styles.versionLine}>委托版本 v{mission.version} · 最近观察 {mission.workState?.observedAt?new Date(mission.workState.observedAt).toLocaleString("zh-CN",{hour12:false}):"尚无成功观察"}{mission.workState?.checkedAt&&<> · 读取于 {new Date(mission.workState.checkedAt).toLocaleTimeString("zh-CN",{hour12:false})}</>}</p>
      {mission.delegation?.attention?.level==="URGENT"&&<p role="alert">临近任务截止，需要你核对当前问题后决定下一步。</p>}
 

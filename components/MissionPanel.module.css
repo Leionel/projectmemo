@@ -5,7 +5,7 @@
 .panel p { margin: 0; }
 .header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; padding: 1rem; border-bottom: 1px solid var(--rule); }
 .header p { margin-top: .375rem; color: var(--ink-soft); max-width: 48rem; }
-.count { flex-shrink: 0; color: var(--muted); font-size: .75rem; padding-top: .3rem; }
+.count { margin-left: auto; flex-shrink: 0; color: var(--muted); font-size: .75rem; padding-top: .3rem; }
 .workspace { display: grid; grid-template-columns: minmax(240px, 300px) minmax(0, 1fr); }
 .sidebar { min-width: 0; padding: 1.25rem; border-right: 1px solid var(--rule); background: var(--paper); }
 .composer { display: grid; gap: .75rem; }
@@ -33,11 +33,13 @@
 .statusDot[data-status=SUCCEEDED],.statusDot[data-status=RUNNING] { background: var(--teal); }
 .detail { min-width: 0; padding: 1rem; }
 .detailHeader { display: grid; gap: .75rem; }
+.detailTop { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; }
+.detailTools { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; }
 .detailMeta { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; color: var(--muted); font-size: .75rem; }
 .badge { display: inline-flex; align-items: center; padding: .1875rem .625rem; border-radius: .375rem; color: var(--ink-soft); background: var(--paper); border: 1px solid var(--rule); font-weight: 600; }
 .badge[data-status=PAUSED],.badge[data-status=WAITING_INPUT],.badge[data-status=WAITING_APPROVAL] { color: var(--ink-soft); border-color: var(--amber); }
 .badge[data-status=RUNNING],.badge[data-status=SUCCEEDED] { color: var(--teal-strong); background: var(--teal-pale); }
-.panel h3.goal { font-size: 1.0625rem; line-height: 1.8; font-weight: 650; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.panel h3.goal { font-size: 1rem; line-height: 1.7; font-weight: 600; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
 .taskId { color: var(--muted); font-size: .6875rem; overflow-wrap: anywhere; }
 .statusText { font-size: .8125rem; color: var(--ink-soft); }
 .completionFacts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.625rem 1rem; padding-block:.75rem; border-block:1px solid var(--rule); }

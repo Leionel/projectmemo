@@ -249,7 +249,7 @@ button:active:enabled,.editorial-button:active { filter:brightness(.94); }
 .workspace-tool-tinted { background:var(--teal-pale); color:var(--teal-strong); border-color:transparent; }
 .workspace-link { display:inline-flex; align-items:center; gap:.25rem; min-height:2.125rem; font-size:.84375rem; font-weight:550; color:var(--teal-strong); border-radius:4px; }
 .workspace-link:hover { color:var(--ink); }
-.workspace-status { display:inline-flex; align-items:center; border:1px solid color-mix(in srgb,var(--amber) 25%,transparent); border-radius:4px; padding:.2rem .45rem; background:color-mix(in srgb,var(--amber) 8%,var(--card-bg)); color:var(--amber); font:500 .75rem/1.5 ui-monospace,SFMono-Regular,Consolas,monospace; }
+.workspace-status { display:inline-flex; align-items:center; border:1px solid color-mix(in srgb,var(--amber) 25%,transparent); border-radius:4px; padding:.2rem .45rem; background:color-mix(in srgb,var(--amber) 8%,var(--card-bg)); color:var(--amber); font-size:.75rem; font-weight:550; line-height:1.5; font-variant-numeric:tabular-nums; }
 .workspace-status-neutral { color:var(--teal-strong); background:var(--teal-pale); border-color:var(--rule); }
 .evidence-value { border-radius:4px; background:var(--paper); padding:.125rem .3rem; font:400 .8125rem/1.6 ui-monospace,SFMono-Regular,Consolas,monospace; color:var(--ink); }
 .global-nav-link { display:flex; align-items:center; gap:.375rem; padding:.5rem .875rem; min-height:2.375rem; color:var(--ink-soft); border-radius:6px; font-size:.875rem; font-weight:550; }
@@ -284,6 +284,10 @@ button:active:enabled,.editorial-button:active { filter:brightness(.94); }
 .workspace-row-meta { display:flex; flex-wrap:wrap; gap:.375rem .75rem; font-size:.8125rem; color:var(--muted); margin-bottom:.375rem; overflow-wrap:anywhere; }
 .workspace-row-meta > span:first-child { color:var(--teal-strong); font-weight:600; }
 .workspace-row-meta time { font-family:ui-monospace,Consolas,monospace; }
+.workspace-row-tags { align-items:center; font-size:.75rem; line-height:1.25rem; }
+.workspace-row-tags time { font-family:inherit; font-variant-numeric:tabular-nums; }
+.workspace-tag { display:inline-flex; align-items:center; height:1.375rem; padding:0 .5rem; border:1px solid var(--rule); border-radius:4px; font-size:.75rem; font-weight:500; line-height:1; color:var(--ink-soft); white-space:nowrap; }
+.workspace-row-meta > .workspace-tag[data-kind=type] { border-color:transparent; padding:0; color:var(--teal-strong); font-weight:600; }
 .workspace-inbox-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; align-items:start; }
 .workspace-inbox-grid .workspace-row { flex-direction:column; align-items:stretch; gap:.375rem; }
 .workspace-empty { padding:2rem 1rem; }

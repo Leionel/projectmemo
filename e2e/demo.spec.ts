@@ -163,7 +163,7 @@ test("project dashboard surfaces attention state and snoozed reminder history", 
   const projectCard = page.locator("article").filter({ hasText: /人工智能创意赛 忆程 ProjectMemo 作品开发/ }).first();
   await expect(projectCard.getByText("参赛准备项", { exact: true })).toBeVisible();
   await expect(projectCard.getByText(/\d+\/6 项已形成/)).toBeVisible();
-  await expect(projectCard.getByText(/不代表项目整体完成率/)).toBeVisible();
+  await expect(projectCard.getByTitle(/不代表项目整体完成率/)).toBeVisible();
   const projectHref = await projectCard.getByRole("link", { name: /打开项目/ }).getAttribute("href");
   expect(projectHref).toMatch(/^\/projects\/[^/?#]+$/);
   await page.goto(projectHref!);

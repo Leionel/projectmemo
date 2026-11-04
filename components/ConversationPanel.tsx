@@ -15,6 +15,7 @@ import { ConversationAnswer } from "./ConversationFileGuides";
 import { SourcePanelDialog, sourceEntryCount } from "./ConversationSourcePanel";
 import { PriorityBasisPanel } from "./ConversationPriorityBasis";
 import { MessageToolbar } from "./MessageToolbar";
+import { MemoryUsePanel } from "./MemoryUsePanel";
 import { ConversationResearchScope, ConversationResearchView } from "./ConversationResearch";
 import { ConversationCalendarComposer } from "./ConversationCalendarComposer";
 import { missionStatusLabels } from "@/lib/mission/presentation";
@@ -64,6 +65,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   const [correctionMessageId, setCorrectionMessageId] = useState<string | null>(null);
   const [sourceMessageId, setSourceMessageId] = useState<string | null>(null);
   const [basisMessageId, setBasisMessageId] = useState("");
+  const [memoryMessageId, setMemoryMessageId] = useState("");
   const [workRef, setWorkRef] = useState<ConversationWorkRef | null>(null);
   const generation = useRef(0), pending = useRef<{ text: string; id: string; body: unknown } | null>(null);
   const messageRegion = useRef<HTMLDivElement>(null);
@@ -307,12 +309,15 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
         <MessageToolbar message={m} sourceCount={sourceEntryCount(m)} busy={busy}
           showBasis={m.role === "ASSISTANT" && !supportsAgentPresentation(m) && !!m.priorities.length}
           basisOpen={basisMessageId === m.id}
+          memoryOpen={memoryMessageId === m.id}
+          onMemory={() => setMemoryMessageId(memoryMessageId === m.id ? "" : m.id)}
           canCorrect={m.role === "ASSISTANT" && !m.restricted && view.linkedProjects.length > 0}
           onSources={() => setSourceMessageId(m.id)}
           onBasis={() => setBasisMessageId(basisMessageId === m.id ? "" : m.id)}
           onCorrect={() => setCorrectionMessageId(m.id)}
           onAsk={() => setReply(m)}/>
         {basisMessageId === m.id && <PriorityBasisPanel priorities={m.priorities} projects={view.linkedProjects}/>}
+        {memoryMessageId === m.id && m.memoryUse && <MemoryUsePanel items={m.memoryUse.items}/>}
         {m.role === "ASSISTANT" && !m.restricted && <ConversationResearchView message={m} conversationId={view!.id} version={view!.version} onError={setError} onContinue={value => { setReply(m); setText(value); }}/>}
         <RelatedTasks message={m} conversationId={view.id} working={working} expanded={expandedRefs === m.id}
           onToggle={() => setExpandedRefs(expandedRefs === m.id ? "" : m.id)}

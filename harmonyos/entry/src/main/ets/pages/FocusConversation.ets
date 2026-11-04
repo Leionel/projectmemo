@@ -20,7 +20,7 @@ import { ConversationAnchorPanel } from '../components/ConversationAnchorPanel';
 import { ConversationFileGuides, ConversationAnswer } from '../components/ConversationFileGuides';
 import { AgentMessageBlocks } from '../components/AgentMessageBlocks';
 import { AllowedAction, HydratedBlock } from '../models/AgentExperience';
-import { ConversationUIActionInput, ConversationReadStep } from '../models/Conversation';
+import { ConversationUIActionInput, ConversationReadStep, ConversationMemoryUseItem } from '../models/Conversation';
 import { ConversationDraftStore, ConversationDraft } from '../services/ConversationDraftStore';
 interface CloudHelpState { isVisible: boolean; }
 interface AgentMessageInput { message: ConversationMessage; }
@@ -44,6 +44,7 @@ struct FocusConversation {
   @State private target: string = '';
   @State private expandedRefs: string = '';
   @State private basisExpanded: string = '';
+  @State private memoryExpanded: string = '';
   @State private agentSheetOpen: boolean = false;
   @State private agentSheetMode: string = '';
   @State private scopeOpen: boolean = false;
@@ -429,6 +430,11 @@ struct FocusConversation {
           .fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).borderRadius(8).padding({ left: 8, right: 8 })
           .accessibilityText('判断依据').onClick(() => { this.basisExpanded = this.basisExpanded === $$.message.id ? '' : $$.message.id; })
       }
+      if ($$.message.role === 'ASSISTANT' && !$$.message.restricted && this.memoryItems($$.message).length > 0) {
+        Button('记忆 ' + this.memoryItems($$.message).length, { type: ButtonType.Normal }).constraintSize({ minHeight: 40 }).fontSize(13)
+          .fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).borderRadius(8).padding({ left: 8, right: 8 })
+          .accessibilityText('本轮提供参考的记忆').onClick(() => { this.memoryExpanded = this.memoryExpanded === $$.message.id ? '' : $$.message.id; })
+      }
       if ($$.message.role === 'ASSISTANT' && !$$.message.restricted && this.correctionTarget($$.message) !== '') {
         Button('纠正', { type: ButtonType.Normal }).constraintSize({ minHeight: 40 }).fontSize(13)
           .fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).borderRadius(8).padding({ left: 8, right: 8 })
@@ -495,11 +501,42 @@ struct FocusConversation {
       if (!$$.message.restricted && this.basisExpanded === $$.message.id) {
         this.PriorityBasis({ message: $$.message })
       }
+      if (!$$.message.restricted && this.memoryExpanded === $$.message.id) {
+        this.MemoryUse({ message: $$.message })
+      }
       this.RelatedTasks({ message: $$.message })
       if ($$.message.role === 'ASSISTANT' && !$$.message.restricted && ($$.message.researchCoverage || $$.message.sources.some((source: ConversationSource) => source.external !== undefined))) {
         ConversationResearchResult({ message: $$.message, conversationId: this.view.id, version: this.view.version, disabled: this.busy, onContinue: (value: string): void => { this.replyId = $$.message.id; this.text = value; this.saveComposer(); } })
       }
     }.width('100%').alignItems(HorizontalAlign.Start).padding({ top: $$.message.role === 'USER' ? 2 : 0, bottom: $$.message.role === 'USER' ? 8 : 12 })
+  }
+  private memoryItems(message: ConversationMessage): ConversationMemoryUseItem[] {
+    return message.memoryUse !== undefined && message.memoryUse !== null ? message.memoryUse.items : [];
+  }
+  private memoryKindLabel(kind: string): string {
+    return kind === 'PERSONAL' ? '你的偏好' : kind === 'JUDGMENT' ? '项目判断' : '项目经验';
+  }
+  /** 本轮提供给调查参考的记忆，按当前状态展示；手机端只给个人记忆的管理入口，深读在 Web。 */
+  @Builder
+  private MemoryUse($$: AgentMessageInput) {
+    Column({ space: 8 }) {
+      Text('本轮提供参考的记忆').fontSize(13).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_SECONDARY)
+      ForEach(this.memoryItems($$.message), (item: ConversationMemoryUseItem) => {
+        Column({ space: 2 }) {
+          Text(this.memoryKindLabel(item.kind) + ' · ' + item.stateLabel + (item.changedSince ? ' · 之后已更新' : ''))
+            .fontSize(11).fontColor(PMColors.INK_TERTIARY)
+          Text(item.title).fontSize(14).lineHeight(20).width('100%')
+            .fontColor(item.active ? PMColors.INK_PRIMARY : PMColors.INK_TERTIARY)
+            .decoration({ type: item.active ? TextDecorationType.None : TextDecorationType.LineThrough, color: PMColors.INK_TERTIARY })
+        }.width('100%').alignItems(HorizontalAlign.Start)
+      }, (item: ConversationMemoryUseItem) => item.kind + item.id)
+      if (this.memoryItems($$.message).some((item: ConversationMemoryUseItem) => item.kind === 'PERSONAL')) {
+        Button('管理我的记忆', { type: ButtonType.Normal }).constraintSize({ minHeight: 40 }).fontSize(13)
+          .fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 })
+          .onClick(() => { router.pushUrl({ url: 'pages/PersonalMemoryPage' }); })
+      }
+    }.width('100%').alignItems(HorizontalAlign.Start).padding(12)
+      .backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(10)
   }
   @Builder
   private AgentSheet() {

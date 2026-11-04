@@ -280,7 +280,7 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
           </ul>
           <p className="mt-3 text-xs leading-5 text-[var(--muted)]">使用记录：{detail.uses.length > 0
             ? `最近 ${detail.uses.length} 次进入任务上下文（首次 ${new Date(detail.uses[0].at).toLocaleString("zh-CN")}）。`
-            : "还没有进入过任务上下文。"}生成中的任务会在各自“为什么这样建议”里说明引用了哪条记忆。</p>
+            : "还没有进入过任务上下文。"}对话回答下方的“记忆”入口会列出该轮提供参考的条目。</p>
         </section>
       )}
 

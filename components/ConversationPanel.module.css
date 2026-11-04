@@ -260,6 +260,14 @@
 .toolEntry { display:inline-flex; align-items:center; gap:.25rem; min-height:2.1rem; padding:.25rem .55rem; border-radius:7px; font-size:.78125rem; color:var(--ink-soft); }
 .toolEntry:hover { color:var(--teal-strong); background:var(--paper); }
 .toolEntry:disabled { opacity:.45; cursor:not-allowed; }
+.memoryUse { display:grid; gap:.5rem; margin-top:.5rem; padding:.75rem .875rem; border:1px solid var(--rule); border-radius:8px; background:var(--paper); }
+.memoryUse h4 { font-size:.8125rem; font-weight:700; color:var(--ink-soft); }
+.memoryUse ul { display:grid; gap:.5rem; }
+.memoryUse li { display:grid; gap:.125rem; min-width:0; font-size:.875rem; line-height:1.55; color:var(--ink); overflow-wrap:anywhere; }
+.memoryUseMeta { font-size:.75rem; color:var(--muted); }
+.memoryUseInactive { opacity:.6; }
+.memoryUseInactive span:last-child { text-decoration:line-through; text-decoration-color:var(--muted); }
+.memoryUseLinks { display:flex; flex-wrap:wrap; gap:.75rem; font-size:.8125rem; }
 .menuBackdrop { position:fixed; inset:0; z-index:15; background:transparent; border:0; cursor:default; }
 .overlayDrawer { justify-content:flex-end; padding:0; }
 .dialogDrawer { width:min(26rem,100vw); max-height:100dvh; height:100dvh; border-radius:0; border-block:0; border-right:0; animation:conversationDrawerIn .2s cubic-bezier(.22,1,.36,1); }

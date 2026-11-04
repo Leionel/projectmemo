@@ -88,8 +88,11 @@ export type ConversationBlocks = {
   reviewRef?: { id: string; purpose: string; missionId: string; projectId: string; status: string; proposalHash: string };
   options?: Array<{ key: string; label: string; projectId: string; missionId: string; proposalId: string; proposalHash: string; expectedVersion: number; purpose?: "DYNAMIC_PLAN"; candidateId?: string }>;
 };
+export type ConversationMemoryUseItem = { kind: "PERSONAL" | "JUDGMENT" | "EXPERIENCE"; id: string; projectId: string | null; title: string; stateLabel: string; active: boolean; changedSince: boolean };
 export type ConversationMessage = ConversationBlocks & {
   id: string; seq: number; role: string; content: string; restricted: boolean;
+  /** 本轮提供给调查参考的记忆（只读，读取时按当前权限过滤）；旧消息或无读集时缺省。 */
+  memoryUse?: { items: ConversationMemoryUseItem[] };
 };
 export type ConversationProgress = { sequence?: number; events?: Array<{ seq: number; phase: string; at: string; stepId: string | null }>; phase: string; mode: string; completedReads: number; readLimit: number;
   steps: Array<{ id: string; label: string; status: string }>; stopReason: string | null };

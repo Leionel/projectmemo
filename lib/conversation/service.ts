@@ -12,6 +12,7 @@ import { assertProject, assertSession, emptyBlocks, lockConversation, ownedConve
 import { openConversationEntry } from "./anchorService";
 import { discussionTitle, hasDefaultDiscussionTitle } from "./presentation";
 import { resolveFileGuides } from "./fileGuides";
+import { readMemoryUse } from "./memoryUse";
 import { experienceProgress } from "./progress";
 import { refreshExperiencePresentation } from "./presentationRuntime";
 import type { R4State } from "./investigationService";
@@ -144,6 +145,7 @@ export async function readConversation(actor: ConversationActor, id: string, bef
   ]);
   const allowed = new Set(memberships.map(m => m.projectId)), owners = new Set(memberships.filter(m => m.role === "OWNER").map(m => m.projectId));
   const messages: ConversationView["messages"] = [];
+  const memberProjects = async () => [...allowed];
   for (const row of rows.slice(0, 50).reverse()) {
     const blocks = { ...emptyBlocks(), ...record(row.blocksJson) } as ConversationBlocks;
     let webRestricted = false;
@@ -179,8 +181,9 @@ export async function readConversation(actor: ConversationActor, id: string, bef
       }
     }
     blocks.fileGuides = await resolveFileGuides(blocks.sources, blocks.citations, blocks.fileGuides);
+    const turn = row.turnId && row.role === "ASSISTANT" ? await db.conversationTurn.findUnique({ where: { id: row.turnId } }) : null;
+    const memoryUse = turn ? await readMemoryUse(actor.userId, turn.readManifestJson, memberProjects) : null;
     if (blocks.presentationPlan && row.turnId) {
-      const turn = await db.conversationTurn.findUnique({ where: { id: row.turnId } });
       const experience = record(turn?.readManifestJson).experience;
       if (record(experience).policyVersion === "r4-v1") {
         try { blocks.presentation = await refreshExperiencePresentation(actor, id, blocks, experience as R4State, row.turnId); }
@@ -195,7 +198,7 @@ export async function readConversation(actor: ConversationActor, id: string, bef
     } else blocks.presentation = undefined;
     delete blocks.presentationPlan;
     delete blocks.changeNotice;
-    messages.push({ ...blocks, id: row.id, seq: row.seq!, role: row.role, content: row.content, restricted: false });
+    messages.push({ ...blocks, id: row.id, seq: row.seq!, role: row.role, content: row.content, restricted: false, ...(memoryUse ? { memoryUse } : {}) });
   }
   await assertSession(actor);
   const latestMemberships = await db.projectMembership.findMany({ where: { userId: actor.userId }, select: { projectId: true, role: true } });

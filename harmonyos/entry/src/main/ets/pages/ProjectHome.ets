@@ -93,6 +93,7 @@ import { MissionWorkspaceItem, MissionWorkspaceSummary } from '../models/Mission
 import { missionStatusLabel } from '../common/MissionContract';
 import { selectProjectFocus } from '../common/ProjectAttention';
 import { ProjectEvolutionPanel } from '../components/ProjectEvolutionPanel';
+import { workStateLabel } from '../common/WorkStateBadge';
 
 interface HomeRecentActivity {
   id: string;
@@ -1740,7 +1741,7 @@ struct ProjectHome {
   private HomeFocusView() {
     Column({ space: 10 }) {
       Row() {
-        Text(this.agentContext !== null ? '当前下一步' : this.homeFocusKind() === 'mission' ? this.homeMissionStatusLabel() : '当前先处理')
+        Text(this.agentContext !== null ? (this.agentContext.nextStep.workState !== undefined ? '当前下一步 · ' + workStateLabel(this.agentContext.nextStep.workState) : '当前下一步') : this.homeFocusKind() === 'mission' ? this.homeMissionStatusLabel() : '当前先处理')
           .fontSize(12)
           .fontWeight(FontWeight.Medium)
           .fontColor(PMColors.BRAND)

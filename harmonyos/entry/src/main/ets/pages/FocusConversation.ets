@@ -8,7 +8,12 @@ import { ApiError } from '../models/Project';
 import { ConversationService } from '../services/ConversationService';
 import { SessionStore } from '../services/SessionStore';
 import { ConversationView, ConversationListItem, ConversationCreateInput, ConversationTurnInput, ConversationConfirmInput,
-  ConversationMessage, ConversationRef, ConversationProposal, ConversationEntityInput, ConversationSource, ConversationProject, PriorityReason, FocusPreferenceInput } from '../models/Conversation';
+  ConversationMessage, ConversationRef, ConversationProposal, ConversationEntityInput, ConversationSource, ConversationProject, PriorityReason, FocusPreferenceInput, ConversationAttachmentChip } from '../models/Conversation';
+import { ConversationAttachmentService } from '../services/ConversationAttachmentService';
+import { AttachmentService } from '../services/AttachmentService';
+import promptAction from '@ohos.promptAction';
+import { photoAccessHelper } from '@kit.MediaLibraryKit';
+import { picker } from '@kit.CoreFileKit';
 import { missionStatusLabel } from '../common/MissionContract';
 import { ConversationPresentation } from '../common/ConversationPresentation';
 import { PMAppBar } from '../components/PMAppBar';
@@ -31,6 +36,11 @@ struct FocusConversation {
   @State private view: ConversationView = new ConversationView();
   @State private sessions: ConversationListItem[] = [];
   @State private text: string = '';
+  // 本轮附带的“仅用于本次讨论”附件；发送成功后清空，附件本身仍保留在讨论里
+  @State private attachmentChips: ConversationAttachmentChip[] = [];
+  @State private attachBusy: boolean = false;
+  private attachmentService: ConversationAttachmentService = new ConversationAttachmentService();
+  private projectAttachmentService: AttachmentService = new AttachmentService();
   @State private busy: boolean = false;
   @State private pageVisible: boolean = true;
   @State private error: string = '';
@@ -189,6 +199,56 @@ struct FocusConversation {
     catch (e) { if (epoch === this.generation) { this.fail(e); } }
     finally { if (epoch === this.generation) { this.busy = false; } }
   }
+  private attachProjectId(): string { return this.target !== '' ? this.target : (this.view.homeProjectId ?? ''); }
+  private async pickAttachment(): Promise<void> {
+    if (this.attachBusy || this.view.id === '') { return; }
+    let uri = '', name = '', mime = '';
+    try {
+      const source = await promptAction.showActionMenu({ title: '添加附件', buttons: [{ text: '从相册选图片', color: '#0A7EA4' }, { text: '选择 PDF', color: '#0A7EA4' }] });
+      if (source.index === 0) {
+        const options = new photoAccessHelper.PhotoSelectOptions(); options.MIMEType = photoAccessHelper.PhotoViewMIMETypes.IMAGE_TYPE; options.maxSelectNumber = 1;
+        const result = await new photoAccessHelper.PhotoViewPicker().select(options);
+        if (result.photoUris.length === 0) { return; }
+        uri = result.photoUris[0]; name = `discussion-image-${Date.now()}.jpg`; mime = 'image/jpeg';
+      } else {
+        const options = new picker.DocumentSelectOptions(); options.fileSuffixFilters = ['PDF|.pdf']; options.maxSelectNumber = 1;
+        const uris = await new picker.DocumentViewPicker().select(options);
+        if (uris.length === 0) { return; }
+        uri = uris[0]; name = uris[0].split('/').pop() ?? `discussion-${Date.now()}.pdf`; mime = 'application/pdf';
+      }
+    } catch (_e) { return; }
+    const projectId = this.attachProjectId();
+    let use = 0;
+    try {
+      use = (await promptAction.showActionMenu({ title: '这个附件用于', buttons: projectId !== ''
+        ? [{ text: '仅用于本次讨论', color: '#0A7EA4' }, { text: '加入项目记忆', color: '#0A7EA4' }]
+        : [{ text: '仅用于本次讨论', color: '#0A7EA4' }] })).index;
+    } catch (_e) { return; }
+    this.attachBusy = true; this.error = '';
+    try {
+      if (use === 0) {
+        const reply = await this.attachmentService.upload(this.view.id, uri, name, mime, projectId);
+        if (!this.attachmentChips.some((c: ConversationAttachmentChip) => c.id === reply.attachment.id)) { this.attachmentChips = [...this.attachmentChips, reply.attachment]; }
+        this.pending = null;
+      } else {
+        await this.projectAttachmentService.upload(projectId, uri, name, mime);
+        this.text = (this.text !== '' ? this.text + '\n' : '') + '我刚把一份资料加入了项目记忆，'; this.saveComposer();
+      }
+    } catch (e) { this.fail(e); }
+    finally { this.attachBusy = false; }
+  }
+  private async promoteAttachment(chip: ConversationAttachmentChip): Promise<void> {
+    const projectId = this.attachProjectId();
+    if (projectId === '' || this.attachBusy) { return; }
+    this.attachBusy = true;
+    try { await this.attachmentService.promote(this.view.id, chip.id, projectId); this.attachmentChips = this.attachmentChips.filter((c: ConversationAttachmentChip) => c.id !== chip.id); this.pending = null; }
+    catch (e) { this.fail(e); }
+    finally { this.attachBusy = false; }
+  }
+  private removeAttachment(chip: ConversationAttachmentChip): void {
+    this.attachmentChips = this.attachmentChips.filter((c: ConversationAttachmentChip) => c.id !== chip.id); this.pending = null;
+    this.attachmentService.remove(this.view.id, chip.id).catch(() => undefined);
+  }
   private async ask(): Promise<void> {
     if (this.busy || !this.analysisReady || this.text.trim() === '' || this.view.id === '') { return; }
     const epoch = this.generation; this.busy = true; this.error = '';
@@ -199,6 +259,7 @@ struct FocusConversation {
       input.projectId = this.target === '' ? null : this.target;
       if (this.replyId !== '') { input.replyToMessageId = this.replyId; }
       if (this.entity !== undefined && this.entity.projectId === this.target) { input.entityRef = this.entity; }
+      if (this.attachmentChips.length > 0) { input.attachmentIds = this.attachmentChips.map((c: ConversationAttachmentChip): string => c.id); }
       this.pending = input;
     }
     try {
@@ -207,7 +268,7 @@ struct FocusConversation {
       this.view = reply.conversation; this.target = this.view.focusProjectId ?? '';
       this.sessions = this.sessions.map((item: ConversationListItem): ConversationListItem => item.id === this.view.id ? { id: item.id, title: this.view.title, scope: item.scope, homeProjectId: item.homeProjectId, updatedAt: item.updatedAt } : item);
       this.nearBottom = true; setTimeout(() => { if (epoch === this.generation) { this.messageScroller.scrollEdge(Edge.Bottom); } }, 50);
-      if (reply.status === 'ANSWERED' || reply.status === 'NEEDS_CLARIFICATION' || reply.status === 'CANCELLED') { this.text = ''; this.saveComposer(); this.pending = null; this.replyId = ''; }
+      if (reply.status === 'ANSWERED' || reply.status === 'NEEDS_CLARIFICATION' || reply.status === 'CANCELLED') { this.text = ''; this.saveComposer(); this.pending = null; this.replyId = ''; this.attachmentChips = []; }
       else { this.error = ''; if (['FAILED', 'UNKNOWN'].includes(reply.status)) { this.pending = null; } }
     } catch (e) { if (epoch === this.generation) { this.fail(e); await this.refresh(); } }
     finally { if (epoch === this.generation) { this.busy = this.view.activeTurn !== null; } }
@@ -668,9 +729,27 @@ struct FocusConversation {
             if (this.view.research?.available && this.cloud) {
               ConversationResearchControl({ conversationId: this.view.id, projectId: this.target || this.view.homeProjectId || '', info: this.view.research!, disabled: this.busy, onSaved: (): void => { this.service.read(this.view.id).then(v => { this.view = v; }).catch((e: Error) => { this.fail(e); }); } })
             }
+            if (this.attachmentChips.length > 0) {
+              Scroll() {
+                Row({ space: 6 }) {
+                  ForEach(this.attachmentChips, (chip: ConversationAttachmentChip) => {
+                    Row({ space: 6 }) {
+                      Text(chip.fileName).fontSize(12).fontColor(PMColors.INK_PRIMARY).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).constraintSize({ maxWidth: 140 })
+                      if (chip.extractionStatus !== 'SUCCESS') { Text((chip.extractionError ?? '').includes('未选择项目') ? '暂未识别' : '待提取').fontSize(11).fontColor(PMColors.WARNING) }
+                      if (this.attachProjectId() !== '') { Text('转为项目资料').fontSize(12).fontColor(PMColors.BRAND).height(32).onClick(() => { this.promoteAttachment(chip); }) }
+                      Text('×').fontSize(16).fontColor(PMColors.INK_TERTIARY).width(28).height(32).textAlign(TextAlign.Center)
+                        .accessibilityText('移除附件 ' + chip.fileName).onClick(() => { this.removeAttachment(chip); })
+                    }.padding({ left: 10, right: 2 }).borderRadius(999).backgroundColor(PMColors.SURFACE_SUBTLE)
+                  }, (chip: ConversationAttachmentChip) => chip.id)
+                }.padding({ left: 12, right: 12, top: 10 })
+              }.scrollable(ScrollDirection.Horizontal).scrollBar(BarState.Off).width('100%')
+            }
             TextArea({ text: this.text, placeholder: '聊聊下一步…' }).constraintSize({ minHeight: 48, maxHeight: 136 }).fontSize(15).fontColor(PMColors.INK_PRIMARY).backgroundColor(Color.Transparent).padding({ left: 15, right: 15, top: 14, bottom: 4 })
               .enabled(!this.busy).onChange((v: string) => { this.text = v; this.saveComposer(); })
             Row({ space: 8 }) {
+              Button({ type: ButtonType.Normal }) { Text('附件').fontSize(12).fontColor(PMColors.INK_SECONDARY) }
+                .height(32).padding({ left: 8, right: 8 }).backgroundColor(Color.Transparent).enabled(!this.busy && !this.attachBusy)
+                .accessibilityText('添加附件：仅用于本次讨论或加入项目记忆').onClick(() => { this.pickAttachment(); })
               Row({ space: 6 }) {
                 Checkbox().width(18).height(18).selectedColor(PMColors.BRAND).select(this.cloud).enabled(this.analysisReady && this.cloudAvailable && !this.busy).onChange((v: boolean) => { this.cloud = v; this.pending = null; })
                 Text(this.cloudAvailable ? '云端分析' : '本地整理').fontSize(12).fontColor(PMColors.INK_SECONDARY)

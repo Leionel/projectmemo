@@ -238,9 +238,35 @@ sudo systemctl restart projectmemo
 | 站点 502 | `systemctl status projectmemo`、`journalctl -u projectmemo -n 100` | 起服务；若因环境文件错误反复退出，先修 `projectmemo.env` |
 | 服务反复重启 | `systemctl show projectmemo -p NRestarts` | 多为 `DATABASE_URL` 指向不存在目录或迁移未执行 |
 | 登录全部 401 | `/health` 与 `npx prisma migrate deploy` | 会话表缺失或迁移未跑 |
+| 删除项目失败，或“问忆程”上传附件报错 | `migrate status`（命令见下方“讨论附件迁移”） | 缺 `ConversationAttachment` 表：讨论附件迁移未执行。删除项目会去这张表找附件原件，所以缺表时删除项目也会失败；先备份再 `migrate deploy` |
 | 附件打不开 | `ls /opt/projectmemo/storage`、`ATTACHMENT_DIR` | 附件目录未挂载或发布时被覆盖；从最近备份还原该目录 |
 | 数据库损坏 | `node deploy/alibaba-cloud-linux/sqlite-tool.mjs verify <db>` | 保留损坏文件后从备份恢复，禁止直接删库重建 |
 | 磁盘写满 | `df -h /opt`、`du -sh /opt/projectmemo/backups` | 清理旧备份或调小 `KEEP`；先确认最近的备份仍完整 |
+
+### 讨论附件迁移（2026-11 起）
+
+`20261104220000_conversation_attachment` 新建 `ConversationAttachment` 表，存放“仅用于本次讨论”的附件；只新建表，不改已有数据。删除项目的流程会读取这张表清理附件原件，因此**这张表缺失时，删除项目也会失败**，不只是附件功能不可用。
+
+- 用 `safe-update.sh` 更新到包含该迁移的提交时，脚本会在构建通过后自动执行 `migrate deploy`，然后才启动服务，无需手动迁移。
+- 以下情况不会自动迁移，需要手动核对：机器已经是目标提交（脚本只校验健康状态后退出）；或者没用 `safe-update.sh`，手动拉代码、手动构建。
+- 更新后核对迁移状态（只读）：
+
+```bash
+cd /opt/projectmemo/app
+sudo -H -u projectmemo env DATABASE_URL=file:/opt/projectmemo/data/projectmemo.db npm exec prisma -- migrate status
+sudo -H -u projectmemo env APP_DIR=/opt/projectmemo/app node deploy/alibaba-cloud-linux/sqlite-tool.mjs info /opt/projectmemo/data/projectmemo.db | grep ConversationAttachment
+```
+
+- 如果显示有未执行的迁移，先停服、备份，再迁移、启动（与 `safe-update.sh` 的顺序一致）：
+
+```bash
+systemctl stop projectmemo-mission-worker projectmemo
+sudo -H -u projectmemo env DB_FILE=/opt/projectmemo/data/projectmemo.db ATTACHMENT_DIR=/opt/projectmemo/storage   BACKUP_ROOT=/opt/projectmemo/backups/manual-migrate-$(date -u +%Y%m%dT%H%M%SZ) KEEP=0 bash deploy/alibaba-cloud-linux/backup.sh
+sudo -H -u projectmemo env DATABASE_URL=file:/opt/projectmemo/data/projectmemo.db npm exec prisma -- migrate deploy
+systemctl start projectmemo && systemctl start projectmemo-mission-worker
+```
+
+- 迁移后验收：在“问忆程”里各上传一次附件（选“仅用于本次讨论”和“加入项目记忆”各一次）。删除项目只用新建的测试项目验证，不要拿真实项目试。
 
 `sqlite-tool.mjs` 也支持单独使用：`info <db>` 查看各表行数，`verify <db>` 做完整性校验，
 `backup <源> <目标>` 取一致快照。它在应用目录下解析 `better-sqlite3`，因此

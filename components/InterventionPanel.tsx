@@ -123,7 +123,7 @@ export function InterventionPanel({ projectId, initialInterventions, demoEnabled
 
   return <section id="interventions" aria-labelledby="interventions-title" className="scroll-mt-24 space-y-4">
     <div className="flex flex-wrap items-end justify-between gap-3">
-      <div><div className="mb-2 flex flex-wrap items-center gap-2"><Sparkles size={18} className="text-[var(--teal-strong)]" /><h2 id="interventions-title" className="text-lg font-black">忆程主动提醒</h2><span className="paper-tab px-2 py-1 text-xs font-bold text-[var(--teal-strong)]">上下文 Agent</span></div><p className="max-w-2xl text-sm leading-6 text-[var(--ink-soft)]">提醒不是静态建议：每条都有触发规则、证据卡片和可确认的行动，完成后会自动沉淀复盘。</p></div>
+      <h2 id="interventions-title" className="text-[17px] font-bold">忆程主动提醒</h2>
       <button type="button" onClick={() => void evaluate()} disabled={Boolean(busy)} className="focus-ring editorial-button-secondary disabled:opacity-60"><RotateCcw size={15} className={busy === "evaluate" ? "animate-spin" : ""} />重新评估</button>
     </div>
 

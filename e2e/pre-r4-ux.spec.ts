@@ -31,6 +31,7 @@ test("first material leads to an explicitly authorized Mission; multiple waiting
  const created=page.waitForResponse(r=>r.url().endsWith("/api/missions")&&r.request().method()==="POST");
  await page.getByRole("button",{name:"创建委托",exact:true}).click();const first=(await(await created).json()).mission.id;
  ask(first,"请补充实验设备与统计口径");
+ if(await page.getByRole("button",{name:"查看委托列表与新建"}).isVisible())await page.getByRole("button",{name:"查看委托列表与新建"}).click();
  await page.getByText("委托新目标",{exact:true}).click();
  await page.getByRole("textbox",{name:"想推进什么"}).fill("核对阶段汇报的资料范围");
  const secondCreated=page.waitForResponse(r=>r.url().endsWith("/api/missions")&&r.request().method()==="POST");
@@ -77,7 +78,7 @@ test("first material leads to an explicitly authorized Mission; multiple waiting
    await expect(page.getByRole("complementary",{name:"有效提醒"})).toBeVisible();
  }
  await page.screenshot({path:"test-results/projectmemo-focus-desktop.png",fullPage:true,animations:"disabled"});
- await page.getByRole("button",{name:"切换深浅色主题"}).click();
+ await page.getByRole("button",{name:"账号与设置"}).click(); await page.getByRole("button",{name:"切换深浅色主题"}).click(); await page.keyboard.press("Escape");
  await page.screenshot({path:"test-results/projectmemo-focus-dark.png",fullPage:true,animations:"disabled"});
  await page.setViewportSize({width:390,height:844});
  await page.getByLabel("打开全局导航").click();

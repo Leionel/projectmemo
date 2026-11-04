@@ -151,3 +151,15 @@
 .summary > p { font-weight:700; color:var(--ink); }
 .summary ul { display:grid; gap:.125rem; padding-left:1rem; list-style:disc; }
 .summary li[data-pending] { color:var(--amber); }
+
+/* Mission detail — design: list collapses once a mission is open; main column + right aside for results and settings. */
+.panel .listToggle { display:block; margin:.75rem 1rem 0; }
+.workspace:has(> .collapsedSidebar) { grid-template-columns:minmax(0,1fr); }
+.collapsedSidebar { display:none; }
+.detailGrid { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:1.5rem; align-items:start; }
+.detailMain { min-width:0; display:grid; gap:1rem; }
+.detailAside { min-width:0; display:grid; gap:1rem; position:sticky; top:5rem; }
+.detailAside > * { margin:0; padding:1rem 1.125rem; background:var(--card-bg); border:1px solid var(--rule); border-radius:14px; }
+.panel .detailMain h3.goal { font-family:"PM Brand","Noto Serif SC","Songti SC",serif; font-size:1.75rem; font-weight:600; line-height:1.35; -webkit-line-clamp:3; }
+.nextStep { border-radius:16px; }
+@container(max-width:900px) { .detailGrid { grid-template-columns:minmax(0,1fr); } .detailAside { position:static; } }

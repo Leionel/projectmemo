@@ -28,7 +28,7 @@ test("同一浏览器从 OWNER 切换为共享项目 MEMBER：草稿不串号，
   const quote = "S0 合成 OWNER 私有草稿，不应交给普通成员";
   await field.fill(quote);
   await page.waitForFunction(text => Object.entries(localStorage).some(([key, value]) => key.startsWith("projectmemo:capture:v2:") && value.includes(text)), quote);
-  await page.getByRole("button", { name: "E2E 评审身份", exact: true }).click();
+  await page.getByRole("button", { name: "账号与设置", exact: true }).click();
   await page.getByRole("button", { name: "退出登录", exact: true }).click();
   await expect(page).toHaveURL(/\/login/);
   const login = await page.request.post("/api/auth/login", { data: { username: `${E2E_USERNAME}-member`, password: E2E_PASSWORD, client: "web" } });

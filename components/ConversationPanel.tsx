@@ -19,6 +19,7 @@ import { MemoryUsePanel } from "./MemoryUsePanel";
 import { ConversationResearchScope, ConversationResearchView } from "./ConversationResearch";
 import { ConversationCalendarComposer } from "./ConversationCalendarComposer";
 import { missionStatusLabels } from "@/lib/mission/presentation";
+import { ConversationAttachments, type ConversationAttachmentChip } from "./ConversationAttachments";
 import styles from "./ConversationPanel.module.css";
 import { AgentMessageBlocks, supportsAgentPresentation } from "./AgentMessageBlocks";
 import { OverlayPanel } from "./OverlayPanel";
@@ -61,6 +62,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   const [r4Available, setR4Available] = useState(false), [investigationMode, setInvestigationMode] = useState<"QUICK" | "STANDARD" | "DEEP">("STANDARD");
   const [calendarWriteAvailable, setCalendarWriteAvailable] = useState(false);
   const [target, setTarget] = useState(selection?.projectId ?? projectId ?? ""), [showPreference, setShowPreference] = useState(false);
+  const [attachmentChips, setAttachmentChips] = useState<ConversationAttachmentChip[]>([]);
   const [expandedRefs, setExpandedRefs] = useState("");
   const [correctionMessageId, setCorrectionMessageId] = useState<string | null>(null);
   const [sourceMessageId, setSourceMessageId] = useState<string | null>(null);
@@ -162,12 +164,13 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   async function ask(e: React.FormEvent) {
     e.preventDefault(); if (!view || !analysisReady || !text.trim() || busyRef.current) return;
     const epoch = generation.current, currentText = text.trim();
-    const intentKey = JSON.stringify({ text: currentText, target, replyId: reply?.id, entityId: selection?.id, cloud, investigationMode });
+    const intentKey = JSON.stringify({ text: currentText, target, replyId: reply?.id, entityId: selection?.id, cloud, investigationMode, attachments: attachmentChips.map(c => c.id) });
     if (!pending.current || pending.current.text !== intentKey) pending.current = { text: intentKey, id: crypto.randomUUID(),
       body: { requestId: crypto.randomUUID(), expectedVersion: view.version, expectedContinuitySeq: view.continuity?.seq, message: currentText,
         projectId: target || null, ...(reply ? { replyToMessageId: reply.id } : {}),
         ...(selection && selection.projectId === target ? { entityRef: { kind: selection.kind, id: selection.id, projectId: selection.projectId } } : {}),
-        llmContextApproved: cloud && cloudAvailable, ...(r4Available ? { investigationMode } : {}) } };
+        llmContextApproved: cloud && cloudAvailable, ...(r4Available ? { investigationMode } : {}),
+        ...(attachmentChips.length ? { attachmentIds: attachmentChips.map(c => c.id) } : {}) } };
     setBusy(true); setError("");
     try {
       const result = await api<{ conversation: ConversationView; status: string }>("/api/conversations/" + view.id + "/turns", "POST", pending.current.body);
@@ -176,7 +179,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       setList(rows => rows.map(row => row.id === result.conversation.id ? { ...row, title: result.conversation.title } : row));
       setTarget(result.conversation.focusProjectId ?? "");
       requestAnimationFrame(() => { if (epoch === generation.current && messageRegion.current) { nearBottomRef.current = true; messageRegion.current.scrollTop = messageRegion.current.scrollHeight; } });
-      if (["ANSWERED", "NEEDS_CLARIFICATION", "CANCELLED"].includes(result.status)) { setText(""); setReply(null); pending.current = null; }
+      if (["ANSWERED", "NEEDS_CLARIFICATION", "CANCELLED"].includes(result.status)) { setText(""); setReply(null); setAttachmentChips([]); pending.current = null; }
       else { setError(""); if (["UNKNOWN", "FAILED"].includes(result.status)) pending.current = null; }
     } catch (e) {
       if (epoch !== generation.current) return;
@@ -345,6 +348,9 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       {reply && <div className={styles.reply}>围绕：{reply.content.slice(0, 55)}<button type="button" className="workspace-link focus-ring" onClick={() => { setReply(null); pending.current = null; }}>取消追问</button></div>}
       <ConversationContinuity key={view.id + ":" + (view.homeProjectId ?? view.focusProjectId)} view={view} onChange={setView} onError={setError} onWork={(kind, id, projectId) => setWorkRef({ kind, id, projectId })}/>
       <ConversationResearchScope view={view} projectId={target} disabled={working} onChange={setView} onError={setError}/>
+      <ConversationAttachments conversationId={view.id} projectId={target || view.homeProjectId || ""} disabled={working} chips={attachmentChips}
+        onChips={chips => { setAttachmentChips(chips); pending.current = null; }} onError={setError}
+        onProjectSaved={name => setText(t => (t ? t + "\n" : "") + "我刚把《" + name + "》加入了项目资料，")}/>
       <label className={styles.inputLabel}><textarea aria-label="与忆程讨论项目" value={text} rows={2} maxLength={3000} placeholder="问忆程：先做什么？或请帮我继续…" disabled={working}
         onChange={e => { setText(e.target.value); const el = e.currentTarget; el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 132) + "px"; }}
         onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); e.currentTarget.form?.requestSubmit(); } }}/></label>

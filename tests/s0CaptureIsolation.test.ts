@@ -74,6 +74,7 @@ it("迟到的 auth/me 回包不能把新账号重新绑定为旧账号", async (
   await act(async () => resolvers[0](Response.json({ user: { id: "A", username: "A", displayName: "旧账号" } })));
   expect(captureOwner()).toBe("B");
   await act(async () => resolvers[1](Response.json({ user: { id: "B", username: "B", displayName: "当前账号" } })));
+  fireEvent.click(screen.getByRole("button", { name: "账号与设置" }));
   expect(screen.getByText("当前账号")).toBeTruthy();
   expect(captureOwner()).toBe("B");
 });

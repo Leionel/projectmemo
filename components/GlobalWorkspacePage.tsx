@@ -5,19 +5,12 @@ import { ArrowRight, Plus, Search } from "lucide-react";
 import { MemoryScopeNav } from "@/components/MemoryScopeNav";
 import { PageHeading } from "@/components/PageHeading";
 import { EvidenceText } from "@/components/EvidenceText";
-import { knowledgeTypeLabels, knowledgeTypes, temporalStateLabels, type TemporalTopLevelState } from "@/lib/types";
+import { knowledgeTypeLabels, knowledgeTypes, temporalStateLabels } from "@/lib/types";
 import { loadGlobalWorkspace, type WorkspaceFilters } from "@/lib/server/globalWorkspace";
 
 /** 常用类型直接给出，其余收进“更多类型”；仍是同一个 type 查询参数。 */
 const primaryTypes = ["experiment_log", "meeting_note", "requirement", "risk"] as const;
 const moreTypes = knowledgeTypes.filter(t => !(primaryTypes as readonly string[]).includes(t));
-
-const temporalBadge: Record<TemporalTopLevelState, string> = {
-  CURRENT: "bg-[var(--teal-pale)] text-[var(--teal-strong)]",
-  SUPERSEDED: "bg-[var(--paper-strong)] text-[var(--muted)]",
-  CONTESTED: "bg-[var(--brick-pale)] text-[var(--brick)]",
-  UNKNOWN: "bg-[var(--amber)]/10 text-[var(--amber)]",
-};
 
 export async function GlobalWorkspacePage({ userId, mode, input }: { userId: string; mode: "memory" | "actions"; input: WorkspaceFilters }) {
   const data = await loadGlobalWorkspace(userId, mode, input);
@@ -34,7 +27,7 @@ export async function GlobalWorkspacePage({ userId, mode, input }: { userId: str
   };
   return <main id="main-content" className="shell workspace-index">
     <PageHeading eyebrow="我的工作台" title={memory ? "项目记忆档案" : "行动与提醒"}
-      description={memory ? "跨项目查找已保存的记忆，回到所属项目查看来源与结论演进。" : "集中查看各项目的待办行动和当前提醒，回到原项目处理。"}
+      description={memory ? "跨项目找回记忆，再回到原项目看来源与结论演进。" : "各项目的待办和提醒，回到原项目处理。"}
       actions={<Link prefetch={false} className="editorial-button-secondary focus-ring" href={f.project && data.projects.some(p => p.id === f.project) ? `/projects/${f.project}/${memory ? "records#capture-box" : "actions#action-board"}` : "/projects"}><Plus size={14} aria-hidden="true" />{memory ? "选择项目记录进展" : "选择项目新增行动"}</Link>} />
     {memory && <MemoryScopeNav />}
     <form action={path} className="workspace-filters" aria-label={memory ? "筛选项目记忆" : "筛选待办与提醒"}>
@@ -50,13 +43,19 @@ export async function GlobalWorkspacePage({ userId, mode, input }: { userId: str
         <div>{moreTypes.map(t => <Link key={t} prefetch={false} href={typeHref(t)} aria-current={f.type === t ? "page" : undefined} className="focus-ring">{knowledgeTypeLabels[t]}</Link>)}</div></details>
     </nav>}
     {memory && isFeatureEnabled("FOCUS_AGENT_ENABLED",false) && f.project && data.projects.some(p=>p.id===f.project) && <AgentMemoryPanel key={userId+f.project} projectId={f.project}/>} 
-    {memory ? <section aria-label="跨项目记忆" className="workspace-list-panel">
-      <div className="workspace-panel-heading"><h2>已保存的记忆</h2></div>
-      {data.cards.map(card => <article key={card.id} className="workspace-row"><div className="min-w-0"><div className="workspace-row-meta workspace-row-tags"><span className="workspace-tag" data-kind="type">{knowledgeTypeLabels[card.type]}</span>{card.capture.sourceType && <span className="workspace-tag">{card.capture.sourceType}</span>}{card.temporal && card.temporal.reasonCode !== "NO_SUPPORTING_EVIDENCE" && <span className={`workspace-tag ${temporalBadge[card.temporal.topLevelState]}`} title={`时态只描述与当前结论的关系：${card.temporal.displayReason}`}>{temporalStateLabels[card.temporal.topLevelState]}</span>}<span>{card.project.title}{card.project.archivedAt ? " · 已归档" : ""}</span><time dateTime={card.createdAt.toISOString()}>{card.createdAt.toLocaleDateString("zh-CN")}</time></div><h3>{card.title}</h3>{card.summary.trim() !== card.title.trim() && <p><EvidenceText text={card.summary} /></p>}</div><Link prefetch={false} className="workspace-link focus-ring" href={`/projects/${card.project.id}/knowledge#card-${card.id}`}>查看记忆与来源<ArrowRight size={14} aria-hidden="true" /></Link></article>)}
+    {memory ? <section aria-label="跨项目记忆" className="ws-list">
+      <p className="ws-count">{data.cards.length ? `找到 ${data.cards.length}${data.hasMore ? "+" : ""} 条记忆` : ""}</p>
+      {data.cards.map(card => { const state = card.temporal && card.temporal.reasonCode !== "NO_SUPPORTING_EVIDENCE" ? card.temporal.topLevelState : null;
+        return <article key={card.id} className="ws-card" data-superseded={state === "SUPERSEDED" ? "true" : undefined}><div className="ws-card-main">
+          <div className="ws-card-meta"><span className="ws-tag" data-type={card.type}>{knowledgeTypeLabels[card.type]}</span><span>{card.project.title}{card.project.archivedAt ? " · 已归档" : ""}</span>{card.capture.sourceType && <span>{card.capture.sourceType}</span>}</div>
+          <h3>{card.title}</h3>{card.summary.trim() !== card.title.trim() && <p><EvidenceText text={card.summary} /></p>}</div>
+          <div className="ws-card-side">{state && <span className="ws-state" data-state={state} title={`时态只描述与当前结论的关系：${card.temporal!.displayReason}`}>时态：{temporalStateLabels[state]}</span>}<span>保存于 <time dateTime={card.createdAt.toISOString()}>{card.createdAt.toLocaleDateString("zh-CN", { month: "2-digit", day: "2-digit" })}</time></span>
+            <Link prefetch={false} className="focus-ring" href={`/projects/${card.project.id}/knowledge#card-${card.id}`}>{state === "SUPERSEDED" ? "查看结论演进" : "查看记忆与来源"}<ArrowRight size={14} aria-hidden="true" /></Link></div></article>; })}
       {!data.cards.length && <Empty filtered={filtered || f.page > 1} memory />}
+      {data.cards.some(card => card.temporal && card.temporal.reasonCode !== "NO_SUPPORTING_EVIDENCE") && <p className="ws-note">时态只描述与当前结论的关系，有效性请在原项目核验。</p>}
     </section> : <div className="workspace-inbox-grid">
-      <section aria-label="主动提醒" className="workspace-list-panel"><div className="workspace-panel-heading"><h2>主动提醒</h2></div>{data.reminders.map(item => <article className="workspace-row" key={item.id}><div className="min-w-0"><div className="workspace-row-meta"><span className="workspace-status">优先级 {item.severity}/5</span><span>{item.project.title}{item.project.archivedAt ? " · 已归档" : ""}</span></div><h3>{item.title}</h3><p>{item.content}</p></div><Link prefetch={false} className="workspace-link focus-ring" href={`/projects/${item.project.id}/actions#intervention-${item.id}`}>查看提醒依据<ArrowRight size={14} aria-hidden="true" /></Link></article>)}{!data.reminders.length && <Empty filtered={filtered || f.page > 1} />}</section>
-      <section aria-label="待办行动" className="workspace-list-panel"><div className="workspace-panel-heading"><h2>待办行动</h2></div>{data.actions.map(item => <article className="workspace-row" key={item.id}><div className="min-w-0"><div className="workspace-row-meta"><span>{item.status === "DOING" ? "进行中" : "待开始"} · 优先级 {item.priority}/5</span><span>{item.project.title}{item.project.archivedAt ? " · 已归档" : ""}</span></div><h3>{item.title}</h3><p>{item.dueAt ? `${item.dueAt.toLocaleDateString("zh-CN")} 截止` : "未设截止"}{item.description ? ` · ${item.description}` : ""}</p></div><Link prefetch={false} className="workspace-link focus-ring" href={`/projects/${item.project.id}/actions#action-${item.id}`}>打开行动<ArrowRight size={14} aria-hidden="true" /></Link></article>)}{!data.actions.length && <Empty filtered={filtered || f.page > 1} />}</section>
+      <section aria-labelledby="ws-reminders" className="ws-list"><h2 id="ws-reminders" className="ws-heading">主动提醒</h2>{data.reminders.map(item => <article className="ws-card" key={item.id}><div className="ws-card-main"><div className="ws-card-meta"><span className="ws-tag" data-tone={item.severity >= 4 ? "risk" : "user"}>{item.severity >= 4 ? "需要关注" : "待确认"}</span><span>{item.project.title}{item.project.archivedAt ? " · 已归档" : ""}</span></div><h3>{item.title}</h3><p>{item.content}</p><Link prefetch={false} className="ws-inline-link focus-ring" href={`/projects/${item.project.id}/actions#intervention-${item.id}`}>为什么提醒我这个？<ArrowRight size={14} aria-hidden="true" /></Link></div></article>)}{!data.reminders.length && <Empty filtered={filtered || f.page > 1} />}</section>
+      <section aria-labelledby="ws-actions" className="ws-list"><h2 id="ws-actions" className="ws-heading">待办行动</h2>{data.actions.map(item => <article className="ws-card" key={item.id}><div className="ws-card-main"><div className="ws-card-meta"><span className="ws-tag" data-tone={item.status === "DOING" ? "agent" : undefined}>{item.status === "DOING" ? "进行中" : "待开始"}</span>{item.priority >= 4 && <span className="ws-tag" data-tone="risk">高优先级</span>}<span className={item.dueAt ? "ws-due" : undefined}>{item.dueAt ? `截止 ${item.dueAt.toLocaleDateString("zh-CN", { month: "2-digit", day: "2-digit" })}` : "未设截止"}</span><span>{item.project.title}{item.project.archivedAt ? " · 已归档" : ""}</span></div><h3>{item.title}</h3>{item.description && <p>{item.description}</p>}<Link prefetch={false} className="ws-inline-link focus-ring" href={`/projects/${item.project.id}/actions#action-${item.id}`}>打开行动<ArrowRight size={14} aria-hidden="true" /></Link></div></article>)}{!data.actions.length && <Empty filtered={filtered || f.page > 1} />}</section>
     </div>}
     <nav aria-label="结果分页" className="workspace-pagination">{f.page > 1 && <Link prefetch={false} className="workspace-tool focus-ring" href={pageHref(f.page - 1)}>上一页</Link>}<span>第 {f.page} 页 · 每类最多 30 条</span>{data.hasMore && <Link prefetch={false} className="workspace-tool focus-ring" href={pageHref(f.page + 1)}>下一页</Link>}</nav>
   </main>;

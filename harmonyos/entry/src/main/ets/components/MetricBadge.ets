@@ -249,7 +249,7 @@ export struct TemporalBadge {
   private getBgColor(): ResourceColor {
     switch (this.status) {
       case 'CURRENT':
-        return PMColors.EVIDENCE_TINT;
+        return PMColors.BRAND_LIGHT;
       case 'SUPPORTED':
         return PMColors.SUCCESS_LIGHT;
       case 'SUPERSEDED':
@@ -267,7 +267,7 @@ export struct TemporalBadge {
   private getTextColor(): ResourceColor {
     switch (this.status) {
       case 'CURRENT':
-        return PMColors.EVIDENCE;
+        return PMColors.BRAND;
       case 'SUPPORTED':
         return PMColors.SUCCESS;
       case 'SUPERSEDED':

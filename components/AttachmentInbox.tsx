@@ -264,7 +264,7 @@ export function AttachmentInbox({ projectId, enabled, onMaterialSaved }: { proje
             附件资料库（PDF 与图片原件）
           </h3>
           <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
-            支持在线预览原件、提取结构化文本。无 OCR 依赖时原件如实保留，可对照查阅校对。
+            原件始终保留，文字提取不了时可以手动校对。
           </p>
         </div>
         <label className="focus-ring inline-flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--rule-strong)] bg-[var(--paper-strong)] px-3.5 py-2 text-xs font-bold text-[var(--ink)] shadow-xs transition hover:border-[var(--teal)] hover:text-[var(--teal-strong)]">

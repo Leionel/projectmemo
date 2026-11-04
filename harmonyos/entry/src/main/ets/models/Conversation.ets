@@ -44,7 +44,12 @@ export class ConversationTurnInput {
   requestId: string = ''; expectedVersion: number = 1; expectedContinuitySeq?: number; message: string = '';
   projectId?: string | null; replyToMessageId?: string; llmContextApproved: boolean = false; entityRef?: ConversationEntityInput;
   investigationMode?: string;
+  /** 本轮引用的“仅用于对话”附件；服务端只把提取文字交给模型。 */
+  attachmentIds?: string[];
 }
+export class ConversationAttachmentChip { id: string = ''; fileName: string = ''; extractionStatus: string = 'PENDING'; extractionError: string | null = null; }
+export class ConversationAttachmentUpload { attachment: ConversationAttachmentChip = new ConversationAttachmentChip(); isDuplicate: boolean = false; }
+export class ConversationAttachmentPromoteInput { projectId: string = ''; }
 export class ConversationConfirmInput { requestId: string = ''; proposalHash: string = ''; confirmed: boolean = true; expectedConversationVersion?: number; }
 export interface ConversationCreated { id: string; }
 export interface ConversationTurnReply { turnId: string; status: string; conversation: ConversationView; }

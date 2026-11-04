@@ -36,10 +36,10 @@ test("R4 native Web blocks keep drafts and confirm one original Action on deskto
       await page.screenshot({ path: screenshotDir + `/r4-approval-${width}.png`, fullPage: true });
     }
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.getByRole("button", { name: "切换深浅色主题" }).click();
+    await page.getByRole("button",{name:"账号与设置"}).click(); await page.getByRole("button",{name:"切换深浅色主题"}).click(); await page.keyboard.press("Escape");
     await expect(page.locator("html")).toHaveClass(/dark/);
     await page.screenshot({ path: screenshotDir + "/r4-dark-1280.png", fullPage: true });
-    await page.getByRole("button", { name: "切换深浅色主题" }).click();
+    await page.getByRole("button",{name:"账号与设置"}).click(); await page.getByRole("button",{name:"切换深浅色主题"}).click(); await page.keyboard.press("Escape");
     await page.setViewportSize({ width: 390, height: 900 });
     await page.evaluate(() => { document.documentElement.style.fontSize = "20px"; });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);

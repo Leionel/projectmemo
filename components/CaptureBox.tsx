@@ -144,10 +144,8 @@ function CaptureForm({ projectId, ownerId, inboxEnabled = true, onMaterialSaved,
       <div className="flex flex-col justify-between gap-4 border-b archive-rule pb-5 sm:flex-row sm:items-end">
         <div>
           <p className="archive-label">新建项目记录</p>
-          <h2 className="mt-3 text-lg font-black">捕获一条项目碎片</h2>
-          <p className="mt-1 text-sm text-[var(--ink-soft)]">
-            原文完整保存；生成的知识卡保留来源，属待核对的候选结论，不会自动当作已确认事实。
-          </p>
+          <h2 className="text-[17px] font-bold">记录项目进展</h2>
+          <p className="mt-1 text-sm text-[var(--ink-soft)]">原文会原样保留。</p>
         </div>
         <label className="text-xs font-bold text-[var(--ink-soft)]">
           记录来源
@@ -206,9 +204,6 @@ function CaptureForm({ projectId, ownerId, inboxEnabled = true, onMaterialSaved,
           </span>
           <span>{text.length} / 5000</span>
         </div>
-        <p className="mt-2 text-xs leading-5 text-[var(--ink-soft)]">
-          保存后：原始记录留存 → 生成带来源的知识卡（待核对）→ 在「项目记忆与问答」中核对结论与时态；与已有记录冲突时会以对照呈现，不静默覆盖。
-        </p>
         <div className="mt-3 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div
             aria-live="polite"

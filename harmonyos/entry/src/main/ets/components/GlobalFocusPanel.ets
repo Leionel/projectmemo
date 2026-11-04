@@ -8,7 +8,7 @@ import { GlobalFocusService } from '../services/GlobalFocusService';
 import { ConversationService } from '../services/ConversationService';
 import { ApiError } from '../models/Project';
 import { LoadingStateView, ErrorStateView } from './AsyncStateView';
-import { PMColors, PMRadius } from '../common/DesignTokens';
+import { PMColors, PMFontFamily, PMRadius } from '../common/DesignTokens';
 import { PMButton, PMStatusPill, PMPageIntro, PMListRow } from './PMReferencePrimitives';
 import { FilterIcon } from './PMIcons';
 import { FocusAgentLauncher } from './FocusAgentLauncher';
@@ -24,6 +24,7 @@ export struct GlobalFocusPanel {
   @State private agentEnabled: boolean = false;
   @Prop @Watch('refresh') refreshKey: number = 0;
   onOpenActions: (reminders: boolean) => void = (_reminders: boolean): void => {};
+  onOpenSettings: () => void = (): void => {};
   @State private view: GlobalFocusReply = new GlobalFocusReply();
   @State private busy: boolean = true;
   @State private errorText: string = '';
@@ -193,6 +194,7 @@ export struct GlobalFocusPanel {
       this.includeArchived = !this.includeArchived; this.refresh();
     } });
     items.push({ value: '刷新焦点', action: (): void => { this.refresh(); } });
+    items.push({ value: '个人设置', action: (): void => { this.onOpenSettings(); } });
     return items;
   }
   @Builder private Primary(item: FocusEntry) {
@@ -202,12 +204,12 @@ export struct GlobalFocusPanel {
           WorkStateBadges({ state: item.workState })
         } else {
           PMStatusPill({ label: this.view.primaryContext !== undefined && this.view.primaryContext !== null && this.view.primaryContext.freshness !== 'FRESH' ? '部分摘要暂不可用' : this.kind(item) === 'reminder' ? '待你核对' : this.kind(item) === 'record' ? '最近记录' : this.focusStatusText(item),
-          tone: item.status === 'PAUSED' || item.status === 'FAILED' ? 'risk' : 'warning' })
+          tone: item.status === 'PAUSED' || item.status === 'FAILED' ? 'risk' : item.status === 'DOING' || item.status === 'RUNNING' ? 'brand' : 'warning' })
         }
         Text(item.projectTitle).fontSize(12).fontColor(PMColors.INK_TERTIARY).layoutWeight(1)
           .textAlign(TextAlign.End).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
       }.width('100%')
-      Text(this.rowTitle(item, this.kind(item))).fontSize(21).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
+      Text(this.rowTitle(item, this.kind(item))).fontSize(20).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
         .maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis }).lineHeight(29)
       if (this.kind(item) === 'reminder' && this.reminderTime(item) !== '') {
         Text(this.reminderTime(item)).fontSize(13).fontColor(PMColors.INK_SECONDARY)
@@ -227,7 +229,7 @@ export struct GlobalFocusPanel {
             .border({ width: { left: 1 }, color: PMColors.BORDER_SUBTLE })
         }.width('100%').borderRadius(13).backgroundColor(PMColors.SURFACE_SUBTLE)
       }
-      PMButton({ label: this.view.primaryContext?.nextStep.actionLabel ?? focusActionLabel(item.status, this.kind(item)), secondary: primaryActionTone(item.workState) !== 'solid', onAction: (): void => { this.open(item, this.kind(item)); } })
+      Row() { PMButton({ label: this.view.primaryContext?.nextStep.actionLabel ?? focusActionLabel(item.status, this.kind(item)), secondary: primaryActionTone(item.workState) !== 'solid', fit: true, onAction: (): void => { this.open(item, this.kind(item)); } }) }.width('100%').justifyContent(FlexAlign.End)
       if (item.workState !== undefined && this.kind(item) === 'mission') {
         Row() {
           if (nextActorLabel(item.workState.nextActor) !== '') {

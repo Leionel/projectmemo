@@ -43,27 +43,6 @@ export struct PMAppBar {
         .accessibilityText(this.backDescription !== '' ? this.backDescription : `返回${this.backLabel}`)
       }
 
-      if (this.showRepository) {
-        Button({ type: ButtonType.Normal }) {
-          Image($r('app.media.github'))
-            .width(21).height(21)
-            .fillColor(PMColors.INK_SECONDARY)
-            .accessibilityLevel('no')
-        }
-        .width(44).height(44)
-        .padding(11)
-        .borderRadius(PMRadius.SM)
-        .backgroundColor(Color.Transparent)
-        .clickEffect(PMInteraction.PRESS_EFFECT)
-        .accessibilityText('GitHub 仓库')
-        .accessibilityDescription('查看本项目的仓库连接与提交记录')
-        .onClick(() => {
-          if (this.onRepositoryAction) {
-            this.onRepositoryAction();
-          }
-        })
-      }
-
       Column() {
         Text(this.title)
           .fontSize(17)
@@ -86,7 +65,23 @@ export struct PMAppBar {
       .alignItems(HorizontalAlign.Start)
       .justifyContent(FlexAlign.Center)
       .layoutWeight(1)
-      .margin({ left: this.showRepository ? PMSpacing.XS : this.showBack ? PMSpacing.SM : 0, right: PMSpacing.SM })
+      .margin({ left: this.showBack ? PMSpacing.SM : 0, right: PMSpacing.SM })
+
+      if (this.showRepository) {
+        Text('仓库')
+          .fontSize(PMFontSize.SECONDARY)
+          .fontColor(PMColors.INK_SECONDARY)
+          .height(44)
+          .padding({ left: 8, right: 8 })
+          .clickEffect(PMInteraction.PRESS_EFFECT)
+          .accessibilityText('GitHub 仓库')
+          .accessibilityDescription('查看本项目的仓库连接与提交记录')
+          .onClick(() => {
+            if (this.onRepositoryAction) {
+              this.onRepositoryAction();
+            }
+          })
+      }
 
       if (this.rightActionText !== '') {
         Text(this.rightActionText)

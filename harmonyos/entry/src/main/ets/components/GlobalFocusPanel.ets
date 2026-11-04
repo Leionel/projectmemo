@@ -8,7 +8,7 @@ import { GlobalFocusService } from '../services/GlobalFocusService';
 import { ConversationService } from '../services/ConversationService';
 import { ApiError } from '../models/Project';
 import { LoadingStateView, ErrorStateView } from './AsyncStateView';
-import { PMColors, PMRadius } from '../common/DesignTokens';
+import { PMColors, PMFontFamily, PMRadius } from '../common/DesignTokens';
 import { PMButton, PMStatusPill, PMPageIntro, PMListRow } from './PMReferencePrimitives';
 import { FilterIcon } from './PMIcons';
 import { FocusAgentLauncher } from './FocusAgentLauncher';
@@ -209,7 +209,7 @@ export struct GlobalFocusPanel {
         Text(item.projectTitle).fontSize(12).fontColor(PMColors.INK_TERTIARY).layoutWeight(1)
           .textAlign(TextAlign.End).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
       }.width('100%')
-      Text(this.rowTitle(item, this.kind(item))).fontSize(21).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
+      Text(this.rowTitle(item, this.kind(item))).fontSize(21).fontFamily(PMFontFamily.BRAND_SERIF).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
         .maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis }).lineHeight(29)
       if (this.kind(item) === 'reminder' && this.reminderTime(item) !== '') {
         Text(this.reminderTime(item)).fontSize(13).fontColor(PMColors.INK_SECONDARY)

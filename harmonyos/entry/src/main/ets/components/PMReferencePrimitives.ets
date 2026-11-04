@@ -1,4 +1,4 @@
-import { PMColors, PMFontSize, PMSpacing, PMRadius, PMInteraction } from '../common/DesignTokens';
+import { PMFontFamily, PMColors, PMFontSize, PMSpacing, PMRadius, PMInteraction } from '../common/DesignTokens';
 import { AlertIcon, CloseIcon, MemoryIcon, TaskIcon, ClockIcon } from './PMIcons';
 
 @Component
@@ -104,8 +104,8 @@ export struct PMPageIntro {
   @Prop description: string = '';
   build() {
     Column({ space: 6 }) {
-      if (this.eyebrow !== '') { Text(this.eyebrow).fontSize(12).fontWeight(FontWeight.Medium).fontColor(PMColors.BRAND) }
-      Text(this.title).fontSize(this.compact ? 20 : PMFontSize.PAGE_TITLE).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
+      if (this.eyebrow !== '') { Text(this.eyebrow).fontSize(12).fontColor(PMColors.INK_TERTIARY) }
+      Text(this.title).fontSize(this.compact ? 24 : PMFontSize.PAGE_TITLE).fontFamily(PMFontFamily.BRAND_SERIF).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
       if (this.description !== '') { Text(this.description).fontSize(13).fontColor(PMColors.INK_SECONDARY).lineHeight(21).maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis }) }
     }.width('100%').alignItems(HorizontalAlign.Start).margin({ bottom: this.compact ? 10 : 18 })
   }

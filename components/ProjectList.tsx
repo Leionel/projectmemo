@@ -53,7 +53,7 @@ export function ProjectList({ projects }: { projects: ProjectCardData[] }) {
     <section className="mt-5" aria-labelledby="project-list-heading">
       <h2 id="project-list-heading" className="sr-only">项目列表</h2>
 
-      <div className="border-b border-[var(--rule)] pb-4">
+      <div className="pt-5">
         <div className="grid gap-3 lg:grid-cols-[minmax(16rem,1fr)_minmax(10rem,0.34fr)_minmax(10rem,0.34fr)]">
           <label className="block">
             <span className="mb-2 block text-xs font-bold text-[var(--ink-soft)]">搜索项目</span>
@@ -108,7 +108,7 @@ export function ProjectList({ projects }: { projects: ProjectCardData[] }) {
           </label>
         </div>
 
-        <div className="mt-4 flex min-h-8 flex-wrap items-center justify-between gap-3 border-t archive-rule pt-4">
+        <div className="mt-3 flex min-h-8 flex-wrap items-center justify-between gap-3">
           <p className="flex items-center gap-2 text-sm text-[var(--ink-soft)]" aria-live="polite" aria-atomic="true">
             <SlidersHorizontal aria-hidden="true" size={16} className="text-[var(--teal-strong)]" />
             找到 <strong className="text-[var(--ink)]">{visibleProjects.length}</strong> 个项目

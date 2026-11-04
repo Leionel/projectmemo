@@ -109,3 +109,5 @@
 .summary[aria-label="最近记录"] li { position:relative; border-top:0!important; }
 .summary[aria-label="最近记录"] li::before { content:""; position:absolute; left:-1.45rem; top:1.1rem; width:.6rem; height:.6rem; border-radius:50%; border:2px solid var(--ink-soft); background:var(--paper); }
 .summary[aria-label="最近记录"] li > a { padding:.625rem 0; }
+.kbd { margin-left:.25rem; font-size:11px; opacity:.6; font-family:ui-monospace,Consolas,monospace; }
+@media(max-width:640px) { .kbd { display:none; } }

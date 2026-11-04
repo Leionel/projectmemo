@@ -24,6 +24,7 @@ export struct GlobalFocusPanel {
   @State private agentEnabled: boolean = false;
   @Prop @Watch('refresh') refreshKey: number = 0;
   onOpenActions: (reminders: boolean) => void = (_reminders: boolean): void => {};
+  onOpenSettings: () => void = (): void => {};
   @State private view: GlobalFocusReply = new GlobalFocusReply();
   @State private busy: boolean = true;
   @State private errorText: string = '';
@@ -193,6 +194,7 @@ export struct GlobalFocusPanel {
       this.includeArchived = !this.includeArchived; this.refresh();
     } });
     items.push({ value: '刷新焦点', action: (): void => { this.refresh(); } });
+    items.push({ value: '个人设置', action: (): void => { this.onOpenSettings(); } });
     return items;
   }
   @Builder private Primary(item: FocusEntry) {

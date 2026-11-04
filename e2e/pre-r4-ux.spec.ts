@@ -31,6 +31,7 @@ test("first material leads to an explicitly authorized Mission; multiple waiting
  const created=page.waitForResponse(r=>r.url().endsWith("/api/missions")&&r.request().method()==="POST");
  await page.getByRole("button",{name:"创建委托",exact:true}).click();const first=(await(await created).json()).mission.id;
  ask(first,"请补充实验设备与统计口径");
+ if(await page.getByRole("button",{name:"查看委托列表与新建"}).isVisible())await page.getByRole("button",{name:"查看委托列表与新建"}).click();
  await page.getByText("委托新目标",{exact:true}).click();
  await page.getByRole("textbox",{name:"想推进什么"}).fill("核对阶段汇报的资料范围");
  const secondCreated=page.waitForResponse(r=>r.url().endsWith("/api/missions")&&r.request().method()==="POST");

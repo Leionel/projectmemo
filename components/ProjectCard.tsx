@@ -31,7 +31,7 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
     <h2 className="project-card-title"><Link prefetch={false} href={`/projects/${project.id}`} className="focus-ring">{project.title}</Link></h2>
     <Link prefetch={false} href={nextHref} className="project-card-next focus-ring" data-tone={next.tone}><strong>{next.label}：</strong>{next.detail}</Link>
     {project.scenario === "COMPETITION" && <div className="project-card-readiness" title="只是这份清单的完成比例，不代表项目整体完成率">
-      <div><span>参赛准备度</span><span>{dashboard.readiness.completed} / {dashboard.readiness.total} 项已形成</span></div>
+      <div><span>参赛准备度</span><span>{dashboard.readiness.completed}/{dashboard.readiness.total} 项已形成</span></div>
       <div className="project-card-bar"><div style={{ width: `${dashboard.readiness.percentage}%` }} /></div>
     </div>}
     <p className="project-card-stats">

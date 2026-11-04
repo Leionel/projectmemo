@@ -30,9 +30,9 @@ test("accepts a proactive reminder and asks the memory copilot", async ({ page }
   if (process.env.FOCUS_AGENT_ENABLED === "true") {
     await page.getByRole("link", { name: "问忆程", exact: true }).click();
     const discussion = page.getByRole("region", { name: "问忆程", exact: true });
-    await expect(discussion.getByText("正在读取讨论…")).toHaveCount(0);
-    if (await discussion.getByRole("button", { name: "开始讨论", exact: true }).isVisible()) await discussion.getByRole("button", { name: "开始讨论", exact: true }).click();
     const input = discussion.getByRole("textbox", { name: "与忆程讨论项目" });
+    await expect(discussion.getByRole("button", { name: "开始讨论", exact: true }).or(input)).toBeVisible();
+    if (await discussion.getByRole("button", { name: "开始讨论", exact: true }).isVisible()) await discussion.getByRole("button", { name: "开始讨论", exact: true }).click();
     await input.fill("当前进展如何？");
     await discussion.getByRole("button", { name: "发送", exact: true }).click();
     await expect(input).toHaveValue("");
@@ -161,7 +161,7 @@ test("project dashboard surfaces attention state and snoozed reminder history", 
   await page.goto("/projects");
   await expect(page.getByLabel("排列方式")).toHaveValue("attention");
   const projectCard = page.locator("article").filter({ hasText: /人工智能创意赛 忆程 ProjectMemo 作品开发/ }).first();
-  await expect(projectCard.getByText("参赛准备项", { exact: true })).toBeVisible();
+  await expect(projectCard.getByText("参赛准备度", { exact: true })).toBeVisible();
   await expect(projectCard.getByText(/\d+\/6 项已形成/)).toBeVisible();
   await expect(projectCard.getByTitle(/不代表项目整体完成率/)).toBeVisible();
   const projectHref = await projectCard.getByRole("link", { name: /打开项目/ }).getAttribute("href");

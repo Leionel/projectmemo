@@ -37,10 +37,11 @@ export function SiteHeader({
             </Link>
           ) : (
             <>
-              <a href="#experience">产品体验</a>
+              <a href="#flow">工作方式</a>
               <a href="#missions">长期委托</a>
               <a href="#moments">使用场景</a>
               <a href="#demo">决赛演示</a>
+              <a href="https://github.com/Leionel/projectmemo" target="_blank" rel="noopener noreferrer">GitHub</a>
               {registrationEnabled && <Link href="/register">注册</Link>}
               <Link href="/focus" className={styles.headerCta}>
                 进入工作台

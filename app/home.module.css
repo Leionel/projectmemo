@@ -1488,3 +1488,69 @@
     background: var(--paper);
   }
 }
+
+/* ------------------------------------------------ 设计稿对齐：首屏接续卡 */
+.resumeCard { display: grid; gap: 1rem; padding: 1.5rem; border: 1px solid var(--rule); border-radius: 16px; background: var(--card-bg); box-shadow: var(--shadow-md); min-width: 0; }
+.resumeHead { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .25rem 1rem; font-size: .8125rem; color: var(--muted); }
+.resumeHead strong { color: var(--ink); font-weight: 600; }
+.resumeStop { display: grid; gap: .25rem; padding: .875rem 1rem; border-radius: 12px; background: color-mix(in srgb, var(--amber) 8%, var(--card-bg)); }
+.resumeStop > p, .resumeChange > p { font-size: .75rem; font-weight: 600; color: var(--amber); }
+.resumeStop > div { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.resumeStop strong { font-size: 1.0625rem; color: var(--ink); }
+.resumeWaiting { padding: .0625rem .5625rem; border-radius: 999px; background: color-mix(in srgb, var(--amber) 14%, var(--card-bg)); color: var(--amber); font-size: .75rem; font-weight: 600; }
+.resumeSources { display: grid; gap: .625rem; margin: 0; padding: 0; list-style: none; }
+.resumeSources li { display: grid; gap: .125rem; padding-left: .875rem; border-left: 2px solid var(--rule); font-size: .8125rem; line-height: 1.7; color: var(--ink-soft); }
+.resumeSources p { display: flex; justify-content: space-between; gap: 1rem; }
+.resumeSources strong { color: var(--ink); font-weight: 600; }
+.resumeSources time { font-variant-numeric: tabular-nums; color: var(--muted); }
+.resumeChange { display: grid; gap: .25rem; padding-top: .875rem; border-top: 1px solid var(--rule); }
+.resumeChange > p { color: var(--teal); }
+.resumeChange strong { font-size: 1rem; color: var(--ink); }
+.resumeChange > span { font-size: .8125rem; color: var(--ink-soft); }
+.resumeChange s { color: var(--muted); }
+.resumeRefs { display: flex; flex-wrap: wrap; gap: .375rem; margin-top: .25rem; }
+.resumeRefs span, .scenarioTags span { padding: .0625rem .5rem; border: 1px solid var(--rule); border-radius: 6px; font-size: .75rem; color: var(--ink-soft); }
+.resumeActions, .missionActions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.resumeActions span, .missionActions span { display: inline-flex; align-items: center; min-height: 2.5rem; padding: 0 1rem; border: 1px solid var(--rule); border-radius: 10px; font-size: .875rem; color: var(--ink); }
+.resumeActions span:first-child, .missionActions span:first-child { background: var(--teal); border-color: var(--teal); color: var(--paper-strong); }
+.resumeNote { font-size: .75rem; color: var(--muted); }
+
+/* ------------------------------------------------ 设计稿对齐：工作方式入口、长期委托 */
+.flowLink { display: inline-flex; align-items: center; gap: .375rem; margin-top: 1.5rem; min-height: 2.75rem; color: var(--teal); font-weight: 600; }
+.flowLink:hover { text-decoration: underline; }
+.missionCard { display: grid; gap: 1rem; padding: 1.5rem; border: 1px solid var(--rule); border-radius: 16px; background: var(--card-bg); min-width: 0; }
+.missionCard > header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; }
+.missionCard h3 { font-size: 1.125rem; font-weight: 650; color: var(--ink); }
+.missionWaiting { padding: .0625rem .5625rem; border-radius: 999px; background: color-mix(in srgb, var(--amber) 12%, var(--card-bg)); color: var(--amber); font-size: .75rem; font-weight: 600; }
+.missionSteps { display: grid; gap: .875rem; margin: 0; padding: 0 0 0 1.5rem; list-style: none; position: relative; }
+.missionSteps::before { content: ""; position: absolute; left: .375rem; top: .5rem; bottom: .5rem; width: 2px; background: var(--rule); }
+.missionSteps li { position: relative; display: grid; gap: .125rem; font-size: .875rem; }
+.missionSteps li::before { content: ""; position: absolute; left: -1.5rem; top: .35rem; width: .875rem; height: .875rem; border-radius: 50%; box-sizing: border-box; border: 2px solid var(--rule-strong); background: var(--card-bg); }
+.missionSteps li[data-state="done"]::before { background: var(--teal); border-color: var(--teal); }
+.missionSteps li[data-state="waiting"]::before { border-color: var(--amber); background: color-mix(in srgb, var(--amber) 20%, var(--card-bg)); }
+.missionSteps strong { color: var(--ink); font-weight: 600; }
+.missionSteps li[data-state="waiting"] strong { color: var(--amber); }
+.missionSteps span { color: var(--ink-soft); }
+
+/* ------------------------------------------------ 设计稿对齐：场景标签、双端截图、原则、GitHub */
+.scenarioTags { display: flex; flex-wrap: wrap; gap: .375rem; }
+.scenarioList p.scenarioTags { margin-top: .875rem; }
+.platformShot { grid-column: 1 / -1; margin: 1.5rem 0 0; border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; background: var(--card-bg); box-shadow: var(--shadow-md); }
+.platformShot figcaption { display: flex; align-items: center; gap: .375rem; padding: .5rem .875rem; border-bottom: 1px solid var(--rule); font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.platformShot figcaption span { width: .5rem; height: .5rem; border-radius: 50%; background: var(--rule-strong); }
+.platformShot figcaption span:nth-child(3) { margin-right: .5rem; }
+.platformShot img { display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 1280 / 760; object-fit: cover; object-position: top center; }
+.principles { padding-block: clamp(2.5rem, 5vw, 4rem); border-top: 1px solid var(--rule); }
+.principles ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem 2.5rem; margin: 0; padding: 0; list-style: none; }
+.principles h3 { font-family: var(--editorial-font); font-size: 1.125rem; font-weight: 500; color: var(--ink); }
+.principles p { margin-top: .375rem; font-size: .875rem; line-height: 1.8; color: var(--ink-soft); }
+.closingInner { flex-wrap: wrap; }
+.githubCard { display: grid; gap: .5rem; flex: 1 1 100%; max-width: 34rem; padding: 1.25rem 1.375rem; border: 1px solid color-mix(in srgb, var(--paper) 22%, transparent); border-radius: 14px; color: var(--paper); }
+.githubCard:hover { border-color: color-mix(in srgb, var(--paper) 45%, transparent); }
+.githubCard > span:not(.scenarioTags):not(.githubLink) { font-size: .875rem; line-height: 1.7; color: color-mix(in srgb, var(--paper) 78%, transparent); }
+.githubCard .scenarioTags span { border-color: color-mix(in srgb, var(--paper) 25%, transparent); color: color-mix(in srgb, var(--paper) 85%, transparent); }
+.githubLink { display: inline-flex; align-items: center; gap: .25rem; font-size: .875rem; font-weight: 600; }
+@media (max-width: 760px) {
+  .principles ul { grid-template-columns: minmax(0, 1fr); }
+  .resumeCard, .missionCard { padding: 1.125rem; }
+}

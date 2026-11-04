@@ -11,8 +11,9 @@ import {
 import { getSessionUser } from "@/lib/auth/serverSession";
 import { HomeJourney } from "@/components/HomeJourney";
 import { DemoVideoPlayer } from "@/components/home/DemoVideoPlayer";
-import { HomeHeroLens } from "@/components/home/HomeHeroLens";
+import { HomeResumeCard } from "@/components/home/HomeResumeCard";
 import { HomeMotion } from "@/components/home/HomeMotion";
+import { exampleProject } from "@/components/home/homeExample";
 import styles from "./home.module.css";
 
 export const metadata: Metadata = {
@@ -20,6 +21,8 @@ export const metadata: Metadata = {
   description:
     "面向大学生的个人项目 Agent。目标、材料和判断依据留在原处；回来时先看原委托做到哪、依据是什么、现在等你决定什么。公开示例可在本页亲手走一遍。",
 };
+
+const GITHUB_URL = "https://github.com/Leionel/projectmemo";
 
 const DEMO_VIDEO_URL =
   "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b";
@@ -52,18 +55,9 @@ const continuitySteps = [
 ];
 
 const scenarios = [
-  {
-    title: "竞赛备赛",
-    text: "实验记录、报名要求和答辩材料回到同一个项目，整理汇报时能回看来源。",
-  },
-  {
-    title: "科研训练",
-    text: "查清方案为什么改过、结论用了哪些实验记录，哪些问题还没有依据。",
-  },
-  {
-    title: "课程设计",
-    text: "保留需求、问题和修改过程；完成行动后，把结果接回项目历史。",
-  },
+  { title: "竞赛备赛", text: "实验记录、报名要求和答辩材料放在同一个项目里，整理汇报时能回看来源。", tags: ["实验记录", "报名要求", "答辩材料"] },
+  { title: "科研训练", text: "方案为什么改过、结论用了哪些实验记录、哪些问题还没有依据，都查得清。", tags: ["方案变更", "结论依据", "未决问题"] },
+  { title: "课程设计", text: "需求、问题和修改过程都保留下来，完成一项行动后，结果接回项目历史。", tags: ["需求", "修改过程", "完成回执"] },
 ];
 
 export default async function Home() {
@@ -94,41 +88,37 @@ export default async function Home() {
               关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。
             </p>
             <div className={styles.heroActions}>
-              <a className={styles.ctaPrimary} href="#experience">
-                体验一段项目接续
-                <ArrowDown size={16} aria-hidden="true" />
-              </a>
-              <Link className={styles.ctaSecondary} href={workspaceHref}>
+              <Link className={styles.ctaPrimary} href={workspaceHref}>
                 {workspaceLabel}
                 <ArrowRight size={16} aria-hidden="true" />
               </Link>
+              <a className={styles.ctaSecondary} href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
+                在 GitHub 查看源码
+                <ArrowUpRight size={16} aria-hidden="true" />
+              </a>
             </div>
             <p className={styles.heroNote}>
-              公开示例 · 不调用模型 · 不写入你的项目。
+              Web 工作台 · 鸿蒙客户端 · 同一个项目后端
             </p>
           </div>
-          <HomeHeroLens />
+          <HomeResumeCard />
         </div>
       </section>
 
       <section
-        id="missions"
+        id="flow"
         className={styles.section}
         aria-labelledby="continuity-title"
       >
         <div className={styles.shell}>
           <header className={styles.sectionHead}>
-            <p className={styles.kicker} data-draw>
-              <span>01</span>
-              离开以后
-            </p>
             <h2 id="continuity-title">
               新情况出现时，
               <br className={styles.mobileBreak} />
               它带着出处回来。
             </h2>
             <p className={styles.sectionIntro}>
-              同一个示例委托：来源、判断和等你决定的那一步，都留在原处。
+              同一个委托里，来源、判断和等你决定的那一步都留在原处。
             </p>
           </header>
 
@@ -166,6 +156,25 @@ export default async function Home() {
               这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。
             </p>
           </div>
+          <a className={styles.flowLink} href="#experience">体验一段项目接续，无需登录<ArrowDown size={15} aria-hidden="true" /></a>
+        </div>
+      </section>
+      <section id="missions" className={`${styles.section} ${styles.sectionTint}`} aria-labelledby="missions-title">
+        <div className={`${styles.shell} ${styles.split}`}>
+          <header className={styles.splitHead}>
+            <h2 id="missions-title">长期委托会保留进度，<br className={styles.mobileBreak} />需要你时停下来。</h2>
+            <p className={styles.sectionIntro}>比如“用已有材料整理阶段汇报”。步骤和草稿都在同一份委托里：缺材料就补来源，要批准就先核对提案。</p>
+            <p className={styles.sectionIntro}>暂停后不会从头再来。继续之前，服务端会重新检查授权、预算和材料是否仍然适用。</p>
+          </header>
+          <article className={styles.missionCard} aria-label="公开示例：长期委托">
+            <header><h3>整理参赛项目的阶段汇报</h3><span className={styles.missionWaiting}>等待补充材料</span></header>
+            <ol className={styles.missionSteps}>
+              <li data-state="done"><strong>读取项目记忆</strong><span>已找到参赛要求与任务安排</span></li>
+              <li data-state="waiting"><strong>需要补充：{exampleProject.missing.title}</strong><span>{exampleProject.missing.detail}</span></li>
+              <li data-state="next"><strong>继续整理汇报草稿</strong><span>补充材料并确认后继续</span></li>
+            </ol>
+            <div className={styles.missionActions} aria-hidden="true"><span>补充材料</span><span>查看草稿</span></div>
+          </article>
         </div>
       </section>
 
@@ -176,10 +185,6 @@ export default async function Home() {
       >
         <div className={styles.shell}>
           <header className={`${styles.sectionHead} ${styles.experienceHead}`}>
-            <p className={styles.kicker} data-draw>
-              <span>02</span>
-              公开交互示例
-            </p>
             <h2 id="experience-title">
               同一份素材，
               <br className={styles.mobileBreak} />
@@ -193,13 +198,30 @@ export default async function Home() {
         </div>
       </section>
 
+      <section
+        id="moments"
+        className={styles.section}
+        aria-labelledby="moments-title"
+      >
+        <div className={styles.shell}>
+          <header className={styles.sectionHead}>
+            <h2 id="moments-title">竞赛、科研、课程设计。</h2>
+          </header>
+          <ul className={styles.scenarioList}>
+            {scenarios.map((scenario) => (
+              <li key={scenario.title}>
+                <h3>{scenario.title}</h3>
+                <p>{scenario.text}</p>
+                <p className={styles.scenarioTags}>{scenario.tags.map(tag => <span key={tag}>{tag}</span>)}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
       <section className={styles.section} aria-labelledby="platform-title">
         <div className={`${styles.shell} ${styles.split}`}>
           <header className={styles.splitHead}>
-            <p className={styles.kicker} data-draw>
-              <span>03</span>
-              同一个任务
-            </p>
             <h2 id="platform-title">
               电脑上看依据，
               <br className={styles.mobileBreak} />
@@ -252,30 +274,11 @@ export default async function Home() {
               </p>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section
-        id="moments"
-        className={styles.section}
-        aria-labelledby="moments-title"
-      >
-        <div className={styles.shell}>
-          <header className={styles.sectionHead}>
-            <p className={styles.kicker} data-draw>
-              <span>04</span>
-              用在什么项目上
-            </p>
-            <h2 id="moments-title">竞赛、科研、课程设计。</h2>
-          </header>
-          <ul className={styles.scenarioList}>
-            {scenarios.map((scenario) => (
-              <li key={scenario.title}>
-                <h3>{scenario.title}</h3>
-                <p>{scenario.text}</p>
-              </li>
-            ))}
-          </ul>
+          <figure className={styles.platformShot}>
+            <figcaption><span aria-hidden="true" /><span aria-hidden="true" /><span aria-hidden="true" />project.luojiatutor.xyz</figcaption>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/home/workspace-desktop.jpg" alt="忆程 Web 工作台：项目焦点与长期委托（公开示例截图）" width={1280} height={760} loading="lazy" />
+          </figure>
         </div>
       </section>
 
@@ -286,10 +289,6 @@ export default async function Home() {
       >
         <div className={`${styles.shell} ${styles.demoSplit}`}>
           <header className={styles.splitHead}>
-            <p className={styles.kicker} data-draw>
-              <span>05</span>
-              决赛演示
-            </p>
             <h2 id="demo-title">
               看一遍决赛演示。
             </h2>
@@ -299,6 +298,15 @@ export default async function Home() {
             </p>
           </header>
           <DemoVideoPlayer />
+        </div>
+      </section>
+      <section className={styles.principles} aria-label="使用原则">
+        <div className={styles.shell}>
+          <ul>
+            <li><h3>来源可以回看</h3><p>判断链接到原始记录和附件原件。</p></li>
+            <li><h3>缺口会标出来</h3><p>没有依据的内容不写成结论，未知不当作否定。</p></li>
+            <li><h3>重要操作先确认</h3><p>建议和提案经你确认后，才会改动项目。</p></li>
+          </ul>
         </div>
       </section>
 
@@ -315,19 +323,18 @@ export default async function Home() {
               {workspaceLabel}
               <ArrowRight size={16} aria-hidden="true" />
             </Link>
-            <a href="#experience" className={styles.closingLink}>
-              先看一段示例
-            </a>
+            {!user && <Link href="/login" className={styles.closingLink}>登录</Link>}
           </div>
+          <a className={styles.githubCard} href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
+            <strong>Leionel/projectmemo</strong>
+            <span>面向项目式学习的智能记忆与主动复盘助手，代码在 GitHub 公开。</span>
+            <span className={styles.scenarioTags}><span>Next.js</span><span>TypeScript</span><span>Prisma</span><span>HarmonyOS ArkTS</span></span>
+            <span className={styles.githubLink}>在 GitHub 查看<ArrowUpRight size={14} aria-hidden="true" /></span>
+          </a>
         </div>
       </section>
 
-      <aside className={styles.boundary} aria-label="使用边界">
-        <p>
-          <span>使用边界</span>
-          来源可以回看；没有依据的内容会标明缺口。建议需要你判断，重要操作在确认后才应用。模型分析与委托执行取决于实际配置。
-        </p>
-      </aside>
+
 
       <footer className={styles.footer}>
         <div className={`${styles.shell} ${styles.footerInner}`}>
@@ -345,6 +352,7 @@ export default async function Home() {
               决赛演示
               <ArrowUpRight size={12} aria-hidden="true" />
             </a>
+            <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">GitHub<ArrowUpRight size={12} aria-hidden="true" /></a>
             <a href="#home-heading">回到顶部 ↑</a>
           </nav>
           <p className={styles.footerMeta}>竞赛 · 科研 · 课程项目</p>

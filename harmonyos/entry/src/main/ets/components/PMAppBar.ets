@@ -45,9 +45,9 @@ export struct PMAppBar {
 
       Column() {
         Text(this.title)
-          .fontSize(18)
-          .fontWeight(FontWeight.Medium)
-          .fontFamily(PMFontFamily.BRAND_SERIF)
+          .fontSize(17)
+          .fontWeight(FontWeight.Bold)
+          .fontFamily(PMFontFamily.SANS)
           .fontColor(PMColors.INK_PRIMARY)
           .maxLines(1)
           .lineHeight(22)

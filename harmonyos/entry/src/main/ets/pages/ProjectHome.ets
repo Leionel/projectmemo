@@ -1778,23 +1778,7 @@ struct ProjectHome {
         Text(this.agentContext !== null ? (this.agentContext.nextStep.workState !== undefined ? '当前下一步 · ' + workStateLabel(this.agentContext.nextStep.workState) : '当前下一步') : this.homeFocusKind() === 'mission' ? this.homeMissionStatusLabel() : '当前先处理')
           .fontSize(12)
           .fontWeight(FontWeight.Medium)
-          .fontColor(PMColors.BRAND)
-          .padding({ left: 8, right: 8, top: 2, bottom: 2 })
-          .backgroundColor(PMColors.BRAND_LIGHT)
-          .borderRadius(PMRadius.XS)
-
-        Blank()
-
-        if (this.agentContext !== null && this.agentContext.goal !== '') {
-          Text(`目标：${this.agentContext.goal}`)
-            .fontSize(12)
-            .fontColor(PMColors.INK_TERTIARY)
-            .maxLines(1)
-            .textOverflow({ overflow: TextOverflow.Ellipsis })
-            .layoutWeight(1)
-            .textAlign(TextAlign.End)
-            .margin({ left: 8 })
-        }
+          .fontColor(PMColors.WARNING)
       }
       .width('100%')
       .alignItems(VerticalAlign.Center)
@@ -1814,18 +1798,29 @@ struct ProjectHome {
         .maxLines(3)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
 
-      PMButton({
-        label: `${this.homeFocusAction()} →`,
-        onAction: (): void => { this.openHomeFocus(); }
-      })
+      if (this.agentContext !== null && this.agentContext.goal !== '') {
+        Text(`目标：${this.agentContext.goal}`)
+          .fontSize(12)
+          .fontColor(PMColors.INK_TERTIARY)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+      }
+
+      Row() {
+        PMButton({
+          label: this.homeFocusAction(),
+          fit: true,
+          onAction: (): void => { this.openHomeFocus(); }
+        })
+      }.width('100%').justifyContent(FlexAlign.End)
     }
     .width('100%')
     .alignItems(HorizontalAlign.Start)
-    .padding(16)
+    .padding(18)
     .backgroundColor(PMColors.SURFACE)
-    .borderRadius(PMRadius.LG)
-    .border({ width: 1, color: PMColors.BORDER })
-    .shadow({ radius: 8, color: 'rgba(19, 36, 58, 0.04)', offsetX: 0, offsetY: 2 })
+    .borderRadius(18)
+    .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+    .shadow({ radius: 16, color: 'rgba(28, 46, 44, 0.06)', offsetX: 0, offsetY: 6 })
   }
 
   /** 准备项逐项入口：与「当前状态」卡里的缺口按钮同一套跳转规则 */
@@ -4152,7 +4147,7 @@ struct ProjectHome {
         })
     }
     .width('100%')
-    .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.LG })
+    .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: 96 })
     .alignItems(HorizontalAlign.Start)
   }
 
@@ -4734,7 +4729,7 @@ if (this.attachmentSearchOpen) {
         }, (card: KnowledgeCard) => card.id)
       }
       .layoutWeight(1)
-      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.LG })
+      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: 96 })
       }
     }
     .layoutWeight(1)
@@ -4835,7 +4830,7 @@ if (this.attachmentSearchOpen) {
     Column() {
       Column({ space: 8 }) {
         Row({ space: 6 }) {
-          Text('行动').fontSize(22).fontFamily(PMFontFamily.BRAND_SERIF).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY).layoutWeight(1)
+          Text('行动').fontSize(22).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY).layoutWeight(1)
           Button({ type: ButtonType.Circle }) { SearchIcon({ iconSize: 18 }) }
             .width(40).height(40).backgroundColor(Color.Transparent)
             .accessibilityText('搜索行动标题与预期结果')
@@ -4881,7 +4876,7 @@ if (this.attachmentSearchOpen) {
                 .backgroundColor(this.actionStatusFilter === status ? PMColors.BRAND_LIGHT : Color.Transparent)
                 .accessibilitySelected(this.actionStatusFilter === status).onClick(() => { this.actionStatusFilter = status; this.focusedActionId = ''; })
             })
-          }
+          }.padding({ right: 16 })
         }.scrollable(ScrollDirection.Horizontal).scrollBar(BarState.Off).width('100%')
       }.width('100%').padding({ left: 16, right: 16, top: 10, bottom: 2 }).alignItems(HorizontalAlign.Start)
 
@@ -5127,7 +5122,7 @@ if (this.attachmentSearchOpen) {
         }, (action: ActionItem) => action.id)
       }
       .layoutWeight(1)
-      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.LG })
+      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: 96 })
     }
     .layoutWeight(1)
     .transition(PMTransition.CONTENT_ENTER)
@@ -6677,7 +6672,7 @@ if (this.attachmentSearchOpen) {
               }
             }
             .width('100%')
-            .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.LG })
+            .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: 96 })
           }
           .width('100%')
           .constraintSize({ maxHeight: '85%' })

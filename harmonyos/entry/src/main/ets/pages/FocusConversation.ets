@@ -668,7 +668,7 @@ struct FocusConversation {
             if (this.view.research?.available && this.cloud) {
               ConversationResearchControl({ conversationId: this.view.id, projectId: this.target || this.view.homeProjectId || '', info: this.view.research!, disabled: this.busy, onSaved: (): void => { this.service.read(this.view.id).then(v => { this.view = v; }).catch((e: Error) => { this.fail(e); }); } })
             }
-            TextArea({ text: this.text, placeholder: '聊聊下一步…' }).constraintSize({ minHeight: 76, maxHeight: 136 }).fontSize(15).fontColor(PMColors.INK_PRIMARY).backgroundColor(Color.Transparent).padding({ left: 15, right: 15, top: 14, bottom: 4 })
+            TextArea({ text: this.text, placeholder: '聊聊下一步…' }).constraintSize({ minHeight: 48, maxHeight: 136 }).fontSize(15).fontColor(PMColors.INK_PRIMARY).backgroundColor(Color.Transparent).padding({ left: 15, right: 15, top: 14, bottom: 4 })
               .enabled(!this.busy).onChange((v: string) => { this.text = v; this.saveComposer(); })
             Row({ space: 8 }) {
               Row({ space: 6 }) {
@@ -678,7 +678,7 @@ struct FocusConversation {
                 .gesture(LongPressGesture({ repeat: false, duration: 500 }).onAction(() => { this.showCloudHelp = true; }))
                 .onHover((hover: boolean) => { this.showCloudHelp = hover; })
                 .bindPopup(this.showCloudHelp, { message: this.cloudExplanation(), placement: Placement.Top, onStateChange: (event: CloudHelpState) => { if (!event.isVisible) { this.showCloudHelp = false; } } })
-              Button(this.target === '' ? '跨项目 ⌄' : '当前项目 ⌄', { type: ButtonType.Normal }).constraintSize({ minHeight: 44 }).fontSize(12).fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).padding({ left: 4, right: 6 }).enabled(!this.busy)
+              Button(this.target === '' ? '跨项目 ⌄' : '当前项目 ⌄', { type: ButtonType.Normal }).height(32).fontSize(12).fontColor(PMColors.INK_PRIMARY).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(8).padding({ left: 10, right: 10 }).enabled(!this.busy)
                 .accessibilityText('选择讨论项目范围').onClick(() => { this.scopeOpen = !this.scopeOpen; })
               Blank()
               Button('更多', { type: ButtonType.Normal }).constraintSize({ minHeight: 44 }).fontSize(12).fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).padding({ left: 6, right: 6 })
@@ -695,8 +695,8 @@ struct FocusConversation {
               }.height(38).width(38).accessibilityText('发送').backgroundColor(PMColors.BRAND)
                 .enabled(!this.busy && this.analysisReady && this.text.trim() !== '').onClick(() => { this.ask(); })
             }.width('100%').padding({ left: 12, right: 10, bottom: 8 })
-          }.width('100%').backgroundColor(PMColors.SURFACE_SUBTLE).border({ width: 1, color: PMColors.BORDER_SUBTLE }).borderRadius(22).clip(true)
-        }.width('100%').padding({ left: 10, right: 10, top: 8, bottom: 10 }).backgroundColor(PMColors.SURFACE)
+          }.width('100%').backgroundColor(PMColors.SURFACE).border({ width: 1, color: PMColors.BORDER }).borderRadius(20).clip(true)
+        }.width('100%').padding({ left: 12, right: 12, top: 8, bottom: 10 }).backgroundColor(PMColors.BACKGROUND)
         .bindSheet($$this.agentSheetOpen, this.AgentSheet(), {
           height: SheetSize.FIT_CONTENT,
           dragBar: true,

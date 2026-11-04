@@ -1,6 +1,6 @@
 import { MissionCreate, MissionConstraints, MissionScope, MissionCost } from '../models/Mission';
 import { editableMissionConstraints } from '../common/MissionContract';
-import { PMColors } from '../common/DesignTokens';
+import { PMColors, PMInteraction } from '../common/DesignTokens';
 import { PMButton } from './PMReferencePrimitives';
 
 @Component
@@ -161,9 +161,16 @@ export struct MissionSettingsForm {
           }.width('100%').padding({ top: 6 })
         }.width('100%').padding(14).alignItems(HorizontalAlign.Start).backgroundColor(PMColors.SURFACE).borderRadius(18)
         Column({ space: 12 }) {
-          Button(this.showConstraints ? '时间与限制（选填）  收起 ↑' : '时间与限制（选填）  展开 ↓', { type: ButtonType.Normal })
-            .width('100%').constraintSize({ minHeight: 44 }).fontSize(14).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent)
-            .enabled(!this.busy).onClick(() => { this.showConstraints = !this.showConstraints; })
+          Row({ space: 8 }) {
+            Column({ space: 2 }) {
+              Text('时间与限制').fontSize(15).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+              Text('可投入时间、费用、截止与优先级，选填').fontSize(12).fontColor(PMColors.INK_TERTIARY)
+            }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+            Text(this.showConstraints ? '收起' : '展开').fontSize(13).fontColor(PMColors.INK_SECONDARY)
+            Text('›').fontSize(18).fontColor(PMColors.INK_TERTIARY).rotate({ angle: this.showConstraints ? -90 : 90 })
+          }.width('100%').constraintSize({ minHeight: 48 }).clickEffect(PMInteraction.PRESS_EFFECT)
+            .accessibilityText('时间与限制，' + (this.showConstraints ? '已展开，点按收起' : '点按展开'))
+            .onClick(() => { if (!this.busy) { this.showConstraints = !this.showConstraints; } })
           if (this.showConstraints) {
             this.Label('可投入时间 · 分钟', '你愿意为这次委托投入的总时间；留空不限制。')
             TextInput({ placeholder: '例如：120', text: this.minutes }).height(44).fontSize(14).borderRadius(11)
@@ -207,9 +214,16 @@ export struct MissionSettingsForm {
       }
       if (this.mode !== 'constraints') {
         Column({ space: 12 }) {
-          Button(this.showResearch ? '公开网络研究（可选）  收起 ↑' : `公开网络研究 · ${this.researchEnabled ? '已开启' : '未开启'}  展开 ↓`, { type: ButtonType.Normal })
-            .width('100%').constraintSize({ minHeight: 44 }).fontSize(14).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent)
-            .enabled(!this.busy).onClick(() => { this.showResearch = !this.showResearch; })
+          Row({ space: 8 }) {
+            Column({ space: 2 }) {
+              Text('公开网络研究').fontSize(15).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+              Text(this.researchEnabled ? '已开启' : '未开启').fontSize(12).fontColor(PMColors.INK_TERTIARY)
+            }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+            Text(this.showResearch ? '收起' : '展开').fontSize(13).fontColor(PMColors.INK_SECONDARY)
+            Text('›').fontSize(18).fontColor(PMColors.INK_TERTIARY).rotate({ angle: this.showResearch ? -90 : 90 })
+          }.width('100%').constraintSize({ minHeight: 48 }).clickEffect(PMInteraction.PRESS_EFFECT)
+            .accessibilityText('公开网络研究，' + (this.showResearch ? '已展开，点按收起' : '点按展开'))
+            .onClick(() => { if (!this.busy) { this.showResearch = !this.showResearch; } })
           if (this.showResearch) {
             Row({ space: 10 }) {
               Text('允许公开网络研究').fontSize(14).fontColor(PMColors.INK_PRIMARY).layoutWeight(1)
@@ -245,9 +259,16 @@ export struct MissionSettingsForm {
       }
       if (this.mode === 'create') {
         Column({ space: 10 }) {
-          Button(this.showCompletion ? '完成要求（可选）  收起 ↑' : '完成要求（可选）  展开 ↓', { type: ButtonType.Normal })
-            .width('100%').constraintSize({ minHeight: 44 }).fontSize(14).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent)
-            .enabled(!this.busy).onClick(() => { this.showCompletion = !this.showCompletion; })
+          Row({ space: 8 }) {
+            Column({ space: 2 }) {
+              Text('完成要求').fontSize(15).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+              Text('不设置时按默认流程判定完成').fontSize(12).fontColor(PMColors.INK_TERTIARY)
+            }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+            Text(this.showCompletion ? '收起' : '展开').fontSize(13).fontColor(PMColors.INK_SECONDARY)
+            Text('›').fontSize(18).fontColor(PMColors.INK_TERTIARY).rotate({ angle: this.showCompletion ? -90 : 90 })
+          }.width('100%').constraintSize({ minHeight: 48 }).clickEffect(PMInteraction.PRESS_EFFECT)
+            .accessibilityText('完成要求，' + (this.showCompletion ? '已展开，点按收起' : '点按展开'))
+            .onClick(() => { if (!this.busy) { this.showCompletion = !this.showCompletion; } })
           if (this.showCompletion) {
             Row() { Checkbox().select(this.requireMetric).onChange((v: boolean) => { this.requireMetric = v; }); Text('完成时必须有固定核算回执，执行仍需批准').fontSize(13).layoutWeight(1) }
             Row() { Checkbox().select(this.requirePaper).onChange((v: boolean) => { this.requirePaper = v; }); Text('完成时必须读到论文元数据，非全文').fontSize(13).layoutWeight(1) }

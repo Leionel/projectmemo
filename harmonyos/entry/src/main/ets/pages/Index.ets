@@ -857,9 +857,8 @@ struct Index {
       }
       .width('100%')
       .alignItems(VerticalAlign.Center)
-      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.XS, bottom: PMSpacing.XS })
-      .backgroundColor(PMColors.SURFACE)
-      .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.XS, bottom: PMSpacing.SM })
+      .backgroundColor(PMColors.BACKGROUND)
 
       // 归档管理入口放在分支之外：即使项目全部归档、主列表为空，
       // 也必须能进到归档列表把它们恢复回来。
@@ -1338,8 +1337,7 @@ struct Index {
 
         Text(TextFormatters.readableText(project.title, '项目名称无法读取，请重新编辑。'))
           .fontSize(18)
-          .fontFamily(PMFontFamily.BRAND_SERIF)
-          .fontWeight(FontWeight.Medium)
+          .fontWeight(FontWeight.Bold)
           .fontColor(PMColors.INK_PRIMARY)
           .maxLines(2)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -1595,7 +1593,7 @@ struct Index {
               .fontColor(PMColors.BRAND)
           }
           .layoutWeight(1)
-          .height(44)
+          .height(38)
           .justifyContent(FlexAlign.Center)
           .backgroundColor(PMColors.SURFACE)
           .borderRadius(9)
@@ -1609,7 +1607,7 @@ struct Index {
               .fontColor(PMColors.INK_SECONDARY)
           }
           .layoutWeight(1)
-          .height(44)
+          .height(38)
           .justifyContent(FlexAlign.Center)
           .borderRadius(9)
           .clickEffect(PMInteraction.PRESS_EFFECT)
@@ -1646,7 +1644,7 @@ struct Index {
         }
       }
       .width('100%')
-      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.XS })
+      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.XS, bottom: PMSpacing.XS })
       .alignItems(HorizontalAlign.Start)
 
       // 搜索框与筛选
@@ -1688,11 +1686,10 @@ struct Index {
         .scrollable(ScrollDirection.Horizontal)
         .scrollBar(BarState.Off)
         .align(Alignment.Start)
-        .margin({ top: PMSpacing.XS })
 
       }
-      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.SM })
-      .backgroundColor(PMColors.SURFACE)
+      .padding({ left: PMSpacing.SM, right: PMSpacing.LG, top: 0, bottom: 0 })
+      .backgroundColor(PMColors.BACKGROUND)
       .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
 
       List({ space: 10 }) {
@@ -2861,8 +2858,8 @@ struct Index {
           Column() {
             Row() {
               Text(this.currentMainTabIndex === 0 ? '项目' : this.currentMainTabIndex === 1 ? '记忆' : this.currentMainTabIndex === 2 ? '行动' : '设置')
-                .fontSize(26).fontWeight(FontWeight.Medium)
-                .fontFamily(PMFontFamily.BRAND_SERIF).fontColor(PMColors.INK_PRIMARY)
+                .fontSize(26).fontWeight(FontWeight.Bold)
+                .fontFamily(PMFontFamily.SANS).fontColor(PMColors.INK_PRIMARY)
                 .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
                 .layoutWeight(1)
                 .accessibilityLevel('yes')
@@ -2877,10 +2874,12 @@ struct Index {
                   .accessibilityText(this.createActionName())
                   .onClick(() => { this.openContextualCreate(); })
               }
-              Row() { SettingsIcon({ iconSize: 20, isSelected: this.currentMainTabIndex === 3 }) }
+              if (this.currentMainTabIndex !== 3) {
+              Row() { SettingsIcon({ iconSize: 20, isSelected: false }) }
                 .width(44).height(44).justifyContent(FlexAlign.Center)
                 .accessibilityText('打开设置')
                 .onClick(() => { this.currentMainTabIndex = 3; this.loadLlmSettings(); })
+              }
             }
             .width('100%')
             .constraintSize({ minHeight: 58 })

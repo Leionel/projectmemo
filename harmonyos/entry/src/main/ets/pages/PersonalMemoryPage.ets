@@ -437,7 +437,7 @@ struct PersonalMemoryPage {
                       .fontSize(PMFontSize.SECONDARY)
                       .fontWeight(FontWeight.Medium)
                       .fontColor(PMColors.INK_PRIMARY)
-                    Text('关闭后项目资料与原任务照常可用，已保存内容保留。')
+                    Text('关闭后项目资料照常可用')
                       .fontSize(PMFontSize.CAPTION)
                       .fontColor(PMColors.INK_TERTIARY)
                   }
@@ -460,7 +460,7 @@ struct PersonalMemoryPage {
                       .fontSize(PMFontSize.SECONDARY)
                       .fontWeight(FontWeight.Medium)
                       .fontColor(PMColors.INK_PRIMARY)
-                    Text('默认关闭：个人内容只在本地规则处理；开启后仍受当轮云模型许可约束。')
+                    Text('默认关闭，只在本地规则处理')
                       .fontSize(PMFontSize.CAPTION)
                       .fontColor(PMColors.INK_TERTIARY)
                   }

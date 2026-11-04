@@ -917,6 +917,10 @@ struct Index {
               this.projectListItem(project)
             }
           }, (project: Project) => project.id)
+          ListItem() {
+            Text('长按项目卡片可归档或删除').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+              .width('100%').textAlign(TextAlign.Center).padding({ top: PMSpacing.SM, bottom: PMSpacing.SM })
+          }
         }
         .width('100%')
         .layoutWeight(1)
@@ -3097,6 +3101,7 @@ struct Index {
                   .margin({ top: PMSpacing.SM })
               }
 
+              Text('原文会原样保留').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY).margin({ top: PMSpacing.MD })
               Row({ space: PMSpacing.SM }) {
                 Button('取消').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                   .fontSize(PMFontSize.BUTTON)
@@ -3108,7 +3113,7 @@ struct Index {
                   .onClick(() => {
                     this.showGlobalCapture = false;
                   })
-                Button('沉淀为项目记忆').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
+                Button('保存到项目').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                   .fontSize(PMFontSize.BUTTON)
                   .fontWeight(FontWeight.Medium)
                   .fontColor(PMColors.SURFACE)

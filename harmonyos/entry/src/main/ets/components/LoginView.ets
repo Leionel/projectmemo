@@ -111,6 +111,11 @@ export struct LoginView {
           }.alignItems(HorizontalAlign.Start)
         }.width('100%').margin({ top: PMSpacing.XXL, bottom: PMSpacing.MD })
 
+        if (this.mode === 'login') {
+          Text('人可以下线，\n项目别掉线。').fontSize(28).fontWeight(FontWeight.Bold).fontFamily(PMFontFamily.BRAND_SERIF)
+            .fontColor(PMColors.INK_PRIMARY).lineHeight(40).width('100%')
+        }
+
         Column({ space: PMSpacing.SM }) {
           Text(this.title()).fontSize(PMFontSize.DISPLAY).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY).lineHeight(36)
           Text(this.mode === 'login' ? '用用户名或邮箱登录，接着推进上次的项目。' : this.mode === 'register' ? '用一个账号，保存项目里的积累。' : '我们会将安全链接发送到你的邮箱。')

@@ -21,7 +21,7 @@ test("公开登录页支持用户名或邮箱，且不展示预置凭据或外�
   await page.getByPlaceholder("输入你的密码", { exact: true }).fill(E2E_PASSWORD);
   await page.getByRole("button", { name: "登录工作台" }).click();
   await expect(page).toHaveURL(/\/focus$/);
-  await expect(page.getByRole("button", { name: "E2E 评审身份", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "账号与设置", exact: true })).toBeVisible();
 });
 
 test("已验证邮箱（大小写与空格规范化后）可登录同一账号与项目空间", async ({ page }) => {
@@ -30,7 +30,7 @@ test("已验证邮箱（大小写与空格规范化后）可登录同一账号�
   await page.getByPlaceholder("输入你的密码", { exact: true }).fill(E2E_PASSWORD);
   await page.getByRole("button", { name: "登录工作台" }).click();
   await expect(page).toHaveURL(/\/focus$/);
-  await expect(page.getByRole("button", { name: "E2E 评审身份", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "账号与设置", exact: true })).toBeVisible();
 });
 
 test("未验证邮箱提示重发入口而不是密码错误，且保留已输入的邮箱", async ({ page }) => {

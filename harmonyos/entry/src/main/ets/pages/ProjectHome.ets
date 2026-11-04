@@ -2780,10 +2780,6 @@ struct ProjectHome {
   private TopHeader() {
     PMAppBar({
       title: this.project.title !== '' ? TextFormatters.readableText(this.project.title, '项目名称无法读取') : '项目档案',
-      subtitle: `项目工作区 · ${this.currentTabIndex === 0 ? '概览' :
-        this.currentTabIndex === 1 ? '资料' :
-          this.currentTabIndex === 2 ? '行动' :
-            this.currentTabIndex === 3 ? '委托' : '成果'}`,
       backLabel: '项目',
       backDescription: '返回项目列表',
       showRepository: true,

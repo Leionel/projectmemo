@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ChevronDown, GalleryVerticalEnd, Rows3, Search, SlidersHorizontal, Star, X } from "lucide-react";
+import { ChevronDown, GalleryVerticalEnd, Rows3, Search, Star, X } from "lucide-react";
 import { KnowledgeCardView, type KnowledgeCardData } from "@/components/KnowledgeCardView";
 import { knowledgeTypeLabels, knowledgeTypes, getKnowledgeTypeColor, type KnowledgeTypeValue } from "@/lib/types";
 import { subscribeWorkspaceChange } from "@/lib/client/workspaceEvents";
@@ -96,7 +96,7 @@ export function KnowledgeFeed({ projectId, cards }: { projectId: string; cards: 
 
   return <section id="knowledge-assets" className="scroll-mt-24">
     <div className="mb-5 border-b archive-rule pb-4">
-      <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="archive-label">项目记忆</p><h2 className="mt-3 flex items-center gap-2 text-lg font-black"><SlidersHorizontal size={19} className="text-[var(--navy)]" /> 项目知识资产流</h2></div><span aria-live="polite" className="text-sm font-semibold text-[var(--muted)]">显示 {Math.min(rendered.length, visible.length)} / {visible.length} 张{visible.length !== localCards.length ? `（共 ${localCards.length} 张）` : ""}</span></div>
+      <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="archive-label">项目记忆</p><h2 className="mt-3 flex items-center gap-2 text-lg font-black">项目记忆</h2></div><span aria-live="polite" className="text-sm font-semibold text-[var(--muted)]">显示 {Math.min(rendered.length, visible.length)} / {visible.length} 张{visible.length !== localCards.length ? `（共 ${localCards.length} 张）` : ""}</span></div>
       <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_180px] xl:grid-cols-[minmax(0,1fr)_170px_auto_auto]">
         <label className="relative block"><span className="sr-only">搜索知识资产</span><Search aria-hidden="true" size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)]" /><input value={query} onChange={(event) => { setQuery(event.target.value); setVisibleLimit(PAGE_SIZE); }} className="focus-ring editorial-input w-full py-2.5 pl-10 pr-10 text-sm" placeholder="搜索标题、摘要或关键词" />{query && <button type="button" onClick={() => { setQuery(""); setVisibleLimit(PAGE_SIZE); }} aria-label="清空搜索" className="focus-ring absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-[var(--muted)] hover:bg-[var(--paper-strong)]"><X size={16} /></button>}</label>
         <label><span className="sr-only">按卡片类型筛选</span><select value={type} onChange={(event) => { setTypeSelection({ urlType: initialType, value: event.target.value as KnowledgeTypeValue | "all" }); setVisibleLimit(PAGE_SIZE); }} className="focus-ring editorial-input w-full px-3 py-2.5 text-sm"><option value="all">全部类型</option>{knowledgeTypes.map((value) => <option key={value} value={value} className={getKnowledgeTypeColor(value)}>{knowledgeTypeLabels[value]}</option>)}</select></label>

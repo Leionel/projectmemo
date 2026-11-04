@@ -403,3 +403,18 @@ button:active:enabled,.editorial-button:active { filter:brightness(.94); }
 .ws-state[data-state="SUPERSEDED"]::before { width:8px; height:2px; border-radius:1px; background:var(--muted); }
 .workspace-filters .workspace-search { flex:1 1 100%; }
 @media(max-width:760px) { .ws-card { padding:1rem 1.125rem; } .ws-card-side { flex-basis:100%; flex-direction:row; flex-wrap:wrap; gap:.25rem 1rem; } }
+
+/* Design language, applied system-wide (2026-11 rebuild): quiet labels, softer cards, 10px controls,
+   no decorative heading icons inside the project workspace. Pages without their own design inherit this. */
+.archive-label { color:var(--muted); font-weight:500; letter-spacing:0; text-transform:none; font-size:12px; }
+.archive-label::before { display:none; }
+.archive-label:has(+ h1),.archive-label:has(+ h2),.archive-label:has(+ h3),div:has(> .archive-label + h2) > .archive-label { display:none; }
+.card-surface { border-radius:14px; }
+.editorial-button,.editorial-button-secondary { min-height:2.75rem; border-radius:10px; font-weight:500; }
+.workspace-tool { border-radius:10px; border-color:var(--rule-strong); font-weight:500; }
+.workspace-tool-tinted { border-color:transparent; }
+.artifact-catalog { padding:.25rem 0; }
+.artifact-catalog button[aria-pressed] svg { display:none; }
+.artifact-catalog button[aria-pressed] { border-left:0!important; border-radius:10px; font-weight:400; }
+.artifact-catalog button[aria-pressed="true"] { background:var(--teal-pale); color:var(--ink); font-weight:700; }
+.artifact-catalog button[aria-pressed="false"] { background:transparent; }

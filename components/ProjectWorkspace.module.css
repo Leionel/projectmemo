@@ -33,7 +33,7 @@
 .contextNavigation a[aria-current=page] { color:var(--teal-strong); font-weight:650; }
 .content,.overviewMain,.overviewAside { min-width:0; }
 .pageTitle { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.75rem; margin-bottom:1.25rem; }
-.pageTitle h2 { font-size:1.125rem; font-weight:700; }
+.pageTitle h2 { font-family:"PM Brand","Noto Serif SC","Songti SC",serif; font-size:1.625rem; font-weight:600; line-height:1.35; }
 .pageTitle p { margin-top:.25rem; color:var(--ink-soft); font-size:.875rem; line-height:1.7; }
 .sectionStack { display:grid; gap:1.25rem; }
 .overviewLayout { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:1.5rem; align-items:start; }
@@ -111,3 +111,8 @@
 .summary[aria-label="最近记录"] li > a { padding:.625rem 0; }
 .kbd { margin-left:.25rem; font-size:11px; opacity:.6; font-family:ui-monospace,Consolas,monospace; }
 @media(max-width:640px) { .kbd { display:none; } }
+
+/* Project sub-pages inherit the design: section headings without decorative icons, quiet cards. */
+.content :global(.card-surface) { border-radius:16px; }
+.content :is(h2,h3) > svg:first-child { display:none; }
+.content :global(.card-surface) h2 { font-size:17px; font-weight:700; }

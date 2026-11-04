@@ -161,10 +161,10 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
   }
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-8">
+    <main className="w-full max-w-3xl pb-8">
       <header className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-[var(--ink)]">我的记忆</h1>
+          <h1 className="majestic-heading text-[2rem] font-semibold leading-tight text-[var(--ink)]">我的记忆</h1>
           <p className="mt-1.5 text-sm leading-6 text-[var(--ink-soft)]">用于你自己的项目协作；只保存你明确提供的非敏感内容，来源与使用随时可查。</p>
         </div>
         <span className="hidden items-center gap-1.5 rounded-lg bg-[var(--paper-strong)] px-3 py-1.5 text-xs font-bold text-[var(--ink-soft)] sm:inline-flex">

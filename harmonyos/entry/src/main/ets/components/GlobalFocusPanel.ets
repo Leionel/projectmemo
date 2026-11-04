@@ -12,6 +12,12 @@ import { PMColors, PMRadius } from '../common/DesignTokens';
 import { PMButton, PMStatusPill, PMPageIntro, PMListRow } from './PMReferencePrimitives';
 import { SettingsIcon } from './PMIcons';
 import { FocusAgentLauncher } from './FocusAgentLauncher';
+import { WorkStateBadges } from './WorkStateBadge';
+import { nextActorLabel, primaryActionTone } from '../common/WorkStateBadge';
+import { MissionService } from '../services/MissionService';
+import { MissionReadTarget } from '../models/MissionReadback';
+import { readbackDelta, WorkPacketView, shortPacketTime } from '../models/WorkPacket';
+import { missionToolLabel } from '../common/MissionContract';
 
 @Component
 export struct GlobalFocusPanel {
@@ -25,6 +31,7 @@ export struct GlobalFocusPanel {
   @State private lastKnown: boolean = false;
   @State private includeArchived: boolean = false;
   @State private expandedGroups: string[] = [];
+  @State private heroPacket: WorkPacketView | null = null;
   private generation: number = 0;
   private boundaryTimer:number=-1;
   private service: GlobalFocusService = new GlobalFocusService();
@@ -38,13 +45,31 @@ export struct GlobalFocusPanel {
       const reply = await this.service.read(this.includeArchived);
       if (generation !== this.generation || token !== SessionStore.getToken()) return;
       if (reply.schemaVersion !== 1) throw new Error('当前客户端尚不支持这份焦点摘要，请更新应用');
-      this.view = reply;if(this.boundaryTimer>=0)clearTimeout(this.boundaryTimer);const boundary=reply.primaryContext?.nextBoundary;if(boundary){this.boundaryTimer=setTimeout(()=>{this.refresh();},Math.min(Math.max(Date.parse(boundary)-Date.now()+20,20),2147483647));} this.observedAt = new Date().toLocaleString('zh-CN'); this.lastKnown = false;
+      this.view = reply;if(this.boundaryTimer>=0)clearTimeout(this.boundaryTimer);const boundary=reply.primaryContext?.nextBoundary;if(boundary){this.boundaryTimer=setTimeout(()=>{this.refresh();},Math.min(Math.max(Date.parse(boundary)-Date.now()+20,20),2147483647));} this.observedAt = new Date().toLocaleString('zh-CN'); this.lastKnown = false; this.loadHeroPacket(generation, token);
     } catch (error) {
       if (generation !== this.generation || token !== SessionStore.getToken()) return;
       if (error instanceof ApiError && [401, 403, 404].includes(error.status)) { this.view = new GlobalFocusReply(); this.observedAt = ''; }
       this.lastKnown = this.observedAt !== '';
       this.errorText = (error instanceof ApiError ? error.message : '焦点暂未加载，请检查网络后重试') + (this.lastKnown ? `；保留上次读取 ${this.observedAt} 的历史摘要` : '');
     } finally { if (generation === this.generation) this.busy = false; }
+  }
+  /** 主卡片为委托时读原工作包，只摘要「做到哪 / 为什么停」；读取失败不显示，不用空白冒充无进展。 */
+  private loadHeroPacket(generation: number, token: string): void {
+    const item = this.primary();
+    if (item === null || this.kind(item) !== 'mission') { this.heroPacket = null; return; }
+    new MissionService().readback(item.id, new MissionReadTarget()).then(value => {
+      if (generation !== this.generation || token !== SessionStore.getToken()) return;
+      const packet = readbackDelta(value.readback).workPacket;
+      this.heroPacket = packet !== null && packet.present ? packet : null;
+    }).catch(() => { if (generation === this.generation) this.heroPacket = null; });
+  }
+  private packetDone(packet: WorkPacketView): string {
+    const steps = packet.done.steps;
+    const head = steps.length > 0 ? `${steps.length} 步${steps[0].note !== '' ? ' · ' + steps[0].note : ' · ' + missionToolLabel(steps[0].toolName)}` : '窗口内暂无步骤';
+    return packet.stopped.unsettledPresent ? head + ' · 1 步待结算' : head;
+  }
+  private packetStop(packet: WorkPacketView): string {
+    return packet.blockers.length > 0 ? packet.blockers[0].text : packet.stopped.phase === 'RUNNING' ? '无阻断' : packet.stopped.reasonText;
   }
   private dateLabel(): string {
     const today = new Date();
@@ -173,8 +198,12 @@ export struct GlobalFocusPanel {
   @Builder private Primary(item: FocusEntry) {
     Column({ space: 12 }) {
       Row({ space: 8 }) {
-        PMStatusPill({ label: this.view.primaryContext !== undefined && this.view.primaryContext !== null && this.view.primaryContext.freshness !== 'FRESH' ? '部分摘要暂不可用' : this.kind(item) === 'reminder' ? '待你核对' : this.kind(item) === 'record' ? '最近记录' : this.focusStatusText(item),
+        if (item.workState !== undefined && this.kind(item) === 'mission' && (this.view.primaryContext === undefined || this.view.primaryContext === null || this.view.primaryContext.freshness === 'FRESH')) {
+          WorkStateBadges({ state: item.workState })
+        } else {
+          PMStatusPill({ label: this.view.primaryContext !== undefined && this.view.primaryContext !== null && this.view.primaryContext.freshness !== 'FRESH' ? '部分摘要暂不可用' : this.kind(item) === 'reminder' ? '待你核对' : this.kind(item) === 'record' ? '最近记录' : this.focusStatusText(item),
           tone: item.status === 'PAUSED' || item.status === 'FAILED' ? 'risk' : 'warning' })
+        }
         Text(item.projectTitle).fontSize(12).fontColor(PMColors.INK_TERTIARY).layoutWeight(1)
           .textAlign(TextAlign.End).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
       }.width('100%')
@@ -185,7 +214,30 @@ export struct GlobalFocusPanel {
       }
       if (this.view.primaryContext?.workingObjective) { Text('当前重点：'+this.view.primaryContext!.workingObjective).fontSize(14).fontColor(PMColors.INK_SECONDARY) }
       if (this.primaryDetail(item) !== '') { Text(this.primaryDetail(item)).fontSize(14).lineHeight(22).fontColor(PMColors.INK_SECONDARY).maxLines(4).textOverflow({ overflow: TextOverflow.Ellipsis }) }
-      PMButton({ label: this.view.primaryContext?.nextStep.actionLabel ?? focusActionLabel(item.status, this.kind(item)), onAction: (): void => { this.open(item, this.kind(item)); } })
+      if (this.heroPacket !== null && this.kind(item) === 'mission') {
+        Row() {
+          Column({ space: 2 }) {
+            Text('做到哪').fontSize(11).fontColor(PMColors.INK_TERTIARY)
+            Text(this.packetDone(this.heroPacket)).fontSize(13).fontColor(PMColors.INK_PRIMARY).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+          }.layoutWeight(1).alignItems(HorizontalAlign.Start).padding({ left: 12, right: 12, top: 8, bottom: 8 })
+          Column({ space: 2 }) {
+            Text('为什么停').fontSize(11).fontColor(PMColors.INK_TERTIARY)
+            Text(this.packetStop(this.heroPacket)).fontSize(13).fontColor(PMColors.INK_PRIMARY).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+          }.layoutWeight(1).alignItems(HorizontalAlign.Start).padding({ left: 12, right: 12, top: 8, bottom: 8 })
+            .border({ width: { left: 1 }, color: PMColors.BORDER_SUBTLE })
+        }.width('100%').borderRadius(13).backgroundColor(PMColors.SURFACE_SUBTLE)
+      }
+      PMButton({ label: this.view.primaryContext?.nextStep.actionLabel ?? focusActionLabel(item.status, this.kind(item)), secondary: primaryActionTone(item.workState) !== 'solid', onAction: (): void => { this.open(item, this.kind(item)); } })
+      if (item.workState !== undefined && this.kind(item) === 'mission') {
+        Row() {
+          if (nextActorLabel(item.workState.nextActor) !== '') {
+            Text('下一步：' + nextActorLabel(item.workState.nextActor)).fontSize(12).fontColor(PMColors.INK_TERTIARY)
+          }
+          Blank()
+          Text(item.workState.observedAt !== null && item.workState.observedAt !== '' ? '最近观察 ' + shortPacketTime(item.workState.observedAt) : '尚无成功观察')
+            .fontSize(12).fontColor(PMColors.INK_TERTIARY)
+        }.width('100%')
+      }
       if (this.agentEnabled && this.kind(item) === 'reminder') { PMButton({ label: '问问提醒原因', secondary: true, onAction: (): void => { this.askReason(item); } }) }
       if (this.kind(item) === 'mission') { GoalQuestionPanel({ projectId: item.projectId, missionId: item.id, compact: true }) }
     }.width('100%').alignItems(HorizontalAlign.Start).padding(16).backgroundColor(PMColors.SURFACE)

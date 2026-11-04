@@ -41,7 +41,9 @@ export async function requestProjectDeletion(ownerId: string, projectId: string,
     if (expectedVersion !== project.updatedAt.toISOString()) throw new AppError("PROJECT_CHANGED", "项目已变化，请刷新后重新确认删除", 409);
     const members = await tx.projectMembership.findMany({ where: { projectId }, select: { userId: true } });
     const files = await tx.attachment.findMany({ where: { projectId }, select: { storageKey: true } });
-    const storageFiles = [...new Set([...files.map(f => f.storageKey), ...await listProjectAttachmentFiles(projectId)])];
+    // 只属于本项目的讨论会随项目清除；其中“仅用于本次讨论”的附件原件一并进入文件清理清单。
+    const conversationFiles = await tx.conversationAttachment.findMany({ where: { conversation: { projects: { some: { projectId }, every: { projectId } } } }, select: { storageKey: true } });
+    const storageFiles = [...new Set([...files.map(f => f.storageKey), ...conversationFiles.map(f => f.storageKey), ...await listProjectAttachmentFiles(projectId)])];
     for (const member of members) await invalidateContinuityConsumers(tx, member.userId, { projectId }, ["PROJECT_DELETION"], true);
     await tx.project.update({ where: { id: projectId }, data: { deletionRequestedAt: new Date(), contextRevision: { increment: 1 } } });
     // 立即撤销项目消费资格，清理失败也不能恢复旧权限或继续模型/外部派发。

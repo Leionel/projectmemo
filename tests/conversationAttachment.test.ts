@@ -71,3 +71,17 @@ test("转为项目资料后进入项目附件并移除讨论副本", async () =>
   expect(await listProjectAttachments(f.p.id)).toHaveLength(1);
   expect(await listConversationAttachments(f.actor, f.c.id)).toHaveLength(0);
 });
+
+test("删除项目时只属于该项目的讨论附件原件进入清理清单，记录随讨论删除", async () => {
+  const { requestProjectDeletion, processProjectDeletions } = await import("@/lib/services/projectDeletionService");
+  const f = await fixture("PROJECT");
+  await db.projectMembership.updateMany({ where: { projectId: f.p.id, userId: f.u.id }, data: { role: "OWNER" } });
+  const { attachment } = await uploadConversationAttachment(f.actor, f.c.id, { fileName: "白板.png", mimeType: "image/png", buffer: png });
+  const row = await db.conversationAttachment.findUniqueOrThrow({ where: { id: attachment.id } });
+  const project = await db.project.findUniqueOrThrow({ where: { id: f.p.id } });
+  await requestProjectDeletion(f.u.id, f.p.id, f.p.id, project.updatedAt.toISOString(), f.actor.sessionId);
+  const removed: string[] = [];
+  await processProjectDeletions(5, async key => { removed.push(key); });
+  expect(removed).toContain(row.storageKey);
+  expect(await db.conversationAttachment.findUnique({ where: { id: attachment.id } })).toBeNull();
+});

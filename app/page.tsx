@@ -45,7 +45,7 @@ const continuitySteps = [
   },
   {
     label: "等你",
-    title: "补充结果，或确认原计划",
+    title: "补充结果，或审阅提案",
     text: "原任务、来源和草稿都保留，不另建一个新任务。",
     state: "waiting" as const,
   },

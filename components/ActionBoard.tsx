@@ -293,6 +293,7 @@ function ActionCard(props: ActionCardProps) {
           </div>
         </details>
       </div>}
+      {completed && !action.resultCardId && !action.isSimulated && <p className="mt-3 text-xs text-[var(--muted)]">已完成 · 尚无结果复盘</p>}
       {completed && action.resultCardId && <div className="mt-3.5"><Link className="focus-ring inline-flex items-center gap-1.5 rounded-lg bg-[var(--teal-pale)] px-3.5 py-2 text-xs font-bold text-[var(--teal-strong)] transition hover:bg-[var(--teal)] hover:text-white" href={projectHref(action.projectId, `#card-${action.resultCardId}`)}>查看结果复盘卡<ArrowRight size={14} aria-hidden="true" /></Link></div>}
       {!completed && !cancelled && feasibilityFor === action.id && <ActionFeasibilityPanel projectId={action.projectId} action={action} otherActions={props.allActions} onActionCreated={props.onDependencyChanged} />}
       {!completed && !cancelled && reminderFor === action.id && <ActionReminderPanel projectId={action.projectId} actionId={action.id} onClose={() => props.onToggleReminder(action.id)} />}

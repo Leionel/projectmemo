@@ -10,7 +10,6 @@ import {
   LoaderCircle,
   Check,
   CircleAlert,
-  FolderOpen,
 } from "lucide-react";
 import { workspaceReturnPath } from "@/lib/auth/returnPath";
 import styles from "@/app/auth.module.css";
@@ -173,22 +172,22 @@ function AuthForm({ mode }: { mode: AuthMode }) {
   return (
     <div className={styles.layout}>
       <section className={styles.introduction} aria-label="忆程项目空间">
-        <p className={styles.eyebrow}>你的个人项目空间</p>
-        <h2>
-          把项目，
-          <br />
-          接着做下去。
-        </h2>
-        <p>
-          留下每次讨论、实验和调整。下次回来，能找到上次的进展，也能看清下一步。
-        </p>
-        <div className={styles.projectNote}>
-          <FolderOpen size={21} aria-hidden="true" />
-          <div>
-            <strong>记录放回项目里</strong>
-            <span>查看来源，核对判断，再确认行动。</span>
-          </div>
-        </div>
+        <p className={styles.eyebrow}>忆程 ProjectMemo · 竞赛 · 科研 · 课程项目</p>
+        {mode === "register" ? <>
+          <h2>开启你的<br /><span className={styles.accentLine}>个人项目空间。</span></h2>
+          <ol className={styles.steps}>
+            <li><span>01</span>填写账号与邮箱</li>
+            <li><span>02</span>打开验证邮件里的链接</li>
+            <li><span>03</span>回到这里登录，放进第一份材料</li>
+          </ol>
+        </> : <>
+          <h2>人可以下线，<br /><span className={styles.accentLine}>项目别掉线。</span></h2>
+          <ol className={styles.timeline}>
+            <li><strong>记录放回项目里</strong><span>讨论、实验和调整，原样留下。</span></li>
+            <li><strong>核对判断的来源</strong><span>每条建议都能回到原文。</span></li>
+            <li><strong>由你确认行动</strong><span>重要操作确认后才会应用。</span></li>
+          </ol>
+        </>}
       </section>
       <section className={styles.panel} aria-labelledby="auth-title">
         <header>

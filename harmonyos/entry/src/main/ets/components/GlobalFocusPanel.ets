@@ -10,7 +10,7 @@ import { ApiError } from '../models/Project';
 import { LoadingStateView, ErrorStateView } from './AsyncStateView';
 import { PMColors, PMRadius } from '../common/DesignTokens';
 import { PMButton, PMStatusPill, PMPageIntro, PMListRow } from './PMReferencePrimitives';
-import { SettingsIcon } from './PMIcons';
+import { FilterIcon } from './PMIcons';
 import { FocusAgentLauncher } from './FocusAgentLauncher';
 import { WorkStateBadges } from './WorkStateBadge';
 import { nextActorLabel, primaryActionTone } from '../common/WorkStateBadge';
@@ -317,9 +317,9 @@ export struct GlobalFocusPanel {
           if (this.errorText !== '') { Text(this.errorText).fontSize(12).fontColor(PMColors.RISK) }
           Row({ space: 8 }) {
             PMPageIntro({ eyebrow: this.dateLabel(), title: '今日焦点', compact: true }).layoutWeight(1)
-            Button({ type: ButtonType.Circle }) { SettingsIcon({ iconSize: 18 }) }
-              .width(40).height(40).backgroundColor(Color.Transparent)
-              .accessibilityText('焦点设置：归档筛选与刷新')
+            Button({ type: ButtonType.Circle }) { FilterIcon({ iconSize: 18, isSelected: this.includeArchived }) }
+              .width(40).height(40).backgroundColor(this.includeArchived ? PMColors.BRAND_LIGHT : Color.Transparent)
+              .accessibilityText(this.includeArchived ? '焦点范围：已包含归档项目，可刷新' : '焦点范围：归档筛选与刷新')
               .bindMenu(this.focusMenuItems())
           }.width('100%').alignItems(VerticalAlign.Top)
           if (this.primary() !== null) { this.Primary(this.primary()!) }

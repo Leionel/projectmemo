@@ -15,7 +15,7 @@ import { fileIo, fileUri, picker } from '@kit.CoreFileKit';
 import { camera, cameraPicker } from '@kit.CameraKit';
 import { common } from '@kit.AbilityKit';
 import { Project, ProjectDashboard, ApiError, ReadinessItem, ProjectUpdateInput } from '../models/Project';
-import { ProjectDetail, KnowledgeCard, CardLink, IncomingCardLink, TemporalTimelineResponse, TemporalDecisionItem } from '../models/Memory';
+import { ProjectDetail, KnowledgeCard, CardLink, IncomingCardLink, TemporalTimelineResponse, TemporalDecisionItem, TemporalCardSummary } from '../models/Memory';
 import { Milestone, Deliverable, DeliverableEvidence } from '../models/Milestone';
 import { Intervention, ProposedAction } from '../models/Intervention';
 import { ActionCreateInput, ActionItem } from '../models/Action';
@@ -170,6 +170,9 @@ struct ProjectHome {
   @State actionEditError: string = '';
   @State attachmentLoadError: string = '';
   @State actionStatusFilter: string = 'ACTIVE';
+  // 决策演化：取时态投影里最近一组“被取代 → 替代”，只读展示，关系确认在结论演进页完成
+  @State decisionOld: TemporalCardSummary | null = null;
+  @State decisionNew: TemporalCardSummary | null = null;
   @State lastUploadedAttachmentId: string = '';
   @State milestoneLoadError: string = '';
 
@@ -725,7 +728,11 @@ struct ProjectHome {
       // 项目详情不含时态；与 Web 资料页一致，用 decisions/timeline 投影补齐，读取失败时不显示时态而不是默认“当前有效”。
       const timelineP = this.memoryService.getDecisionTimeline(this.projectId).catch(() => null);
       const res = await Promise.all([detailP, listP, intervP, actionP, artifactP, chatP, milestoneP, attachmentP]);
-      applyTemporalStates(res[0].cards, await timelineP);
+      const timeline = await timelineP;
+      applyTemporalStates(res[0].cards, timeline);
+      const pair = timeline !== null ? timeline.items.find((item: TemporalDecisionItem) => item.supersededBy !== null && item.supersededBy.id !== item.card.id) : undefined;
+      this.decisionOld = pair !== undefined ? pair.card : null;
+      this.decisionNew = pair !== undefined ? pair.supersededBy : null;
       const missionSummary = await missionP;
       const contextReply = await contextP;
       if (contextGeneration !== this.agentContextGeneration || contextToken !== SessionStore.getToken() || contextProject !== this.projectId) return;
@@ -4367,6 +4374,38 @@ if (this.attachmentSearchOpen) {
   }
 
   @Builder
+  private DecisionSide(label: string, card: TemporalCardSummary, current: boolean) {
+    Column({ space: 4 }) {
+      Row() {
+        Text(label + (card.createdAt.length >= 10 ? ' · ' + card.createdAt.substring(5, 10).replace('-', '/') : ''))
+          .fontSize(12).fontColor(current ? PMColors.BRAND : PMColors.INK_TERTIARY).layoutWeight(1)
+        Text(current ? '当前时态' : '已被取代').fontSize(12)
+          .fontWeight(current ? FontWeight.Medium : FontWeight.Regular)
+          .fontColor(current ? PMColors.BRAND : PMColors.INK_TERTIARY)
+      }.width('100%')
+      Text(TextFormatters.readableText(card.title, '决策标题无法读取'))
+        .fontSize(14).fontWeight(current ? FontWeight.Medium : FontWeight.Regular)
+        .fontColor(current ? PMColors.INK_PRIMARY : PMColors.INK_SECONDARY)
+        .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+    }.width('100%').alignItems(HorizontalAlign.Start).padding(12).borderRadius(12)
+      .backgroundColor(current ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+  }
+
+  @Builder
+  private DecisionEvolutionCard() {
+    Column({ space: 8 }) {
+      Text('决策演化').fontSize(16).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+      this.DecisionSide('原决策', this.decisionOld!, false)
+      Text('↓').fontSize(14).fontColor(PMColors.INK_TERTIARY).width('100%').textAlign(TextAlign.Center)
+      this.DecisionSide('替代决策', this.decisionNew!, true)
+      Text('查看结论演进 →').fontSize(13).fontColor(PMColors.BRAND).height(44)
+        .accessibilityText('打开结论演进，核对或确认决策关系')
+        .onClick(() => { router.pushUrl({ url: 'pages/MemoryTimeline', params: { projectId: this.projectId } }); })
+    }.width('100%').alignItems(HorizontalAlign.Start).padding(16).backgroundColor(PMColors.SURFACE)
+      .borderRadius(16).border({ width: 1, color: PMColors.BORDER_SUBTLE })
+  }
+
+  @Builder
   private MemoryView() {
     Column() {
       // 材料工具区：范围切换（项目记忆/附件原件）、搜索、新建与类型筛选收在同一个头部，
@@ -4486,6 +4525,9 @@ if (this.attachmentSearchOpen) {
       }
       // 卡片流
       List({ space: PMSpacing.MD }) {
+        if (this.decisionOld !== null && this.decisionNew !== null && this.requestedCaptureId === '' && this.memorySearchQuery.trim() === '' && this.selectedMemoryType === 'all') {
+          ListItem() { this.DecisionEvolutionCard() }
+        }
         // 空态不能用空白代替：区分「还没有记忆」和「当前筛选下没有记忆」
         if (this.requestedCaptureId === '' && this.getFilteredCards().length === 0 && this.memorySearchQuery.trim() === '') {
           ListItem() {

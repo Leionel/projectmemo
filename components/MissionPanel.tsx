@@ -23,6 +23,7 @@ import { MissionContinuation } from "./MissionContinuation";
 import { MissionResearchScopeEditor } from "./MissionResearchScopeEditor";
 import { MissionConstraintsEditor } from "./MissionConstraintsEditor";
 import {MissionReadback} from "./MissionReadback";
+import {MissionJudgmentChanges} from "./MissionJudgmentChanges";
 import type {FitPremise,EvidenceReview} from "@/lib/types/missionEvidenceFit";
 import type {MissionReadTarget} from "@/lib/mission/navigation";
 import {failedReadState,type ReadState} from "@/lib/client/readState";
@@ -143,6 +144,7 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
      </div>
     </header>
     <MissionReadback key={`readback:${mission.id}`} refreshKey={readbackRefreshKey} missionVersion={mission.version} missionId={mission.id} target={mission.id===initialMissionId?readTarget:undefined}/>
+    <MissionJudgmentChanges key={`judgments:${mission.id}`} projectId={projectId} missionId={mission.id} missionVersion={mission.version}/>
 {mission.status==="PAUSED"&&mission.budget&&mission.used&&<MissionBudgetReview budget={mission.budget} used={mission.used} busy={busy} onReview={totals=>void perform(async()=>{await api(`/api/missions/${mission.id}/budget-review`,"POST",{requestId:requestId({kind:"budget",version:mission.version,totals}),expectedVersion:mission.version,totals});await refresh(mission.id);})}/>}
     {mission.error&&<section id="mission-error-block" className={styles.stoppedBlock} role={mission.status==="PAUSED"||mission.status==="FAILED"?"alert":"status"} aria-label="暂停原因与恢复条件">
       <strong>{mission.status==="PAUSED"?"执行已暂停，已有进度已保留":mission.status==="FAILED"?"执行失败，已执行的结果保留":"本次执行需要恢复，已有进度已保留"}</strong>

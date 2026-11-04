@@ -101,6 +101,12 @@
 .composer .step > button { justify-self:start; }
 .stepHint { color:var(--muted); font-size:.75rem; line-height:1.6; }
 .backgroundWarn { color:var(--amber); font-size:.8125rem; font-weight:600; line-height:1.6; }
+.judgmentChanges { display:grid; gap:.625rem; margin:1rem 1.5rem 0; padding:.875rem 1rem; border:1px solid var(--rule); border-radius:.5rem; }
+.judgmentChanges ul { display:grid; gap:.75rem; }
+.judgmentChanges li { display:grid; gap:.25rem; min-width:0; font-size:.875rem; line-height:1.6; overflow-wrap:anywhere; }
+.judgmentState { font-size:.8125rem; color:var(--ink-soft); }
+.judgmentState time { color:var(--muted); }
+.judgmentPrevious { color:var(--muted); text-decoration:line-through; text-decoration-color:var(--rule); }
 .stoppedBlock { display:grid; gap:.75rem; margin-top:1.25rem; border:1px solid color-mix(in srgb,var(--brick) 55%,var(--rule)); border-left:3px solid var(--brick); border-radius:.5rem; padding:1rem; background:var(--brick-pale); color:var(--brick); }
 .stoppedBlock > strong { font-size:.875rem; }
 .stoppedBlock > p { color:var(--ink-soft); font-size:.8125rem; line-height:1.7; overflow-wrap:anywhere; }

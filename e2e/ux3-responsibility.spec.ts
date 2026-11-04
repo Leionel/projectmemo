@@ -24,7 +24,7 @@ test("UX3责任：原页面保存目标与重点、刷新读回；另一端旧�
     await panel.getByRole("button",{name:"确认修订（失效原有提案）",exact:true}).click();
     expect((await saved).status()).toBe(200);
     await page.reload();
-    await expect(page.getByText("先核对目标设备，保留原结果链",{exact:true}).first()).toBeVisible();
+    await expect(page.getByText("先核对目标设备，保留原结果链",{exact:true}).locator("visible=true").first()).toBeVisible();
     const current=await(await page.request.get(`/api/missions/${f.missionId}/responsibility`,{headers})).json();
     expect(current.responsibility.workingObjective).toBe("先查启动日志");
     const stale=await page.request.patch(`/api/missions/${f.missionId}/responsibility`,{headers,data:{requestId:"stale-other-device",expectedControlVersion:original.responsibility.controlVersion,goal:"旧端目标"}});

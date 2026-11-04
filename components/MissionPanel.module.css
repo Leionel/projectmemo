@@ -136,3 +136,10 @@
 .materialReview { display:grid; gap:.75rem; padding-top:.75rem; border-top:1px solid var(--rule); }
 .questionInput summary { cursor:pointer; color:var(--teal-strong); }
 @media(max-width:640px) { .questionInput textarea { font-size:1rem; } .questionInput :is(button,a) { min-height:2.75rem; } }
+
+.versionLine { font-size:.75rem; color:var(--muted); font-variant-numeric:tabular-nums; }
+.nextStep { display:grid; gap:.875rem; margin:1rem 1.5rem 0; padding:1rem 1.125rem; border:1px solid color-mix(in srgb,var(--amber) 35%,var(--rule)); border-radius:.75rem; background:color-mix(in srgb,var(--amber) 5%,var(--card-bg)); }
+.nextStep > section, .nextStep > div[data-mission-approval-id] { margin:0; }
+.nextHead { display:grid; gap:.25rem; }
+.nextHead > p:first-child { font-size:.75rem; font-weight:600; color:var(--amber); }
+.nextHead h4 { font-size:1.0625rem; font-weight:700; line-height:1.45; }

@@ -1,4 +1,5 @@
 import { publishConversationDigest } from "@/lib/memory/conversationDigest";
+import { conversationAttachmentContext } from "@/lib/services/conversationAttachmentService";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { json, jsonHash } from "@/lib/mission/contracts";
@@ -93,7 +94,9 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
       readManifestJson: json({ ...(directiveAdmission ? { directiveAdmission } : {}), ...(options?.defer ? { deferred: true } : {}), ...(coord ? { coordination: coord } : {}) }) } });
     if (target) await tx.conversationProject.upsert({ where: { conversationId_projectId: { conversationId: id, projectId: target } },
       create: { conversationId: id, projectId: target }, update: {} });
-    await appendConversationMessage(tx, id, actor.userId, "USER", input.message,
+    const attached = input.attachmentIds?.length ? await tx.conversationAttachment.findMany({ where: { id: { in: input.attachmentIds }, conversationId: id, ownerUserId: actor.userId }, select: { fileName: true } }) : [];
+    if (input.attachmentIds?.length && attached.length !== input.attachmentIds.length) throw new AppError("ATTACHMENT_NOT_FOUND", "有附件已移除，请重新选择", 404);
+    await appendConversationMessage(tx, id, actor.userId, "USER", input.message + (attached.length ? "\n\n附件：" + attached.map(a => "《" + a.fileName + "》").join("、") : ""),
       { ...emptyBlocks(), observedProjectIds: target ? [target] : [] }, turn.id);
     await tx.conversation.update({ where: { id }, data: { activeTurnId: turn.id, version: { increment: 1 } } });
     return { turn, replay: false };
@@ -143,6 +146,8 @@ async function executeTurnGeneration(actor: ConversationActor, id: string, turn:
   actor = { ...actor, conversationId: id };
   const input = conversationTurnSchema.parse(turn.inputJson);
   assertTurnLease(turn);
+  const attachmentContext = await conversationAttachmentContext(id, actor.userId, input.attachmentIds ?? []);
+  // 附件文字只作为单独资料交给模型；规则匹配（选项、结果、限制语、指令、网址）仍只读用户原话。
   try {
     const c = await ownedConversation(actor, id);
     const admission = record(record(turn.readManifestJson).directiveAdmission);
@@ -236,7 +241,7 @@ async function executeTurnGeneration(actor: ConversationActor, id: string, turn:
     await mutateTurn(actor, id, turn.id, manifest => ({ ...manifest, sourceRevisionReadSet: directory.summaries.map(p => ({ projectId: p.id, revision: p.sourceRevision, role: p.scopeRole })) }));
     const modelEnabled = input.llmContextApproved && process.env.LLM_MODE === "openai-compatible" && !pinned.some(rule => /(?:\u4e0d\u8981|\u7981\u6b62|\u4e0d\u5f97|\u4e0d\u5141\u8bb8)(?:\u8c03\u7528\u6a21\u578b|\u4ed8\u8d39\u8c03\u7528)/.test(rule));
     const r4 = modelEnabled && !ambiguous && (isFeatureEnabled("FOCUS_AGENT_R4_ENABLED", false) || !!coordination(turn))
-      ? await investigateConversation(actor, id, turn.id, { message: input.message, mode: input.investigationMode, focus: focused, evaluationVariant: evaluation?.variant,
+      ? await investigateConversation(actor, id, turn.id, { message: input.message, attachmentText: attachmentContext.text || undefined, mode: input.investigationMode, focus: focused, evaluationVariant: evaluation?.variant,
         constraints: pinned, frozenRefs, directory, exactRef, userProvidedUrls: input.userProvidedUrls,
         priorWebSources: frozenMessage?.sources.filter(s => !!s.external && (!frozenMessage?.citations?.length || frozenMessage.citations.some(c => c.sourceId === s.id))).slice(0, 4),
         recentDialogue: continuity.some(v => v.directives.some(d => d.kind === "USE_SUPPRESSION")) ? [] : history.messages.filter(m => !m.restricted).map(m => ({ role: m.role, content: m.content })) }) : null;
@@ -256,7 +261,7 @@ async function executeTurnGeneration(actor: ConversationActor, id: string, turn:
           longTermGoal: p.preference.longTermGoal.slice(0, 80), notes: p.preference.notes.slice(0, 80) } : null }));
       const r = await conversationModel(actor, turn.id, "ROUTE", focusSystemPrompt +
         "\n按问题选择至多3个项目，intent=ANSWER/CLARIFY/PROPOSE_ACTION/OPEN_MISSION；query≤256字。返回 {intent,projectIds,query}。\n" +
-        JSON.stringify({ message: input.message, focus: focused, frozenRefs, pinnedConstraints: pinned, directory: compact,
+        JSON.stringify({ message: input.message, ...(attachmentContext.text ? { conversationAttachments: attachmentContext.text } : {}), focus: focused, frozenRefs, pinnedConstraints: pinned, directory: compact,
           coverage: directory.coverage }), routeSchema);
       route = r.data; provider = r.provider;
       const allowed = new Set(directory.summaries.map(p => p.id));
@@ -282,7 +287,7 @@ async function executeTurnGeneration(actor: ConversationActor, id: string, turn:
       const r = r4 ? { data: r4.modelAnswer!, provider: r4.provider } : await conversationModel(actor, turn.id, "ANSWER", focusSystemPrompt +
         "\n返回 {advice,recommendedProjectId,observations:[{sourceId,quote}],priorities:[{projectId,tradeoff}],action:null或{projectId,title,description,priority}}。" +
         "仅 intent=PROPOSE_ACTION 可以提出 action。未知字段不补造。\n" +
-        JSON.stringify({ message: input.message, intent: route.intent, focus: focused, pinnedConstraints: pinned,
+        JSON.stringify({ message: input.message, ...(attachmentContext.text ? { conversationAttachments: attachmentContext.text } : {}), intent: route.intent, focus: focused, pinnedConstraints: pinned,
           recentDialogue: responseHistory.messages.filter(m => !m.restricted).slice(-6).map(m => ({ role: m.role, text: m.content.slice(0, 400), refs: m.refs.slice(0, 4) })),
           projects: directory.summaries.filter(p => route.projectIds.includes(p.id)).map(p => ({
             id: p.id, title: p.title, goal: p.goal.slice(0, 300), priority: p.priority,

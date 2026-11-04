@@ -21,6 +21,8 @@ export const conversationTurnSchema = z.object({
   userProvidedUrls: z.array(z.string().min(1).max(8192)).max(5).optional(),
   llmContextApproved: z.boolean().default(false),
   investigationMode: z.enum(["QUICK", "STANDARD", "DEEP"]).optional(),
+  /** 本轮引用的“仅用于对话”附件；只在发给模型的内容里附上提取文字。 */
+  attachmentIds: z.array(id).max(5).optional(),
 }).strict();
 export const conversationConfirmSchema = z.object({
   requestId: id, proposalHash: z.string().regex(/^[a-f0-9]{64}$/),

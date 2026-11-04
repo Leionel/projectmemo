@@ -28,7 +28,7 @@ test("accepts a proactive reminder and asks the memory copilot", async ({ page }
   await openProjectDirectory(page);await page.getByRole("navigation", {name:"项目功能导航"}).getByRole("link",{name:"知识与问答"}).click();
   const copilot = page.locator("#memory-copilot");
   if (process.env.FOCUS_AGENT_ENABLED === "true") {
-    await page.getByRole("button", { name: "问忆程，打开项目协作对话", exact: true }).click();
+    await page.getByRole("link", { name: "问忆程", exact: true }).click();
     const discussion = page.getByRole("region", { name: "问忆程", exact: true });
     await expect(discussion.getByText("正在读取讨论…")).toHaveCount(0);
     if (await discussion.getByRole("button", { name: "开始讨论", exact: true }).isVisible()) await discussion.getByRole("button", { name: "开始讨论", exact: true }).click();

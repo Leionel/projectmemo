@@ -11,7 +11,7 @@ import type {ActionItemData,InterventionData,AgentEvidence,ProposedAction,Projec
 export const loadWorkspaceProject=cache(async(id:string)=>{
  const user=await getSessionUser();if(!user)return null;
  if(!(await hasProjectAccess(user.id,id)))notFound();
- const project=await db.project.findUnique({where:{id},include:{memberships:{where:{userId:user.id},select:{role:true}}}});if(!project)notFound();
+ const project=await db.project.findUnique({where:{id},include:{memberships:{where:{userId:user.id},select:{role:true}},_count:{select:{cards:{where:{archivedAt:null}},actions:{where:{status:{not:"DONE"}}},artifacts:true}}}});if(!project)notFound();
  return {user,project,missionOwner:project.memberships.some(m=>m.role==="OWNER")};
 });
 export async function requireWorkspaceProject(id:string,section=""){

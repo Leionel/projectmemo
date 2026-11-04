@@ -30,7 +30,7 @@ import { MemoryLifecycleService } from '../services/MemoryLifecycleService';
 import { InterventionPolicyService } from '../services/InterventionPolicyService';
 import { ProjectStateService } from '../services/ProjectStateService';
 import { MeetingImportSheet } from '../components/MeetingImportSheet';
-import { deadlineReminderConflict, workPhaseLabel } from '../common/GlobalFocusPresentation';
+import { deadlineReminderConflict } from '../common/GlobalFocusPresentation';
 import { DateOnly } from '../common/DateOnly';
 import { PolicyResponse, PolicySuggestion, PolicyUpdateBody } from '../models/Intervention';
 import { ActionService } from '../services/ActionService';
@@ -1704,7 +1704,7 @@ struct ProjectHome {
     if (state !== undefined) {
       if (state.reasonCode === 'STOP_REQUESTED_IN_FLIGHT') { return '停止请求待结算'; }
       if (state.reasonCode === 'DAILY_BUDGET_WAITING') { return '等待额度恢复'; }
-      return workPhaseLabel(state.phase);
+      return workStateLabel(state);
     }
     return missionStatusLabel(this.homeMission?.status ?? '');
   }

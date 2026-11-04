@@ -1,4 +1,4 @@
-import { workPhaseLabel } from '../common/GlobalFocusPresentation';
+import { WorkStateBadges } from './WorkStateBadge';
 import { failedReadState } from '../common/ReadState';
 import { ProjectAgentContextService } from '../services/ProjectAgentContextService';
 import router from '@ohos.router';
@@ -103,8 +103,11 @@ export struct MissionPanel {
   private MissionRow(item: MissionWorkspaceItem) {
     Column({ space: 8 }) {
       Row({ space: 8 }) {
-        PMStatusPill({ label: item.workState ? workPhaseLabel(item.workState!.phase) : missionStatusLabel(item.status),
-          tone: item.status === 'FAILED' || item.status === 'PAUSED' ? 'risk' : 'brand' })
+        if (item.workState) {
+          WorkStateBadges({ state: item.workState! })
+        } else {
+          PMStatusPill({ label: missionStatusLabel(item.status), tone: item.status === 'FAILED' || item.status === 'PAUSED' ? 'risk' : 'brand' })
+        }
         Blank()
         if (this.shortTime(item.activityAt) !== '') { Text('更新于 ' + this.shortTime(item.activityAt)).fontSize(11).fontColor(PMColors.INK_TERTIARY) }
       }.width('100%')

@@ -1,0 +1,13 @@
+.group { display:inline-flex; flex-wrap:wrap; align-items:center; gap:.375rem; min-width:0; }
+.badge { display:inline-flex; align-items:center; gap:.3rem; padding:.0625rem .5625rem; border:1px solid transparent; border-radius:999px; font-size:.75rem; font-weight:550; line-height:1.6; white-space:nowrap; }
+.dot { width:.3125rem; height:.3125rem; border-radius:50%; background:currentColor; flex-shrink:0; }
+
+.badge[data-tone="user"] { background:color-mix(in srgb,var(--amber) 12%,var(--card-bg)); color:var(--amber); }
+.badge[data-tone="agent"],.badge[data-tone="observing"],.badge[data-tone="done"] { background:var(--teal-pale); color:var(--teal-strong); }
+.badge[data-tone="observing"] .dot { background:transparent; border:1.5px solid currentColor; box-sizing:border-box; }
+.badge[data-tone="queued"],.badge[data-tone="paused"],.badge[data-tone="cancelled"] { background:var(--paper); color:var(--ink-soft); border-color:var(--rule); }
+.badge[data-tone="paused"] .dot { background:var(--muted); }
+.badge[data-tone="failed"] { background:var(--brick-pale); color:var(--brick); }
+.badge[data-tone="system"] { background:transparent; color:var(--ink-soft); border:1px dashed var(--rule-strong); }
+
+@media (forced-colors: active) { .badge { border-color:CanvasText; } }

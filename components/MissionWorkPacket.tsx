@@ -14,6 +14,8 @@ import { useState } from "react";
 import { workPhaseLabel } from "@/lib/client/focusPresentation";
 import { missionStatusLabels } from "@/lib/mission/presentation";
 import { MissionBasisEvidence } from "./MissionBasisEvidence";
+import { WorkStateBadges } from "./WorkStateBadges";
+import { nextActorLabel, primaryActionTone } from "@/lib/client/workStateBadge";
 import type { MissionReadback as ReadbackData } from "@/lib/mission/readback";
 import type { WorkState } from "@/lib/types/workState";
 import type {
@@ -127,7 +129,7 @@ const COVERAGE_LABELS: Record<string, string> = {
   EVIDENCE_REVIEWS: "证据审查",
 };
 
-const STEP_STATUS_LABELS: Record<string, string> = {
+export const STEP_STATUS_LABELS: Record<string, string> = {
   READY: "准备执行",
   RUNNING: "正在执行",
   WAITING_APPROVAL: "待批准",
@@ -354,6 +356,10 @@ export function MissionWorkPacket({ readback, packet, missionId, onReload, disab
 
   return (
     <section aria-label="原任务四问工作包" className={styles.root}>
+      <div className={styles.stateRow}>
+        <WorkStateBadges state={stopped.workState} />
+        {nextActorLabel(next.nextActor) && <span className={styles.muted}>下一步：{nextActorLabel(next.nextActor)}</span>}
+      </div>
       {versionAdvanced && (
         <p role="alert" className={styles.alert}>
           读取期间版本已推进，提交前必须重新核对。
@@ -369,6 +375,7 @@ export function MissionWorkPacket({ readback, packet, missionId, onReload, disab
           <button
             type="button"
             className={styles.primary}
+            data-tone={versionAdvanced ? "solid" : primaryActionTone({ phase: stopped.workState.phase, nextActor: next.nextActor })}
             data-mission-primary-action={versionAdvanced ? "RELOAD" : action?.kind}
             disabled={disabled}
             onClick={runAction}

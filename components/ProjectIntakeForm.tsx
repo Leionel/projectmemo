@@ -236,7 +236,14 @@ export function ProjectIntakeForm({ ownerId, initialDraftId, openDrafts }: { own
     finally { setBusy(""); }
   }
 
+  // 建项步骤只反映当前已发生的状态：无材料 → 放材料；有材料未形成理解 → 看它读懂了什么；理解已形成 → 整体纠正；已建项 → 确认建项。
+  const step = projectId ? 4 : !preview || preview.materials.length === 0 ? 1 : preview.understandingState === "READY" ? 3 : 2;
   return <div className="mt-8 space-y-6">
+    <ol aria-label="建项步骤" className="flex flex-wrap gap-2 text-xs">
+      {["放材料", "看它读懂了什么", "整体纠正", "确认建项"].map((label, index) => <li key={label} aria-current={index + 1 === step ? "step" : undefined}
+        className={"inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 " + (index + 1 === step ? "border-[var(--teal)] bg-[var(--teal-pale)] font-bold text-[var(--teal-strong)]" : index + 1 < step ? "border-[var(--rule)] text-[var(--ink-soft)]" : "border-[var(--rule)] text-[var(--muted)]")}>
+        <span className="font-mono">{index + 1}</span>{label}</li>)}
+    </ol>
     {openDrafts.length > 0 && !draftId && <section className="card-surface rounded-lg p-5" aria-label="继续未完成的材料预览">
       <p className="archive-label">继续上次的材料</p>
       <div className="mt-3 space-y-2">
@@ -285,7 +292,7 @@ export function ProjectIntakeForm({ ownerId, initialDraftId, openDrafts }: { own
     <section className="card-surface rounded-lg p-6 sm:p-8" aria-label="项目理解">
       <div className="flex flex-wrap items-end justify-between gap-3 border-b archive-rule pb-5">
         <div>
-          <p className="archive-label">第二步 · 看它读懂了什么</p>
+          <p className="archive-label">第二步 · 看它读懂了什么{preview && preview.understandingState === "READY" ? ` · 项目理解第 ${preview.revision} 版` : ""}</p>
           <p className="mt-3 text-sm leading-6 text-[var(--ink-soft)]">{preview ? statusText(preview) : "加入材料后，让 Agent 说出它对项目的理解。"}</p>
         </div>
         <button onClick={understand} disabled={!canUnderstand || !consent || busy === "understand"} className="focus-ring editorial-button disabled:opacity-60">

@@ -1,4 +1,4 @@
-import { MissionEvent, MissionConstraints, MissionCompletionSummary, MissionCompletionFact } from '../models/Mission';
+import { MissionEvent, MissionConstraints, MissionCompletionSummary, MissionCompletionFact, MissionCapabilities } from '../models/Mission';
 
 export function missionStatusLabel(status: string): string {
   const labels: Record<string, string> = { 'READY': '等待执行', 'RUNNING': '执行中', 'WAITING_INPUT': '等待补充资料',
@@ -63,4 +63,27 @@ export function missionToolLabel(tool: string): string {
     'web_search': '搜索公开资料', 'web_fetch': '读取公开来源', 'save_mission_output': '保存草稿',
     'propose_action': '提议行动', 'create_action': '创建行动', 'inspect_action': '检查行动结果', 'bind_project_sources': '绑定补充资料' };
   return labels[tool] ?? '处理任务资料';
+}
+
+/** 创建委托前的一行实情，与 Web `missionBackgroundNotice` 同口径；旧服务缺字段时返回空串，不作推断。 */
+export function missionBackgroundNotice(caps: MissionCapabilities | null): string {
+  if (caps === null) return '';
+  if (caps.cloud !== undefined && caps.cloud !== null && !caps.cloud.available) {
+    const reasons: Record<string, string> = {
+      'RULE_MODE': '当前是本地规则模式，委托不会调用模型执行',
+      'NOT_CONFIGURED': '云模型尚未配置，委托暂时无法执行',
+      'ACCOUNT_NOT_ELIGIBLE': '账号还没有云模型额度（需要先验证邮箱），委托暂时无法执行',
+      'DAILY_QUOTA_EXHAUSTED': '今日云模型额度已用完，委托要等额度恢复后才会执行'
+    };
+    return reasons[caps.cloud.reason] ?? '云模型当前不可用，委托暂时无法执行';
+  }
+  if (caps.background === undefined || caps.background === null) return '';
+  if (caps.background.worker === 'RECENT' && caps.background.inspecting) return '后台在线，关闭应用后会按授权继续执行';
+  if (caps.background.worker === 'RECENT') return '后台在线，但最近一次巡检没有完成；创建后可能需要稍后回来手动继续';
+  return '暂未检测到后台运行，关闭应用后不会自动继续；可以稍后回来手动继续';
+}
+
+export function missionBackgroundOk(caps: MissionCapabilities | null): boolean {
+  return caps !== null && (caps.cloud === undefined || caps.cloud === null || caps.cloud.available) &&
+    caps.background !== undefined && caps.background !== null && caps.background.worker === 'RECENT' && caps.background.inspecting;
 }

@@ -11,7 +11,7 @@ import { MissionDocumentSources } from "./MissionDocumentSources";
 import {DecisionScenarios} from "./DecisionScenarios";
 import {ExperienceSuggestions,type ExperienceSuggestion} from "./ExperienceSuggestions";
 import {GoalQuestion} from "./GoalQuestion";
-import {missionStatusLabels,missionToolLabels,missionCompletionFacts,missionErrorPhaseLabel,type MissionCompletionSummary,type MissionRecovery} from "@/lib/mission/presentation";
+import {missionStatusLabels,missionToolLabels,missionCompletionFacts,missionErrorPhaseLabel,missionBackgroundNotice,type MissionBackground,type MissionCompletionSummary,type MissionRecovery} from "@/lib/mission/presentation";
 import {projectHref} from "@/lib/projectNavigation";
 import { useCallback,useEffect,useRef,useState,useSyncExternalStore } from "react";
 import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
@@ -62,6 +62,9 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
  const refresh=useCallback(async(id?:string)=>{const generation=++readGeneration.current;if(id)selectedId.current=id;const result=await api(`/api/missions?projectId=${encodeURIComponent(projectId)}`);if(generation!==readGeneration.current)return;setList(result.missions);setNextCursor(result.nextCursor??null);if(!id){hasRead.current=true;setReadState("fresh");setCheckedAt(Date.now());}if(id){const [d,s]=await Promise.all([api(`/api/missions/${id}`),api(`/api/missions/${id}/sources`)]);if(generation!==readGeneration.current||selectedId.current!==id)return;if(d.mission.projectId!==projectId)throw new Error("此委托不属于当前项目，请从列表选择");hasRead.current=true;setReadState("fresh");setCheckedAt(Date.now());setMission(d.mission);setSources(s.sources);if(questionId.current!==d.mission.question?.id){questionId.current=d.mission.question?.id;}}},[projectId]);
  useEffect(()=>{let live=true;void Promise.resolve().then(()=>{if(live&&initialMissionId)return refresh(initialMissionId);}).catch(e=>{if(live)handleError(e);});return()=>{live=false;};},[initialMissionId,refresh,handleError]);
  useEffect(()=>{let live=true;const generation=readGeneration.current;void api(`/api/missions?projectId=${encodeURIComponent(projectId)}`).then(v=>{if(live&&generation===readGeneration.current){setList(v.missions);setNextCursor(v.nextCursor??null);hasRead.current=true;setReadState("fresh");const first=v.missions[0]?.id;if(!initialMissionId&&!selectedId.current&&first){void refresh(first).catch(e=>{if(live&&selectedId.current===first)handleError(e);});}}}).catch(e=>{if(live&&generation===readGeneration.current)handleError(e);});return()=>{live=false;};},[projectId,initialMissionId,refresh,handleError]);
+ const [background,setBackground]=useState<MissionBackground|null>(null);
+ useEffect(()=>{let live=true;void api(`/api/missions/capabilities?projectId=${encodeURIComponent(projectId)}`).then(v=>{if(live)setBackground(v as MissionBackground);}).catch(()=>{if(live)setBackground(null);});return()=>{live=false;};},[projectId]);
+ const backgroundNotice=background?missionBackgroundNotice(background):null;
  useEffect(()=>{if(!mission?.id)return;let live=true,inFlight=false;const id=mission.id;const timer=setInterval(()=>{if(document.hidden||inFlight||pending.current||selectedId.current!==id)return;inFlight=true;const generation=readGeneration.current;void Promise.all([api(`/api/missions/${id}`),api(`/api/missions/${id}/sources`)]).then(([v,s])=>{if(live&&selectedId.current===id&&generation===readGeneration.current){hasRead.current=true;setReadState("fresh");setCheckedAt(Date.now());setMission(current=>current&&current.version>v.mission.version?current:v.mission);setList(rows=>rows.map(row=>row.id===id?{...row,status:v.mission.status}:row));setSources(s.sources);if(questionId.current!==v.mission.question?.id){questionId.current=v.mission.question?.id;}}}).catch(e=>{if(live&&selectedId.current===id&&generation===readGeneration.current)handleError(e);}).finally(()=>{inFlight=false;});},2000);return()=>{live=false;clearInterval(timer);};},[mission?.id,handleError]);
  async function perform(work:()=>Promise<unknown>,read=false){if(pending.current)return;if(!read&&readState!=="fresh"){setError("请先重新读取当前委托，再提交操作；填写内容仍保留。");return;}pending.current=true;readGeneration.current++;setBusy(true);setError("");try{await work();}catch(e){
  if(e instanceof Error&&"status" in e&&e.status===0){
@@ -110,6 +113,7 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
       </details>
      </fieldset>
      <p className={styles.stepHint}>提交前确认：{readOnly?"仅读取与分析":"可提议行动（创建或修改行动仍需批准）"} · {cloud?"已授权云模型使用本任务资料":"未授权云模型资料，委托无法开始执行"} · {requireMetric||requirePaper||requireResult?"已设置额外完成要求":"未额外设置完成要求"}</p>
+     {backgroundNotice&&<p role="status" className={backgroundNotice.tone==="ok"?styles.stepHint:styles.backgroundWarn}>{backgroundNotice.text}</p>}
      <button className={styles.primary} disabled={!clientReady||busy||goal.trim().length<3||!cloud}>创建委托</button>
     </form></details>
     <nav className={styles.missionList} aria-label="已有委托">

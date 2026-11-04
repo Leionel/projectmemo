@@ -100,6 +100,7 @@
 .composer .step legend { font-size:.75rem; font-weight:700; letter-spacing:.08em; color:var(--teal-strong); padding-inline:.375rem; }
 .composer .step > button { justify-self:start; }
 .stepHint { color:var(--muted); font-size:.75rem; line-height:1.6; }
+.backgroundWarn { color:var(--amber); font-size:.8125rem; font-weight:600; line-height:1.6; }
 .stoppedBlock { display:grid; gap:.75rem; margin-top:1.25rem; border:1px solid color-mix(in srgb,var(--brick) 55%,var(--rule)); border-left:3px solid var(--brick); border-radius:.5rem; padding:1rem; background:var(--brick-pale); color:var(--brick); }
 .stoppedBlock > strong { font-size:.875rem; }
 .stoppedBlock > p { color:var(--ink-soft); font-size:.8125rem; line-height:1.7; overflow-wrap:anywhere; }

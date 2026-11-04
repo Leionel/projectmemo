@@ -43,7 +43,9 @@ export interface MissionSummary { id: string; goal: string; status: string; vers
 export interface MissionList { missions: MissionSummary[]; nextCursor: string | null; }
 export interface MissionReply { mission: MissionSummary; }
 export interface MissionDetailReply { mission: Mission; }
-export interface MissionCapabilities { enabled: boolean; widgetEnabled: boolean; }
+export interface MissionBackgroundState { worker: string; inspecting: boolean; lastHeartbeatAt: string | null; }
+export interface MissionCloudState { available: boolean; reason: string; }
+export interface MissionCapabilities { enabled: boolean; widgetEnabled: boolean; background?: MissionBackgroundState; cloud?: MissionCloudState; }
 export interface MissionQuestionPayload { question: string; missing: string; gapId?: string; }
 export interface MissionQuestion { id: string; seq: number; payloadJson: MissionQuestionPayload; }
 export interface MissionSource {

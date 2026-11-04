@@ -22,7 +22,7 @@ import { ApiError } from '../models/Project';
 import { MissionService } from '../services/MissionService';
 import { SessionStore } from '../services/SessionStore';
 import { WidgetDataService } from '../services/WidgetDataService';
-import { missionStatusLabel, mergeMissionEvents, missionTerminal, missionToolLabel, missionCompletionFacts, missionErrorPhaseLabel } from '../common/MissionContract';
+import { missionStatusLabel, mergeMissionEvents, missionTerminal, missionToolLabel, missionCompletionFacts, missionErrorPhaseLabel, missionBackgroundNotice, missionBackgroundOk } from '../common/MissionContract';
 import { MissionProgressPresentation } from '../common/MissionProgressPresentation';
 import { PMColors, PMSpacing, PMRadius, PMFontSize } from '../common/DesignTokens';
 import { PMAppBar } from '../components/PMAppBar';
@@ -64,6 +64,8 @@ struct MissionDetail {
   @State notice: string = '';
   @State updatedAt: string = '';
   @State missionUiEnabled: boolean = false;
+  @State backgroundNotice: string = '';
+  @State backgroundOk: boolean = false;
   @State nextCursor: string = '';
   @State loaded: boolean = false;
   @State readState: string = 'unavailable';
@@ -164,6 +166,7 @@ struct MissionDetail {
       const capability = await this.service.capabilities(this.projectId);
       if (!this.current(generation, token)) return;
       this.missionUiEnabled = capability.enabled;
+      this.backgroundNotice = missionBackgroundNotice(capability); this.backgroundOk = missionBackgroundOk(capability);
       if (this.createRequested) {
         this.createRequested = false;
         if (capability.enabled) { this.editSnapshot = new Mission(); this.form = 'create'; }
@@ -895,6 +898,7 @@ struct MissionDetail {
           if (this.busy) { Text('正在提交，请等待服务端回执') }
           if (this.form !== '') {
             MissionSettingsForm({ mode: this.form, initialConstraints: this.editSnapshot.constraints, initialScope: this.editSnapshot.researchScope, busy: this.busy,
+              backgroundNotice: this.backgroundNotice, backgroundOk: this.backgroundOk,
               onSubmit: (value: MissionCreate) => { this.saveForm(value); }, onClose: () => { if (this.form === 'create' && this.directCreate) router.back(); else this.form = ''; } })
           } else if (this.approval !== null) {
             MissionApprovalSheet({ approval: this.approval, busy: this.busy, onDecide: (decision: string) => { this.command('approval', decision); }, onClose: () => { this.approval = null; } })

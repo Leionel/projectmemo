@@ -25,6 +25,8 @@ export struct MissionSettingsForm {
   @State rejected: string = '';
   @State readOnly: boolean = false;
   @State llmApproved: boolean = false;
+  @Prop backgroundNotice: string = '';
+  @Prop backgroundOk: boolean = false;
   @State researchEnabled: boolean = false;
   @State topic: string = '';
   @State terms: string = '';
@@ -263,6 +265,10 @@ export struct MissionSettingsForm {
           Text('时间与限制：' + (this.minutes.trim() !== '' || this.deadline.trim() !== '' || this.cost.trim() !== '' ? '已设置' : '未额外设置')).fontSize(12).fontColor(PMColors.INK_SECONDARY).lineHeight(18)
         }.width('100%').padding(12).alignItems(HorizontalAlign.Start)
           .backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(12)
+      }
+      if (this.mode === 'create' && this.backgroundNotice !== '') {
+        Text(this.backgroundNotice).fontSize(13).lineHeight(19)
+          .fontColor(this.backgroundOk ? PMColors.INK_SECONDARY : PMColors.WARNING).accessibilityText(this.backgroundNotice)
       }
       if (this.error !== '') { Text(this.error).fontSize(13).fontColor(PMColors.RISK).accessibilityText(this.error) }
       PMButton({ label: this.busy ? '正在保存…' : this.mode === 'create' ? '创建长期委托' : '保存修改', disabled: this.busy, onAction: () => { this.submit(); } })

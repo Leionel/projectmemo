@@ -75,3 +75,22 @@ export function missionCompletionFacts(status: string, completion?: MissionCompl
     { label: "现实完成", value: "未从委托状态推断，以实际行动回执为准" },
   ];
 }
+
+export type MissionBackground = {
+  background?: { worker: "RECENT" | "STALE" | "UNOBSERVED"; inspecting: boolean; lastHeartbeatAt: string | null };
+  cloud?: { available: boolean; reason: string };
+};
+const cloudUnavailable: Record<string, string> = {
+  RULE_MODE: "当前是本地规则模式，委托不会调用模型执行",
+  NOT_CONFIGURED: "云模型尚未配置，委托暂时无法执行",
+  ACCOUNT_NOT_ELIGIBLE: "账号还没有云模型额度（需要先验证邮箱），委托暂时无法执行",
+  DAILY_QUOTA_EXHAUSTED: "今日云模型额度已用完，委托要等额度恢复后才会执行",
+};
+/** 创建委托前的一行实情：先说能不能执行，再说关掉页面后会不会继续；旧服务缺字段时不作推断。 */
+export function missionBackgroundNotice(caps: MissionBackground): { tone: "ok" | "warn"; text: string } | null {
+  if (caps.cloud && !caps.cloud.available) return { tone: "warn", text: cloudUnavailable[caps.cloud.reason] ?? "云模型当前不可用，委托暂时无法执行" };
+  if (!caps.background) return null;
+  if (caps.background.worker === "RECENT" && caps.background.inspecting) return { tone: "ok", text: "后台在线，关闭页面后会按授权继续执行" };
+  if (caps.background.worker === "RECENT") return { tone: "warn", text: "后台在线，但最近一次巡检没有完成；创建后可能需要稍后回来手动继续" };
+  return { tone: "warn", text: "暂未检测到后台运行，关闭页面后不会自动继续；可以稍后回来手动继续" };
+}

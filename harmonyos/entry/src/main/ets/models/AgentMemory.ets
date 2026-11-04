@@ -36,7 +36,9 @@ export interface HypothesisView {
  id: string; revision: number; statement: string; conditions: string[]; effectiveStatus: string;
  explanation: string | null; nextInformationNeed: string | null; qualificationReason: string | null;
  evidence: HypothesisEvidence[]; sourceMissionId: string | null; sourceConversationId: string | null;
+ history?: HypothesisRevision[];
 }
+export interface HypothesisRevision { revision: number; at: string; statement?: string; state?: string; }
 export interface HypothesisCoverage { hasMore: boolean; }
 export class HypothesisListView { items: HypothesisView[] = []; coverage: HypothesisCoverage = { hasMore: false }; }
 export interface AgentMemoryReply { memory: DigestListView; hypotheses: HypothesisListView; experience: ExperienceListReply | null; }

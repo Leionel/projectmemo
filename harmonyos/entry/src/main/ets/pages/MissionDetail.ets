@@ -7,6 +7,7 @@ import { MissionEvidenceReview } from '../components/MissionEvidenceReview';
 import { DecisionScenarioPanel } from '../components/DecisionScenarioPanel';
 import { ExperiencePanel } from '../components/ExperiencePanel';
 import { GoalQuestionPanel } from '../components/GoalQuestionPanel';
+import { MissionJudgmentChanges } from '../components/MissionJudgmentChanges';
 import { ProjectImpactPanel } from '../components/ProjectImpactPanel';
 import { MissionReadTarget } from '../models/MissionReadback';
 import { MissionReadbackView } from '../components/MissionReadbackView';
@@ -828,6 +829,7 @@ struct MissionDetail {
         mode: 'full', inlinePrimaryAction: false,
         onPrimaryAction: (action: WorkPacketActionView): void => { this.packetAction(action); }
       })
+      MissionJudgmentChanges({ projectId: this.projectId, missionId: this.missionId, missionVersion: this.mission.version })
       GoalQuestionPanel({ projectId: this.projectId, missionId: this.missionId, compact: true })
       ProjectImpactPanel({ projectId: this.projectId })
     }.width('100%').alignItems(HorizontalAlign.Start)

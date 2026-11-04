@@ -143,3 +143,9 @@
 .nextHead { display:grid; gap:.25rem; }
 .nextHead > p:first-child { font-size:.75rem; font-weight:600; color:var(--amber); }
 .nextHead h4 { font-size:1.0625rem; font-weight:700; line-height:1.45; }
+
+.consent[data-pending] { padding:.5rem .625rem; border:1px dashed color-mix(in srgb,var(--amber) 55%,var(--rule)); border-radius:.5rem; background:color-mix(in srgb,var(--amber) 5%,var(--card-bg)); }
+.summary { display:grid; gap:.25rem; padding:.75rem .875rem; border-radius:.625rem; background:var(--paper); font-size:.75rem; color:var(--ink-soft); }
+.summary > p { font-weight:700; color:var(--ink); }
+.summary ul { display:grid; gap:.125rem; padding-left:1rem; list-style:disc; }
+.summary li[data-pending] { color:var(--amber); }

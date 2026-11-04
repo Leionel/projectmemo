@@ -93,19 +93,19 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
     <details className={styles.newMission} open={!initialMissionId&&!list.length&&!mission}><summary>委托新目标</summary><form className={styles.composer} onSubmit={e=>{e.preventDefault();void perform(async()=>{const v=await api("/api/missions","POST",{projectId,requestId:requestId({projectId,goal,successCriteria:["DRAFT_EXISTS",...(requireMetric?["FIXED_METRIC_JOB_RECORDED"]:[]),...(requirePaper?["PAPER_METADATA_READ"]:[]),...(requireResult?["ACTION_CREATED","ACTION_RESULT_RECORDED"]:[])],llmContextApproved:cloud,readOnly,allowExternalWrite}),goal:goal,successCriteria:["DRAFT_EXISTS",...(requireMetric?["FIXED_METRIC_JOB_RECORDED"]:[]),...(requirePaper?["PAPER_METADATA_READ"]:[]),...(requireResult?["ACTION_CREATED","ACTION_RESULT_RECORDED"]:[])],llmContextApproved:cloud,...(readOnly?{missionConstraints:{executionBoundary:"READ_ANALYZE"}}:allowExternalWrite?{missionConstraints:{executionBoundary:"PROPOSE_ACTION",externalWriteProposal:true}}:{})});await refresh(v.mission.id);requestKeys.current.delete(JSON.stringify({projectId,goal,llmContextApproved:cloud,readOnly,allowExternalWrite}));setGoal("");});}}>
      <h3>新建委托</h3>
      <fieldset className={styles.step}>
-      <legend>01 · 委托目标</legend>
+      <legend>想推进什么</legend>
       <button type="button" disabled={busy||!clientReady} onClick={()=>{setGoal("根据本项目已有材料，形成带来源的阶段汇报草稿，包括已完成事项、当前风险和下一步建议。缺少依据的内容列为信息缺口，不编造实验指标。本次只读取、分析和保存草稿，不搜索网络，不创建或修改行动。");setReadOnly(true);}}>使用阶段汇报模板</button>
       <label htmlFor="mission-goal">想推进什么</label>
       <textarea id="mission-goal" disabled={!clientReady||busy} rows={4} placeholder="例如：根据已有材料准备阶段汇报，列出风险和缺失信息。" value={goal} onChange={e=>setGoal(e.target.value)} required minLength={3} maxLength={2000}/>
      </fieldset>
      <fieldset className={styles.step}>
-      <legend>02 · 执行边界</legend>
+      <legend>执行边界</legend>
       <label className={styles.consent}><input type="checkbox" disabled={!clientReady||busy} checked={readOnly} onChange={e=>setReadOnly(e.target.checked)}/><span>仅允许读取、分析和保存草稿（创建或修改行动需要另行批准）</span></label>
       <label className={styles.consent}><input type="checkbox" disabled={!clientReady||busy||readOnly} checked={allowExternalWrite} onChange={e=>setAllowExternalWrite(e.target.checked)}/><span>允许提出飞书日历事件写入预览（仍需逐项批准，批准后才创建）</span></label>
      </fieldset>
      <fieldset className={styles.step}>
-      <legend>03 · 资料授权</legend>
-      <label className={styles.consent}><input type="checkbox" disabled={!clientReady||busy} checked={cloud} onChange={e=>setCloud(e.target.checked)}/><span>允许配置的云模型使用本委托目标、选入的项目资料和任务历史（与公开网络研究分开；委托的每一步都需要它）</span></label>
+      <legend>资料授权</legend>
+      <label className={styles.consent} data-pending={!cloud||undefined}><input type="checkbox" disabled={!clientReady||busy} checked={cloud} onChange={e=>setCloud(e.target.checked)}/><span>允许配置的云模型使用本委托目标、选入的项目资料和任务历史（与公开网络研究分开；委托的每一步都需要它）</span></label>
       <p className={styles.stepHint}>高级约束（费用、研究范围、接续许可）在创建后于「委托设置」中调整。</p>
      </fieldset>
      <fieldset className={styles.step}>
@@ -115,7 +115,7 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
        <p className={styles.stepHint}>不选择时按默认流程判定完成，不会人为补充完成条件。</p>
       </details>
      </fieldset>
-     <p className={styles.stepHint}>提交前确认：{readOnly?"仅读取与分析":"可提议行动（创建或修改行动仍需批准）"} · {cloud?"已授权云模型使用本任务资料":"未授权云模型资料，委托无法开始执行"} · {requireMetric||requirePaper||requireResult?"已设置额外完成要求":"未额外设置完成要求"}</p>
+     <div className={styles.summary}><p>提交前确认</p><ul><li>{readOnly?"仅读取与分析":"可提议行动（创建或修改行动仍需批准）"}</li><li data-pending={!cloud||undefined}>{cloud?"已授权云模型使用本任务资料":"未授权云模型资料，委托无法开始执行"}</li><li>{requireMetric||requirePaper||requireResult?"已设置额外完成要求":"未额外设置完成要求"}</li></ul></div>
      {backgroundNotice&&<p role="status" className={backgroundNotice.tone==="ok"?styles.stepHint:styles.backgroundWarn}>{backgroundNotice.text}</p>}
      <button className={styles.primary} disabled={!clientReady||busy||goal.trim().length<3||!cloud}>创建委托</button>
     </form></details>

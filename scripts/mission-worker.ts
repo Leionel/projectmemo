@@ -7,6 +7,7 @@ import { db } from "../lib/db";
 import { processMaterialContinuationBatch } from "../lib/mission/continuationService";
 import { runConversationTurn } from "../lib/conversation/turnWorker";
 import { processInvestigationDelegations } from "../lib/mission/investigationDelegation";
+import { processWaitNotices } from "../lib/mission/waitNotice";
 import { runWorkerCycle, type WorkerCycleState } from "../lib/mission/workerCycle";
 import { recordWorkerPresence } from "../lib/mission/workerPresence";
 import { processProjectDeletions } from "../lib/services/projectDeletionService";
@@ -32,6 +33,7 @@ try {
         { name: "IMPACT", run: () => scanned(()=>consumeImpactJobs()) },
         { name: "MATERIAL", run: () => scanned(()=>processMaterialContinuationBatch()) },
         { name: "DELEGATION", run: () => scanned(()=>processInvestigationDelegations()) },
+        { name: "WAIT_NOTICE", run: () => processWaitNotices() },
       ],
       conversation: () => runConversationTurn({ onClaim: () => recordWorkerPresence({ workerId, claim: true }) }),
       mission: () => isFeatureEnabled("MISSION_ENABLED", false)

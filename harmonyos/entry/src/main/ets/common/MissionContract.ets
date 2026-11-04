@@ -11,7 +11,8 @@ export function missionEventLabel(type: string): string {
     'INPUT': '已补充答复', 'APPROVAL': '已记录审批', 'PAUSE': '已请求暂停', 'RESUME': '已请求继续',
     'CANCEL': '已请求取消', 'CONSTRAINTS_CHANGED': '约束已更新', 'RESEARCH_SCOPE_CHANGED': '研究范围已更新',
     'CONTINUATION_POLICY_CHANGED': '自动接续许可已更新', 'MATERIAL_CANDIDATE': '发现候选资料',
-    'MATERIAL_CONTINUED': '已使用新资料接续', 'ARTIFACT_ADOPTED': '已归入项目成果' };
+    'MATERIAL_CONTINUED': '已使用新资料接续', 'ARTIFACT_ADOPTED': '已归入项目成果',
+    'USER_NOTICE_SENDING': '正在发送邮件提醒', 'USER_NOTICE_SENT': '已发邮件提醒你', 'USER_NOTICE_FAILED': '邮件提醒未送达' };
   return labels[type] ?? '执行记录';
 }
 export function mergeMissionEvents(previous: MissionEvent[], incoming: MissionEvent[]): MissionEvent[] {

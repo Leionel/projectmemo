@@ -8,6 +8,10 @@ import { EvidenceText } from "@/components/EvidenceText";
 import { knowledgeTypeLabels, knowledgeTypes, temporalStateLabels, type TemporalTopLevelState } from "@/lib/types";
 import { loadGlobalWorkspace, type WorkspaceFilters } from "@/lib/server/globalWorkspace";
 
+/** 常用类型直接给出，其余收进“更多类型”；仍是同一个 type 查询参数。 */
+const primaryTypes = ["experiment_log", "meeting_note", "requirement", "risk"] as const;
+const moreTypes = knowledgeTypes.filter(t => !(primaryTypes as readonly string[]).includes(t));
+
 const temporalBadge: Record<TemporalTopLevelState, string> = {
   CURRENT: "bg-[var(--teal-pale)] text-[var(--teal-strong)]",
   SUPERSEDED: "bg-[var(--paper-strong)] text-[var(--muted)]",
@@ -24,6 +28,10 @@ export async function GlobalWorkspacePage({ userId, mode, input }: { userId: str
     const query = new URLSearchParams({ ...(f.q ? { q: f.q } : {}), ...(f.project ? { project: f.project } : {}), ...(memory && f.type ? { type: f.type } : {}), ...(f.archived ? { archived: "1" } : {}), page: String(page) });
     return `${path}?${query}`;
   };
+  const typeHref = (type: string) => {
+    const query = new URLSearchParams({ ...(f.q ? { q: f.q } : {}), ...(f.project ? { project: f.project } : {}), ...(type ? { type } : {}), ...(f.archived ? { archived: "1" } : {}) });
+    return `${path}${query.size ? `?${query}` : ""}`;
+  };
   return <main id="main-content" className="shell workspace-index">
     <PageHeading eyebrow="我的工作台" title={memory ? "项目记忆档案" : "行动与提醒"}
       description={memory ? "跨项目查找已保存的记忆，回到所属项目查看来源与结论演进。" : "集中查看各项目的待办行动和当前提醒，回到原项目处理。"}
@@ -32,10 +40,15 @@ export async function GlobalWorkspacePage({ userId, mode, input }: { userId: str
     <form action={path} className="workspace-filters" aria-label={memory ? "筛选项目记忆" : "筛选待办与提醒"}>
       <label className="workspace-search"><span className="sr-only">{memory ? "搜索记忆标题或摘要" : "搜索行动或提醒"}</span><Search size={15} aria-hidden="true" /><input className="editorial-input focus-ring" name="q" defaultValue={f.q} placeholder={memory ? "搜索标题或摘要" : "搜索行动或提醒"} maxLength={200} /></label>
       <label><span className="sr-only">所属项目</span><select name="project" defaultValue={f.project} className="editorial-input focus-ring"><option value="">全部项目</option>{f.project && !data.projects.some(p => p.id === f.project) && <option value={f.project}>项目不可访问或已归档</option>}{data.projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}</select></label>
-      {memory && <label><span className="sr-only">记忆类型</span><select name="type" defaultValue={f.type} className="editorial-input focus-ring"><option value="">全部类型</option>{knowledgeTypes.map(t => <option key={t} value={t}>{knowledgeTypeLabels[t]}</option>)}</select></label>}
+      {memory && f.type && <input type="hidden" name="type" value={f.type} />}
       <label className="flex items-center gap-2 text-xs text-[var(--ink-soft)]"><input type="checkbox" name="archived" value="1" defaultChecked={f.archived} />包含归档项目</label>
       <button className="editorial-button focus-ring" type="submit">应用筛选</button>{filtered && <Link prefetch={false} className="workspace-link focus-ring" href={path}>清除筛选</Link>}
     </form>
+    {memory && <nav aria-label="记忆类型" className="workspace-type-chips">
+      {[["", "全部类型"], ...primaryTypes.map(t => [t, knowledgeTypeLabels[t]] as const)].map(([value, label]) => <Link key={value || "all"} prefetch={false} href={typeHref(value)} aria-current={f.type === value ? "page" : undefined} className="focus-ring">{label}</Link>)}
+      <details className={moreTypes.includes(f.type as typeof moreTypes[number]) ? "is-current" : undefined}><summary className="focus-ring">{moreTypes.includes(f.type as typeof moreTypes[number]) ? knowledgeTypeLabels[f.type as typeof moreTypes[number]] : "更多类型"}</summary>
+        <div>{moreTypes.map(t => <Link key={t} prefetch={false} href={typeHref(t)} aria-current={f.type === t ? "page" : undefined} className="focus-ring">{knowledgeTypeLabels[t]}</Link>)}</div></details>
+    </nav>}
     {memory && isFeatureEnabled("FOCUS_AGENT_ENABLED",false) && f.project && data.projects.some(p=>p.id===f.project) && <AgentMemoryPanel key={userId+f.project} projectId={f.project}/>} 
     {memory ? <section aria-label="跨项目记忆" className="workspace-list-panel">
       <div className="workspace-panel-heading"><h2>已保存的记忆</h2><span>时态只描述与当前结论的关系；有效性请在原项目核验</span></div>

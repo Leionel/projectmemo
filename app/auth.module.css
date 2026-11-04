@@ -46,6 +46,17 @@
   margin-top: 1.5rem;
   max-width: 22rem;
 }
+.accentLine { color: var(--teal); }
+.timeline { position: relative; display: grid; gap: 1.25rem; margin-top: 3rem; max-width: 27rem; padding-left: 1.75rem; list-style: none; }
+.timeline::before { content: ""; position: absolute; left: .375rem; top: .6rem; bottom: .6rem; width: 2px; background: var(--rule); }
+.timeline li { position: relative; display: grid; gap: .125rem; }
+.timeline li::before { content: ""; position: absolute; left: -1.75rem; top: .45rem; width: .875rem; height: .875rem; border-radius: 50%; background: var(--paper); border: 2px solid var(--teal); box-sizing: border-box; }
+.timeline li:last-child::before { background: var(--teal); }
+.timeline strong { font-size: 1rem; font-weight: 600; color: var(--ink); }
+.timeline span { font-size: .875rem; color: var(--ink-soft); }
+.steps { display: grid; gap: .875rem; margin-top: 3rem; max-width: 26rem; list-style: none; padding: 0; }
+.steps li { display: flex; gap: .875rem; align-items: baseline; color: var(--ink); }
+.steps span { font-family: ui-monospace, "JetBrains Mono", monospace; font-size: .8125rem; color: var(--teal); }
 .projectNote {
   display: flex;
   align-items: start;

@@ -121,9 +121,9 @@ struct FeatureGuide {
   ];
 
   private supportRows: SupportRow[] = [
-    { label: '已可用', labelColor: PMColors.SUCCESS, items: '记录文字与图片、上传 PDF、附件解析与纠错、状态基线与变化对比、行动依赖与结果回执、成果草稿与证据核查、桌面服务卡片（真实项目数据）、提醒预算与静默时段（预算开关需在服务端开启）' },
+    { label: '已可用', labelColor: PMColors.SUCCESS, items: '记录文字与图片（可直接拍照）、上传 PDF、附件解析与纠错、状态基线与变化对比、行动依赖与结果回执、成果草稿与证据核查、桌面服务卡片（真实项目数据）、提醒预算与静默时段（预算开关需在服务端开启）' },
     { label: '需要配置', labelColor: PMColors.WARNING, items: '在线模型问答与成果生成（需配置 OpenAI 兼容 API）、语义检索（需配置 embedding 服务）、行动的系统日历提醒（服务端开启并授予日历权限后，由系统日历在截止前提醒，关闭应用也有效）' },
-    { label: '暂不支持', labelColor: PMColors.INK_TERTIARY, items: '关闭应用后由忆程主动推送的通知（如委托等你回答）、拍摄录入、小艺语音入口（平台能力尚未接入）' },
+    { label: '暂不支持', labelColor: PMColors.INK_TERTIARY, items: '关闭应用后由忆程主动推送的通知（如委托等你回答）、小艺语音入口（平台能力尚未接入）' },
     { label: '演示数据', labelColor: PMColors.INK_TERTIARY, items: '演示情境始终明确标识，不计入真实行为与效果统计' }
   ];
 

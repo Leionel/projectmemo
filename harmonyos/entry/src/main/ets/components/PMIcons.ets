@@ -275,6 +275,27 @@ export struct SettingsIcon {
 }
 
 @Component
+export struct FilterIcon {
+  @Prop isSelected: boolean = false;
+  @Prop iconSize: number = 20;
+
+  build() {
+    // 由长到短的三道线：调整当前范围，与设置的双滑块区分
+    Column({ space: this.iconSize * 0.2 }) {
+      Row().width(this.iconSize).height(1.6).borderRadius(0.8)
+        .backgroundColor(this.isSelected ? PMColors.BRAND : PMColors.INK_TERTIARY)
+      Row().width(this.iconSize * 0.62).height(1.6).borderRadius(0.8)
+        .backgroundColor(this.isSelected ? PMColors.BRAND : PMColors.INK_TERTIARY)
+      Row().width(this.iconSize * 0.26).height(1.6).borderRadius(0.8)
+        .backgroundColor(this.isSelected ? PMColors.BRAND : PMColors.INK_TERTIARY)
+    }
+    .width(this.iconSize)
+    .height(this.iconSize)
+    .justifyContent(FlexAlign.Center)
+  }
+}
+
+@Component
 export struct MoreIcon {
   @Prop isSelected: boolean = false;
   @Prop iconSize: number = 20;

@@ -11,7 +11,8 @@ import { missionHandoffRoute } from '../common/MissionWidgetContract';
 import { captureSourceCardId } from '../models/WorkPacket';
 import pasteboard from '@ohos.pasteboard';
 import { photoAccessHelper } from '@kit.MediaLibraryKit';
-import { picker } from '@kit.CoreFileKit';
+import { fileIo, fileUri, picker } from '@kit.CoreFileKit';
+import { camera, cameraPicker } from '@kit.CameraKit';
 import { common } from '@kit.AbilityKit';
 import { Project, ProjectDashboard, ApiError, ReadinessItem, ProjectUpdateInput } from '../models/Project';
 import { ProjectDetail, KnowledgeCard, CardLink, IncomingCardLink, TemporalTimelineResponse, TemporalDecisionItem } from '../models/Memory';
@@ -30,7 +31,7 @@ import { MemoryLifecycleService } from '../services/MemoryLifecycleService';
 import { InterventionPolicyService } from '../services/InterventionPolicyService';
 import { ProjectStateService } from '../services/ProjectStateService';
 import { MeetingImportSheet } from '../components/MeetingImportSheet';
-import { deadlineReminderConflict, workPhaseLabel } from '../common/GlobalFocusPresentation';
+import { deadlineReminderConflict } from '../common/GlobalFocusPresentation';
 import { DateOnly } from '../common/DateOnly';
 import { PolicyResponse, PolicySuggestion, PolicyUpdateBody } from '../models/Intervention';
 import { ActionService } from '../services/ActionService';
@@ -93,6 +94,7 @@ import { MissionWorkspaceItem, MissionWorkspaceSummary } from '../models/Mission
 import { missionStatusLabel } from '../common/MissionContract';
 import { selectProjectFocus } from '../common/ProjectAttention';
 import { ProjectEvolutionPanel } from '../components/ProjectEvolutionPanel';
+import { workStateLabel } from '../common/WorkStateBadge';
 
 interface HomeRecentActivity {
   id: string;
@@ -523,7 +525,7 @@ struct ProjectHome {
     AppStorage.setOrCreate<string>('notificationProjectId', ''); AppStorage.setOrCreate<string>('notificationInterventionId', '');
   }
 
-  // 上传入口统一为回形针：二级菜单分开“相册图片”与“文件（PDF 等）”两条路径
+  // 上传入口统一为回形针：二级菜单分开“拍照”“相册图片”与“文件（PDF 等）”几条路径
   private async openUploadMenu(): Promise<void> {
     if (this.isUploadingAttachment) {
       return;
@@ -532,19 +534,45 @@ struct ProjectHome {
       const menu = await promptAction.showActionMenu({
         title: '上传项目资料',
         buttons: [
+          { text: '拍照', color: '#0A7EA4' },
           { text: '从相册选图片', color: '#0A7EA4' },
           { text: '选择文件（PDF）', color: '#0A7EA4' },
           { text: '导入实验指标（CSV / JSON）', color: '#0A7EA4' }
         ]
       });
       if (menu.index === 0) {
-        await this.pickAndUploadImage();
+        await this.takeAndUploadPhoto();
       } else if (menu.index === 1) {
+        await this.pickAndUploadImage();
+      } else if (menu.index === 2) {
         await this.pickAndUploadPdf();
-      } else if(menu.index === 2) { await this.pickAndUploadMetrics();
+      } else if(menu.index === 3) { await this.pickAndUploadMetrics();
       }
     } catch (_e) {
       // 用户取消菜单，无需提示
+    }
+  }
+
+  // 系统相机拍完写进应用缓存再上传，不申请相机权限；上传结束即删除缓存副本。
+  private async takeAndUploadPhoto(): Promise<void> {
+    if (this.isUploadingAttachment) return;
+    const context = getContext(this) as common.UIAbilityContext;
+    const localPath = `${context.cacheDir}/camera-${Date.now()}.jpg`;
+    try {
+      const file = fileIo.openSync(localPath, fileIo.OpenMode.CREATE | fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.TRUNC);
+      fileIo.closeSync(file);
+      const profile: cameraPicker.PickerProfile = {
+        cameraPosition: camera.CameraPosition.CAMERA_POSITION_BACK,
+        saveUri: fileUri.getUriFromPath(localPath)
+      };
+      const result = await cameraPicker.pick(context, [cameraPicker.PickerMediaType.PHOTO], profile);
+      if (result.resultCode === 0 && fileIo.statSync(localPath).size > 0) {
+        await this.uploadAttachment(localPath, `project-photo-${Date.now()}.jpg`, 'image/jpeg');
+      }
+    } catch (error) {
+      this.attachmentFeedback = '相机不可用，可以改从相册选图片';
+    } finally {
+      try { fileIo.unlinkSync(localPath); } catch (_) {}
     }
   }
 
@@ -1703,7 +1731,7 @@ struct ProjectHome {
     if (state !== undefined) {
       if (state.reasonCode === 'STOP_REQUESTED_IN_FLIGHT') { return '停止请求待结算'; }
       if (state.reasonCode === 'DAILY_BUDGET_WAITING') { return '等待额度恢复'; }
-      return workPhaseLabel(state.phase);
+      return workStateLabel(state);
     }
     return missionStatusLabel(this.homeMission?.status ?? '');
   }
@@ -1740,7 +1768,7 @@ struct ProjectHome {
   private HomeFocusView() {
     Column({ space: 10 }) {
       Row() {
-        Text(this.agentContext !== null ? '当前下一步' : this.homeFocusKind() === 'mission' ? this.homeMissionStatusLabel() : '当前先处理')
+        Text(this.agentContext !== null ? (this.agentContext.nextStep.workState !== undefined ? '当前下一步 · ' + workStateLabel(this.agentContext.nextStep.workState) : '当前下一步') : this.homeFocusKind() === 'mission' ? this.homeMissionStatusLabel() : '当前先处理')
           .fontSize(12)
           .fontWeight(FontWeight.Medium)
           .fontColor(PMColors.BRAND)

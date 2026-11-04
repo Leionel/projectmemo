@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Cpu, Globe, KeyRound, LoaderCircle, Save, Settings, X } from "lucide-react";
 
@@ -27,7 +27,8 @@ const initialSettings: RuntimeSettings = {
   llmApiKey: "",
 };
 
-export function GlobalSettings({ isMenuItem = false }: { isMenuItem?: boolean }) {
+/** `inline` 用于设置页「模型与安全」：进入即读取，不经弹窗；读取与保存仍走同一 /api/settings。 */
+export function GlobalSettings({ isMenuItem = false, inline = false }: { isMenuItem?: boolean; inline?: boolean }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -72,7 +73,7 @@ export function GlobalSettings({ isMenuItem = false }: { isMenuItem?: boolean })
       });
       const data = await response.json() as SettingsResponse;
       if (!response.ok) throw new Error(data.error?.message || "保存设置失败。");
-      setOpen(false);
+      if (!inline) setOpen(false);
       window.location.reload();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "保存设置失败。");
@@ -105,26 +106,7 @@ export function GlobalSettings({ isMenuItem = false }: { isMenuItem?: boolean })
     </ul>
   </div>;
 
-  return (
-    <>
-      <button type="button" onClick={() => void openSettings()} className={buttonClass} aria-label="全局设置">
-        <Settings size={17} /> 设置
-      </button>
-
-      {open && typeof document !== "undefined" && createPortal(
-        <div className="fixed inset-0 z-[100] grid place-items-center overflow-y-auto bg-[rgba(16,27,50,.46)] p-4 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving) setOpen(false); }}>
-          <section role="dialog" aria-modal="true" aria-labelledby="global-settings-title" className="card-surface my-6 w-full max-w-2xl rounded-[2rem] bg-[var(--paper-strong)] p-1 shadow-2xl">
-            <div className="rounded-lg bg-[var(--card-bg)] p-5 sm:p-8">
-              <div className="flex items-center justify-between pb-6">
-                <div>
-                  <h2 id="global-settings-title" className="text-2xl font-black text-[var(--ink)]">全局设置</h2>
-                  <p className="mt-1.5 text-sm text-[var(--ink-soft)]">仅用于本地演示期间切换模型运行方式。</p>
-                </div>
-                <button type="button" onClick={() => setOpen(false)} disabled={saving} aria-label="关闭" className="focus-ring grid h-9 w-9 place-items-center rounded-md bg-[var(--rule)] text-[var(--muted)] transition hover:bg-[var(--rule-strong)] hover:text-[var(--ink)]">
-                  <X size={18} />
-                </button>
-              </div>
-
+  const body = <>
               {loading ? (
                 <div className="py-16 text-center text-[var(--muted)]"><LoaderCircle className="mx-auto animate-spin" size={28} /><p className="mt-3 text-sm font-medium">正在读取配置...</p></div>
               ) : !editable ? (
@@ -195,6 +177,33 @@ export function GlobalSettings({ isMenuItem = false }: { isMenuItem?: boolean })
                   </div>
                 </form>
               )}
+  </>;
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { if (inline) void openSettings(); }, [inline]);
+  if (inline) return <div className="rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] p-5 sm:p-8">{body}</div>;
+
+  return (
+    <>
+      <button type="button" onClick={() => void openSettings()} className={buttonClass} aria-label="全局设置">
+        <Settings size={17} /> 设置
+      </button>
+
+      {open && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[100] grid place-items-center overflow-y-auto bg-[rgba(16,27,50,.46)] p-4 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving) setOpen(false); }}>
+          <section role="dialog" aria-modal="true" aria-labelledby="global-settings-title" className="card-surface my-6 w-full max-w-2xl rounded-[2rem] bg-[var(--paper-strong)] p-1 shadow-2xl">
+            <div className="rounded-lg bg-[var(--card-bg)] p-5 sm:p-8">
+              <div className="flex items-center justify-between pb-6">
+                <div>
+                  <h2 id="global-settings-title" className="text-2xl font-black text-[var(--ink)]">全局设置</h2>
+                  <p className="mt-1.5 text-sm text-[var(--ink-soft)]">仅用于本地演示期间切换模型运行方式。</p>
+                </div>
+                <button type="button" onClick={() => setOpen(false)} disabled={saving} aria-label="关闭" className="focus-ring grid h-9 w-9 place-items-center rounded-md bg-[var(--rule)] text-[var(--muted)] transition hover:bg-[var(--rule-strong)] hover:text-[var(--ink)]">
+                  <X size={18} />
+                </button>
+              </div>
+
+              {body}
             </div>
           </section>
         </div>,

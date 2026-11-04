@@ -84,6 +84,8 @@ export function ActionBoard({ projectId, initialActions, reminderEnabled = false
   const simulatedActions = actions.filter((item) => item.isSimulated);
   const activeCount = projectActions.filter((item) => item.status === "TODO" || item.status === "DOING").length;
   const completedCount = projectActions.filter((item) => item.status === "DONE").length;
+  // 待处理视图下列出最近 3 项已完成：结果回执与复盘卡就近可查，不需要切到“已完成”。
+  const recentDone = projectActions.filter(item => item.status === "DONE").sort((a, b) => (b.completedAt ?? "").localeCompare(a.completedAt ?? "")).slice(0, 3);
   const visibleActions = sortActions(projectActions.filter((item) => {
     if (view === "active") return item.status === "TODO" || item.status === "DOING";
     if (view === "completed") return item.status === "DONE";
@@ -237,6 +239,13 @@ export function ActionBoard({ projectId, initialActions, reminderEnabled = false
 
     {message && <p role="status" className="mt-3 rounded-lg bg-[var(--teal-pale)] px-3 py-2 text-xs font-semibold text-[var(--teal-strong)]">{message}</p>}
     <div className="mt-4 space-y-3">{visibleActions.length ? visibleActions.map((action) => <ActionCard key={action.id} action={action} now={now} busy={busy} resultFor={resultFor} resultText={resultText} editFor={editFor} editDraft={editDraft} cancelFor={cancelFor} allActions={projectActions} feasibilityFor={feasibilityFor} reminderFor={reminderFor} reminderEnabled={reminderEnabled} onToggleFeasibility={(id) => setFeasibilityFor((current) => current === id ? null : id)} onToggleReminder={(id) => setReminderFor((current) => current === id ? null : id)} onDependencyChanged={() => notify(["actions", "metrics"])} onSetResultFor={setResultFor} onSetResultText={setResultText} onBeginEdit={beginEdit} onSetEditDraft={setEditDraft} onCloseEdit={() => { setEditFor(null); setEditDraft(null); }} onSetCancelFor={setCancelFor} onPatch={patchAction} onComplete={complete} onOpenResult={openResult} completionPrompt={completionPrompt} onSetCompletionDisposition={(value) => setCompletionPrompt((previous) => previous ? { ...previous, disposition: value } : previous)} />) : <EmptyState view={view} hasActions={projectActions.length > 0} onShowActive={() => setView("active")} />}</div>
+    {view === "active" && recentDone.length > 0 && <section aria-labelledby="actions-recent-done" className="mt-6 border-t border-[var(--rule)] pt-4">
+      <h3 id="actions-recent-done" className="text-sm font-bold text-[var(--ink)]">最近完成</h3>
+      <ul className="mt-2 divide-y divide-[var(--rule)]">{recentDone.map(action => <li key={action.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2.5 text-sm">
+        <span className="min-w-0 flex-1"><span className="font-semibold text-[var(--ink)]">{action.title}</span>{action.resultText && <span className="block text-xs text-[var(--ink-soft)]">回执：{action.resultText}</span>}</span>
+        {action.resultCardId ? <Link prefetch={false} className="workspace-link focus-ring text-xs" href={projectHref(action.projectId, `#card-${action.resultCardId}`)}>查看结果复盘卡 →</Link> : <span className="text-xs text-[var(--muted)]">尚无结果复盘</span>}
+      </li>)}</ul>
+    </section>}
     {simulatedActions.length > 0 && <details className="mt-4 rounded-md border border-dashed border-[var(--amber)] bg-[var(--amber)]/10 p-3 text-xs"><summary className="focus-ring cursor-pointer rounded font-bold text-[var(--amber)]">查看 {simulatedActions.length} 条演示行动（不计入真实完成率）</summary><ul className="mt-2 space-y-1.5 text-[var(--ink-soft)]">{simulatedActions.map((action) => <li key={action.id}>· {action.title}</li>)}</ul></details>}
   </section>;
 }
@@ -293,6 +302,7 @@ function ActionCard(props: ActionCardProps) {
           </div>
         </details>
       </div>}
+      {completed && !action.resultCardId && !action.isSimulated && <p className="mt-3 text-xs text-[var(--muted)]">已完成 · 尚无结果复盘</p>}
       {completed && action.resultCardId && <div className="mt-3.5"><Link className="focus-ring inline-flex items-center gap-1.5 rounded-lg bg-[var(--teal-pale)] px-3.5 py-2 text-xs font-bold text-[var(--teal-strong)] transition hover:bg-[var(--teal)] hover:text-white" href={projectHref(action.projectId, `#card-${action.resultCardId}`)}>查看结果复盘卡<ArrowRight size={14} aria-hidden="true" /></Link></div>}
       {!completed && !cancelled && feasibilityFor === action.id && <ActionFeasibilityPanel projectId={action.projectId} action={action} otherActions={props.allActions} onActionCreated={props.onDependencyChanged} />}
       {!completed && !cancelled && reminderFor === action.id && <ActionReminderPanel projectId={action.projectId} actionId={action.id} onClose={() => props.onToggleReminder(action.id)} />}

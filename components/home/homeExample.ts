@@ -12,12 +12,14 @@ export const exampleProject = {
   sources: [
     {
       id: "requirements",
+      date: "10/20",
       title: "比赛材料",
       detail: "初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。",
       meta: "示例素材 · 比赛要求摘录",
     },
     {
       id: "task",
+      date: "10/18",
       title: "任务安排",
       detail:
         "目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。",
@@ -25,6 +27,7 @@ export const exampleProject = {
     },
     {
       id: "advice",
+      date: "10/23",
       title: "老师建议",
       detail:
         "老师建议作品不要叫普通学习助手，要突出项目制学习和知识资产复用。",

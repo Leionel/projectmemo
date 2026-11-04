@@ -2,24 +2,19 @@
 import { createElement, StrictMode } from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import { HomeHeroLens } from "@/components/home/HomeHeroLens";
+import { HomeResumeCard } from "@/components/home/HomeResumeCard";
 import { HomeMotion } from "@/components/home/HomeMotion";
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
-it("阶段标题跟随当前内容，离开时不要求确认，回到原阶段仍保留任务身份", () => {
-  render(createElement(HomeHeroLens));
-  expect(screen.getByText("等你确认")).toBeTruthy();
-  fireEvent.click(screen.getByRole("tab", { name: /离开时/ }));
-  expect(screen.getByText("无需操作")).toBeTruthy();
-  expect(screen.getByText("暂时不需要你操作")).toBeTruthy();
-  expect(screen.queryByText("等你确认")).toBeNull();
-  fireEvent.keyDown(screen.getByRole("tab", { name: /离开时/ }), { key: "ArrowRight" });
-  expect(screen.getByText("核对示例")).toBeTruthy();
-  expect(screen.getByRole("tab", { name: /期间/ }).getAttribute("aria-selected")).toBe("true");
-  fireEvent.click(screen.getByRole("tab", { name: /回来后/ }));
-  expect(screen.getByText("等你确认")).toBeTruthy();
-  expect(screen.getByRole("heading", { name: "整理阶段汇报" })).toBeTruthy();
+it("首屏接续卡展示上次停在哪、依据与判断变化，按时间排列来源且不提供可点击的写操作", () => {
+  render(createElement(HomeResumeCard));
+  expect(screen.getByRole("article", { name: /接续卡/ })).toBeTruthy();
+  expect(screen.getByText("演示流程的实际结果")).toBeTruthy();
+  expect(screen.getByText("待确认")).toBeTruthy();
+  expect(screen.getAllByRole("time").map(t => t.textContent)).toEqual(["10/18", "10/20", "10/23"]);
+  expect(screen.getByText("先补演示结果，再写汇报")).toBeTruthy();
+  expect(screen.queryAllByRole("button")).toHaveLength(0);
 });
 
 class MediaPreference extends EventTarget {

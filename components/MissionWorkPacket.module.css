@@ -43,6 +43,35 @@
   border-color: var(--teal-strong);
 }
 
+/* 主按钮随下一步执行方：轮到你 = 实心；忆程/系统在做 = 描边；失败 = 砖红描边。 */
+.primary[data-tone="outline"] {
+  background: var(--card-bg);
+  color: var(--teal-strong);
+}
+
+.primary[data-tone="outline"]:hover:enabled {
+  background: var(--teal-pale);
+}
+
+.primary[data-tone="failed"] {
+  background: var(--card-bg);
+  border-color: var(--brick);
+  color: var(--brick);
+}
+
+.primary[data-tone="failed"]:hover:enabled {
+  background: var(--brick-pale);
+  border-color: var(--brick);
+}
+
+.stateRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
 .primary:disabled {
   opacity: 0.55;
   cursor: wait;

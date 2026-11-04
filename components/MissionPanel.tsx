@@ -24,6 +24,8 @@ import { MissionResearchScopeEditor } from "./MissionResearchScopeEditor";
 import { MissionConstraintsEditor } from "./MissionConstraintsEditor";
 import {MissionReadback} from "./MissionReadback";
 import {MissionJudgmentChanges} from "./MissionJudgmentChanges";
+import {WorkStateBadges} from "./WorkStateBadges";
+import {nextActorLabel} from "@/lib/client/workStateBadge";
 import type {FitPremise,EvidenceReview} from "@/lib/types/missionEvidenceFit";
 import type {MissionReadTarget} from "@/lib/mission/navigation";
 import {failedReadState,type ReadState} from "@/lib/client/readState";
@@ -91,19 +93,19 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
     <details className={styles.newMission} open={!initialMissionId&&!list.length&&!mission}><summary>委托新目标</summary><form className={styles.composer} onSubmit={e=>{e.preventDefault();void perform(async()=>{const v=await api("/api/missions","POST",{projectId,requestId:requestId({projectId,goal,successCriteria:["DRAFT_EXISTS",...(requireMetric?["FIXED_METRIC_JOB_RECORDED"]:[]),...(requirePaper?["PAPER_METADATA_READ"]:[]),...(requireResult?["ACTION_CREATED","ACTION_RESULT_RECORDED"]:[])],llmContextApproved:cloud,readOnly,allowExternalWrite}),goal:goal,successCriteria:["DRAFT_EXISTS",...(requireMetric?["FIXED_METRIC_JOB_RECORDED"]:[]),...(requirePaper?["PAPER_METADATA_READ"]:[]),...(requireResult?["ACTION_CREATED","ACTION_RESULT_RECORDED"]:[])],llmContextApproved:cloud,...(readOnly?{missionConstraints:{executionBoundary:"READ_ANALYZE"}}:allowExternalWrite?{missionConstraints:{executionBoundary:"PROPOSE_ACTION",externalWriteProposal:true}}:{})});await refresh(v.mission.id);requestKeys.current.delete(JSON.stringify({projectId,goal,llmContextApproved:cloud,readOnly,allowExternalWrite}));setGoal("");});}}>
      <h3>新建委托</h3>
      <fieldset className={styles.step}>
-      <legend>01 · 委托目标</legend>
+      <legend>想推进什么</legend>
       <button type="button" disabled={busy||!clientReady} onClick={()=>{setGoal("根据本项目已有材料，形成带来源的阶段汇报草稿，包括已完成事项、当前风险和下一步建议。缺少依据的内容列为信息缺口，不编造实验指标。本次只读取、分析和保存草稿，不搜索网络，不创建或修改行动。");setReadOnly(true);}}>使用阶段汇报模板</button>
       <label htmlFor="mission-goal">想推进什么</label>
       <textarea id="mission-goal" disabled={!clientReady||busy} rows={4} placeholder="例如：根据已有材料准备阶段汇报，列出风险和缺失信息。" value={goal} onChange={e=>setGoal(e.target.value)} required minLength={3} maxLength={2000}/>
      </fieldset>
      <fieldset className={styles.step}>
-      <legend>02 · 执行边界</legend>
+      <legend>执行边界</legend>
       <label className={styles.consent}><input type="checkbox" disabled={!clientReady||busy} checked={readOnly} onChange={e=>setReadOnly(e.target.checked)}/><span>仅允许读取、分析和保存草稿（创建或修改行动需要另行批准）</span></label>
       <label className={styles.consent}><input type="checkbox" disabled={!clientReady||busy||readOnly} checked={allowExternalWrite} onChange={e=>setAllowExternalWrite(e.target.checked)}/><span>允许提出飞书日历事件写入预览（仍需逐项批准，批准后才创建）</span></label>
      </fieldset>
      <fieldset className={styles.step}>
-      <legend>03 · 资料授权</legend>
-      <label className={styles.consent}><input type="checkbox" disabled={!clientReady||busy} checked={cloud} onChange={e=>setCloud(e.target.checked)}/><span>允许配置的云模型使用本委托目标、选入的项目资料和任务历史（与公开网络研究分开；委托的每一步都需要它）</span></label>
+      <legend>资料授权</legend>
+      <label className={styles.consent} data-pending={!cloud||undefined}><input type="checkbox" disabled={!clientReady||busy} checked={cloud} onChange={e=>setCloud(e.target.checked)}/><span>允许配置的云模型使用本委托目标、选入的项目资料和任务历史（与公开网络研究分开；委托的每一步都需要它）</span></label>
       <p className={styles.stepHint}>高级约束（费用、研究范围、接续许可）在创建后于「委托设置」中调整。</p>
      </fieldset>
      <fieldset className={styles.step}>
@@ -113,7 +115,7 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
        <p className={styles.stepHint}>不选择时按默认流程判定完成，不会人为补充完成条件。</p>
       </details>
      </fieldset>
-     <p className={styles.stepHint}>提交前确认：{readOnly?"仅读取与分析":"可提议行动（创建或修改行动仍需批准）"} · {cloud?"已授权云模型使用本任务资料":"未授权云模型资料，委托无法开始执行"} · {requireMetric||requirePaper||requireResult?"已设置额外完成要求":"未额外设置完成要求"}</p>
+     <div className={styles.summary}><p>提交前确认</p><ul><li>{readOnly?"仅读取与分析":"可提议行动（创建或修改行动仍需批准）"}</li><li data-pending={!cloud||undefined}>{cloud?"已授权云模型使用本任务资料":"未授权云模型资料，委托无法开始执行"}</li><li>{requireMetric||requirePaper||requireResult?"已设置额外完成要求":"未额外设置完成要求"}</li></ul></div>
      {backgroundNotice&&<p role="status" className={backgroundNotice.tone==="ok"?styles.stepHint:styles.backgroundWarn}>{backgroundNotice.text}</p>}
      <button className={styles.primary} disabled={!clientReady||busy||goal.trim().length<3||!cloud}>创建委托</button>
     </form></details>
@@ -130,8 +132,9 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
    {!mission?<div className={styles.empty} role="status">{readState==="unavailable"&&!error?<><h3>正在读取委托</h3><p>正在核对已有委托和执行进度。</p></>:list.length>0?<><h3>{error?"委托详情暂不可用":"正在读取委托详情"}</h3><p>{error?"已有委托仍保留，可以选择其他委托，或重新读取当前结果。":"已有进度、待回应事项和结果将在这里显示。"}</p></>:<><h3>委托一个需要持续跟进的目标</h3><p>从「委托新目标」开始。需要补充材料或批准时，会在同一委托中等你处理。</p></>}</div>:<fieldset disabled={readState!=="fresh"} className="contents">
     {!["SUCCEEDED","CANCELLED"].includes(mission.status)&&<ProjectAgentFocusButton projectId={projectId} missionId={mission.id}/>}
     <header className={styles.detailHeader}>
-     <div className={styles.detailMeta}><span className={styles.badge} data-status={mission.status}>{mission.workState?workPhaseLabel(mission.workState.phase):labels[mission.status]??"状态待确认"}</span><span>{done} 个步骤已执行 · {mission.outputs.length} 份草稿</span></div>
+     <div className={styles.detailMeta}>{mission.workState?<WorkStateBadges state={mission.workState}/>:<span className={styles.badge} data-status={mission.status}>{labels[mission.status]??"状态待确认"}</span>}{nextActorLabel(mission.workState?.nextActor)&&<span>下一步：<strong>{nextActorLabel(mission.workState?.nextActor)}</strong></span>}<span>{done} 个步骤已执行 · {mission.outputs.length} 份草稿</span></div>
      <Link className="workspace-link focus-ring" href={"/focus?entryKind=MISSION&entryId="+mission.id+"&entryProject="+projectId}>调整当前重点／继续讨论</Link>{mission.workingObjective&&<p>当前重点：{mission.workingObjective}</p>}<h3 className={styles.goal}>{mission.goal.length>90?`${[...mission.goal].slice(0,90).join("")}…`:mission.goal}</h3>{mission.goal.length>90&&<details><summary>查看完整委托目标</summary><p>{mission.goal}</p></details>}
+     <p className={styles.versionLine}>委托版本 v{mission.version} · 最近观察 {mission.workState?.observedAt?new Date(mission.workState.observedAt).toLocaleString("zh-CN",{hour12:false}):"尚无成功观察"}{mission.workState?.checkedAt&&<> · 读取于 {new Date(mission.workState.checkedAt).toLocaleTimeString("zh-CN",{hour12:false})}</>}</p>
      {mission.delegation?.attention?.level==="URGENT"&&<p role="alert">临近任务截止，需要你核对当前问题后决定下一步。</p>}
 
      <div role="status" className={styles.statusText}>{(mission.workState?.phase==="WAITING_USER"?"等待你回答下方原问题":mission.workState?.reasonText)??labels[mission.status]}{!mission.workState&&(mission.status==="RUNNING"?"，最近已完成的步骤见下方":mission.status==="READY"?"，进度已保存，等待开始":mission.status==="WAITING_INPUT"?"，补充后可继续同一委托":mission.status==="WAITING_APPROVAL"?"，确认预览后才会执行该提案":"")}</div>
@@ -143,9 +146,9 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
       {!terminal&&<button className={styles.cancel} disabled={busy} onClick={()=>void command("cancel")}>取消委托</button>}
      </div>
     </header>
-    <MissionReadback key={`readback:${mission.id}`} refreshKey={readbackRefreshKey} missionVersion={mission.version} missionId={mission.id} target={mission.id===initialMissionId?readTarget:undefined}/>
-    <MissionJudgmentChanges key={`judgments:${mission.id}`} projectId={projectId} missionId={mission.id} missionVersion={mission.version}/>
-{mission.status==="PAUSED"&&mission.budget&&mission.used&&<MissionBudgetReview budget={mission.budget} used={mission.used} busy={busy} onReview={totals=>void perform(async()=>{await api(`/api/missions/${mission.id}/budget-review`,"POST",{requestId:requestId({kind:"budget",version:mission.version,totals}),expectedVersion:mission.version,totals});await refresh(mission.id);})}/>}
+    {(mission.question||mission.approvals.length>0||mission.error||(mission.status==="PAUSED"&&mission.budget&&mission.used))&&<section className={styles.nextStep} aria-labelledby="mission-next-title">
+     <div className={styles.nextHead}><p>下一步{mission.workState?` · ${workPhaseLabel(mission.workState.phase)}`:""}</p><h4 id="mission-next-title">{mission.workState?.actionLabel??labels[mission.status]??"查看委托进展"}</h4></div>
+    {mission.status==="PAUSED"&&mission.budget&&mission.used&&<MissionBudgetReview budget={mission.budget} used={mission.used} busy={busy} onReview={totals=>void perform(async()=>{await api(`/api/missions/${mission.id}/budget-review`,"POST",{requestId:requestId({kind:"budget",version:mission.version,totals}),expectedVersion:mission.version,totals});await refresh(mission.id);})}/>}
     {mission.error&&<section id="mission-error-block" className={styles.stoppedBlock} role={mission.status==="PAUSED"||mission.status==="FAILED"?"alert":"status"} aria-label="暂停原因与恢复条件">
       <strong>{mission.status==="PAUSED"?"执行已暂停，已有进度已保留":mission.status==="FAILED"?"执行失败，已执行的结果保留":"本次执行需要恢复，已有进度已保留"}</strong>
       <p>{mission.error.code==="MODEL_PROTOCOL_ERROR"&&mission.error.message==="委托执行失败，请检查服务配置后继续"?"模型回复格式不符合要求，尚未执行新步骤。修复后可继续此委托。":mission.error.message}</p>
@@ -173,6 +176,9 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
       return <section className={styles.attention} key={s.id} aria-label="批量外部日历写入回执"><h4>飞书日历批量写入回执</h4><p>{s.status==="SUCCEEDED"?`已创建 ${data?.events?.length??0} 个日程并完成回读核对；外部对象存在不等于现实目标达成。`:s.status==="UNKNOWN"?"批次写入结果待核对：可能部分已创建，不会自动再发。":s.status==="FAILED"?"确定失败："+(data?.message??"飞书拒绝了本批写入")+"；未自动重发。":"等待批准或执行。"}</p>{data?.events?.map(item=><p className="break-all" key={item.index}>日程 {item.index+1}：{item.externalId}</p>)}{data?.compensation&&<p className={styles.muted}>补偿删除：已删除 {data.compensation.deleted.length} 个{data.compensation.remaining.length?`，仍有 ${data.compensation.remaining.length} 个未确认删除`:""}。</p>}{s.execution?.phase&&<p className={styles.muted}>派发阶段：{s.execution.phase}</p>}</section>;})}
     {mission.steps.filter(s=>s.toolName==="propose_calendar_event").map(s=>{const data=(s.result as {data?:{externalId?:string;status?:string;code?:string;message?:string;marker?:string}}|null)?.data;
       return <section className={styles.attention} key={s.id} aria-label="外部日历写入回执"><h4>飞书日历写入回执</h4><p>{s.status==="SUCCEEDED"?"已创建并完成回读核对；外部对象存在不等于现实目标达成。":s.status==="UNKNOWN"?"写入结果待核对：可能已创建，不会自动再发一次。":s.status==="FAILED"?"确定失败："+(data?.message??"飞书拒绝了本次写入")+"；未自动重发。":"等待批准或执行。"}</p>{data?.externalId&&<p className="break-all">外部日程 ID：{data.externalId}</p>}{data?.marker&&<p className="break-all">核对标记：{data.marker}</p>}{s.execution?.phase&&<p className={styles.muted}>派发阶段：{s.execution.phase}</p>}</section>;})}
+    </section>}
+    <MissionReadback key={`readback:${mission.id}`} refreshKey={readbackRefreshKey} missionVersion={mission.version} missionId={mission.id} target={mission.id===initialMissionId?readTarget:undefined}/>
+    <MissionJudgmentChanges key={`judgments:${mission.id}`} projectId={projectId} missionId={mission.id} missionVersion={mission.version}/>
     <MissionResponsibilityPanel key={`responsibility:${mission.id}`} missionId={mission.id} onRevised={()=>void refresh(mission.id)} />
     <details className={styles.activity}><summary>最近进展</summary>{mission.steps.filter(s=>s.status==="SUCCEEDED").slice(-2).map(s=><p key={s.id}>{toolLabels[s.toolName]??"工具步骤"}已执行</p>)}{mission.outputs[0]&&<p>草稿修订 {mission.outputs[0].revision} 已保存，内容待审阅。</p>}{done===0&&!mission.outputs.length&&<p>尚无已完成步骤；当前状态：{labels[mission.status]??"待核对"}。</p>}</details>
     <DecisionScenarios key={`scenarios:${mission.id}`} missionId={mission.id} disabled={readState!=="fresh"||busy||terminal} onAdopted={()=>void refresh(mission.id).catch(handleError)}/>

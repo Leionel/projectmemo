@@ -1,4 +1,3 @@
-import { workPhaseLabel } from '../common/GlobalFocusPresentation';
 import { MissionBudgetReview } from "../models/Mission";
 import { MissionMetricReceipt } from '../components/MissionMetricReceipt';
 import { MissionInvestigationDelegation } from "../components/MissionInvestigationDelegation";
@@ -8,6 +7,7 @@ import { DecisionScenarioPanel } from '../components/DecisionScenarioPanel';
 import { ExperiencePanel } from '../components/ExperiencePanel';
 import { GoalQuestionPanel } from '../components/GoalQuestionPanel';
 import { MissionJudgmentChanges } from '../components/MissionJudgmentChanges';
+import { WorkStateBadges } from '../components/WorkStateBadge';
 import { ProjectImpactPanel } from '../components/ProjectImpactPanel';
 import { MissionReadTarget } from '../models/MissionReadback';
 import { MissionReadbackView } from '../components/MissionReadbackView';
@@ -593,7 +593,11 @@ struct MissionDetail {
     Column({ space: 12 }) {
       Column({ space: 12 }) {
         Row() {
-          PMStatusPill({ label: this.mission.workState ? workPhaseLabel(this.mission.workState!.phase) : missionStatusLabel(this.mission.status), tone: this.mission.status === 'PAUSED' || this.mission.status === 'FAILED' ? 'risk' : 'brand' })
+          if (this.mission.workState) {
+            WorkStateBadges({ state: this.mission.workState! })
+          } else {
+            PMStatusPill({ label: missionStatusLabel(this.mission.status), tone: this.mission.status === 'PAUSED' || this.mission.status === 'FAILED' ? 'risk' : 'brand' })
+          }
           Blank()
           Button(this.showCompletion ? '收起状态详情 ⌃' : '状态详情 ⌄', { type: ButtonType.Normal }).height(44).fontSize(12)
             .fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).padding({ left: 8, right: 0 }).onClick(() => { this.showCompletion = !this.showCompletion; })

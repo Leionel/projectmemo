@@ -257,6 +257,17 @@ button:active:enabled,.editorial-button:active { filter:brightness(.94); }
 .global-nav-link[aria-current=page] { color:var(--teal-strong); background:var(--teal-pale); font-weight:600; }
 .workspace-filters { display:flex; flex-wrap:wrap; align-items:center; gap:.625rem; padding:1rem 0; margin-bottom:.5rem; }
 .workspace-filters > label { min-width:0; }
+.workspace-type-chips { display:flex; flex-wrap:wrap; align-items:center; gap:.375rem; margin:-.25rem 0 1rem; }
+.workspace-type-chips > a,.workspace-type-chips summary { display:inline-flex; align-items:center; min-height:2.25rem; padding:0 .875rem; border:1px solid var(--rule); border-radius:999px; background:var(--card-bg); color:var(--ink-soft); font-size:.8125rem; cursor:pointer; list-style:none; }
+.workspace-type-chips > a:hover,.workspace-type-chips summary:hover { border-color:var(--rule-strong); color:var(--ink); }
+.workspace-type-chips > a[aria-current="page"],.workspace-type-chips details.is-current > summary { background:var(--teal-pale); border-color:var(--teal); color:var(--teal-strong); font-weight:600; }
+.workspace-type-chips summary::-webkit-details-marker { display:none; }
+.workspace-type-chips details { position:relative; }
+.workspace-type-chips details > div { position:absolute; z-index:20; top:calc(100% + .375rem); left:0; display:grid; min-width:9rem; padding:.375rem; border:1px solid var(--rule); border-radius:.625rem; background:var(--card-bg); box-shadow:var(--shadow-md); }
+.workspace-type-chips details > div a { display:flex; min-height:2.5rem; align-items:center; padding:0 .625rem; border-radius:.375rem; font-size:.8125rem; color:var(--ink); }
+.workspace-type-chips details > div a:hover { background:var(--paper); }
+.workspace-type-chips details > div a[aria-current="page"] { color:var(--teal-strong); font-weight:600; }
+@media (pointer:coarse) { .workspace-type-chips > a,.workspace-type-chips summary { min-height:44px; } }
 .workspace-filters select { max-width:15rem; padding:.5rem; font-size:.84375rem; }
 .workspace-search { display:flex; align-items:center; position:relative; flex:1; min-width:12rem!important; }
 .workspace-search svg { position:absolute; left:.625rem; color:var(--muted); pointer-events:none; }

@@ -128,10 +128,10 @@ test("project home separates features and preserves old bookmarks", async ({page
   await expect(page.getByLabel(process.env.FOCUS_AGENT_ENABLED === "true" ? "与忆程讨论项目" : "问项目进展、提醒依据或下一步")).toBeVisible();
   await page.goto(base);await page.setViewportSize({width:1280,height:800});
   await page.screenshot({path:"test-results/pre-r4-home-desktop.png",fullPage:true,animations:"disabled"});
-  await page.getByRole("button",{name:"切换深浅色主题"}).click();
+  await page.getByRole("button",{name:"账号与设置"}).click(); await page.getByRole("button",{name:"切换深浅色主题"}).click(); await page.keyboard.press("Escape");
   await expect(page.locator("html")).toHaveClass(/dark/);
   await page.screenshot({path:"test-results/pre-r4-home-dark.png",fullPage:true,animations:"disabled"});
-  await page.getByRole("button",{name:"切换深浅色主题"}).click();
+  await page.getByRole("button",{name:"账号与设置"}).click(); await page.getByRole("button",{name:"切换深浅色主题"}).click(); await page.keyboard.press("Escape");
   await page.setViewportSize({width:390,height:844});
   await expect(page.getByRole("region",{name:"当前最重要的事项"}).getByRole("link").first()).toBeInViewport();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);

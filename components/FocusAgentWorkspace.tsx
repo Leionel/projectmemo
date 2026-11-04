@@ -1,6 +1,6 @@
 "use client";
 import {focusPrimary} from "@/lib/client/focusPresentation";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, MessageCircle, CircleAlert, Layers3, CheckSquare2 } from "lucide-react";
@@ -59,7 +59,6 @@ export function FocusAgentWorkspace({ focus }: { focus: GlobalFocus }) {
     .map(g => { const rest = g.items.filter(item => item.id !== hero?.id || item.projectId !== hero?.projectId);
       const stopped = g.kind === "MISSION" ? rest.filter(isStopped) : [];
       return { ...g, items: rest.filter(item => !stopped.includes(item)).slice(0, 3), stopped }; });
-  const hasVisibleItems = visibleGroups.some(g => g.items.length > 0 || g.stopped.length > 0);
   useEffect(()=>{const refresh=()=>router.refresh();window.addEventListener("focus",refresh);const boundary=focus.primaryContext?.nextBoundary;const delay=boundary?Date.parse(boundary)-Date.now():NaN;const timer=Number.isFinite(delay)?setTimeout(refresh,Math.min(Math.max(delay+50,50),2147483647)):undefined;return()=>{window.removeEventListener("focus",refresh);clearTimeout(timer);};},[focus.primaryContext?.nextBoundary,router]);
   function discuss(item: FocusEntry, kind: "MISSION" | "ACTION" | "INTERVENTION") {
     if (kind === "INTERVENTION") { setEntry({ kind, projectId: item.projectId, id: item.id }); setSelection(undefined); }
@@ -73,26 +72,66 @@ export function FocusAgentWorkspace({ focus }: { focus: GlobalFocus }) {
     if (item.status === "FAILED" && item.entityKind !== "ACTION") return "委托执行中断，进入详情查看原因与恢复方式。";
     return item.detail;
   }
+  const today = new Date().toLocaleDateString("zh-CN", { month: "long", day: "numeric", weekday: "short" });
+  const listGroups = visibleGroups.filter(g => g.title !== "下一步行动");
+  const listEmpty = !listGroups.some(g => g.items.length > 0 || g.stopped.length > 0);
+  const stoppedAll = listGroups.flatMap(g => g.stopped.map(item => ({ item, kind: g.kind })));
+  const actions = focus.actions.filter(item => item.id !== hero?.id || item.projectId !== hero?.projectId).slice(0, 4);
+  const failed = (item: FocusEntry) => item.workState?.phase === "FAILED" || item.status === "FAILED";
+  function rowChip(item: FocusEntry, kind: string, title: string) {
+    if (item.workState) return <WorkStateBadges state={item.workState}/>;
+    if (kind === "INTERVENTION") return <span className={styles.chip} data-tone="risk">需要关注</span>;
+    return <span className={styles.chip} data-tone={title === "需要你判断" ? "user" : "agent"}>{missionStatusLabels[item.status] ?? title}</span>;
+  }
   return <div className={styles.root}>
-    <header className={styles.pageHead}><h1>今日项目焦点</h1><Link className="workspace-tool focus-ring" href="/projects">全部项目<ArrowRight size={14}/></Link></header>
     <div className={styles.mobileSwitch} aria-label="焦点视图">{[["focus", "项目焦点"], ["chat", "与忆程协作"]].map(([key, title]) => <button type="button" key={key} aria-pressed={mobileView === key} className={mobileView === key ? styles.active : ""} onClick={() => setMobileView(key)}>{title}</button>)}</div>
     <div className={styles.columns} data-mobile={mobileView}>
-      <aside className={styles.left} aria-label="项目焦点">
-        {discussions.some(d => d.unread > 0) && <section className={styles.taskList} aria-label="讨论新结果"><header><h2>讨论新结果</h2></header>
-          {discussions.filter(d => d.unread > 0).map(d => <article className={styles.item} key={d.conversationId}><span className={styles.itemIcon}><MessageCircle size={16}/></span><div><h3><Link className="focus-ring" href={conversationHref("/focus", d.conversationId)} onClick={() => { setEntry(undefined); setSelection(undefined); setMobileView("chat"); }}>{d.title}</Link></h3><p className={styles.excerpt}>{d.unread} 条未读</p></div></article>)}
+      <div className={styles.left}>
+        <header className={styles.pageHead}>
+          <div><p className={styles.date}>{today}</p><h1>今日项目焦点</h1></div>
+          <label className={styles.scope}><input type="checkbox" checked={focus.archived} onChange={event => router.push(event.target.checked ? "/focus?archived=1" : "/focus")}/>包含归档项目</label>
+        </header>
+        {discussions.filter(d => d.unread > 0).map(d => <Link key={d.conversationId} className={styles.banner + " focus-ring"} href={conversationHref("/focus", d.conversationId)} onClick={() => { setEntry(undefined); setSelection(undefined); setMobileView("chat"); }}>
+          <span aria-hidden="true" className={styles.bannerDot}/><span className={styles.bannerText}><strong>讨论新结果</strong> · 「{d.title}」有 {d.unread} 条新回答</span><span className={styles.bannerGo}>打开 →</span></Link>)}
+        {hero && heroKind && <section className={styles.hero} aria-labelledby="focus-hero-title">
+          <div className={styles.heroBody}>
+            <div className={styles.heroMeta}>{hero.workState ? <WorkStateBadges state={hero.workState}/> : <span className={styles.chip} data-tone={heroKind === "INTERVENTION" ? "risk" : "user"}>{missionStatusLabels[hero.status] ?? (heroKind === "INTERVENTION" ? "需要关注" : "下一步")}</span>}<Link className={styles.heroProject + " focus-ring"} href={"/projects/" + hero.projectId}>{hero.projectTitle}</Link></div>
+            <h2 id="focus-hero-title">{hero.title}</h2>
+            {hero.detail && <p className={styles.heroReason}>{entryDetail(hero)}</p>}
+            {focus.primaryContext?.workingObjective && <p className={styles.heroObjective}>当前重点：{focus.primaryContext.workingObjective}</p>}
+            {heroKind === "MISSION" && <FocusPacketSummary missionId={hero.id} version={hero.workState?.originalRef.version}/>}
+            <div className={styles.heroActions}>
+              <div><Link className={(primaryActionTone(hero.workState) === "solid" ? "editorial-button" : primaryActionTone(hero.workState) === "failed" ? `workspace-tool ${styles.failedAction}` : "workspace-tool") + " focus-ring"} href={href(hero,heroKind)}>{hero.actionLabel??"打开原事项"}<ArrowRight size={15} aria-hidden="true"/></Link>
+                {heroKind!=="PROJECT"&&<button type="button" className={styles.textAction + " focus-ring"} onClick={() => discuss(hero,heroKind)}><MessageCircle size={15} aria-hidden="true"/>和忆程讨论</button>}</div>
+              {hero.workState && nextActorLabel(hero.workState.nextActor) && <span className={styles.actor}>下一步：<strong>{nextActorLabel(hero.workState.nextActor)}</strong></span>}
+            </div>
+          </div>
+          {hero.workState && <div className={styles.heroFoot}><span>最近观察 {shortTime(hero.workState.observedAt) ? <time dateTime={hero.workState.observedAt!}>{shortTime(hero.workState.observedAt)}</time> : "尚无成功观察"} · 读取于 <time dateTime={hero.workState.checkedAt}>{shortTime(hero.workState.checkedAt) ?? "未记录"}</time></span><span>读取与刷新不推进观察时间</span></div>}
         </section>}
-        {hero && heroKind && <section className={styles.hero}><div className={styles.heroMeta}>{hero.workState ? <WorkStateBadges state={hero.workState}/> : <span className={styles.heroPill}>{missionStatusLabels[hero.status] ?? (heroKind === "INTERVENTION" ? "需要关注" : "下一步")}</span>}<span className={styles.heroProject}>{hero.projectTitle}</span></div><h2>{hero.title}</h2>{focus.primaryContext?.workingObjective&&<p>当前重点：{focus.primaryContext.workingObjective}</p>}{hero.detail && <p>{entryDetail(hero)}</p>}
-          {hero.workState && <p className={styles.heroFacts}>{nextActorLabel(hero.workState.nextActor) && <span>下一步：<strong>{nextActorLabel(hero.workState.nextActor)}</strong></span>}<span>最近观察 {shortTime(hero.workState.observedAt) ? <time dateTime={hero.workState.observedAt!}>{shortTime(hero.workState.observedAt)}</time> : "尚无成功观察"}</span><span>读取于 <time dateTime={hero.workState.checkedAt}>{shortTime(hero.workState.checkedAt) ?? "未记录"}</time></span></p>}
-          {heroKind === "MISSION" && <FocusPacketSummary missionId={hero.id} version={hero.workState?.originalRef.version}/>}
-          <div className={styles.heroActions}><Link className={(primaryActionTone(hero.workState) === "solid" ? "editorial-button" : primaryActionTone(hero.workState) === "failed" ? `workspace-tool ${styles.failedAction}` : "workspace-tool") + " focus-ring"} href={href(hero,heroKind)}>{hero.actionLabel??"打开原事项"}<ArrowRight size={13}/></Link>{heroKind!=="PROJECT"&&<button type="button" className="workspace-tool focus-ring" onClick={() => discuss(hero,heroKind)}><MessageCircle size={14}/>和忆程讨论</button>}</div></section>}
-        <section className={styles.taskList}><header><h2>项目焦点</h2><div className={styles.filters}>{[["all", "全部"], ["waiting", (focus.coverage?.complete===false?"当前待回应 ":"待回应 ")+focus.counts.waiting], ["running", "推进中 "+focus.counts.running]].map(([key, label]) => <button type="button" key={key} className={filter === key ? styles.active : ""} aria-pressed={filter === key} onClick={() => setFilter(key)}>{label}</button>)}</div></header>
-          {visibleGroups.map(g => { const row = (item: FocusEntry) => <article key={g.kind + item.id} className={styles.item}><span className={g.title === "需要你判断" || g.kind === "INTERVENTION" ? styles.warmIcon : styles.itemIcon}><g.Icon size={16}/></span><div><p className={styles.project}>{item.projectTitle}{item.workState ? <WorkStateBadges state={item.workState}/> : <span className={styles.projectLabel}>{g.title}</span>}</p><h3>{item.title}</h3>{item.detail && <p className={styles.excerpt}>{entryDetail(item)}</p>}<div className={styles.itemActions}><Link className={styles.discuss+" focus-ring"} href={href(item,g.kind)}>{item.actionLabel??"打开原事项"}</Link><button type="button" className={styles.discuss + " focus-ring"} onClick={() => discuss(item, g.kind)}>与忆程讨论<ArrowRight size={12}/></button></div></div></article>;
-            return <Fragment key={g.title}>{g.items.map(row)}{g.stopped.length > 0 && <details className={styles.stoppedGroup}><summary>{g.stopped.length} 项委托已暂停或未完成</summary>{g.stopped.map(row)}</details>}</Fragment>; })}
-          {!hasVisibleItems && <div className={styles.emptyFilter} role="status"><p>{filter === "waiting" ? "目前没有等待你回应的委托。" : filter === "running" ? "目前没有等待执行或正在执行的委托。" : "目前没有更多待处理事项。"}</p>{filter !== "all" ? <button type="button" className="workspace-tool focus-ring" onClick={() => setFilter("all")}>查看全部事项</button> : !hero && <Link className="workspace-tool focus-ring" href="/projects">查看项目</Link>}</div>}
+        <section aria-labelledby="focus-list-title">
+          <div className={styles.listHead}><h2 id="focus-list-title">项目焦点</h2><div role="group" aria-label="筛选" className={styles.filters}>{[["all", "全部"], ["waiting", (focus.coverage?.complete===false?"当前待回应 ":"待回应 ")+focus.counts.waiting], ["running", "推进中 "+focus.counts.running]].map(([key, label]) => <button type="button" key={key} className={filter === key ? styles.active : ""} aria-pressed={filter === key} onClick={() => setFilter(key)}>{label}</button>)}</div></div>
+          <ul className={styles.list}>
+            {listGroups.flatMap(g => g.items.map(item => <li key={g.kind + item.id} className={styles.row}>
+              {rowChip(item, g.kind, g.title)}
+              <div className={styles.rowText}><strong>{item.title}</strong><span>{item.projectTitle}{item.detail ? " · " + entryDetail(item) : ""}</span></div>
+              <div className={styles.rowActions}><Link className="focus-ring" href={href(item,g.kind)}>{item.actionLabel ?? (g.kind === "INTERVENTION" ? "为什么提醒我这个？" : "打开原事项")}</Link><button type="button" className={styles.iconAction + " focus-ring"} aria-label={"与忆程讨论：" + item.title} title="与忆程讨论" onClick={() => discuss(item, g.kind)}><MessageCircle size={15} aria-hidden="true"/></button></div>
+            </li>))}
+            {stoppedAll.length > 0 && <li className={styles.stoppedRow}><details className={styles.stoppedGroup}>
+              <summary><span className={styles.chip} data-tone="paused">已暂停 · 未完成</span><span className={styles.rowText}><strong>{stoppedAll.length} 项委托执行已暂停或失败</strong><span>运行记录与原因保留，逐条查看</span></span></summary>
+              <div className={styles.stoppedItems}>{stoppedAll.map(({ item, kind }) => <Link key={kind + item.id} className="focus-ring" href={href(item, kind)}><span data-failed={failed(item) ? "true" : undefined}>{failed(item) ? "这一步未完成" : "已暂停"}</span><span>{item.title}</span><span>{item.projectTitle}</span></Link>)}</div>
+            </details></li>}
+            {listEmpty && <li className={styles.emptyFilter} role="status"><p>{filter === "waiting" ? "目前没有等待你回应的委托。" : filter === "running" ? "目前没有等待执行或正在执行的委托。" : "目前没有更多待处理事项。"}</p>{filter !== "all" ? <button type="button" className="workspace-tool focus-ring" onClick={() => setFilter("all")}>查看全部事项</button> : !hero && <Link className="workspace-tool focus-ring" href="/projects">查看项目</Link>}</li>}
+          </ul>
+          {(focus.hasMore||focus.coverage?.complete===false) && <p className={styles.footnote}>每类最多列出 6 项，计数覆盖当前授权范围。<Link className="focus-ring" href="/projects">查看全部项目 →</Link></p>}
         </section>
-        {(focus.hasMore||focus.coverage?.complete===false) && <Link className={styles.more + " focus-ring"} href="/projects">当前范围建议先处理 · 查看全部项目 →</Link>}
-      </aside>
-      <div id="focus-conversation" className={styles.right}>{syncing ? <p role="status" className={styles.calm}>正在读取讨论…</p> : <ConversationPanel entry={entry} selection={selection} onUpdated={() => router.refresh()}/>}</div>
+        <div className={styles.lower}>
+          <section aria-labelledby="focus-actions-title"><div className={styles.lowerHead}><h2 id="focus-actions-title">下一步行动</h2><Link className="focus-ring" href="/actions">行动板 →</Link></div>
+            <ul className={styles.compact}>{actions.map(item => <li key={item.id}><span data-doing={item.status === "DOING" ? "true" : undefined}>{item.status === "DOING" ? "进行中" : "待开始"}</span><Link className="focus-ring" href={href(item, "ACTION")}>{item.title}</Link>{item.dueAt && <time dateTime={item.dueAt}>{new Date(item.dueAt).toLocaleDateString("zh-CN", { month: "2-digit", day: "2-digit" })}</time>}</li>)}{!actions.length && <li className={styles.compactEmpty}>暂无待办行动</li>}</ul></section>
+          <section aria-labelledby="focus-records-title"><div className={styles.lowerHead}><h2 id="focus-records-title">最近保存的资料</h2><Link className="focus-ring" href="/memory">检索全部记忆 →</Link></div>
+            <ul className={styles.compact}>{focus.records.map(item => <li key={item.id}><span>{item.recordFields.length ? "实验记录" : "项目记录"}</span><Link className="focus-ring" href={`/projects/${item.projectId}/knowledge#card-${item.id}`}>{item.title}</Link>{item.recordedAt && <time dateTime={item.recordedAt}>{new Date(item.recordedAt).toLocaleDateString("zh-CN", { month: "2-digit", day: "2-digit" })}</time>}</li>)}{!focus.records.length && <li className={styles.compactEmpty}>暂无新保存的资料</li>}</ul></section>
+        </div>
+      </div>
+      <aside id="focus-conversation" aria-label="与忆程协作" className={styles.right}>{syncing ? <p role="status" className={styles.calm}>正在读取讨论…</p> : <ConversationPanel entry={entry} selection={selection} onUpdated={() => router.refresh()}/>}</aside>
     </div>
   </div>;
 }

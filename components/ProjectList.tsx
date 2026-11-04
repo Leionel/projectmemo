@@ -1,7 +1,8 @@
 "use client";
 
 import { useDeferredValue, useMemo, useState } from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import Link from "next/link";
+import { Plus, Search, SlidersHorizontal, X } from "lucide-react";
 import { ProjectCard, type ProjectCardData } from "@/components/ProjectCard";
 import { scenarioOptions } from "@/lib/types";
 
@@ -124,6 +125,7 @@ export function ProjectList({ projects }: { projects: ProjectCardData[] }) {
       {visibleProjects.length > 0 ? (
         <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {visibleProjects.map((project) => <ProjectCard key={project.id} project={project} />)}
+          {!query && scenario === "ALL" && <Link prefetch={false} href="/projects/new" className="project-new-card focus-ring"><div><span aria-hidden="true"><Plus size={20} /></span><strong>新项目</strong><small>竞赛、科研或课程设计</small></div></Link>}
         </div>
       ) : (
         <div className="card-surface mt-5 grid min-h-64 place-items-center rounded-lg p-8 text-center" role="status">

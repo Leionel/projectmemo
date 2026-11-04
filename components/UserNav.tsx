@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { BookOpen, LogIn, LogOut, User, LoaderCircle, ShieldCheck } from "lucide-react";
 import { bindConversationDraftOwner, clearConversationDrafts } from "@/lib/client/conversationDrafts";
 import { bindCaptureDraftOwner, clearCaptureDrafts, captureGeneration } from "@/lib/client/captureDrafts";
@@ -12,10 +13,16 @@ interface UserState {
   displayName: string;
 }
 
-export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
+export function UserNav({ isMenuItem = false, liveLlm = false }: { isMenuItem?: boolean; liveLlm?: boolean }) {
   const [user, setUser] = useState<UserState | null>(null);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const close = (event: KeyboardEvent) => { if (event.key === "Escape") setMenuOpen(false); };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, [menuOpen]);
   const [loggingOut, setLoggingOut] = useState(false);
   const [error, setError] = useState("");
 
@@ -133,12 +140,11 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
     <div className="relative">
       <button
         onClick={() => setMenuOpen(!menuOpen)}
-        className="focus-ring flex items-center gap-1.5 rounded-md border border-[var(--rule)] bg-[var(--paper-strong)] px-2.5 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:border-[var(--teal)]"
+        aria-label="账号与设置"
+        aria-expanded={menuOpen}
+        className="focus-ring grid h-10 w-10 place-items-center rounded-full bg-[var(--teal-pale)] text-sm font-bold text-[var(--teal-strong)] transition hover:shadow-[inset_0_0_0_1px_var(--teal)]"
       >
-        <span className="grid h-5 w-5 place-items-center rounded-full bg-[var(--teal-pale)] text-[11px] text-[var(--teal-strong)]">
-          <User size={12} />
-        </span>
-        <span className="max-w-[100px] truncate">{user.displayName || user.username}</span>
+        我
       </button>
 
       {menuOpen && (
@@ -148,6 +154,7 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
             <div className="border-b border-[var(--rule)] px-3 py-2">
               <p className="text-xs font-bold text-[var(--ink)]">{user.displayName}</p>
               <p className="font-mono text-xs text-[var(--ink-soft)]">@{user.username}</p>
+              <p className="mt-1 flex items-center gap-1.5 text-xs text-[var(--ink-soft)]"><span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${liveLlm ? "bg-[var(--teal)]" : "bg-[var(--muted)]"}`} />{liveLlm ? "云模型已配置" : "演示模式"}</p>
             </div>
             <Link
               href="/settings/memory"
@@ -165,6 +172,7 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
             >
               <ShieldCheck size={14} /> 模型与安全
             </Link>
+            <ThemeToggle isMenuItem />
             <button
               onClick={handleLogout}
               disabled={loggingOut}

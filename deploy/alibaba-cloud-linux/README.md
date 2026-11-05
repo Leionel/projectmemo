@@ -228,6 +228,66 @@ sudo -u projectmemo APP_DIR=/opt/projectmemo/app \
 sudo systemctl restart projectmemo
 ```
 
+## 账号邮件（注册、找回密码、委托等待提醒）
+
+没有发信配置时，注册、找回密码和邮箱验证全部关闭（接口返回 `ACCOUNT_MAIL_UNAVAILABLE`），只有已有账号能登录。代码已支持 Resend HTTPS API 和 SMTP 两种方式，**推荐 Resend**：走 443 端口，不受阿里云默认封禁 25 端口的影响。
+
+1. **在 Resend 验证发信域名。** 添加 `mail.luojiatutor.xyz`，把 Resend 给出的 SPF（TXT/MX）和 DKIM（TXT）记录加到该域名的 DNS，等待状态变为 Verified。`AUTH_EMAIL_FROM` 的域名必须与已验证域名一致。
+2. **创建 API Key。** 权限选 Sending access，限定到该域名。Key 只写进服务器环境文件，不进仓库、回执或聊天记录。
+3. **写入 `/etc/projectmemo/projectmemo.env`**（先备份；每个键只保留一行）：
+
+```bash
+cp -a /etc/projectmemo/projectmemo.env /etc/projectmemo/projectmemo.env.bak-$(date -u +%Y%m%dT%H%M%SZ)
+vi /etc/projectmemo/projectmemo.env
+# AUTH_MAIL_TRANSPORT=resend
+# AUTH_PUBLIC_BASE_URL=https://project.luojiatutor.xyz   # 生产必须 https，且不带路径
+# AUTH_EMAIL_FROM="忆程 <no-reply@mail.luojiatutor.xyz>"
+# RESEND_API_KEY=re_xxx
+```
+
+   用 SMTP 时改为 `AUTH_MAIL_TRANSPORT=smtp`，并填写 `SMTP_HOST`、`SMTP_PORT`（默认 465）、`SMTP_SECURE`、`SMTP_USER`、`SMTP_PASSWORD`。阿里云 ECS 只能用 465 或 587 端口。
+
+4. **发一封测试邮件。** 测试脚本在独立的 systemd 单元里读取生产环境文件，不会把密钥打印出来，也不会创建账号：
+
+```bash
+cd /opt/projectmemo/app
+systemd-run --wait --pipe --collect \
+  --property=User=projectmemo --property=Group=projectmemo \
+  --property=WorkingDirectory=/opt/projectmemo/app \
+  --property=EnvironmentFile=/etc/projectmemo/projectmemo.env \
+  --setenv=PATH=/home/projectmemo/.nvm/versions/node/v24.22.0/bin:/usr/bin:/bin \
+  /home/projectmemo/.nvm/versions/node/v24.22.0/bin/node --import tsx scripts/test-account-mail.ts --to <你控制的邮箱>
+```
+
+5. **重启并核对。**
+
+```bash
+systemctl restart projectmemo && systemctl restart projectmemo-mission-worker
+curl -s https://project.luojiatutor.xyz/api/auth/capabilities ; echo   # 期望两项都为 true
+```
+
+   然后用一个新邮箱走一遍注册 → 收验证邮件 → 点链接 → 登录，再用同一邮箱试一次“找回密码”。
+
+6. **委托等待提醒（可选）。** 上面几步通过后，才开启 `bash set-flags.sh MISSION_WAIT_EMAIL_ENABLED=true`。开启后 Worker 会在委托等你回答或批准时，给已验证邮箱发一封邮件：同一次等待只发一封，遵守静默时段和每日预算，邮件只含项目名和回到忆程的链接。这属于真实外部发信，开启前确认收件范围。
+
+邮件发不出时，接口只返回“暂时无法发出”，不暴露服务商报错。到 Resend 控制台的 Logs 查看具体原因，最常见的是域名未验证，或 From 与已验证域名不一致。
+
+## 模型状态显示（nginx 与静态页）
+
+服务器已配置模型，界面却显示“演示模式 / Mock / 规则模式”，有两个原因，都已在代码里修好，但需要部署：
+
+- **nginx 原先把 `/api/settings` 整个返回 404。** Web 设置页和鸿蒙“模型与连接”都靠这个只读接口判断是否已接入模型。读取失败后，它们回退到默认的 mock 显示。新版 `projectmemo.nginx.conf` 只对 `/api/settings` 放行 GET；修改接口和 `/api/settings/probe` 仍返回 404，生产环境应用本身也拒绝 POST。`safe-update.sh` 不改 nginx，需要手动更新：
+
+```bash
+cp -a /etc/nginx/conf.d/projectmemo.conf /etc/nginx/conf.d/projectmemo.conf.bak-$(date -u +%Y%m%dT%H%M%SZ)   # 按实际文件名
+# 用仓库 deploy/alibaba-cloud-linux/projectmemo.nginx.conf 中的两个 /api/settings location 替换原来那一段
+nginx -t && systemctl reload nginx
+curl -s https://project.luojiatutor.xyz/api/settings ; echo                          # 期望 {"llmMode":"openai-compatible",...}
+curl -s -o /dev/null -w '%{http_code}\n' -X POST https://project.luojiatutor.xyz/api/settings   # 期望 403
+```
+
+- **构建时不加载生产环境文件**，`/login` 等静态页曾把“演示模式”和“注册关闭”固化进 HTML。现在根布局改为按请求渲染，新版本部署后即可生效。
+
 ## 故障恢复速查
 
 | 现象 | 先看什么 | 处理 |
@@ -239,6 +299,8 @@ sudo systemctl restart projectmemo
 | 服务反复重启 | `systemctl show projectmemo -p NRestarts` | 多为 `DATABASE_URL` 指向不存在目录或迁移未执行 |
 | 登录全部 401 | `/health` 与 `npx prisma migrate deploy` | 会话表缺失或迁移未跑 |
 | 删除项目失败，或“问忆程”上传附件报错 | `migrate status`（命令见下方“讨论附件迁移”） | 缺 `ConversationAttachment` 表：讨论附件迁移未执行。删除项目会去这张表找附件原件，所以缺表时删除项目也会失败；先备份再 `migrate deploy` |
+| 注册 / 找回密码提示“邮件服务尚未配置” | `/api/auth/capabilities` | 按“账号邮件”一节配置发信，重启 Web 与 Worker |
+| 已配置模型，界面仍显示演示模式 / 规则模式 | `curl https://project.luojiatutor.xyz/api/settings` | 返回 nginx 404 时，按“模型状态显示”一节更新 nginx |
 | 附件打不开 | `ls /opt/projectmemo/storage`、`ATTACHMENT_DIR` | 附件目录未挂载或发布时被覆盖；从最近备份还原该目录 |
 | 数据库损坏 | `node deploy/alibaba-cloud-linux/sqlite-tool.mjs verify <db>` | 保留损坏文件后从备份恢复，禁止直接删库重建 |
 | 磁盘写满 | `df -h /opt`、`du -sh /opt/projectmemo/backups` | 清理旧备份或调小 `KEEP`；先确认最近的备份仍完整 |

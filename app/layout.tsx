@@ -7,6 +7,7 @@ import { UserNav } from "@/components/UserNav";
 import { SiteHeader } from "@/components/SiteHeader";
 import {BrandLink} from "@/components/BrandLink";
 import { accountMailConfiguration } from "@/lib/auth/mail";
+import { connection } from "next/server";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,7 +15,10 @@ export const metadata: Metadata = {
   description: "忆程 ProjectMemo：面向大学生的个人项目 Agent，留住过程、找回依据、看清变化、接续行动。",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  // 模型状态与注册入口取决于运行时环境变量。ECS 构建时不加载 /etc/projectmemo/projectmemo.env，
+  // 若允许预渲染，/login 等静态页会把“演示模式 / 注册关闭”固化进 HTML。
+  await connection();
   const liveLlm = process.env.LLM_MODE === "openai-compatible" && Boolean(process.env.LLM_API_KEY);
   return (
     <html lang="zh-CN" data-scroll-behavior="smooth" suppressHydrationWarning>

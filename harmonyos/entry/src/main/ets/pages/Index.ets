@@ -118,7 +118,8 @@ struct Index {
   @State selectedGlobalType: string = 'all';
 
   // Tab 3: 设置专属状态
-  @State llmMode: string = 'mock'; // 'mock' | 'openai-compatible'
+  // '' = 尚未从服务端读到；读取失败时不能默认显示成规则模式，否则已接入模型的部署会被误认为未接入。
+  @State llmMode: string = ''; // '' | 'mock' | 'openai-compatible'
   @State llmBaseUrl: string = '';
   @State llmModelName: string = 'deepseek-v4-flash';
   @State llmApiKey: string = '';
@@ -1998,7 +1999,25 @@ struct Index {
     .accessibilityText(`${title}，${subtitle}，点击进入`)
   }
 
+  private llmModeTag(): string {
+    if (this.llmMode === 'openai-compatible') return '在线 API';
+    return this.llmMode === 'mock' ? '规则模式' : '未读取';
+  }
+
+  private llmModeTagColor(): ResourceColor {
+    if (this.llmMode === 'openai-compatible') return PMColors.BRAND;
+    return this.llmMode === 'mock' ? PMColors.MEMORY : PMColors.INK_TERTIARY;
+  }
+
+  private llmModeTagBackground(): ResourceColor {
+    if (this.llmMode === 'openai-compatible') return PMColors.BRAND_LIGHT;
+    return this.llmMode === 'mock' ? PMColors.MEMORY_LIGHT : PMColors.SURFACE_SUBTLE;
+  }
+
   private llmEntrySubtitle(): string {
+    if (this.llmMode === '') {
+      return '暂未读取到服务端模型配置';
+    }
     if (this.llmMode === 'openai-compatible') {
       return this.hasApiKey ? '在线 API · 密钥已配置' : '在线 API · 未配置密钥';
     }
@@ -2171,7 +2190,8 @@ struct Index {
           .fontSize(PMFontSize.SECONDARY)
           .fontWeight(FontWeight.Medium)
           .fontColor(PMColors.INK_SECONDARY)
-        this.InfoSheetRow('运行模式', this.llmMode === 'openai-compatible' ? '在线 API（OpenAI-compatible）' : '规则模式（无需模型 API）', PMColors.INK_PRIMARY)
+        this.InfoSheetRow('运行模式', this.llmMode === 'openai-compatible' ? '在线 API（OpenAI-compatible）' :
+          (this.llmMode === 'mock' ? '规则模式（无需模型 API）' : '暂未读取'), PMColors.INK_PRIMARY)
 
         Text('配置成功不等于每次运行都成功；连通测试与最近一次真实运行结果在「模型与连接」中查看，各委托的运行记录以实际回执为准。')
           .fontSize(PMFontSize.CAPTION)
@@ -2400,9 +2420,9 @@ struct Index {
 
         Column() {
           this.SettingsNavRow('模型与连接', this.llmEntrySubtitle(),
-            this.llmMode === 'openai-compatible' ? '在线 API' : '规则模式',
-            this.llmMode === 'openai-compatible' ? PMColors.BRAND : PMColors.MEMORY,
-            this.llmMode === 'openai-compatible' ? PMColors.BRAND_LIGHT : PMColors.MEMORY_LIGHT,
+            this.llmModeTag(),
+            this.llmModeTagColor(),
+            this.llmModeTagBackground(),
             'api')
 
           Divider().color(PMColors.BORDER_SUBTLE)
@@ -2540,12 +2560,12 @@ struct Index {
             Text('当前运行方式')
               .fontSize(PMFontSize.SECONDARY)
               .fontColor(PMColors.INK_TERTIARY)
-            Text(this.llmMode === 'openai-compatible' ? '在线 API' : '离线确定性引擎')
+            Text(this.llmMode === 'mock' ? '离线确定性引擎' : this.llmModeTag())
               .fontSize(PMFontSize.SECONDARY)
               .fontWeight(FontWeight.Medium)
-              .fontColor(this.llmMode === 'openai-compatible' ? PMColors.BRAND : PMColors.MEMORY)
+              .fontColor(this.llmModeTagColor())
               .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 4, bottom: 4 })
-              .backgroundColor(this.llmMode === 'openai-compatible' ? PMColors.BRAND_LIGHT : PMColors.MEMORY_LIGHT)
+              .backgroundColor(this.llmModeTagBackground())
               .borderRadius(PMRadius.FULL)
           }
           .width('100%')

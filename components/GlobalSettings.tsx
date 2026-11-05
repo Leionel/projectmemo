@@ -35,6 +35,8 @@ export function GlobalSettings({ isMenuItem = false, inline = false }: { isMenuI
   const [error, setError] = useState("");
   const [editable, setEditable] = useState(false);
   const [hasApiKey, setHasApiKey] = useState(false);
+  // 读取失败时不能沿用默认的 mock，否则已接入模型的部署会显示成“离线”。
+  const [loaded, setLoaded] = useState(false);
   const [settings, setSettings] = useState<RuntimeSettings>(initialSettings);
 
   async function openSettings() {
@@ -53,6 +55,7 @@ export function GlobalSettings({ isMenuItem = false, inline = false }: { isMenuI
       });
       setHasApiKey(Boolean(data.hasApiKey));
       setEditable(Boolean(data.editable));
+      setLoaded(true);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "无法读取设置。");
     } finally {
@@ -112,7 +115,7 @@ export function GlobalSettings({ isMenuItem = false, inline = false }: { isMenuI
               ) : !editable ? (
                 <div className="space-y-4">
                   <div className="rounded-lg border border-[var(--rule)] bg-[var(--paper-strong)] p-5 text-sm leading-7 text-[var(--ink-soft)]">
-                    当前运行模式：<strong className="text-[var(--ink)]">{settings.llmMode === "openai-compatible" ? "真实模型（OpenAI-compatible）" : "Mock 模式（离线）"}</strong>{hasApiKey && "，已配置密钥"}。线上或非本机环境仅展示当前模型状态，请通过部署环境变量配置模型，不会在浏览器中读取或保存 API Key。
+                    当前运行模式：<strong className="text-[var(--ink)]">{!loaded ? "暂未读取" : settings.llmMode === "openai-compatible" ? "真实模型（OpenAI-compatible）" : "Mock 模式（离线）"}</strong>{loaded && hasApiKey && "，已配置密钥"}。线上或非本机环境仅展示当前模型状态，请通过部署环境变量配置模型，不会在浏览器中读取或保存 API Key。
                   </div>
                   {executabilityNote}
                   {safetyRules}

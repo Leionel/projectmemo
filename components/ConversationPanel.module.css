@@ -168,9 +168,12 @@
 .userBubble .body { text-align: left; }
 .launcher { position:fixed; right:max(18px,env(safe-area-inset-right)); bottom:calc(5.5rem + env(safe-area-inset-bottom)); z-index:35; display:flex; align-items:center; gap:8px; height:48px; padding:0 15px 0 12px; border:1px solid var(--rule-strong); border-radius:16px; background:var(--card-bg); color:var(--ink); font-size:15px; font-weight:500; box-shadow:0 4px 14px #20383216; }
 .launcher > span { display:grid; place-items:center; width:27px; height:27px; border-radius:9px; background:var(--teal-pale); color:var(--teal-strong); }
-.projectDrawer { position:fixed; right:1rem; top:5rem; bottom:5.5rem; width:min(30rem,calc(100vw - 2rem)); z-index:40; display:flex; flex-direction:column; gap:.5rem; }
-.projectDrawer > .panel { flex:1; min-height:0; height:auto; }
-.projectDrawer > .return { justify-content:space-between; background:var(--card-bg); padding:.5rem .75rem; border:1px solid var(--rule); border-radius:10px; }
+/* 项目页讨论：贴在顶栏下方的右侧栏。宽屏时项目内容让出这一列（见 ProjectWorkspace.module.css），不遮挡概览。 */
+.projectDrawer { position:fixed; right:0; top:61px; bottom:0; width:min(28rem,100%); z-index:30; display:flex; flex-direction:column; background:var(--card-bg); border-left:1px solid var(--rule); box-shadow:-12px 0 32px -28px rgb(28 46 44 / 35%); }
+.projectDrawer > .panel { flex:1; min-height:0; height:auto; border:0; border-radius:0; box-shadow:none; }
+.projectDrawer > .return { justify-content:space-between; margin:0; padding:.375rem 1rem; min-height:2.5rem; border-bottom:1px solid var(--rule); font-size:.75rem; }
+.projectDrawer > .return :global(.workspace-link) { color:var(--ink-soft); }
+@media(max-width:640px) { .projectDrawer { border-left:0; box-shadow:none; } }
 .composer { position:relative; margin:.5rem .625rem .625rem; padding:.75rem .75rem .5rem; border:1px solid var(--rule); border-radius:22px; background:var(--paper); }
 .composer .inputLabel { padding:0 .15rem; border:0; box-shadow:none; }
 .composer textarea { min-height:3.55rem; max-height:8.25rem; overflow-y:auto; resize:none; background:transparent; font-size:.875rem; }
@@ -316,6 +319,8 @@
 .toolsButton { min-height:2rem; padding:.25rem .6rem; border:1px solid var(--rule); border-radius:8px; font-size:.75rem; color:var(--ink-soft); }
 .toolsButton:hover,.toolsButton[aria-expanded="true"] { border-color:var(--teal); color:var(--teal-strong); }
 .toolsMenu { position:absolute; right:0; bottom:2.6rem; display:grid; gap:.15rem; min-width:9.5rem; padding:.35rem; border:1px solid var(--rule); border-radius:10px; background:var(--card-bg); box-shadow:0 8px 24px color-mix(in srgb,var(--ink) 12%,transparent); z-index:20; animation:conversationDialogIn .15s cubic-bezier(.22,1,.36,1); }
+.toolsMenu a { display:flex; align-items:center; text-align:left; min-height:2.25rem; padding:.45rem .6rem; border-radius:8px; font-size:.75rem; color:var(--ink-soft); }
+.toolsMenu a:hover { background:var(--paper); color:var(--teal-strong); }
 .toolsMenu button { text-align:left; min-height:2.25rem; padding:.45rem .6rem; border-radius:8px; font-size:.75rem; color:var(--ink-soft); }
 .toolsMenu button:hover:not(:disabled) { background:var(--paper); color:var(--teal-strong); }
 .toolsMenu button:disabled { opacity:.5; cursor:not-allowed; }

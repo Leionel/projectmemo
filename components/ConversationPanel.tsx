@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { ConversationEntry, ConversationView, ConversationMessage, ConversationRef } from "@/lib/types/conversation";
 import { conversationHref } from "@/lib/conversation/navigation";
 import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
-import { Sparkles, ArrowUp, Plus } from "lucide-react";
+import { Sparkles, ArrowUp, Plus, X } from "lucide-react";
 import type { ConversationWorkRef } from "@/lib/types/conversationWork";
 import { ConversationContinuity } from "./ConversationContinuity";
 import { ConversationWorkCard } from "./ConversationWorkCard";
@@ -35,7 +35,7 @@ async function api<T>(url: string, method = "GET", body?: unknown): Promise<T> {
   return value as T;
 }
 type PanelProps = {
-  projectId?: string; entry?: ConversationEntry; initialConversationId?: string; onUpdated?: () => void;
+  projectId?: string; entry?: ConversationEntry; initialConversationId?: string; onUpdated?: () => void; onClose?: () => void;
   selection?: { projectId: string; title: string; id: string; kind: "MISSION" | "ACTION" };
 };
 const statusLabel = (status?: string | null) => status ? missionStatusLabels[status] ?? ({ TODO: "待办", DOING: "进行中", DONE: "已完成" } as Record<string, string>)[status] ?? status : "回执已保存";
@@ -44,7 +44,7 @@ export function ConversationPanel(props: PanelProps) {
   const initial = props.initialConversationId ?? search.get("conversation") ?? "";
   return <ConversationContent key={[props.projectId, initial, props.entry?.kind, props.entry?.id].join(":")} {...props} initialConversationId={initial}/>;
 }
-function ConversationContent({ projectId, entry, initialConversationId, onUpdated, selection }: PanelProps) {
+function ConversationContent({ projectId, entry, initialConversationId, onUpdated, selection, onClose }: PanelProps) {
   const router = useRouter();
   const search = useSearchParams(), initial = initialConversationId ?? search.get("conversation") ?? "";
   const [view, setView] = useState<ConversationView | null>(null);
@@ -263,6 +263,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       <button type="button" className={styles.historyButton + " focus-ring"} aria-haspopup="dialog" aria-expanded={historyOpen} disabled={working}
         onClick={() => setHistoryOpen(true)}>历史讨论</button>
       <button type="button" aria-label="新讨论" title="新讨论" className={styles.newDiscussion + " focus-ring"} disabled={working} onClick={() => void create()}><Plus size={17}/></button>
+      {onClose && <button type="button" aria-label="收起讨论" title="收起讨论" className={styles.newDiscussion + " focus-ring"} onClick={onClose}><X size={17}/></button>}
     </div></header>
     {historyOpen && <OverlayPanel label="历史讨论" title="历史讨论" variant="drawer" onClose={() => setHistoryOpen(false)}>
       <input className={styles.historySearch} aria-label="筛选历史讨论" placeholder="按标题筛选" value={historyFilter}
@@ -356,12 +357,11 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
         onChange={e => { setText(e.target.value); const el = e.currentTarget; el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 132) + "px"; }}
         onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); e.currentTarget.form?.requestSubmit(); } }}/></label>
       <div className={styles.composerFooter}>{attachments.button}<label className={styles.cloud} onMouseEnter={() => setShowCloudHelp(true)} onMouseLeave={() => setShowCloudHelp(false)} onFocus={() => setShowCloudHelp(true)} onBlur={() => setShowCloudHelp(false)} onContextMenu={event => { event.preventDefault(); setShowCloudHelp(v => !v); }} title="长按查看资料使用说明"><input type="checkbox" aria-label="允许云模型使用本次授权项目资料" checked={cloud} disabled={!analysisReady || !cloudAvailable || working} onChange={e => { setCloud(e.target.checked); pending.current = null; }}/>{cloudAvailable ? "云端分析" : "本地整理"}</label>
-      {view && <div className={styles.composerScope}>
+      {view && view.scope !== "PROJECT" && <div className={styles.composerScope}>
       <label><select aria-label="讨论项目范围" value={target} disabled={working || view.scope === "PROJECT"} onChange={e => { setTarget(e.target.value); pending.current = null; }}>
         <option value="">跨项目</option>{view.linkedProjects.map(p => <option value={p.id} key={p.id}>{p.title}</option>)}
         {projectId && !view.linkedProjects.some(p => p.id === projectId) && <option value={projectId}>当前项目</option>}
       </select></label>
-      {projectId && <Link className="workspace-link focus-ring" href={conversationHref("/focus", view.id)}>回到原焦点讨论</Link>}
     </div>}
       {r4Available && cloud && <select className={styles.analysisMode} aria-label="调查深度" value={investigationMode} disabled={working} onChange={e => { setInvestigationMode(e.target.value as typeof investigationMode); pending.current = null; }}><option value="QUICK">快速</option><option value="STANDARD">标准调查</option><option value="DEEP">深入调查 · 更多调用</option></select>}
       <div className={styles.toolsWrap}>
@@ -375,6 +375,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
             onClick={() => { setToolsOpen(false); void load(view.id, generation.current).catch(e => setError(e.message)); }}>刷新讨论状态</button>
           {target && <button type="button" role="menuitem" className="focus-ring"
             onClick={() => { setToolsOpen(false); setShowPreference(true); }}>项目偏好</button>}
+          {projectId && <Link role="menuitem" className="focus-ring" href={conversationHref("/focus", view.id)}>在焦点页继续</Link>}
         </div>}
       </div>
       <button type="submit" className={styles.send + " focus-ring"} disabled={working || !analysisReady || !text.trim()} aria-label="发送"><ArrowUp size={17}/></button></div>

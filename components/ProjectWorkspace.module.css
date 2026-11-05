@@ -116,3 +116,8 @@
 .content :global(.card-surface) { border-radius:16px; }
 .content :is(h2,h3) > svg:first-child { display:none; }
 .content :global(.card-surface) h2 { font-size:17px; font-weight:700; }
+
+/* 打开项目讨论时，宽屏下项目内容让出右侧 28rem 讨论栏，不被覆盖。 */
+@media(min-width:1100px) {
+  .shell:has([data-project-drawer]) { width:auto; max-width:1360px; margin-left:max(20px,calc((100% - 1360px - 29rem) / 2)); margin-right:calc(28rem + 1.5rem); }
+}

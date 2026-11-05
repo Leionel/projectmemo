@@ -163,3 +163,16 @@
 .panel .detailMain h3.goal { font-family:"PM Brand","Noto Serif SC","Songti SC",serif; font-size:1.75rem; font-weight:600; line-height:1.35; -webkit-line-clamp:3; }
 .nextStep { border-radius:16px; }
 @container(max-width:900px) { .detailGrid { grid-template-columns:minmax(0,1fr); } .detailAside { position:static; } }
+
+/* 委托详情主栏：间距只由 grid gap 决定；没有内容的模块（如暂无追问）不占位。 */
+.detailMain > :empty { display:none; }
+.detailMain > * { margin-block:0; }
+/* 折叠段落像列表一样相接：只留一条上分隔线，不叠加 gap 与上下双线。 */
+.detailMain > details { border-top:1px solid var(--rule); border-bottom:0; padding:0; }
+.detailMain > details { margin-top:-1rem; }
+.detailMain > :has(+ details) { border-bottom:0; padding-bottom:0; }
+.detailMain > :has(+ details) > :last-child { border-bottom:0; }
+.detailMain > details > summary { min-height:2.75rem; padding:.75rem 0; }
+.detailMain > details[open] { padding-bottom:.75rem; }
+.detailMain > .activity p:first-of-type { margin-top:0; }
+.progress .sectionTitle { display:none; }

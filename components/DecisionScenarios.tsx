@@ -124,7 +124,7 @@ export function DecisionScenarios({
           },true);
         }
       }}
-      className="mt-4 border-t border-[var(--rule)] pt-3"
+      className="border-t border-[var(--rule)] pt-3"
     >
       <summary className="focus-ring cursor-pointer text-sm font-bold">
         对比本轮推进方案

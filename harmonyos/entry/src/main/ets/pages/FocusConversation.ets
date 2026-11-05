@@ -747,8 +747,8 @@ struct FocusConversation {
             TextArea({ text: this.text, placeholder: '聊聊下一步…' }).constraintSize({ minHeight: 48, maxHeight: 136 }).fontSize(15).fontColor(PMColors.INK_PRIMARY).backgroundColor(Color.Transparent).padding({ left: 15, right: 15, top: 14, bottom: 4 })
               .enabled(!this.busy).onChange((v: string) => { this.text = v; this.saveComposer(); })
             Row({ space: 8 }) {
-              Button({ type: ButtonType.Normal }) { Text('附件').fontSize(12).fontColor(PMColors.INK_SECONDARY) }
-                .height(32).padding({ left: 8, right: 8 }).backgroundColor(Color.Transparent).enabled(!this.busy && !this.attachBusy)
+              Button({ type: ButtonType.Normal }) { SymbolGlyph($r('sys.symbol.paperclip')).fontSize(20).fontColor([PMColors.INK_SECONDARY]) }
+                .width(36).height(36).borderRadius(8).padding(0).margin({ left: 4 }).backgroundColor(Color.Transparent).enabled(!this.busy && !this.attachBusy)
                 .accessibilityText('添加附件：仅用于本次讨论或加入项目记忆').onClick(() => { this.pickAttachment(); })
               Row({ space: 6 }) {
                 Checkbox().width(18).height(18).selectedColor(PMColors.BRAND).select(this.cloud).enabled(this.analysisReady && this.cloudAvailable && !this.busy).onChange((v: boolean) => { this.cloud = v; this.pending = null; })

@@ -312,7 +312,6 @@ button:active:enabled,.editorial-button:active { filter:brightness(.94); }
 .app-header-row { max-width:1360px; margin:0 auto; padding:0 24px; min-height:60px; display:flex; align-items:center; justify-content:space-between; gap:8px 24px; }
 .app-header-left { display:flex; align-items:center; gap:4px 36px; min-width:0; }
 .app-header .app-brand-name { font-size:19px; }
-.app-header .app-brand-english { display:none; }
 .global-navigation { gap:4px; }
 .global-navigation .global-nav-link { min-height:60px; padding:0 14px; border-radius:0; font-size:15px; font-weight:400; color:var(--ink-soft); background:none; }
 .global-navigation .global-nav-link svg { display:none; }
@@ -326,9 +325,8 @@ button:active:enabled,.editorial-button:active { filter:brightness(.94); }
 .app-brand { display:inline-flex; align-items:center; gap:10px; min-width:0; color:var(--ink); border-radius:6px; white-space:nowrap; }
 .app-brand > img { width:28px; height:28px; flex-shrink:0; object-fit:cover; border-radius:6px; }
 .app-brand-name { font-family:"PM Brand","Noto Serif SC","Songti SC","SimSun",serif; font-size:16px; font-weight:600; letter-spacing:-.02em; line-height:1.5; }
-.app-brand-english { display:none; }
+.app-brand-english { display:inline; }
 .app-brand-descriptor { display:none; border-left:1px solid var(--rule-strong); padding-left:8px; font-size:10px; font-weight:800; letter-spacing:.16em; color:var(--ink-soft); }
-@media(min-width:640px) { .app-brand-english { display:inline; } }
 @media(min-width:1280px) { .app-brand-descriptor { display:inline; } }
 
 /* Project card — design: tag + updated, serif title, next-step strip, one-line stats, two actions. */

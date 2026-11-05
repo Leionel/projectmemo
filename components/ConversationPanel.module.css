@@ -324,7 +324,7 @@
 .send { margin-left: 0; }
 
 /* 讨论附件：回形针、二选一用途卡、本轮附件标签 */
-.attachButton { display:inline-grid; place-items:center; width:32px; height:32px; margin:6px 0 0 8px; border-radius:8px; color:var(--ink-soft); }
+.attachButton { display:inline-grid; place-items:center; flex-shrink:0; width:32px; height:32px; margin-left:-.25rem; border-radius:8px; color:var(--ink-soft); }
 .attachButton:hover:not(:disabled) { background:var(--paper); color:var(--teal-strong); }
 .attachChoice { display:grid; gap:6px; margin:6px 8px 0; padding:10px; border:1px solid var(--rule); border-radius:12px; background:var(--card-bg); box-shadow:0 12px 30px -20px rgb(28 46 44 / 40%); }
 .attachChoice > p { font-size:12px; color:var(--muted); overflow-wrap:anywhere; }

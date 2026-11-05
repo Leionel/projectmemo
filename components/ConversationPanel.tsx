@@ -19,7 +19,7 @@ import { MemoryUsePanel } from "./MemoryUsePanel";
 import { ConversationResearchScope, ConversationResearchView } from "./ConversationResearch";
 import { ConversationCalendarComposer } from "./ConversationCalendarComposer";
 import { missionStatusLabels } from "@/lib/mission/presentation";
-import { ConversationAttachments, type ConversationAttachmentChip } from "./ConversationAttachments";
+import { useConversationAttachments, type ConversationAttachmentChip } from "./ConversationAttachments";
 import styles from "./ConversationPanel.module.css";
 import { AgentMessageBlocks, supportsAgentPresentation } from "./AgentMessageBlocks";
 import { OverlayPanel } from "./OverlayPanel";
@@ -255,6 +255,9 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
     finally { if (epoch === generation.current) setBusy(false); }
   }
   const working = busy || !!view?.activeTurn;
+  const attachments = useConversationAttachments({ conversationId: view?.id ?? "", projectId: target || view?.homeProjectId || "", disabled: working || !view, chips: attachmentChips,
+    onChips: chips => { setAttachmentChips(chips); pending.current = null; }, onError: setError,
+    onProjectSaved: name => setText(t => (t ? t + "\n" : "") + "我刚把《" + name + "》加入了项目资料，") });
   return <section className={styles.panel} aria-label="问忆程">
     <header className={styles.header}><div className={styles.agentTitle}><span className={styles.agentMark} aria-hidden="true"><Sparkles size={19}/></span><div><h2>与忆程协作</h2><p>{view?.scope === "PROJECT" ? "项目讨论" : "项目记忆 · 对话与接续"}</p></div></div><div className={styles.historyControls}>
       <button type="button" className={styles.historyButton + " focus-ring"} aria-haspopup="dialog" aria-expanded={historyOpen} disabled={working}
@@ -348,13 +351,11 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       {reply && <div className={styles.reply}>围绕：{reply.content.slice(0, 55)}<button type="button" className="workspace-link focus-ring" onClick={() => { setReply(null); pending.current = null; }}>取消追问</button></div>}
       <ConversationContinuity key={view.id + ":" + (view.homeProjectId ?? view.focusProjectId)} view={view} onChange={setView} onError={setError} onWork={(kind, id, projectId) => setWorkRef({ kind, id, projectId })}/>
       <ConversationResearchScope view={view} projectId={target} disabled={working} onChange={setView} onError={setError}/>
-      <ConversationAttachments conversationId={view.id} projectId={target || view.homeProjectId || ""} disabled={working} chips={attachmentChips}
-        onChips={chips => { setAttachmentChips(chips); pending.current = null; }} onError={setError}
-        onProjectSaved={name => setText(t => (t ? t + "\n" : "") + "我刚把《" + name + "》加入了项目资料，")}/>
+      {attachments.panel}
       <label className={styles.inputLabel}><textarea aria-label="与忆程讨论项目" value={text} rows={2} maxLength={3000} placeholder="问忆程：先做什么？或请帮我继续…" disabled={working}
         onChange={e => { setText(e.target.value); const el = e.currentTarget; el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 132) + "px"; }}
         onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); e.currentTarget.form?.requestSubmit(); } }}/></label>
-      <div className={styles.composerFooter}><label className={styles.cloud} onMouseEnter={() => setShowCloudHelp(true)} onMouseLeave={() => setShowCloudHelp(false)} onFocus={() => setShowCloudHelp(true)} onBlur={() => setShowCloudHelp(false)} onContextMenu={event => { event.preventDefault(); setShowCloudHelp(v => !v); }} title="长按查看资料使用说明"><input type="checkbox" aria-label="允许云模型使用本次授权项目资料" checked={cloud} disabled={!analysisReady || !cloudAvailable || working} onChange={e => { setCloud(e.target.checked); pending.current = null; }}/>{cloudAvailable ? "云端分析" : "本地整理"}</label>
+      <div className={styles.composerFooter}>{attachments.button}<label className={styles.cloud} onMouseEnter={() => setShowCloudHelp(true)} onMouseLeave={() => setShowCloudHelp(false)} onFocus={() => setShowCloudHelp(true)} onBlur={() => setShowCloudHelp(false)} onContextMenu={event => { event.preventDefault(); setShowCloudHelp(v => !v); }} title="长按查看资料使用说明"><input type="checkbox" aria-label="允许云模型使用本次授权项目资料" checked={cloud} disabled={!analysisReady || !cloudAvailable || working} onChange={e => { setCloud(e.target.checked); pending.current = null; }}/>{cloudAvailable ? "云端分析" : "本地整理"}</label>
       {view && <div className={styles.composerScope}>
       <label><select aria-label="讨论项目范围" value={target} disabled={working || view.scope === "PROJECT"} onChange={e => { setTarget(e.target.value); pending.current = null; }}>
         <option value="">跨项目</option>{view.linkedProjects.map(p => <option value={p.id} key={p.id}>{p.title}</option>)}

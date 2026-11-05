@@ -19,7 +19,7 @@ async function upload<T>(url: string, file: File, extra: Record<string, string> 
  * 讨论附件：选文件后二选一——仅用于本次讨论（不进项目记忆），或加入项目资料（按项目附件原流程生成待核对记忆）。
  * 加入项目资料需要先选定项目；跨项目讨论里的图片按当前选中项目计识别额度，没选项目时只保存原件。
  */
-export function ConversationAttachments({ conversationId, projectId, disabled, chips, onChips, onProjectSaved, onError }: {
+export function useConversationAttachments({ conversationId, projectId, disabled, chips, onChips, onProjectSaved, onError }: {
   conversationId: string; projectId: string; disabled: boolean;
   chips: ConversationAttachmentChip[]; onChips: (chips: ConversationAttachmentChip[]) => void;
   onProjectSaved: (fileName: string) => void; onError: (message: string) => void;
@@ -55,10 +55,13 @@ export function ConversationAttachments({ conversationId, projectId, disabled, c
     onChips(chips.filter(c => c.id !== chip.id));
     await fetch(`/api/conversations/${conversationId}/attachments/${chip.id}`, { method: "DELETE" }).catch(() => undefined);
   }
-  return <>
+  // 回形针放在输入框底栏左侧；用途选择和本轮附件仍显示在输入框上方。
+  const button = <>
     <input ref={input} type="file" accept=".pdf,image/png,image/jpeg,image/webp,image/gif,image/bmp" className="sr-only" tabIndex={-1}
       onChange={e => { const file = e.target.files?.[0]; e.target.value = ""; if (file) setChoice({ file }); }}/>
     <button type="button" className={styles.attachButton + " focus-ring"} aria-label="添加附件" title="添加附件" disabled={disabled || busy} onClick={() => input.current?.click()}><Paperclip size={16} aria-hidden="true"/></button>
+  </>;
+  const panel = <>
     {choice && <div role="dialog" aria-label="附件用途" className={styles.attachChoice}>
       <p>《{choice.file.name}》用于</p>
       <button type="button" className="focus-ring" disabled={busy} onClick={() => void keepInConversation(choice.file)}><strong>仅用于本次讨论</strong><span>不进入项目记忆，可随时转为项目资料</span></button>
@@ -74,4 +77,5 @@ export function ConversationAttachments({ conversationId, projectId, disabled, c
       </li>)}
     </ul>}
   </>;
+  return { button, panel };
 }

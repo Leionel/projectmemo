@@ -20,6 +20,8 @@ import { AuthService } from '../services/AuthService';
 import { WidgetDataService } from '../services/WidgetDataService';
 import { GlobalFocusPanel } from '../components/GlobalFocusPanel';
 import { LoginView } from '../components/LoginView';
+import { SplashView } from '../components/SplashView';
+import { OnboardingView } from '../components/OnboardingView';
 import { DateOnly } from '../common/DateOnly';
 import { ReminderSettingsView } from '../components/ReminderSettingsView';
 import { ReadinessBreakdownSheet } from '../components/ReadinessBreakdownSheet';
@@ -36,6 +38,9 @@ import { PMBreakpoint, PMStorageKey, PMWidthBp } from '../common/WindowMetrics';
 /** 全局记忆的类型筛选项：下划线标签用，选中态同时靠字重与形状表达 */
 const UI_PREFS_NAME: string = 'projectmemo_ui_prefs';
 const KEY_HIDE_GLOBAL_MEMORY_NOTE: string = 'hideGlobalMemoryNote';
+const KEY_ONBOARDING_SEEN: string = 'onboardingSeen';
+// 品牌启动页最短停留，避免登录状态读得很快时一闪而过
+const SPLASH_MIN_MS: number = 700;
 
 class MemoryTypeFilter {
   value: string = '';
@@ -65,6 +70,8 @@ struct Index {
   // 认证与会话状态
   @State isAuthenticated: boolean = false;
   @State isCheckingAuth: boolean = true;
+  // 默认视为已看过，读到本机记录后再决定；读取失败不阻塞登录
+  @State onboardingSeen: boolean = true;
   @State currentUser: UserInfo = new UserInfo();
   @State sessionExpiresAt: string = '';
 
@@ -196,8 +203,30 @@ struct Index {
     }
   }
 
+  private async readOnboardingSeen(): Promise<boolean> {
+    try {
+      const store = await preferences.getPreferences(getContext(this), UI_PREFS_NAME);
+      return (await store.get(KEY_ONBOARDING_SEEN, false)) as boolean;
+    } catch {
+      return true;
+    }
+  }
+
+  private async finishOnboarding(): Promise<void> {
+    animateTo({ duration: 250, curve: Curve.EaseOut }, () => { this.onboardingSeen = true; });
+    try {
+      const store = await preferences.getPreferences(getContext(this), UI_PREFS_NAME);
+      await store.put(KEY_ONBOARDING_SEEN, true);
+      await store.flush();
+    } catch {
+      // 只影响下次是否再显示引导
+    }
+  }
+
   private async checkAndRestoreAuth(): Promise<void> {
     this.isCheckingAuth = true;
+    const startedAt = Date.now();
+    const onboardingRead = this.readOnboardingSeen();
     try {
       const hasSession = await SessionStore.restoreSession(getContext(this));
       if (hasSession) {
@@ -213,7 +242,12 @@ struct Index {
     } catch {
       this.isAuthenticated = false;
     } finally {
-      this.isCheckingAuth = false;
+      this.onboardingSeen = await onboardingRead;
+      const remaining = SPLASH_MIN_MS - (Date.now() - startedAt);
+      if (remaining > 0) {
+        await new Promise<void>((resolve: () => void) => { setTimeout(resolve, remaining); });
+      }
+      animateTo({ duration: 250, curve: Curve.EaseOut }, () => { this.isCheckingAuth = false; });
     }
   }
 
@@ -2853,13 +2887,11 @@ struct Index {
   build() {
     Stack() {
     if (this.isCheckingAuth) {
-      Column() {
-        LoadingStateView({ message: '正在连接演示环境...' })
-      }
-      .width('100%')
-      .height('100%')
-      .justifyContent(FlexAlign.Center)
-      .backgroundColor(PMColors.BACKGROUND)
+      SplashView()
+        .transition(TransitionEffect.OPACITY)
+    } else if (!this.isAuthenticated && !this.onboardingSeen) {
+      OnboardingView({ onDone: () => { this.finishOnboarding(); } })
+        .transition(TransitionEffect.OPACITY)
     } else if (!this.isAuthenticated) {
       Column() {
         LoginView({
@@ -2870,6 +2902,7 @@ struct Index {
       }
       .width('100%')
       .height('100%')
+      .transition(TransitionEffect.OPACITY)
     } else {
       Stack() {
         Column() {

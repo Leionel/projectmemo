@@ -1,4 +1,5 @@
 import { AppError } from "@/lib/api";
+import { locateQuote } from "@/lib/evidence/quoteMatch";
 import type { ConversationSource } from "@/lib/types/conversation";
 import type { ResearchCoverage } from "@/lib/types/conversationResearch";
 
@@ -21,7 +22,7 @@ export function bindResearchCoverage(coverage: ResearchCoverage, sources: Conver
   for (const a of coverage.temporalAssessments ?? []) {
     a.sourceId = canonical(a.sourceId);
     const source = sources.find(s => s.id === a.sourceId);
-    if (!source?.excerpt.includes(a.quote)) throw new AppError("UNSUPPORTED_QUOTE", "生效判断没有可核对的实际片段", 409);
+    if (!source || !locateQuote(source.excerpt, a.quote)) throw new AppError("UNSUPPORTED_QUOTE", "生效判断没有可核对的实际片段", 409);
     if (a.edition && !a.quote.includes(a.edition)) a.edition = null;
     const date = (value: string | null) => value && /^\d{4}-\d{2}-\d{2}$/.test(value) && a.quote.includes(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value ? value : null;
     a.effectiveFrom = date(a.effectiveFrom); a.effectiveUntil = date(a.effectiveUntil);

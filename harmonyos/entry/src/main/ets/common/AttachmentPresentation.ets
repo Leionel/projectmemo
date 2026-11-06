@@ -4,6 +4,10 @@ export function attachmentFilePath(projectId: string, attachmentId: string): str
   return `/api/projects/${encodeURIComponent(projectId)}/attachments/${encodeURIComponent(attachmentId)}/file`;
 }
 
+export function intakeMaterialFilePath(draftId: string, materialId: string): string {
+  return `/api/intake/${encodeURIComponent(draftId)}/materials/${encodeURIComponent(materialId)}/file`;
+}
+
 export function attachmentPreviewKind(mimeType: string): string {
   if (['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp'].includes(mimeType.toLowerCase())) return 'image';
   if (mimeType.toLowerCase() === 'application/pdf') return 'pdf';

@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
+import { pagesFromBbox } from "./pdfLayout";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { readAttachmentFile } from "@/lib/storage/attachmentStorage";
 import { assertProject } from "@/lib/conversation/repository";
@@ -30,11 +31,10 @@ export const extractPdfDocument:DocumentExtractor=async(buffer,options)=>{
   const info=await command(process.env.PDFINFO_PATH||"pdfinfo",["-"],buffer,32768,10000),count=Number(/^Pages:\s+(\d+)/m.exec(info)?.[1]);
   if(!Number.isSafeInteger(count)||count<1||count>10000)throw new AppError("DOCUMENT_PAGE_COUNT_UNKNOWN","未取得可靠页数，请查看原件",422);
   const first=options?.page??1,last=options?.page??Math.min(count,100);if(first>count)throw new AppError("DOCUMENT_PAGE_NOT_FOUND","该页不在原文件页数内",422);
-  const scan=last-first+1,executable=process.env.PDFTOTEXT_PATH||"pdftotext",text=await command(executable,["-layout","-enc","UTF-8","-f",String(first),"-l",String(last),"-","-"],buffer,2*1024*1024,20000);
-  const pages=text.split("\f");if(!pages.at(-1)?.trim())pages.pop();
+  const scan=last-first+1,executable=process.env.PDFTOTEXT_PATH||"pdftotext",pages=pagesFromBbox(await command(executable,["-bbox","-enc","UTF-8","-f",String(first),"-l",String(last),"-","-"],buffer,32*1024*1024,20000));
   if(pages.length!==scan)throw new AppError("DOCUMENT_PAGE_MAPPING_UNKNOWN","提取文本无法可靠对应原始页码，请查看原件",422);
   const version=(await command(executable,["-v"],Buffer.alloc(0),4096,3000,true)).match(/pdftotext version\s+(\S+)/)?.[1]??"UNKNOWN";
-  return {pages,firstPage:first,pageCount:count,mapping:"PHYSICAL_PDF",parser:`poppler-${version}/pm-document-v1`,complete:scan===count};
+  return {pages,firstPage:first,pageCount:count,mapping:"PHYSICAL_PDF",parser:`poppler-${version}/pm-document-v2`,complete:scan===count};
 };
 export function documentIndex(extraction:DocumentExtraction){
   const sections:DocumentSection[]=[],tables:DocumentTable[]=[];

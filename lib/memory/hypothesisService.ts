@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
+import { locateQuote } from "@/lib/evidence/quoteMatch";
 import { record, type Tx } from "@/lib/conversation/repository";
 import { json, jsonHash, type Source } from "@/lib/mission/contracts";
 import { sourceHash, validateSources } from "@/lib/mission/repository";
@@ -58,10 +59,10 @@ export async function recordHypothesisUpdates(tx: Tx, root: CognitiveRoot, updat
       if (!source || !root.allowedProjectIds.includes(source.projectId)) continue;
       const sourceId = source.format === "MISSION" ? (source.snapshot as Source).id : (source.snapshot as ConversationSource).sourceId;
       const policy = await sourceUse(root.userId, source.projectId, sourceId, tx, scope);
-      const start = source.text.indexOf(requested.quote), exact = start >= 0 && source.text.indexOf(requested.quote, start + 1) < 0;
+      const located = locateQuote(source.text, requested.quote), exact = located?.unique === true;
       const supporting = policy.state === "ALLOWED" && policy.independentEvidence && exact && source.knowledgeClass !== "INFERENCE" && !["CARD", "ARTIFACT"].includes(source.entityType ?? "");
-      evidence.push({ sourceId, projectId: source.projectId, role: requested.role, quote: requested.quote, start: exact ? start : null,
-        end: exact ? start + requested.quote.length : null, qualified: supporting, format: source.format, snapshot: source.snapshot });
+      evidence.push({ sourceId, projectId: source.projectId, role: requested.role, quote: exact ? located.text : requested.quote, start: exact ? located.start : null,
+        end: exact ? located.end : null, qualified: supporting, format: source.format, snapshot: source.snapshot });
     }
     const supports = evidence.some(e => e.role === "SUPPORT" && e.qualified), counters = evidence.some(e => e.role === "COUNTER" && e.qualified);
     let state = update.state;

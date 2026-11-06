@@ -123,7 +123,13 @@ struct ProjectIntake {
     this.materialTextTotal = 0; this.materialTextHasMore = false; this.materialTextLoading = false;
   }
 
-  /** 原文核对：打开一份材料并读第一页；再次点击同一份则收起。 */
+  private openSourceFile(item: IntakeCoverageItem): void {
+    const material = this.preview.materials.find((m: IntakeMaterialView) => m.id === item.materialId);
+    router.pushUrl({ url: 'pages/AttachmentViewer', params: { draftId: this.draftId, materialId: item.materialId,
+      fileName: material?.fileName ?? item.label, mimeType: material?.mimeType ?? '', size: material?.size ?? 0 } });
+  }
+
+  /** 展开模型读到的文字（粘贴材料即原文）：读第一页；再次点击同一份则收起。 */
   private async toggleMaterialText(materialId: string): Promise<void> {
     if (this.openTextMaterialId === materialId) { this.closeMaterialText(); return; }
     this.closeMaterialText();
@@ -400,6 +406,9 @@ struct ProjectIntake {
         }.width('100%').alignItems(HorizontalAlign.Start)
         .padding(PMSpacing.SM).borderRadius(PMRadius.SM).backgroundColor(PMColors.SURFACE_SUBTLE)
       }, (statement: IntakeStatement, index: number) => `${statement.materialId}-${index}`)
+      if (this.preview.model.droppedQuotes > 0) {
+        Text(`另有 ${this.preview.model.droppedQuotes} 条摘录没对上原文，已移除。`).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+      }
     }.width('100%').alignItems(HorizontalAlign.Start)
   }
 
@@ -416,11 +425,17 @@ struct ProjectIntake {
               .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
             Text(intakeCoverageItemLabel(item)).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
           }.width('100%')
+          if (item.kind === 'FILE' && this.preview.status !== 'CONFIRMED') {
+            Text('查看源文件')
+              .fontSize(PMFontSize.CAPTION).fontColor(PMColors.BRAND).height(36)
+              .onClick(() => { this.openSourceFile(item); })
+              .accessibilityText(`${item.label} 查看源文件`)
+          }
           if (item.availableChars > 0) {
-            Text(this.openTextMaterialId === item.materialId ? '收起原文' : '核对原文')
+            Text(item.kind === 'FILE' ? (this.openTextMaterialId === item.materialId ? '收起模型读到的文字' : '模型读到的文字') : (this.openTextMaterialId === item.materialId ? '收起原文' : '查看原文'))
               .fontSize(PMFontSize.CAPTION).fontColor(PMColors.BRAND).height(36)
               .onClick(() => { void this.toggleMaterialText(item.materialId); })
-              .accessibilityText(`${item.label} 核对原文`)
+              .accessibilityText(`${item.label} ${item.kind === 'FILE' ? '模型读到的文字' : '查看原文'}`)
           }
           if (this.openTextMaterialId === item.materialId) {
             Column({ space: 6 }) {
@@ -440,7 +455,7 @@ struct ProjectIntake {
       }, (item: IntakeCoverageItem) => item.materialId)
       Text(this.preview.coverage.note).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
       if (this.preview.coverage.current.stale) {
-        Text('之后新增的材料还没有送入；建立项目后可在项目中继续深读全文。')
+        Text('之后新增的材料还没有送入。')
           .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
       }
     }.width('100%').alignItems(HorizontalAlign.Start).padding(10)

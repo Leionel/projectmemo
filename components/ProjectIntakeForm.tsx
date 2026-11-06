@@ -32,7 +32,7 @@ async function sendJson(url: string, body?: unknown, headers: Record<string, str
 function statusText(preview: IntakePreview) {
   if (preview.understandingState === "READY") return "已形成理解，请整体核对";
   if (preview.understandingState === "FAILED") return preview.model.reason === "UNSUPPORTED_QUOTE" ? "引文没通过原文核对，需要重新生成" : "这次没能形成理解，材料仍然保留";
-  if (preview.understandingState === "MATERIAL_ONLY") return "文件还没有可读文本，只能先看原文";
+  if (preview.understandingState === "MATERIAL_ONLY") return "文件还没有可读文本，只能先看源文件";
   return "材料已保存，等你让它读懂";
 }
 
@@ -311,7 +311,7 @@ export function ProjectIntakeForm({ ownerId, initialDraftId, openDrafts }: { own
         <span>允许把这次的材料交给云模型处理一次。它只用于这份预览：不建立项目、不获得工具权限，也不写入长期记忆。</span>
       </label>
 
-      {preview && preview.materials.length > 0 && <IntakeCoveragePanel key={`${draftId}:${preview.materialsHash}:${preview.status}`} draftId={draftId} coverage={preview.coverage} materials={preview.materials} />}
+      {preview && preview.materials.length > 0 && <IntakeCoveragePanel key={`${draftId}:${preview.materialsHash}:${preview.status}`} draftId={draftId} coverage={preview.coverage} materials={preview.materials} sourceAvailable={preview.status !== "CONFIRMED"} />}
 
       {preview && preview.understandingState === "READY" && <>
         {preview.summary && <p className="mt-5 leading-7">{preview.summary}</p>}
@@ -324,6 +324,7 @@ export function ProjectIntakeForm({ ownerId, initialDraftId, openDrafts }: { own
                 <p className="mt-1 text-xs text-[var(--muted)]">{statement.materialLabel} · {statement.meaning}</p>
               </li>)}
             </ul>
+            {preview.model.droppedQuotes > 0 && <p className="mt-2 text-xs text-[var(--muted)]">另有 {preview.model.droppedQuotes} 条摘录没对上原文，已移除。</p>}
           </div>
           <div>
             <p className="archive-label">Agent 的建议（还不是目标）</p>

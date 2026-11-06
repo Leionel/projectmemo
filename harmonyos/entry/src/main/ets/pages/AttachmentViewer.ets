@@ -7,12 +7,16 @@ import { Attachment } from '../models/Attachment';
 import { ApiError } from '../models/Project';
 import { AttachmentService } from '../services/AttachmentService';
 import { SessionStore } from '../services/SessionStore';
-import { attachmentPreviewKind, attachmentSaveName, attachmentSize, attachmentStatus } from '../common/AttachmentPresentation';
+import { attachmentPreviewKind, attachmentSaveName, attachmentSize, attachmentStatus, intakeMaterialFilePath } from '../common/AttachmentPresentation';
 import { PMColors } from '../common/DesignTokens';
 import { PMAppBar } from '../components/PMAppBar';
 import { PMButton, PMStatusPill } from '../components/PMReferencePrimitives';
 
-class AttachmentParams { projectId: string = ''; attachmentId: string = ''; physicalPage: number = 0; }
+class AttachmentParams {
+  projectId: string = ''; attachmentId: string = ''; physicalPage: number = 0;
+  // 项目前材料还不是项目附件：直接带着材料身份读源文件。
+  draftId: string = ''; materialId: string = ''; fileName: string = ''; mimeType: string = ''; size: number = 0;
+}
 
 @Entry
 @Component
@@ -27,6 +31,8 @@ struct AttachmentViewer {
   @State saving: boolean = false;
   private projectId: string = '';
   private attachmentId: string = '';
+  @State private draftId: string = '';
+  private materialId: string = '';
   private active: boolean = false;
   private generation: number = 0;
   private localPath: string = '';
@@ -38,6 +44,15 @@ struct AttachmentViewer {
     const params = router.getParams() as AttachmentParams;
     this.projectId = params.projectId ?? '';
     this.attachmentId = params.attachmentId ?? '';
+    this.draftId = params.draftId ?? '';
+    this.materialId = params.materialId ?? '';
+    if (this.draftId !== '') {
+      const source = new Attachment();
+      source.fileName = params.fileName ?? '';
+      source.mimeType = params.mimeType ?? '';
+      source.size = params.size ?? 0;
+      this.item = source;
+    }
     this.physicalPage = params.physicalPage >= 1 && params.physicalPage <= 10000 ? Math.floor(params.physicalPage) : 0;
     this.active = true;
     SessionStore.onSessionExpired(this.onExpired);
@@ -65,13 +80,16 @@ struct AttachmentViewer {
     this.loading = true; this.error = ''; this.originalError = '';
     this.clearOriginal();
     try {
-      const items = await this.service.list(this.projectId);
-      if (!this.active || generation !== this.generation || SessionStore.getToken() !== this.session) return;
-      const found = items.find((a: Attachment) => a.id === this.attachmentId);
-      if (found === undefined) throw new ApiError('NOT_FOUND', '这份附件已不存在或当前不可访问');
-      this.item = found;
+      if (this.draftId === '') {
+        const items = await this.service.list(this.projectId);
+        if (!this.active || generation !== this.generation || SessionStore.getToken() !== this.session) return;
+        const found = items.find((a: Attachment) => a.id === this.attachmentId);
+        if (found === undefined) throw new ApiError('NOT_FOUND', '这份附件已不存在或当前不可访问');
+        this.item = found;
+      }
       try {
-        const data = await this.service.original(this.projectId, this.attachmentId);
+        const data = this.draftId !== '' ? await this.service.originalAt(intakeMaterialFilePath(this.draftId, this.materialId))
+          : await this.service.original(this.projectId, this.attachmentId);
         if (!this.active || generation !== this.generation || SessionStore.getToken() !== this.session) return;
         // 路径不使用服务端文件名，离开页面即移除缓存。
         const context = getContext(this) as common.UIAbilityContext;
@@ -114,9 +132,11 @@ struct AttachmentViewer {
     finally { this.saving = false; }
   }
 
+  private fileWord(): string { return this.draftId !== '' ? '源文件' : '原件'; }
+
   build() {
     Column() {
-      PMAppBar({ title: '附件原件', backLabel: '资料' })
+      PMAppBar({ title: this.draftId !== '' ? '源文件' : '附件原件', backLabel: this.draftId !== '' ? '材料' : '资料' })
       if (this.loading) { LoadingProgress().width(32).height(32).margin(24) }
       else if (this.error !== '') {
         Column({ space: 14 }) {
@@ -127,30 +147,31 @@ struct AttachmentViewer {
         Scroll() {
           Column({ space: 16 }) {
             Column({ space: 8 }) {
-              PMStatusPill({ label: attachmentStatus(this.item) })
+              if (this.draftId === '') { PMStatusPill({ label: attachmentStatus(this.item) }) }
               Text(this.item.fileName).fontSize(20).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
               if (this.physicalPage > 0) { Text('引用定位：原件物理第 ' + this.physicalPage.toString() + ' 页').fontSize(13).fontColor(PMColors.INK_SECONDARY) }
-              Text(`${attachmentSize(this.item.size)} · ${(this.item.createdAt ?? '').substring(0, 10)}`).fontSize(12).fontColor(PMColors.INK_TERTIARY)
+              Text(this.draftId !== '' ? attachmentSize(this.item.size) : `${attachmentSize(this.item.size)} · ${(this.item.createdAt ?? '').substring(0, 10)}`).fontSize(12).fontColor(PMColors.INK_TERTIARY)
             }.width('100%').alignItems(HorizontalAlign.Start)
             if (this.originalError !== '') {
               Text(this.originalError).width('100%').fontSize(14).fontColor(PMColors.RISK)
-              PMButton({ label: '重新读取原件', secondary: true, onAction: (): void => { this.load(); } })
+              PMButton({ label: `重新读取${this.fileWord()}`, secondary: true, onAction: (): void => { this.load(); } })
             }
             if (this.localUri !== '') {
               if (attachmentPreviewKind(this.item.mimeType) === 'image') {
                 Image(this.localUri).width('100%').height(380).objectFit(ImageFit.Contain).backgroundColor(PMColors.SURFACE)
-                  .onError(() => { this.originalError = '图片无法预览，可保存原件后查看'; })
+                  .onError(() => { this.originalError = `图片无法预览，可保存${this.fileWord()}后查看`; })
               } else {
                 Column({ space: 10 }) {
-                  Text(attachmentPreviewKind(this.item.mimeType) === 'pdf' ? 'PDF 原件已就绪' : '附件原件已就绪')
+                  Text(attachmentPreviewKind(this.item.mimeType) === 'pdf' ? `PDF ${this.fileWord()}已就绪` : `${this.fileWord()}已就绪`)
                     .fontSize(17).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
                   Text('使用手机上的对应应用打开，也可以保存到指定位置。').fontSize(13).fontColor(PMColors.INK_SECONDARY)
-                  PMButton({ label: attachmentPreviewKind(this.item.mimeType) === 'pdf' ? '打开 PDF 原件 →' : '用其他应用打开 →', secondary: true,
+                  PMButton({ label: attachmentPreviewKind(this.item.mimeType) === 'pdf' ? `打开 PDF ${this.fileWord()} →` : '用其他应用打开 →', secondary: true,
                     onAction: (): void => { this.openInApp(); } })
                 }.width('100%').padding(16).backgroundColor(PMColors.SURFACE).borderRadius(18).alignItems(HorizontalAlign.Start)
               }
-              PMButton({ label: this.saving ? '正在保存…' : '保存原件到手机', disabled: this.saving, onAction: (): void => { this.save(); } })
+              PMButton({ label: this.saving ? '正在保存…' : `保存${this.fileWord()}到手机`, disabled: this.saving, onAction: (): void => { this.save(); } })
             }
+            if (this.draftId === '') {
             Column({ space: 12 }) {
               Row() {
                 Text('提取文本').fontSize(17).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY).layoutWeight(1)
@@ -169,6 +190,7 @@ struct AttachmentViewer {
                 }
               }
             }.width('100%').padding(16).backgroundColor(PMColors.SURFACE).borderRadius(18).alignItems(HorizontalAlign.Start)
+            }
           }.width('100%').padding(16).alignItems(HorizontalAlign.Start)
         }.layoutWeight(1).align(Alignment.TopStart)
       }

@@ -161,7 +161,7 @@ export function buildIntakeCoverage(input: {
       : stale
         ? "材料在上一版理解之后有变化；标为“之后新增”的材料还没有送入模型。"
         : truncatedLastSent
-          ? "模型只读到上述字符；未送入的原文仍完整保留，可在项目中继续深读。"
+          ? "模型只读到上述字符；未送入的原文仍完整保留。"
           : "模型已读到的范围与上述字符一致。";
   return {
     schemaVersion: 1,

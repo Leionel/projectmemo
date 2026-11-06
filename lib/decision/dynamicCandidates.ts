@@ -5,15 +5,14 @@ import { jsonHash } from "@/lib/mission/contracts";
 import { evidenceKey, readReviewMaterial } from "@/lib/mission/projectMaterialReader";
 import type { CopilotActor } from "@/lib/copilot/confirmation";
 import { dynamicReviewInput, dynamicAnswerSchema, type ReviewBase, type DynamicCandidate, type DynamicReviewResult, type ChangeReviewResult } from "@/lib/types/changeReview";
-import { validateReviewQuotes } from "./changeCandidateRules";
+import { groundedCandidates } from "./changeCandidateRules";
 import { prepareReview, readReview, replayReview, reviewMission, runPreparedReview, type ReviewProvider } from "./reviewPersistence";
 import type { z } from "zod";
 import { assertToolConstraints } from "@/lib/mission/constraintsService";
 
 export function normalizeDynamicAnswer(answer: z.infer<typeof dynamicAnswerSchema>, base: ReviewBase, provider: string, usageUnknown: boolean): DynamicReviewResult {
   const allowed = new Set(base.sourcePointers.map(p => p.id));
-  const candidates: DynamicCandidate[] = answer.candidates.map(candidate => {
-    validateReviewQuotes(candidate.evidence, base.evidence);
+  const candidates: DynamicCandidate[] = groundedCandidates(answer.candidates, base.evidence).map(candidate => {
     if (candidate.sourceIds.some(id => !allowed.has(id))) throw new AppError("UNKNOWN_REVIEW_SOURCE", "方案引用了本轮未授权的资料", 409);
     const reasons: string[] = [];
     if (candidate.kind !== "KEEP_PLAN") {

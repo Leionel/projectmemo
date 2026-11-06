@@ -7,7 +7,8 @@ import type { IntakeCoverage, IntakeCoverageItem } from "@/lib/intake/coverage";
  * “模型实际读到了多少”的只读呈现。
  *
  * 上传字符数不等于已读字符数：这里把上一轮真正送入的正文与当前材料下次会送入的范围
- * 分开显示，并为每份材料提供按页的原文核对入口。未送入的原文仍保留在草稿或原项目里。
+ * 分开显示。文件材料可看源文件，也可展开模型读到的抽取文字，两者版面可能不一致；
+ * 粘贴的文字没有源文件，展开的就是原文。
  */
 
 const numberText = (value: number) => value.toLocaleString("zh-CN");
@@ -22,8 +23,8 @@ function itemState(item: IntakeCoverageItem): string {
   return `已送入 ${numberText(item.lastSentChars)} 字`;
 }
 
-export function IntakeCoveragePanel({ draftId, coverage, materials }: { draftId: string; coverage: IntakeCoverage;
-  materials: Array<{ id: string; revision: number; contentHash: string }> }) {
+export function IntakeCoveragePanel({ draftId, coverage, materials, sourceAvailable = true }: { draftId: string; coverage: IntakeCoverage;
+  materials: Array<{ id: string; revision: number; contentHash: string }>; sourceAvailable?: boolean }) {
   const [openMaterial, setOpenMaterial] = useState("");
   const [pages, setPages] = useState<Record<string, { text: string; offset: number; total: number; hasMore: boolean }>>({});
   const [loading, setLoading] = useState("");
@@ -69,6 +70,10 @@ export function IntakeCoveragePanel({ draftId, coverage, materials }: { draftId:
           <span>{item.label}{item.type ? ` · ${item.type}` : ""}</span>
           <span className="text-xs text-[var(--muted)]">{itemState(item)}</span>
         </div>
+        {item.kind === "FILE" && sourceAvailable && <a className="focus-ring mr-3 mt-1 inline-block text-xs font-semibold text-[var(--navy)] underline-offset-2 hover:underline"
+          href={`/api/intake/${encodeURIComponent(draftId)}/materials/${encodeURIComponent(item.materialId)}/file`} target="_blank" rel="noopener noreferrer">
+          查看源文件 ↗
+        </a>}
         {item.availableChars > 0 && <button type="button" className="focus-ring mt-1 text-xs font-semibold text-[var(--navy)] underline-offset-2 hover:underline"
           aria-expanded={openMaterial === item.materialId}
           onClick={() => {
@@ -76,7 +81,7 @@ export function IntakeCoveragePanel({ draftId, coverage, materials }: { draftId:
             setOpenMaterial(item.materialId);
             if (!pages[item.materialId]) void loadPage(item.materialId, 0);
           }}>
-          {openMaterial === item.materialId ? "收起原文" : `核对原文（${numberText(item.availableChars)} 字）`}
+          {item.kind === "FILE" ? (openMaterial === item.materialId ? "收起模型读到的文字" : "模型读到的文字") : (openMaterial === item.materialId ? "收起原文" : "查看原文")}
         </button>}
         {openMaterial === item.materialId && <div className="mt-2 rounded-md border border-[var(--rule)] bg-[var(--paper)] px-3 py-2">
           {pages[item.materialId]
@@ -100,7 +105,7 @@ export function IntakeCoveragePanel({ draftId, coverage, materials }: { draftId:
     {(truncated || unsent) && <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
       {truncated ? "被截取的部分没有送给模型，仍完整保留；" : ""}
       {unsent ? "之后新增的材料还没有送入；" : ""}
-      建立项目后可在项目中继续深读全文，不需要先自己裁好材料。
+      不需要先自己裁好材料。
     </p>}
     {error && <p role="status" className="mt-2 text-xs text-[var(--brick)]">{error}</p>}
   </div>;

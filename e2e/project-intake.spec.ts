@@ -25,7 +25,7 @@ test("S1-A 从材料建立项目：理解状态如实、整体纠正生效、确
   const coverage = page.getByRole("group", { name: "材料覆盖与原文核对" });
   await expect(coverage.getByText("模型实际读到的范围")).toBeVisible();
   await expect(coverage.getByText(/尚未送入 · 下次会送入 \d+ 字/)).toBeVisible();
-  await coverage.getByRole("button", { name: /核对原文/ }).first().click();
+  await coverage.getByRole("button", { name: /查看原文/ }).first().click();
   await expect(coverage.getByText(/已显示 \d+ \/ \d+ 字/)).toBeVisible();
   await expect(coverage.getByText(material, { exact: false })).toBeVisible();
   await coverage.getByRole("button", { name: "收起原文" }).click();

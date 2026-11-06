@@ -21,11 +21,15 @@ export class AttachmentService {
 
   // 原件与 JSON 接口使用同一会话，不将凭据拼入可分享的 URL。
   async original(projectId: string, attachmentId: string): Promise<ArrayBuffer> {
+    return this.originalAt(attachmentFilePath(projectId, attachmentId));
+  }
+
+  async originalAt(path: string): Promise<ArrayBuffer> {
     const token = SessionStore.getToken();
     if (token === '') throw new ApiError('UNAUTHORIZED', '请重新登录后查看附件', 401);
     const request = http.createHttp();
     try {
-      const response = await request.request(`${Constants.requireBaseUrl()}${attachmentFilePath(projectId, attachmentId)}`, {
+      const response = await request.request(`${Constants.requireBaseUrl()}${path}`, {
         method: http.RequestMethod.GET,
         header: { 'Authorization': `Bearer ${token}` },
         expectDataType: http.HttpDataType.ARRAY_BUFFER,

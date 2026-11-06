@@ -105,18 +105,22 @@ function normalizeGoals(frame: InvestigationFrame, directory: WorkspaceDirectory
     const goalSource = observations.sources.find(s => s.projectId === g.projectId && s.sourceId === "project:" + g.projectId);
     if (!p || !goalSource || g.goalQuote !== p.goal.slice(0, 1500)) throw new AppError("GOAL_CHANGED", "目标引用不匹配，请重新核对原项目", 409);
     const criteria = g.criteria.map((criterion, ordinal) => {
-      const bound = bindAnswerEvidence(criterion.observations, observations.sources);
-      if (!bound) throw new AppError("UNSUPPORTED_QUOTE", "目标判断引用未通过原文核对", 409);
-      const evidence = criterion.observations.map((o, i) => {
-        const quote = bound[i], s = observations.sources.find(s => s.id === quote.sourceId)!;
+      const { aligned } = bindAnswerEvidence(criterion.observations, observations.sources);
+      if (criterion.observations.length && aligned.every(quote => quote === null)) throw new AppError("UNSUPPORTED_QUOTE", "目标判断引用未通过原文核对", 409);
+      const evidence = criterion.observations.flatMap((o, i) => {
+        const quote = aligned[i];
+        if (!quote) return [];
+        const s = observations.sources.find(s => s.id === quote.sourceId)!;
         if (s.projectId !== p.id) throw new AppError("INVALID_ROUTE", "目标证据属于其他项目", 409);
-        return { source: experienceSourceRef(s), excerptHash: s.excerptHash, quote: quote.quote, observedAt: s.observedAt,
+        return [{ source: experienceSourceRef(s), excerptHash: s.excerptHash, quote: quote.quote, observedAt: s.observedAt,
           readScope: s.readScope ?? (s.sourceId.startsWith("card:") ? "SUMMARY" as const : "EXCERPT" as const),
           claim: criterion.requirement, relation: o.relation, applicability: s.temporalState === "CONTESTED" ? "UNKNOWN" as const : o.applicability,
-          verification: "REPORTED" as const, reason: "项目记录与模型判断；尚未作为独立验收结论" };
+          verification: "REPORTED" as const, reason: "项目记录与模型判断；尚未作为独立验收结论" }];
       });
       let state = criterion.state;
       if (state === "VERIFIED") state = "REPORTED";
+      // 判断依据少了一条（可能正是反证），这一项就不再算有结论。
+      if (evidence.length < criterion.observations.length) state = "UNKNOWN";
       if (state === "NOT_APPLICABLE" || !evidence.length || evidence.every(e => e.applicability !== "DIRECT")) state = "UNKNOWN";
       if (state === "BLOCKED" && !evidence.some(e => e.relation === "CONTRADICTS" && e.applicability === "DIRECT")) state = "UNKNOWN";
       return { id: `${p.id}-criterion-${ordinal}`, requirement: criterion.requirement, state, explanation: criterion.explanation, evidence };

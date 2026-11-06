@@ -8,7 +8,7 @@ import { createSession } from "@/lib/auth/session";
 import type { ConversationActor } from "@/lib/types/conversation";
 import {
   addFileMaterial, addTextMaterial, confirmIntake, createIntakeDraft, expireIntakeDrafts,
-  readIntake, recordProcessingConsent, reviseIntake, syncIntakeMaterials, understandIntake, withdrawIntake,
+  readIntake, readIntakeMaterialFile, recordProcessingConsent, reviseIntake, syncIntakeMaterials, understandIntake, withdrawIntake,
 } from "@/lib/services/projectIntakeService";
 import { getAttachmentStorageDir } from "@/lib/storage/attachmentStorage";
 import { reserveIntakeCloudCall } from "@/lib/auth/cloudQuota";
@@ -267,6 +267,58 @@ describe("S1-A 项目前材料与确认建项", () => {
     // 退回“只展示原文片段”，不声称有模型理解。
     expect(preview.preview.suggested).toBeNull();
     expect(preview.preview.statements[0].meaning).toContain("尚未生成模型理解");
+  });
+
+  test("只有部分引文对不上时保留这一版，移除坏引文并留下记录", async () => {
+    const { actor } = await newActor("quote-partial");
+    const created = await createIntakeDraft(actor, { requestId: `d-${crypto.randomUUID()}` });
+    const added = await addFileMaterial(actor, created.draftId,
+      { fileName: "纪要.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4\nsynthetic") },
+      { requestId: `f-${crypto.randomUUID()}` }, { extractPdf: async () => "三、决定\n 1. 阶段汇报以方案B的\n\n      结果为准。\n 2. 方案A的记录不删。" });
+    await recordProcessingConsent(actor, created.draftId);
+    const { preview } = await understandIntake(actor, created.draftId, { requestId: "u", processingConsent: true },
+      { runModel: fakeModel(understandingOf(added.materialId, { quotes: [
+        { materialId: added.materialId, quote: "阶段汇报以方案B的结果为准。", meaning: "跨行摘录" },
+        { materialId: added.materialId, quote: "材料里根本没写这句话。", meaning: "伪造引文" },
+      ] })) });
+    expect(preview.understandingState).toBe("READY");
+    expect(preview.statements.map(s => s.quote)).toEqual(["阶段汇报以方案B的结果为准。"]);
+    expect(preview.model.droppedQuotes).toBe(1);
+    const run = await db.agentRun.findFirstOrThrow({ where: { externalRequestId: { startsWith: `intake-understanding:${created.draftId}:` } } });
+    expect(run.status).toBe("SUCCESS");
+    expect((run.trace as { droppedQuotes: unknown[] }).droppedQuotes).toHaveLength(1);
+  });
+
+  test("引文全部对不上时留下失败记录，供事后查原因", async () => {
+    const { actor } = await newActor("quote-run");
+    const { draftId, materialId } = await draftWithMaterial(actor);
+    await recordProcessingConsent(actor, draftId);
+    await expect(understandIntake(actor, draftId, { requestId: "u", processingConsent: true },
+      { runModel: fakeModel(understandingOf(materialId, { quotes: [{ materialId, quote: "材料里根本没写这句话。", meaning: "伪造引文" }] })) }))
+      .rejects.toMatchObject({ code: "UNSUPPORTED_QUOTE" });
+    const run = await db.agentRun.findFirstOrThrow({ where: { externalRequestId: { startsWith: `intake-understanding:${draftId}:` } } });
+    expect(run).toMatchObject({ status: "FAILED", fallbackReason: "UNSUPPORTED_QUOTE", provider: "TEST_FIXTURE" });
+  });
+
+  test("源文件只给 owner 的开放草稿，粘贴文字没有源文件", async () => {
+    const { actor } = await newActor("source-file");
+    const other = await newActor("source-file-other");
+    const created = await createIntakeDraft(actor, { requestId: `d-${crypto.randomUUID()}` });
+    const bytes = Buffer.from("%PDF-1.4\nsynthetic source file");
+    const file = await addFileMaterial(actor, created.draftId, { fileName: "纪要.pdf", mimeType: "text/html", buffer: bytes },
+      { requestId: `f-${crypto.randomUUID()}` }, { extractPdf: async () => MATERIAL });
+    const text = await addTextMaterial(actor, created.draftId, { requestId: `t-${crypto.randomUUID()}`, text: MATERIAL });
+
+    const source = await readIntakeMaterialFile(actor, created.draftId, file.materialId);
+    expect(source.data.equals(bytes)).toBe(true);
+    expect(source).toMatchObject({ mimeType: "application/pdf", fileName: "纪要.pdf" });
+    await expect(readIntakeMaterialFile(other.actor, created.draftId, file.materialId)).rejects.toBeInstanceOf(Error);
+    await expect(readIntakeMaterialFile(actor, created.draftId, text.materialId)).rejects.toMatchObject({ code: "INTAKE_MATERIAL_NOT_FOUND" });
+
+    const preview = (await readIntake(actor, created.draftId)).preview;
+    await confirmIntake(actor, created.draftId, { requestId: `c-${crypto.randomUUID()}`, expectedRevision: preview.revision, previewHash: preview.previewHash,
+      accepted: { title: "源文件", description: "确认后由项目资料承接源文件。", goal: "确认后不再从草稿读取", scenario: "RESEARCH" } });
+    await expect(readIntakeMaterialFile(actor, created.draftId, file.materialId)).rejects.toMatchObject({ code: "INTAKE_CONFIRMED" });
   });
 
   test("建项成功但附件同步失败时保留原项目身份，重试不重复建项", async () => {

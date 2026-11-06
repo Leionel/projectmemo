@@ -1,17 +1,25 @@
 import { AppError } from "@/lib/api";
+import { locateQuote } from "@/lib/evidence/quoteMatch";
 import { jsonHash } from "@/lib/mission/contracts";
 import { changeAnswerSchema, type EvidenceSlice, type ReviewBase, type ChangeReviewResult } from "@/lib/types/changeReview";
 import type { z } from "zod";
 
-export function validateReviewQuotes(quotes: Array<{ ref: string; quote: string }>, evidence: EvidenceSlice[]) {
-  for (const quote of quotes) {
+function reviewQuotesGrounded(quotes: Array<{ ref: string; quote: string }>, evidence: EvidenceSlice[]) {
+  return quotes.every(quote => {
     const source = evidence.find(s => s.ref === quote.ref);
-    if (!source || !source.text.includes(quote.quote)) throw new AppError("UNSUPPORTED_REVIEW_QUOTE", "候选引用不在实际读取的原文中", 409);
-  }
+    return source !== undefined && locateQuote(source.text, quote.quote) !== null;
+  });
 }
+
+/** 只去掉引用对不上的候选；全部对不上时这轮审查不成立。 */
+export function groundedCandidates<T extends { evidence: Array<{ ref: string; quote: string }> }>(candidates: T[], evidence: EvidenceSlice[]) {
+  const grounded = candidates.filter(candidate => reviewQuotesGrounded(candidate.evidence, evidence));
+  if (candidates.length && !grounded.length) throw new AppError("UNSUPPORTED_REVIEW_QUOTE", "候选引用不在实际读取的原文中", 409);
+  return grounded;
+}
+
 export function normalizeChangeAnswer(answer: z.infer<typeof changeAnswerSchema>, base: ReviewBase, provider: string, usageUnknown: boolean): ChangeReviewResult {
-  const candidates = answer.candidates.map(candidate => {
-    validateReviewQuotes(candidate.evidence, base.evidence);
+  const candidates = groundedCandidates(answer.candidates, base.evidence).map(candidate => {
     if (!base.goal.includes(candidate.goalQuote) && !JSON.stringify(base.constraints).includes(candidate.goalQuote))
       throw new AppError("UNSUPPORTED_GOAL_PREMISE", "候选前提没有对应原目标或约束", 409);
     const temporalUnknown = candidate.evidence.some(q => base.evidence.find(s => s.ref === q.ref)?.source.temporalState === "CONTESTED");

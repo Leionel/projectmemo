@@ -112,7 +112,8 @@ export type IntakePreview = {
   status: IntakeStatus;
   materialsHash: string;
   understandingState: "NONE" | "READY" | "FAILED" | "UNKNOWN" | "MATERIAL_ONLY";
-  model: { used: boolean; provider: string | null; reason: string | null; usageUnknown: boolean };
+  /** droppedQuotes：模型给出但没对上原文、已从这一版移除的摘录数。 */
+  model: { used: boolean; provider: string | null; reason: string | null; usageUnknown: boolean; droppedQuotes: number };
   summary: string | null;
   statements: Array<{ materialId: string; materialLabel: string; quote: string; meaning: string }>;
   suggested: IntakeAcceptedFields | null;
@@ -133,7 +134,7 @@ export type IntakePreview = {
   /** 实际送入模型的正文字符范围；上传总量不等于已读量。 */
   coverage: IntakeCoverage;
   materials: Array<{
-    id: string; label: string; kind: IntakeMaterialKind; type: string | null; fileName: string | null;
+    id: string; label: string; kind: IntakeMaterialKind; type: string | null; fileName: string | null; mimeType: string | null;
     size: number; sha256: string | null; extractionStatus: string; extractionError: string | null;
     revision: number; contentHash: string;
     sync: { state: string; captureId?: string; attachmentId?: string; error?: string };

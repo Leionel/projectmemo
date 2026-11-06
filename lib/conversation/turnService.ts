@@ -299,12 +299,13 @@ async function executeTurnGeneration(actor: ConversationActor, id: string, turn:
           coverage: directory.coverage }), answerSchema);
       modelAnswer = r.data; provider = r.provider; advice = r.data.advice;
       if (r.data.recommendedProjectId && route.projectIds.includes(r.data.recommendedProjectId)) focused = r.data.recommendedProjectId;
-      const citations = bindAnswerEvidence(r.data.observations, observations.sources);
-      if (!citations) fallbackReason = "UNSUPPORTED_QUOTE";
+      // 只丢对不上的引文；一条都对不上才退回。正文引用了被丢来源时由下面的角标检查退回。
+      const { citations } = bindAnswerEvidence(r.data.observations, observations.sources);
+      if (r.data.observations.length && !citations.length) fallbackReason = "UNSUPPORTED_QUOTE";
       else modelAnswer.observations = citations;
       for (const match of advice.matchAll(/【(\d+)】/g)) {
         const source = observations.sources[Number(match[1]) - 1];
-        if (!source || !citations?.some(o => o.sourceId === source.id))
+        if (!source || !citations.some(o => o.sourceId === source.id))
           fallbackReason ??= "UNSUPPORTED_CITATION";
       }
       if (fallbackReason) {

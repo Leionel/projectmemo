@@ -19,6 +19,8 @@ import { isFeatureEnabled } from "@/lib/config/features";
 import { getVisionProviderConfig } from "@/lib/config/provider";
 import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateService";
 import { spawn } from "node:child_process";
+import { pagesFromBbox } from "@/lib/documents/pdfLayout";
+import { intactPrefix } from "@/lib/intake/textRange";
 
 export interface UploadAttachmentInput {
   projectId: string;
@@ -26,15 +28,27 @@ export interface UploadAttachmentInput {
   mimeType: string;
   buffer: Buffer;
 }
+/** 单份 PDF 保留的文字上限（字符）。 */
+const PDF_TEXT_LIMIT = 300_000;
+/** 附件导入时送去结构化成卡片的上限：卡片只是摘要，全文留在附件上。 */
+const ATTACHMENT_CAPTURE_LIMIT = 100_000;
+
+/** 超出上限时明说，模型和用户都要知道后面还有内容。 */
+function keepWithin(text: string, maxChars: number) {
+  if (text.length <= maxChars) return text;
+  const notice = `\n\n【文件过长，这里只保留前 ${maxChars.toLocaleString("zh-CN")} 字，其余内容请查看原件】`;
+  return intactPrefix(text, Math.max(0, maxChars - notice.length)) + notice;
+}
+
 /**
  * 提取 PDF 文本（支持标准 ASCII 文本块与简单中文流提取）
  *
  * 项目前材料预览复用同一个解析器：不因为还没有 projectId 就换一套实现。
  */
-export async function extractPdfText(buffer: Buffer, maxChars = 100_000): Promise<string | null> {
+export async function extractPdfText(buffer: Buffer, maxChars = PDF_TEXT_LIMIT): Promise<string | null> {
   const executable = process.env.PDFTOTEXT_PATH || "pdftotext";
   return new Promise((resolve, reject) => {
-    const child = spawn(executable, ["-layout", "-", "-"], {
+    const child = spawn(executable, ["-bbox", "-enc", "UTF-8", "-", "-"], {
       windowsHide: true,
       stdio: ["pipe", "pipe", "pipe"],
     });
@@ -53,8 +67,8 @@ export async function extractPdfText(buffer: Buffer, maxChars = 100_000): Promis
         reject(new Error(`PDF extraction failed: ${Buffer.concat(stderr).toString("utf8").trim().slice(0, 240) || `exit ${code}`}`));
         return;
       }
-      const text = Buffer.concat(stdout).toString("utf8").replace(/\u0000/g, "").trim();
-      resolve(text.length >= 20 ? text.slice(0, maxChars) : null);
+      const text = pagesFromBbox(Buffer.concat(stdout).toString("utf8")).join("\f").replace(/\u0000/g, "").trim();
+      resolve(text.length >= 20 ? keepWithin(text, maxChars) : null);
     });
     child.stdin.end(buffer);
   });
@@ -272,7 +286,7 @@ export async function processAttachmentUpload(input: UploadAttachmentInput, depe
   if (extractedText && extractionStatus === "SUCCESS" && fileType!=="CSV" && fileType!=="JSON") {
     try {
       const sourceType = fileType === "IMAGE" ? "图片附件" : fileType === "PDF" ? "PDF文档" : "文件附件";
-      card = await processCapture(projectId, `【附件导入：${fileName}】\n${extractedText}`, sourceType, { allowCloud: dependencies.allowCloud });
+      card = await processCapture(projectId, `【附件导入：${fileName}】\n${keepWithin(extractedText, ATTACHMENT_CAPTURE_LIMIT)}`, sourceType, { allowCloud: dependencies.allowCloud });
 
       // 更新卡片关联 attachmentId
       await db.knowledgeCard.update({
@@ -348,7 +362,7 @@ export async function retryAttachmentExtraction(projectId: string, attachmentId:
   if (!card && fileType!=="CSV" && fileType!=="JSON") {
     card = await processCapture(
       projectId,
-      `【附件导入：${attachment.fileName}】\n${extractedText}`,
+      `【附件导入：${attachment.fileName}】\n${keepWithin(extractedText, ATTACHMENT_CAPTURE_LIMIT)}`,
       fileType === "IMAGE" ? "图片附件" : "PDF文档",
     );
     await db.knowledgeCard.update({ where: { id: card.id }, data: { attachmentId: attachment.id } });

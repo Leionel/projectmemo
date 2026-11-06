@@ -19,6 +19,8 @@ import {
 import { buildIntakeCoverage, INTAKE_MODEL_MATERIAL_LIMIT, sliceMaterialsForModel, type IntakeCoverageRound } from "@/lib/intake/coverage";
 import { IntakeModelOutputError, parseUnderstandingOutput } from "@/lib/intake/modelOutput";
 import { intakeUnderstandingV1 } from "@/lib/intake/prompt";
+import { quoteKey } from "@/lib/evidence/quoteMatch";
+import { verifyQuotes } from "@/lib/intake/quoteCheck";
 import { originalTextPage } from "@/lib/intake/textRange";
 import {
   computeFileSha256, deleteAttachmentFile, listProjectAttachmentFiles, readAttachmentFile, saveFileToStorage,
@@ -200,9 +202,8 @@ function coverageRoundOf(input: { payload: ReturnType<typeof sliceMaterialsForMo
 
 
 function quoteIsVerbatim(quote: string, material: { rawText: string | null }) {
-  const normalize = (value: string) => value.replace(/\s+/g, " ").trim();
-  const text = normalize(material.rawText ?? "");
-  return normalize(quote).length > 0 && text.includes(normalize(quote));
+  const key = quoteKey(quote);
+  return key.length > 0 && quoteKey(material.rawText ?? "").includes(key);
 }
 
 /**
@@ -280,33 +281,35 @@ export async function understandIntake(actor: ConversationActor, draftId: string
   await settleIntakeCloudCall({ draftId: draft.id, requestHash, state: "SETTLED",
     usage: result.usage ?? { inputTokens: null, outputTokens: null }, provider: result.provider }).catch(() => undefined);
 
-  // 原文核对：模型引用的引文必须逐字出现在它指的那份材料里，否则这一版不成立。
-  const byId = new Map(materials.map(m => [m.id, m]));
-  for (const quote of understanding.quotes) {
-    const material = byId.get(quote.materialId);
-    if (!material || !quoteIsVerbatim(quote.quote, material)) {
-      await publishUnderstanding(actor, draft.id, draft.revision, { understandingState: "FAILED", status: "DRAFT",
-        previewJson: json({ failureCode: "UNSUPPORTED_QUOTE", failureAt: new Date().toISOString(), materialsHash,
-          coverage: coverageRoundOf({ payload, requestHash, guidanceEpoch, revision: draft.revision, materialsHash, understandingPublished: false }),
-          note: "模型引用的原文摘录未通过核对，这一版没有保存；材料本身未变" }) }, false, guidanceEpoch).catch(() => undefined);
-      throw new AppError("UNSUPPORTED_QUOTE", "模型引用的原文摘录未通过核对，这一版没有保存", 409);
-    }
+  // 原文核对：只保留确实来自材料的引文。一条都对不上时这一版不成立；只错几条就丢掉那几条并如实记下。
+  const verified = verifyQuotes(understanding, materials);
+  const quotesRejected = understanding.quotes.length > 0 && verified.understanding.quotes.length === 0;
+  const runTrace = { purpose: "INTAKE_UNDERSTANDING", draftId: draft.id, revision: draft.revision,
+    promptId: intakeUnderstandingV1.id, promptVersion: intakeUnderstandingV1.version,
+    outputSchemaVersion: intakeUnderstandingV1.outputSchemaVersion, usage: result.usage, usageUnknown: result.usageUnknown,
+    requestIdentity: result.requestIdentity, quoteCount: verified.understanding.quotes.length,
+    droppedQuotes: verified.dropped.map(quote => ({ materialId: quote.materialId, chars: quote.quote.length, head: quote.quote.slice(0, 40) })),
+    coverage: { sentChars: payload.totalSentChars, availableChars: payload.totalAvailableChars,
+      materials: payload.items.map(item => ({ materialId: item.materialId, sentChars: item.sentChars, reason: item.reason })) },
+    materialsHash };
+  const externalRequestId = `intake-understanding:${draft.id}:${draft.revision}:${input.requestId}`.slice(0, 180);
+  if (quotesRejected) {
+    await publishUnderstanding(actor, draft.id, draft.revision, { understandingState: "FAILED", status: "DRAFT",
+      previewJson: json({ failureCode: "UNSUPPORTED_QUOTE", failureAt: new Date().toISOString(), materialsHash,
+        coverage: coverageRoundOf({ payload, requestHash, guidanceEpoch, revision: draft.revision, materialsHash, understandingPublished: false }),
+        note: "模型引用的原文摘录未通过核对，这一版没有保存；材料本身未变" }) }, false, guidanceEpoch).catch(() => undefined);
+    await db.agentRun.create({ data: { provider: result.provider, runType: "ACTION", status: "FAILED", fallbackReason: "UNSUPPORTED_QUOTE",
+      externalRequestId, trace: json(runTrace) } }).catch(() => undefined);
+    throw new AppError("UNSUPPORTED_QUOTE", "模型引用的原文摘录未通过核对，这一版没有保存", 409);
   }
   await publishUnderstanding(actor, draft.id, draft.revision, {
-    understandingJson: json(understanding), understandingHash: jsonHash(understanding),
-    previewJson: json({ requestHash, guidanceEpoch, provider: result.provider, materialsHash,
+    understandingJson: json(verified.understanding), understandingHash: jsonHash(verified.understanding),
+    previewJson: json({ requestHash, guidanceEpoch, provider: result.provider, materialsHash, droppedQuotes: verified.dropped.length,
       usageUnknown: result.usageUnknown ?? (result.usage?.inputTokens == null || result.usage?.outputTokens == null),
       coverage: coverageRoundOf({ payload, requestHash, guidanceEpoch, revision: draft.revision, materialsHash, understandingPublished: true }) }),
     understandingState: "READY", status: "PREVIEW_READY", understoodAt: new Date() }, true, guidanceEpoch);
   await db.agentRun.create({ data: { provider: result.provider, runType: "ACTION", status: "SUCCESS",
-    externalRequestId: `intake-understanding:${draft.id}:${draft.revision}:${input.requestId}`.slice(0, 180),
-    trace: json({ purpose: "INTAKE_UNDERSTANDING", draftId: draft.id, revision: draft.revision,
-      promptId: intakeUnderstandingV1.id, promptVersion: intakeUnderstandingV1.version,
-      outputSchemaVersion: intakeUnderstandingV1.outputSchemaVersion, usage: result.usage, usageUnknown: result.usageUnknown,
-      requestIdentity: result.requestIdentity, quoteCount: understanding.quotes.length,
-      coverage: { sentChars: payload.totalSentChars, availableChars: payload.totalAvailableChars,
-        materials: payload.items.map(item => ({ materialId: item.materialId, sentChars: item.sentChars, reason: item.reason })) },
-      materialsHash }) } }).catch(() => undefined);
+    externalRequestId, trace: json(runTrace) } }).catch(() => undefined);
   return readIntake(actor, draft.id);
 }
 
@@ -420,7 +423,8 @@ async function buildPreviewFrom(draftId: string, tx: Tx = db): Promise<IntakePre
     understandingState: stale ? "NONE" : draft.understandingState as IntakePreview["understandingState"],
     model: { used: ready, provider: ready ? String(record(draft.previewJson).provider ?? "UNKNOWN") : null,
       reason: ready ? null : stale ? "INTAKE_SCOPE_CHANGED" : typeof record(draft.previewJson).failureCode === "string" ? String(record(draft.previewJson).failureCode) : draft.understandingState === "NONE" ? "NOT_RUN" : null,
-      usageUnknown: ready ? record(draft.previewJson).usageUnknown !== false : true },
+      usageUnknown: ready ? record(draft.previewJson).usageUnknown !== false : true,
+      droppedQuotes: ready ? Number(record(draft.previewJson).droppedQuotes ?? 0) : 0 },
     summary: ready ? understanding!.data.summary : null,
     statements,
     suggested: ready ? { ...understanding!.data.suggested } as IntakeAcceptedFields : null,
@@ -443,7 +447,7 @@ async function buildPreviewFrom(draftId: string, tx: Tx = db): Promise<IntakePre
     accepted,
     coverage,
     materials: materials.map(m => ({ id: m.id, label: labels.get(m.id) ?? "材料", kind: m.kind as "TEXT" | "FILE",
-      type: m.type, fileName: m.fileName, size: m.size, sha256: m.sha256, extractionStatus: m.extractionStatus,
+      type: m.type, fileName: m.fileName, mimeType: m.mimeType, size: m.size, sha256: m.sha256, extractionStatus: m.extractionStatus,
       extractionError: m.extractionError, revision: m.revision, contentHash: m.contentHash,
       sync: { state: String(record(m.syncJson).state ?? "PENDING"),
         ...(typeof record(m.syncJson).captureId === "string" ? { captureId: String(record(m.syncJson).captureId) } : {}),
@@ -679,7 +683,7 @@ export async function readIntakeForClient(actor: ConversationActor, draftId: str
 /**
  * 项目前原文核对：按页读取草稿里的原始正文。
  *
- * 只对 owner、只对仍然开放的草稿可见；确认后材料已进入项目（含深读入口），
+ * 只对 owner、只对仍然开放的草稿可见；确认后材料已进入项目资料，
  * 撤回、到期、项目删除后不再从这里重新暴露原文。分页上限固定，避免一次拉全量私料。
  */
 export async function readIntakeMaterialText(actor: ConversationActor, draftId: string, materialId: string,
@@ -687,7 +691,7 @@ export async function readIntakeMaterialText(actor: ConversationActor, draftId: 
   await assertSession(actor);
   const draft = await loadDraft(actor, draftId);
   if (draft.status === "CONFIRMED")
-    throw new AppError("INTAKE_CONFIRMED", "材料已进入项目，请在项目内继续深读", 409);
+    throw new AppError("INTAKE_CONFIRMED", "材料已进入项目，请在项目资料里查看", 409);
   assertOpen(draft);
   const material = await db.projectIntakeMaterial.findFirst({ where: { id: materialId, draftId: draft.id } });
   if (!material) throw new AppError("INTAKE_MATERIAL_NOT_FOUND", "这份材料不存在或不可访问", 404);
@@ -696,6 +700,22 @@ export async function readIntakeMaterialText(actor: ConversationActor, draftId: 
   return { materialId: material.id, label: materialLabel({ kind: material.kind, fileName: material.fileName, ordinal: material.ordinal }),
     extractionStatus: material.extractionStatus, revision: material.revision, contentHash: material.contentHash,
     ...originalTextPage(text, query.offset, query.limit) };
+}
+
+/** 源文件读取：可见范围与原文核对相同，只对 owner、只对仍然开放的草稿。 */
+export async function readIntakeMaterialFile(actor: ConversationActor, draftId: string, materialId: string) {
+  await assertSession(actor);
+  const draft = await loadDraft(actor, draftId);
+  if (draft.status === "CONFIRMED")
+    throw new AppError("INTAKE_CONFIRMED", "材料已进入项目，请在项目资料里查看", 409);
+  assertOpen(draft);
+  const material = await db.projectIntakeMaterial.findFirst({ where: { id: materialId, draftId: draft.id } });
+  if (!material?.storageKey) throw new AppError("INTAKE_MATERIAL_NOT_FOUND", "这份材料没有源文件", 404);
+  const data = await readAttachmentFile(material.storageKey).catch(() => null);
+  if (!data) throw new AppError("INTAKE_MATERIAL_NOT_FOUND", "源文件暂时不可用", 404);
+  const mimeType = material.type === "PDF" ? "application/pdf"
+    : /^image\/(png|jpeg|webp|gif|bmp)$/.test(material.mimeType ?? "") ? material.mimeType! : "application/octet-stream";
+  return { data, mimeType, fileName: material.fileName ?? "源文件" };
 }
 
 export const intakeTesting = { intakeScope, quoteIsVerbatim, sliceMaterialsForModel };

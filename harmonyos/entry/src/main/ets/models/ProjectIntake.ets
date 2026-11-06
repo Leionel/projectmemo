@@ -16,6 +16,7 @@ export class IntakeMaterialView {
   kind: string = '';
   type: string = '';
   fileName: string = '';
+  mimeType: string = '';
   size: number = 0;
   sha256: string = '';
   extractionStatus: string = '';
@@ -90,6 +91,7 @@ export class IntakeModelState {
   provider: string = '';
   reason: string = '';
   usageUnknown: boolean = true;
+  droppedQuotes: number = 0;
 }
 
 export class IntakeCoverageItem {

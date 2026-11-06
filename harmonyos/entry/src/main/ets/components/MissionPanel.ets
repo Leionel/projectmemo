@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { WorkStateBadges } from './WorkStateBadge';
 import { failedReadState } from '../common/ReadState';
 import { ProjectAgentContextService } from '../services/ProjectAgentContextService';
@@ -22,7 +23,8 @@ export struct MissionPanel {
   @Prop @Watch('refreshChanged') refreshKey: number = 0;
   @State available: boolean = false;
   @State loading: boolean = true;
-  @State error: string = '';
+  @State @Watch('alertError') error: string = '';
+  private alertError(): void { alertError(this.error); }
   @State readState: string = 'unavailable';
   @State observedAt: string = '';
   @State total: number = 0;

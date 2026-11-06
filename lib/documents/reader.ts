@@ -60,7 +60,7 @@ export async function readDocument(actor:DocumentActor,call:DocumentCall,extract
   const guard=async()=>{if(!isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false))throw new AppError("DOCUMENT_READER_DISABLED","文档深读已关闭",503);await permission(actor,call.projectId);await assertContinuityBinding(actor.userId,scope,binding);await assertSourceUse(actor.userId,call.projectId,call.sourceId,db,scope);if(await sourceHash(call.projectId,call.sourceId)!==call.revision)throw new AppError("SOURCE_CHANGED","附件已修订，请重新定位原文件",409);};
   await guard();
   const attachment=await db.attachment.findFirst({where:{id:call.sourceId.slice(11),projectId:call.projectId},include:{revisions:{orderBy:[{revisionIndex:"desc"},{id:"desc"}],take:1}}});
-  if(!attachment||attachment.type!=="PDF"||attachment.size>20*1024*1024)throw new AppError("DOCUMENT_NOT_SUPPORTED","请选择已上传且不超过20MB的 PDF 原件",422);
+  if(!attachment||attachment.type!=="PDF"||attachment.size>100*1024*1024)throw new AppError("DOCUMENT_NOT_SUPPORTED","请选择已上传且不超过20MB的 PDF 原件",422);
   const revision=attachment.revisions[0],corrected=revision&&!revision.source.startsWith("EXTRACTION");
   let extraction:DocumentExtraction;
   if(corrected){extraction={pages:[revision.text],pageCount:null,mapping:"CORRECTED_TEXT_UNMAPPED",parser:"attachment-correction-text/pm-document-v1",complete:true};}

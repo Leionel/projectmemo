@@ -3,7 +3,7 @@ await vi.hoisted(async () => (await import("./helpers/continuityDatabase")).cont
 import { db } from "@/lib/db";
 import { createSession } from "@/lib/auth/session";
 import { addTextMaterial, createIntakeDraft, readIntakeMaterialText } from "@/lib/services/projectIntakeService";
-import { sliceMaterialsForModel } from "@/lib/intake/coverage";
+import { INTAKE_MODEL_MATERIAL_LIMIT, INTAKE_TOTAL_LIMIT, sliceMaterialsForModel } from "@/lib/intake/coverage";
 import { originalTextPage } from "@/lib/intake/textRange";
 import { missionCallCoverageOf, type CallCoverageRun } from "@/lib/mission/callCoverage";
 import { readMissionBack } from "@/lib/mission/readback";
@@ -35,12 +35,12 @@ it("文末与越界偏移返回空页，代理对不在分页边界被拆开", (
 
 it("模型正文切片不拆开代理对，也不发送空材料占位", () => {
   const material = (id: string, rawText: string, ordinal: number) => ({ id, rawText, ordinal, kind: "TEXT", type: "TEXT", fileName: null, extractionStatus: "SUCCESS" });
-  const edge = sliceMaterialsForModel([material("edge", "甲".repeat(19999) + "🙂乙", 1)]);
-  expect(edge.slices[0].text).toBe("甲".repeat(19999)); expect(edge.items[0].sentChars).toBe(19999);
-  const budget = sliceMaterialsForModel([material("a", "甲".repeat(20000), 1), material("b", "乙".repeat(3999), 2), material("c", "🙂", 3), material("d", "丁", 4)]);
+  const edge = sliceMaterialsForModel([material("edge", "甲".repeat(INTAKE_MODEL_MATERIAL_LIMIT - 1) + "🙂乙", 1)]);
+  expect(edge.slices[0].text).toBe("甲".repeat(INTAKE_MODEL_MATERIAL_LIMIT - 1)); expect(edge.items[0].sentChars).toBe(INTAKE_MODEL_MATERIAL_LIMIT - 1);
+  const budget = sliceMaterialsForModel([material("a", "甲".repeat(INTAKE_MODEL_MATERIAL_LIMIT), 1), material("b", "乙".repeat(INTAKE_TOTAL_LIMIT - INTAKE_MODEL_MATERIAL_LIMIT - 1), 2), material("c", "🙂", 3), material("d", "丁", 4)]);
   expect(budget.slices.map(item => item.materialId)).toEqual(["a", "b", "d"]);
   expect(budget.items.find(item => item.materialId === "c")).toMatchObject({ sentChars: 0, reason: "OVER_BUDGET" });
-  expect(budget.totalSentChars).toBe(24000);
+  expect(budget.totalSentChars).toBe(INTAKE_TOTAL_LIMIT);
 });
 
 it("真实材料 API 文末不重读最后一字，调用窗口恰好二十条不伪报截断", async () => {

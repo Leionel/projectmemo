@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { ConversationMessage } from '../models/Conversation';
 import { ConversationResearchInfo, ResearchScopeInput, ResearchSummaryInput, ResearchSummaryReply, ResearchFacet, ResearchConflict } from '../models/ConversationResearch';
 import { ConversationService } from '../services/ConversationService';
@@ -15,7 +16,8 @@ export struct ConversationResearchControl {
   @State private topic: string = '';
   @State private terms: string = '';
   @State private hosts: string = '';
-  @State private error: string = '';
+  @State @Watch('alertError') private error: string = '';
+  private alertError(): void { alertError(this.error); }
   @State private saving: boolean = false;
   private service: ConversationService = new ConversationService();
   private async save(enabled: boolean): Promise<void> {

@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import router from '@ohos.router';
 import { CopilotContinuationSuggestion, CopilotMissionPreview, CopilotMissionPreviewInput, CopilotMissionConfirmInput } from '../models/Copilot';
 import { CopilotService } from '../services/CopilotService';
@@ -13,7 +14,8 @@ export struct CopilotContinuationCard {
   @State preview: CopilotMissionPreview | null = null;
   @State receiptId: string = '';
   @State busy: boolean = false;
-  @State error: string = '';
+  @State @Watch('alertError') error: string = '';
+  private alertError(): void { alertError(this.error); }
   private generation: number = 0;
   private requestId: string = '';
   aboutToAppear(): void { this.goal = this.suggestion.goal; }

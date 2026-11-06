@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { ClaimCorrectionPanel } from "../components/ClaimCorrection";
 import { ConversationContinuity } from "../components/ConversationContinuity";
 import { ConversationResearchControl, ConversationResearchResult } from '../components/ConversationResearch';
@@ -43,7 +44,8 @@ struct FocusConversation {
   private projectAttachmentService: AttachmentService = new AttachmentService();
   @State private busy: boolean = false;
   @State private pageVisible: boolean = true;
-  @State private error: string = '';
+  @State @Watch('alertError') private error: string = '';
+  private alertError(): void { alertError(this.error); }
   @State private cloud: boolean = false;
   @State private cloudAvailable: boolean = false;
   @State private cloudReason: string = '未确认云模型资格，当前仅整理项目记录';

@@ -30,7 +30,8 @@ export const intakeUnderstandingV1: PromptSpec<{ draftId: string; materials: Arr
   version: "1.1.0",
   purpose: "CAPTURE",
   outputSchemaVersion: 1,
-  maxOutputTokens: 2048,
+  // 按字段上限全部写满时也放得下，避免合法结果被截断。
+  maxOutputTokens: 16384,
   outputFormat: "JSON",
   outputSchema: understandingSchema,
   system: `任务 intake.understanding.v1\n${policy}\n字段结构：${JSON.stringify(z.toJSONSchema(understandingSchema))}`,

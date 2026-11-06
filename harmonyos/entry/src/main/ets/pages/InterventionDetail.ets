@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
 import { ApiError } from '../models/Project';
@@ -26,7 +27,8 @@ struct InterventionDetail {
   @State showDismissInput: boolean = false;
   @State dismissReason: string = '';
   @State isSubmitting: boolean = false;
-  @State operationError: string = '';
+  @State @Watch('alertOperationError') operationError: string = '';
+  private alertOperationError(): void { alertError(this.operationError); }
 
   private interventionService: InterventionService = new InterventionService();
   private notificationService: NotificationService = new NotificationService();

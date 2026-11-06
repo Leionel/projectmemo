@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { MemoryService } from '../services/MemoryService';
 import { SessionStore } from '../services/SessionStore';
 import { TemporalDecisionItem, TemporalRelation } from '../models/Memory';
@@ -9,7 +10,8 @@ export struct ProjectEvolutionPanel {
   onOpenSources: (cardId: string) => void = (_cardId: string): void => {};
   @State items: TemporalDecisionItem[] = [];
   @State loading: boolean = true;
-  @State error: string = '';
+  @State @Watch('alertError') error: string = '';
+  private alertError(): void { alertError(this.error); }
   @State evaluatedAt: string = '';
   @State relationsEnabled: boolean = true;
   @State limit: number = 5;

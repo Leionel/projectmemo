@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import router from '@ohos.router';
 import { RepoCiGrant } from '../models/RepoSignal';
 import { ConversationService } from '../services/ConversationService';
@@ -17,7 +18,8 @@ export struct RepoSignalPanel {
   @State loaded: boolean = false;
   @State ciAvailable: boolean = false;
   @State busy: boolean = false;
-  @State error: string = '';
+  @State @Watch('alertError') error: string = '';
+  private alertError(): void { alertError(this.error); }
   @State note: string = '来自公开仓库的只读候选；未采纳不写入任何项目事实。';
   @State connections: ConnectionView[] = [];
   @State signals: SignalView[] = [];

@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { EvidenceReviewReceipt } from '../models/EvidenceFit';
 import router from '@ohos.router';
 import { MissionReadback, MissionReadTarget, ReadbackAdoption, ReadbackAction, ReadbackProgressClass } from '../models/MissionReadback';
@@ -30,7 +31,8 @@ export struct MissionReadbackView {
   private observedScope: string = '';
   @State data: MissionReadback | null = null;
   @State delta: ReadbackDeltaView = new ReadbackDeltaView();
-  @State error: string = '';
+  @State @Watch('alertError') error: string = '';
+  private alertError(): void { alertError(this.error); }
   @State state: string = 'unavailable';
   private generation: number = 0;
   private expired: () => void = () => {

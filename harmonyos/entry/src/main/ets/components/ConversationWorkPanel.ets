@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import util from '@ohos.util';
 import { ConversationView } from '../models/Conversation';
 import { ConversationWork, ConversationWorkRef, ConversationWorkInput, ConversationScenarioInput, WorkCandidate, WorkChoice } from '../models/ConversationWork';
@@ -21,7 +22,8 @@ export struct ConversationWorkPanel {
   @State @Watch('saveDraft') private selected: string[] = [];
   @State @Watch('saveDraft') private minutes: string = '';
   @State @Watch('saveDraft') private delivery: string = '';
-  @State private error: string = '';
+  @State @Watch('alertError') private error: string = '';
+  private alertError(): void { alertError(this.error); }
   @State private busy: boolean = false;
   @State private assessed: boolean = false;
   @State private assessmentText: string = '';

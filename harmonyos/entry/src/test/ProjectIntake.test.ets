@@ -1,11 +1,16 @@
 import { describe, it, expect } from '@ohos/hypium';
 import {
   IntakeAcceptedFields, IntakeMaterialSync, IntakeMaterialView, IntakePreview, IntakeSuggested,
-  intakeAppliedObjective, intakeCanConfirm, intakeEditableFields, intakeFileName, intakeMaterialStatusLabel, intakeSyncSummary, intakeUnderstandingLabel
+  intakeAppliedObjective, intakeCanConfirm, intakeFailureLabel, intakeEditableFields, intakeFileName, intakeMaterialStatusLabel, intakeSyncSummary, intakeUnderstandingLabel
 } from '../main/ets/models/ProjectIntake';
 
 export default function projectIntakeContractTest() {
   describe('projectIntakeContract', () => {
+    it('failure_reason_is_readable', 0, () => {
+      expect(intakeFailureLabel('UNSUPPORTED_QUOTE').indexOf('原文') >= 0).assertTrue();
+      expect(intakeFailureLabel('MODEL_OUTPUT_TRUNCATED').indexOf('截断') >= 0).assertTrue();
+      expect(intakeFailureLabel(null)).assertEqual('模型这次没有完成，可以重新读懂');
+    });
     it('null_objective_is_not_shown_as_text', 0, () => {
       expect(intakeAppliedObjective(null)).assertEqual('');
       expect(intakeAppliedObjective(undefined)).assertEqual('');

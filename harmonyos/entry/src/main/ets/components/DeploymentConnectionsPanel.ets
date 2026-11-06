@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import util from '@ohos.util';
 import router from '@ohos.router';
 import { DeploymentConfig, DeploymentConnection, DeploymentLayer, DeploymentMutation, DeploymentPending } from '../models/Deployment';
@@ -22,7 +23,8 @@ export struct DeploymentConnectionsPanel {
   @State selectedId: string = '';
   @State selectedRevision: number = 0;
   @State busy: boolean = false;
-  @State error: string = '';
+  @State @Watch('alertError') error: string = '';
+  private alertError(): void { alertError(this.error); }
   @State pending: string = '';
   @State clock: number = Date.now();
   private alive: boolean = false;

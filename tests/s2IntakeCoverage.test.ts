@@ -11,8 +11,7 @@ import {
   addFileMaterial, addTextMaterial, confirmIntake, createIntakeDraft, readIntake, readIntakeMaterialText,
   recordProcessingConsent, understandIntake, withdrawIntake,
 } from "@/lib/services/projectIntakeService";
-import { INTAKE_TEXT_LIMIT } from "@/lib/intake/contracts";
-import { INTAKE_TOTAL_LIMIT } from "@/lib/intake/coverage";
+import { INTAKE_MODEL_MATERIAL_LIMIT, INTAKE_TOTAL_LIMIT } from "@/lib/intake/coverage";
 
 /**
  * S2 批次一：Intake 实际送入范围的覆盖提示。
@@ -76,7 +75,7 @@ describe("S2 批次一 · Intake 实际材料覆盖", () => {
   test("长 PDF：只送入单份上限，覆盖与模型真实收到的字符一致", async () => {
     const { actor } = await newActor("coverage-long");
     // 文本材料入口本身限制在 20,000 字；超长只会来自文件抽取，因此这里用 PDF 原件。
-    const long = "甲".repeat(INTAKE_TEXT_LIMIT + 8000);
+    const long = "甲".repeat(INTAKE_MODEL_MATERIAL_LIMIT + 8000);
     const draft = await createIntakeDraft(actor, { requestId: `d-${crypto.randomUUID()}` });
     const file = await addFileMaterial(actor, draft.draftId,
       { fileName: "long-report.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4\nsynthetic long report") },
@@ -88,34 +87,39 @@ describe("S2 批次一 · Intake 实际材料覆盖", () => {
     const { preview } = await understandIntake(actor, draftId, { requestId: "u-long", processingConsent: true }, { runModel: model.runModel });
 
     expect(model.calls()).toBe(1);
-    expect(sumChars(model.sent())).toBe(INTAKE_TEXT_LIMIT);
+    expect(sumChars(model.sent())).toBe(INTAKE_MODEL_MATERIAL_LIMIT);
     const item = preview.coverage.current.items[0];
     expect(item.availableChars).toBe(long.length);
-    expect(item.plannedChars).toBe(INTAKE_TEXT_LIMIT);
-    expect(item.lastSentChars).toBe(INTAKE_TEXT_LIMIT);
+    expect(item.plannedChars).toBe(INTAKE_MODEL_MATERIAL_LIMIT);
+    expect(item.lastSentChars).toBe(INTAKE_MODEL_MATERIAL_LIMIT);
     expect(item.lastSentTruncated).toBe(true);
     expect(item.reason).toBe("INCLUDED_TRUNCATED");
-    expect(preview.coverage.lastSent?.totalSentChars).toBe(INTAKE_TEXT_LIMIT);
+    expect(preview.coverage.lastSent?.totalSentChars).toBe(INTAKE_MODEL_MATERIAL_LIMIT);
     expect(preview.coverage.lastSent?.totalAvailableChars).toBe(long.length);
     expect(preview.coverage.note).toContain("未送入的原文仍完整保留");
   });
 
   test("总量上限：后续材料未送入时逐份标注，不把上传量算成已读量", async () => {
     const { actor } = await newActor("coverage-total");
-    const first = "乙".repeat(20000), second = "丙".repeat(20000), third = "丁".repeat(500);
-    const { draftId, materials } = await newDraft(actor, [first, second, third]);
+    const first = "乙".repeat(INTAKE_MODEL_MATERIAL_LIMIT), second = "丙".repeat(INTAKE_MODEL_MATERIAL_LIMIT), third = "丁".repeat(500);
+    const draft = await createIntakeDraft(actor, { requestId: `d-${crypto.randomUUID()}` });
+    const draftId = draft.draftId, materials = [];
+    for (const [index, text] of [first, second, third].entries()) materials.push(await addFileMaterial(actor, draftId,
+      { fileName: `part-${index}.pdf`, mimeType: "application/pdf", buffer: Buffer.from(`%PDF-1.4\nsynthetic ${index}`) },
+      { requestId: `f-${crypto.randomUUID()}` }, { extractPdf: async () => text }));
+    await recordProcessingConsent(actor, draftId);
     const model = capturingModel(materials[0].materialId, "乙".repeat(10));
     const { preview } = await understandIntake(actor, draftId, { requestId: "u-total", processingConsent: true }, { runModel: model.runModel });
 
-    // 模型实际收到：第一份 20000，第二份只剩 4000，第三份没有。
+    // 模型实际收到：第一份写满单份上限，第二份只剩总量余额，第三份没有。
     expect(model.sent()).toHaveLength(2);
-    expect(model.sent()[0]).toMatchObject({ materialId: materials[0].materialId, chars: 20000 });
-    expect(model.sent()[1]).toMatchObject({ materialId: materials[1].materialId, chars: INTAKE_TOTAL_LIMIT - 20000 });
+    expect(model.sent()[0]).toMatchObject({ materialId: materials[0].materialId, chars: INTAKE_MODEL_MATERIAL_LIMIT });
+    expect(model.sent()[1]).toMatchObject({ materialId: materials[1].materialId, chars: INTAKE_TOTAL_LIMIT - INTAKE_MODEL_MATERIAL_LIMIT });
     expect(sumChars(model.sent())).toBe(INTAKE_TOTAL_LIMIT);
 
     const [one, two, three] = preview.coverage.current.items;
-    expect(one.lastSentChars).toBe(20000);
-    expect(two.lastSentChars).toBe(INTAKE_TOTAL_LIMIT - 20000);
+    expect(one.lastSentChars).toBe(INTAKE_MODEL_MATERIAL_LIMIT);
+    expect(two.lastSentChars).toBe(INTAKE_TOTAL_LIMIT - INTAKE_MODEL_MATERIAL_LIMIT);
     expect(two.lastSentTruncated).toBe(true);
     expect(two.reason).toBe("INCLUDED_TRUNCATED");
     expect(three.lastSentChars).toBe(0);

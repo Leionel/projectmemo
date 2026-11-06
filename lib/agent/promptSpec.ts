@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const promptPurposes = ["ROUTE", "INVESTIGATE", "GOAL", "ANSWER", "UI_PLAN", "CHANGE_REVIEW", "DYNAMIC_PLAN", "MISSION", "CAPTURE", "ARTIFACT", "LEGACY_COPILOT"] as const;
 export const modelMessageSchema = z.object({
-  role: z.enum(["system", "user", "assistant", "tool"]), content: z.string().min(1).max(96000),
+  role: z.enum(["system", "user", "assistant", "tool"]), content: z.string().min(1).max(1_000_000),
   toolCallId: z.string().min(1).max(160).optional(),
 }).strict().refine(v => v.role === "tool" ? !!v.toolCallId : !v.toolCallId, "工具消息需要绑定原调用编号");
 export type ModelMessage = z.infer<typeof modelMessageSchema>;

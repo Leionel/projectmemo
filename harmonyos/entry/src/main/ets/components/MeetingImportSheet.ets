@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction } from '../common/DesignTokens';
 import { MeetingAppliedChange, MeetingConfirmBody, MeetingConfirmResult, MeetingImpactPreview, MeetingPreviewInput, MeetingTypedChange } from '../models/Meeting';
 import { ApiError } from '../models/Project';
@@ -22,7 +23,8 @@ export struct MeetingImportSheet {
   @State selectedIds: string[] = [];
   @State isLoadingPreview: boolean = false;
   @State isConfirming: boolean = false;
-  @State errorMessage: string = '';
+  @State @Watch('alertErrorMessage') errorMessage: string = '';
+  private alertErrorMessage(): void { alertError(this.errorMessage); }
   @State stage: string = 'draft'; // draft | preview | done
   @State applied: MeetingAppliedChange[] = [];
   @State afterSnapshotId: string = '';

@@ -11,7 +11,7 @@ import { ApiError } from '../models/Project';
 import { IntakeService } from '../services/IntakeService';
 import { SessionStore } from '../services/SessionStore';
 import {
-  intakeAppliedObjective, intakeCanConfirm, intakeCoverageItemLabel, intakeFileName, intakeMaterialStatusLabel, intakeCoverageSummary, intakeEditableFields, intakeOriginalPageMatches, intakeOriginalViewKey, intakeSyncSummary, intakeUnderstandingLabel,
+  intakeAppliedObjective, intakeCanConfirm, intakeCoverageItemLabel, intakeFailureLabel, intakeFileName, intakeMaterialStatusLabel, intakeCoverageSummary, intakeEditableFields, intakeOriginalPageMatches, intakeOriginalViewKey, intakeSyncSummary, intakeUnderstandingLabel,
   IntakeAcceptedFields, IntakeCandidate, IntakeCoverageItem, IntakeMaterialTextReply, IntakeMaterialView,
   IntakePreview, IntakeStatement, IntakeSyncReply, IntakeUnknown
 } from '../models/ProjectIntake';
@@ -31,8 +31,8 @@ struct ProjectIntake {
   @State private correction: string = '';
   @State private accepted: IntakeAcceptedFields = new IntakeAcceptedFields();
   @State private busy: boolean = false;
-  @State private error: string = '';
-  @State private notice: string = '';
+  @State @Watch('showError') private error: string = '';
+  @State @Watch('showNotice') private notice: string = '';
   @State private projectId: string = '';
   @State private sync: IntakeSyncReply | null = null;
   @State private loaded: boolean = false;
@@ -60,6 +60,13 @@ struct ProjectIntake {
     this.materialTextGeneration++;
     this.openTextMaterialId = ''; this.materialText = ''; this.materialTextOffset = 0; this.materialTextTotal = 0; this.materialTextHasMore = false; this.materialTextLoading = false;
   };
+  // 页面长，内联提示滚动后看不到：错误弹窗，普通提示用 Toast。
+  private showError(): void {
+    if (this.error !== '') promptAction.showDialog({ message: this.error, buttons: [{ text: '知道了', color: '#0A7EA4' }] }).catch(() => {});
+  }
+  private showNotice(): void {
+    if (this.notice !== '') promptAction.showToast({ message: this.notice, duration: 3000 });
+  }
   private stableId(key: string): string {
     if (!this.requestKeys.has(key)) this.requestKeys.set(key, this.requestId('intake'));
     return this.requestKeys.get(key) ?? '';
@@ -106,7 +113,7 @@ struct ProjectIntake {
       if (!this.acceptedDirty) this.accepted = intakeEditableFields(reply.preview);
       this.loaded = true;
     } catch (e) {
-      this.error = e instanceof ApiError ? e.message : '无法读取这份材料';
+      if (this.error === '') this.error = e instanceof ApiError ? e.message : '无法读取这份材料';
     }
   }
 
@@ -271,7 +278,7 @@ struct ProjectIntake {
     this.busy = true; this.error = ''; this.notice = '';
     try {
       const size = fileIo.statSync(localPath).size;
-      if (size === 0 || size > 20 * 1024 * 1024) { this.error = '文件为空或超过 20MB'; return; }
+      if (size === 0 || size > 100 * 1024 * 1024) { this.error = '文件为空或超过 100MB'; return; }
       const id = await this.ensureDraft();
       const requestId = this.stableId(`file:${id}:${name}:${size}`);
       await this.own(() => this.service.addFile(id, requestId, localPath, name, mimeType));
@@ -289,16 +296,21 @@ struct ProjectIntake {
       if (this.error !== '') return;
     }
     this.busy = true; this.error = ''; this.notice = '';
+    let identity = '';
     try {
       const id = await this.ensureDraft();
       await this.own(() => this.service.consent(id));
-      const reply = await this.own(() => this.service.understand(id, this.stableId(`understand:${id}:${this.preview.previewHash}`)));
+      identity = `understand:${id}:${this.preview.previewHash}`;
+      const reply = await this.own(() => this.service.understand(id, this.stableId(identity)));
       this.preview = reply.preview;
       if (!this.acceptedDirty) this.accepted = intakeEditableFields(reply.preview);
       this.notice = reply.preview.understandingState === 'READY' ? 'Agent 已给出理解，请整体核对。' : intakeUnderstandingLabel(reply.preview.understandingState);
     } catch (e) {
-      this.error = e instanceof ApiError ? e.message : '这次没能形成理解';
+      const message = e instanceof ApiError ? e.message : '这次没能形成理解';
       await this.refresh();
+      // 服务端已记录失败，说明这次调用已结束，重试要用新的请求身份；结果未知时仍沿用原身份。
+      if (this.preview.understandingState === 'FAILED') this.requestKeys.delete(identity);
+      this.error = message;
     } finally {
       this.busy = false;
     }
@@ -443,7 +455,11 @@ struct ProjectIntake {
         Text(`第 ${this.preview.revision} 版`).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
       }.width('100%')
       if (this.preview.summary !== '') Text(this.preview.summary).fontSize(PMFontSize.BODY).fontColor(PMColors.INK_PRIMARY)
-      if (this.preview.statements.length > 0) this.Statements()
+      if (this.preview.understandingState === 'FAILED') {
+        Text(intakeFailureLabel(this.preview.model.reason)).fontSize(PMFontSize.BODY).fontColor(PMColors.RISK)
+      }
+      // 没有形成理解时 statements 只是原文片段，不能放在“材料明确说了”下面。
+      if (this.preview.understandingState === 'READY' && this.preview.statements.length > 0) this.Statements()
       if (this.preview.suggested !== null) {
         Column({ space: 4 }) {
           Text('Agent 的建议（还不是目标）').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
@@ -505,8 +521,6 @@ struct ProjectIntake {
         onRightTextAction: (): void => { this.error = ''; this.refresh(); } })
       Scroll() {
         Column({ space: 14 }) {
-          if (this.error !== '') Text(this.error).fontSize(PMFontSize.CAPTION).fontColor(PMColors.RISK)
-          if (this.notice !== '') Text(this.notice).fontSize(PMFontSize.CAPTION).fontColor(PMColors.BRAND)
           if (this.busy) Text('处理中…').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
 
           if (this.projectId === '') {

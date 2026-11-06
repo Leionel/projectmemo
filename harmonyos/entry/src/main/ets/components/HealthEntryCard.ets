@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { ApiError } from '../models/Project';
 import { HealthFinding, HealthGroup, HealthSeverityCopy, HealthUnavailableSection, ProjectHealthReport } from '../models/Health';
 import { HealthService } from '../services/HealthService';
@@ -25,7 +26,8 @@ export struct HealthEntryCard {
 
   @State isLoading: boolean = true;
   @State report: ProjectHealthReport | null = null;
-  @State errorMessage: string = '';
+  @State @Watch('alertErrorMessage') errorMessage: string = '';
+  private alertErrorMessage(): void { alertError(this.errorMessage); }
   @State showAll: boolean = false;
   @State showUnavailableDetails: boolean = false;
   /** 功能开关关闭时整卡隐藏：不让用户点下去才看到模糊错误 */

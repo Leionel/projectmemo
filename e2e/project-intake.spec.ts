@@ -35,7 +35,7 @@ test("S1-A 从材料建立项目：理解状态如实、整体纠正生效、确
   await page.getByRole("checkbox").check();
   // 规则模式下不假装读懂：明说没有形成理解，并保留原文可供核对。
   await page.getByRole("button", { name: "读懂这些材料" }).click();
-  await expect(page.getByText("规则模式", { exact: false })).toBeVisible();
+  await expect(page.getByRole("alert").getByText("规则模式", { exact: false })).toBeVisible();
   await expect(page.getByText("材料原文片段")).toBeVisible();
   // 没有派发成功时覆盖仍显示“尚未送入”，不把计划范围写成已读。
   await expect(coverage.getByText(/尚未送入 · 下次会送入 \d+ 字/)).toBeVisible();

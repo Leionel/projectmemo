@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import router from '@ohos.router';
 import { promptAction } from '@kit.ArkUI';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMCardStyle, PMInteraction, PMTransition } from '../common/DesignTokens';
@@ -19,7 +20,8 @@ import { Project } from '../models/Project';
 struct PersonalMemoryPage {
   @State loading: boolean = true;
   @State busy: boolean = false;
-  @State error: string = '';
+  @State @Watch('alertError') error: string = '';
+  private alertError(): void { alertError(this.error); }
   @State notice: string = '';
   @State entries: PersonalEntry[] = [];
   @State candidates: PersonalEntry[] = [];

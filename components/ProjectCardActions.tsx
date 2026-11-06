@@ -56,7 +56,7 @@ export function ProjectCardActions({ projectId, projectTitle, archived, onDone, 
   return (
     <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
       {confirming ? (
-        <div role="alert" className="w-full rounded-md bg-[var(--brick-pale)] p-3">
+        <div role="alert" data-no-popup className="w-full rounded-md bg-[var(--brick-pale)] p-3">
           <p className="text-xs font-bold text-[var(--brick)]">
             删除「{projectTitle}」会立即停用项目，随后清理全部记录与应用附件，且无法恢复。独立备份和外部副本不在此次清除范围。确认删除？
           </p>

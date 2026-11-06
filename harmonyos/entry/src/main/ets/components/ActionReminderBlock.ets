@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { common } from '@kit.AbilityKit';
 import { ApiError } from '../models/Project';
 import { ActionReminderState, DeviceCleanupSummary, ReminderDeviceOp, ReminderOutcome } from '../models/Reminder';
@@ -30,7 +31,8 @@ export struct ActionReminderBlock {
   @State isLoading: boolean = true;
   @State state: ActionReminderState | null = null;
   @State stateRefreshFailed: boolean = false;
-  @State errorMessage: string = '';
+  @State @Watch('alertErrorMessage') errorMessage: string = '';
+  private alertErrorMessage(): void { alertError(this.errorMessage); }
   @State message: string = '';
   @State busy: string = '';
   @State durationMinutes: number = 30;

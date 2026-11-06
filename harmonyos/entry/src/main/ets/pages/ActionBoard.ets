@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
 import { ApiError } from '../models/Project';
@@ -34,7 +35,8 @@ struct ActionBoard {
   @State completingActionId: string = '';
   @State resultText: string = '';
   @State isSubmitting: boolean = false;
-  @State dialogError: string = '';
+  @State @Watch('alertDialogError') dialogError: string = '';
+  private alertDialogError(): void { alertError(this.dialogError); }
   @State startingActionId: string = '';
   @State highlightActionId: string = '';
   @State showFeasibility: boolean = false;
@@ -55,7 +57,8 @@ struct ActionBoard {
   @State scheduleDays: string = '7';
   @State scheduleBusy: string = '';
   @State scheduleMessage: string = '';
-  @State scheduleError: string = '';
+  @State @Watch('alertScheduleError') scheduleError: string = '';
+  private alertScheduleError(): void { alertError(this.scheduleError); }
 
   // ---- R2 系统日历同步：授权 → 选择日历 → 冲突预览 → 用户确认写入 → 可撤销 ----
   @State calendarStage: string = '';
@@ -64,7 +67,8 @@ struct ActionBoard {
   @State calendarConflicts: CalendarConflict[] = [];
   @State calendarBusy: string = '';
   @State calendarMessage: string = '';
-  @State calendarError: string = '';
+  @State @Watch('alertCalendarError') calendarError: string = '';
+  private alertCalendarError(): void { alertError(this.calendarError); }
   // 单条待办的日历提醒（与批量排程的日历同步共用同一套状态语义）
   @State reminderAvailable: boolean = false;
   @State reminderForActionId: string = '';

@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { ClaimCorrection } from './ClaimCorrection';
 import { ConversationService } from "../services/ConversationService";
 import router from '@ohos.router';
@@ -18,7 +19,8 @@ export struct AgentMemoryPanel {
   @Prop @Watch('reset') projectId: string = '';
   @State available: boolean = false;
   @State busy: boolean = false;
-  @State error: string = '';
+  @State @Watch('alertError') error: string = '';
+  private alertError(): void { alertError(this.error); }
   @State data: DigestListView = new DigestListView();
   @State hypotheses: HypothesisListView = new HypothesisListView();
   @State experience: ExperienceListReply | null = null;

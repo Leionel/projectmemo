@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { ProjectImpactPanel } from '../components/ProjectImpactPanel';
 import { CopilotContinuationCard } from '../components/CopilotContinuationCard';
 import { SessionStore } from '../services/SessionStore';
@@ -167,7 +168,8 @@ struct ProjectHome {
   @State editActionDescription: string = '';
   @State confirmCancelActionId: string = '';
   @State actionEditBusy: boolean = false;
-  @State actionEditError: string = '';
+  @State @Watch('alertActionEditError') actionEditError: string = '';
+  private alertActionEditError(): void { alertError(this.actionEditError); }
   @State attachmentLoadError: string = '';
   @State actionStatusFilter: string = 'ACTIVE';
   // 决策演化：取时态投影里最近一组“被取代 → 替代”，只读展示，关系确认在结论演进页完成
@@ -192,14 +194,17 @@ struct ProjectHome {
   @State materialSourceId: string = '';
   private materialOwnerId: string = '';
   @State isCapturing: boolean = false;
-  @State captureError: string = '';
+  @State @Watch('alertCaptureError') captureError: string = '';
+  private alertCaptureError(): void { alertError(this.captureError); }
   @State isUploadingAttachment: boolean = false;
   @State attachmentFeedback: string = '';
-  @State attachmentFeedbackTone: string = 'info';
+  @State @Watch('alertAttachmentFeedback') attachmentFeedbackTone: string = 'info';
+  private alertAttachmentFeedback(): void { if (this.attachmentFeedbackTone === 'error' || this.attachmentFeedbackTone === 'warning') alertError(this.attachmentFeedback); }
   @State attachmentRetryId: string = '';
   @State isRetryingAttachment: boolean = false;
   @State isEvaluating: boolean = false;
-  @State evaluateError: string = '';
+  @State @Watch('alertEvaluateError') evaluateError: string = '';
+  private alertEvaluateError(): void { alertError(this.evaluateError); }
   @State showDemoControls: boolean = false;
   // 单一半模态入口：同一时刻只挂载一个 bindSheet，按模式渲染记录/会议
   @State showEntrySheet: boolean = false;
@@ -218,7 +223,8 @@ struct ProjectHome {
   @State actionConfirmIntervention: Intervention = new Intervention();
   @State actionConfirmIndex: number = 0;
   @State isCreatingFocusAction: boolean = false;
-  @State actionConfirmError: string = '';
+  @State @Watch('alertActionConfirmError') actionConfirmError: string = '';
+  private alertActionConfirmError(): void { alertError(this.actionConfirmError); }
   // 状态面板回传的当前变化：「最近闭环」只能引用有独立依据的状态变化
   @State stateDiff: StateDiff = new StateDiff();
 
@@ -245,19 +251,22 @@ struct ProjectHome {
   @State captureSourceNotice: string = '';
   @State memorySearchResults: KnowledgeCard[] = [];
   @State isSearchingMemory: boolean = false;
-  @State memorySearchError: string = '';
+  @State @Watch('alertMemorySearchError') memorySearchError: string = '';
+  private alertMemorySearchError(): void { alertError(this.memorySearchError); }
 
   // Tab 2: 待办专属状态
   @State completingActionId: string = '';
   @State resultText: string = '';
   @State isSubmittingAction: boolean = false;
-  @State dialogError: string = '';
+  @State @Watch('alertDialogError') dialogError: string = '';
+  private alertDialogError(): void { alertError(this.dialogError); }
   @State startingActionId: string = '';
   @State showCreateAction: boolean = false;
   @State newActionTitle: string = '';
   @State newActionDescription: string = '';
   @State newActionPriority: number = 3;
-  @State newActionError: string = '';
+  @State @Watch('alertNewActionError') newActionError: string = '';
+  private alertNewActionError(): void { alertError(this.newActionError); }
   @State isCreatingAction: boolean = false;
   // 单待办日历提醒：功能开关探测结果 + 当前展开提醒设置的待办 ID（与行动安排页共用 ActionReminderBlock）
   @State reminderAvailable: boolean = false;
@@ -273,12 +282,14 @@ struct ProjectHome {
   // Tab 4: 成果专属状态
   @State selectedArtifactType: string = 'competition_outline';
   @State isGeneratingArtifact: boolean = false;
-  @State artifactError: string = '';
+  @State @Watch('alertArtifactError') artifactError: string = '';
+  private alertArtifactError(): void { alertError(this.artifactError); }
   @State currentArtifact: ArtifactItem | undefined = undefined;
   @State isArtifactReader: boolean = false;
   @State isConfirmingEvidence: boolean = false;
   @State evidenceFeedback: string = '';
-  @State evidenceError: string = '';
+  @State @Watch('alertEvidenceError') evidenceError: string = '';
+  private alertEvidenceError(): void { alertError(this.evidenceError); }
 
   private projectService: ProjectService = new ProjectService();
   private interventionService: InterventionService = new InterventionService();
@@ -306,7 +317,8 @@ struct ProjectHome {
   @State checkpointPreview: Episode | null = null;
   @State checkpointBusy: string = '';
   @State checkpointMessage: string = '';
-  @State checkpointError: string = '';
+  @State @Watch('alertCheckpointError') checkpointError: string = '';
+  private alertCheckpointError(): void { alertError(this.checkpointError); }
   // 已确认检查点的完整详情（含全部版本与来源状态），来源弹层与历史版本都读它
   @State episodeDetail: Episode | null = null;
   @State sourceSheetClaim: EpisodeClaim | null = null;
@@ -323,7 +335,8 @@ struct ProjectHome {
   @State suggestionEntries: SuggestionEntry[] = [];
   @State suggestionBusy: string = '';
   @State suggestionNotice: string = '';
-  @State suggestionError: string = '';
+  @State @Watch('alertSuggestionError') suggestionError: string = '';
+  private alertSuggestionError(): void { alertError(this.suggestionError); }
   @State reminderBlockForActionId: string = '';
   private memorySearchSerial: number = 0;
 

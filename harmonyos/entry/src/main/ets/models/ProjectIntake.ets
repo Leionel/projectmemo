@@ -245,6 +245,13 @@ export function intakeSyncSummary(materials: IntakeMaterialView[]): string {
   return `已进入项目 ${synced}/${materials.length} 份`;
 }
 
+export function intakeFailureLabel(reason: string | null | undefined): string {
+  if (reason === 'UNSUPPORTED_QUOTE') return '模型引用的原文没有通过核对，可以重新读懂';
+  if (reason === 'MODEL_OUTPUT_TRUNCATED') return '模型输出超过上限被截断，可以重新读懂';
+  if (reason === 'MODEL_OUTPUT_INVALID') return '模型返回的内容无法使用，可以重新读懂';
+  return '模型这次没有完成，可以重新读懂';
+}
+
 /** 后端在没有生效范围时返回 null，不能当成文字显示。 */
 export function intakeAppliedObjective(value: string | null | undefined): string {
   return typeof value === 'string' ? value : '';

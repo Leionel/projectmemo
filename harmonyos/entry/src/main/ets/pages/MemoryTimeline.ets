@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { DeploymentConnectionsPanel } from '../components/DeploymentConnectionsPanel';
 import { AgentMemoryPanel } from "../components/AgentMemoryPanel";
 import router from '@ohos.router';
@@ -35,7 +36,8 @@ struct MemoryTimeline {
   @State consolidationVisible: boolean = false;
   @State consolidationProposals: ConsolidationProposal[] = [];
   @State consolidationReceipts: ConsolidationReceipt[] = [];
-  @State consolidationError: string = '';
+  @State @Watch('alertConsolidationError') consolidationError: string = '';
+  private alertConsolidationError(): void { alertError(this.consolidationError); }
   @State consolidationReceiptsError: string = '';
   @State consolidationActionId: string = '';
   @State consolidationRequestId: string = '';

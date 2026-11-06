@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { MissionCreate, MissionConstraints, MissionScope, MissionCost } from '../models/Mission';
 import { editableMissionConstraints } from '../common/MissionContract';
 import { PMColors, PMInteraction } from '../common/DesignTokens';
@@ -34,7 +35,8 @@ export struct MissionSettingsForm {
   @State hosts: string = '';
   @State academic: boolean = false;
   @State publicSources: boolean = false;
-  @State error: string = '';
+  @State @Watch('alertError') error: string = '';
+  private alertError(): void { alertError(this.error); }
   @State showConstraints: boolean = false;
   @State showResearch: boolean = false;
   @State showCompletion: boolean = false;

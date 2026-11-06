@@ -272,6 +272,17 @@ curl -s https://project.luojiatutor.xyz/api/auth/capabilities ; echo   # 期望�
 
 邮件发不出时，接口只返回“暂时无法发出”，不暴露服务商报错。到 Resend 控制台的 Logs 查看具体原因，最常见的是域名未验证，或 From 与已验证域名不一致。
 
+## 上传大小与等待时间（nginx）
+
+应用内上传上限为 100MB，项目前理解最多等待模型 110 秒。`safe-update.sh` 不改 nginx，需要在 `location ^~ /api/` 中手动设置：
+
+```nginx
+client_max_body_size 100m;
+proxy_read_timeout 120s;
+```
+
+修改前先备份实际配置，再执行 `nginx -t && systemctl reload nginx`。
+
 ## 模型状态显示（nginx 与静态页）
 
 服务器已配置模型，界面却显示“演示模式 / Mock / 规则模式”，有两个原因，都已在代码里修好，但需要部署：

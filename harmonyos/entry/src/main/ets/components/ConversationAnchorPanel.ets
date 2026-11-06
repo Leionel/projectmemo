@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import util from '@ohos.util';
 import { ConversationView } from '../models/Conversation';
 import { ConversationAnchor, ConversationAnchorInput, ConversationAnchorReply } from '../models/ConversationAnchor';
@@ -16,7 +17,8 @@ export struct ConversationAnchorPanel {
   onReadResults: () => void = (): void => {};
   @State private anchors: ConversationAnchor[] = [];
   @State private followEnabled: boolean = false;
-  @State private error: string = '';
+  @State @Watch('alertError') private error: string = '';
+  private alertError(): void { alertError(this.error); }
   private service: ConversationService = new ConversationService();
   private generation: number = 0;
   private readGeneration: number = 0;

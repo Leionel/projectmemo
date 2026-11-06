@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { MissionBudgetReview } from "../models/Mission";
 import { MissionMetricReceipt } from '../components/MissionMetricReceipt';
 import { MissionInvestigationDelegation } from "../components/MissionInvestigationDelegation";
@@ -61,7 +62,8 @@ struct MissionDetail {
   @State form: string = '';
   @State answer: string = '';
   @State busy: boolean = false;
-  @State error: string = '';
+  @State @Watch('alertError') error: string = '';
+  private alertError(): void { alertError(this.error); }
   @State notice: string = '';
   @State updatedAt: string = '';
   @State missionUiEnabled: boolean = false;

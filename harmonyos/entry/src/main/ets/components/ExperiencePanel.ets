@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import router from '@ohos.router';
 import { ExperienceSuggestion, ExperienceActionBody, ExperienceCounterExample } from '../models/Experience';
 import { ExperienceService } from '../services/ExperienceService';
@@ -12,7 +13,8 @@ export struct ExperiencePanel {
   @Prop missionId: string = '';
   @Prop suggestions: ExperienceSuggestion[] = [];
   @State busy: boolean = false;
-  @State error: string = '';
+  @State @Watch('alertError') error: string = '';
+  private alertError(): void { alertError(this.error); }
   onChanged: () => void = (): void => {};
   private service: ExperienceService = new ExperienceService();
   private keys: Record<string, string> = {};

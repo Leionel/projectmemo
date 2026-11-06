@@ -16,7 +16,8 @@ import {
   understandingSchema, type IntakeAcceptedFields, type IntakePreview, type IntakeUnderstanding,
   understandSchema, reviseSchema, confirmSchema,
 } from "@/lib/intake/contracts";
-import { buildIntakeCoverage, sliceMaterialsForModel, type IntakeCoverageRound } from "@/lib/intake/coverage";
+import { buildIntakeCoverage, INTAKE_MODEL_MATERIAL_LIMIT, sliceMaterialsForModel, type IntakeCoverageRound } from "@/lib/intake/coverage";
+import { IntakeModelOutputError, parseUnderstandingOutput } from "@/lib/intake/modelOutput";
 import { intakeUnderstandingV1 } from "@/lib/intake/prompt";
 import { originalTextPage } from "@/lib/intake/textRange";
 import {
@@ -41,7 +42,7 @@ import { admitDirectiveInTx, effectiveContinuity } from "@/lib/continuity/direct
  */
 
 const INTAKE_SCOPE_TIMEZONE = "Asia/Shanghai";
-const MAX_FILE_BYTES = 20 * 1024 * 1024;
+const MAX_FILE_BYTES = 100 * 1024 * 1024;
 
 function intakeScope(draftId: string) { return { projectId: `intake:${draftId}` }; }
 
@@ -128,7 +129,7 @@ export async function addFileMaterial(actor: ConversationActor, draftId: string,
   file: { fileName: string; mimeType: string; buffer: Buffer }, meta: { requestId: string },
   dependencies: { extractPdf?: typeof extractPdfText } = {}) {
   if (!meta.requestId.trim() || meta.requestId.length > 128) throw new AppError("INVALID_REQUEST_ID", "缺少或过长的材料请求身份", 422);
-  if (!file.buffer.length || file.buffer.length > MAX_FILE_BYTES) throw new AppError("ATTACHMENT_INVALID", "文件为空或超过 20MB", 400);
+  if (!file.buffer.length || file.buffer.length > MAX_FILE_BYTES) throw new AppError("ATTACHMENT_INVALID", "文件为空或超过 100MB", 400);
   const type = inferAndValidateFileType(file.fileName, file.mimeType, file.buffer);
   if (type === "CSV" || type === "JSON") throw new AppError("INTAKE_FORMAT_UNSUPPORTED", "项目前材料暂支持文本、PDF 和图片", 422);
   const hash = jsonHash({ name: file.fileName, sha: computeFileSha256(file.buffer) });
@@ -155,7 +156,7 @@ export async function addFileMaterial(actor: ConversationActor, draftId: string,
   if (prepared.replayed) return { materialId: prepared.material.id, revision: prepared.revision, replayed: true, extractionStatus: prepared.material.extractionStatus };
   let extracted = "", status = "SUCCESS", error: string | null = null;
   try {
-    extracted = type === "PDF" ? await (dependencies.extractPdf ?? extractPdfText)(file.buffer) ?? ""
+    extracted = type === "PDF" ? await (dependencies.extractPdf ?? extractPdfText)(file.buffer, INTAKE_MODEL_MATERIAL_LIMIT) ?? ""
       : await extractImageText(file.mimeType, file.buffer, () => reserveIntakeCloudCall({ userId: actor.userId, sessionId: actor.sessionId,
           draftId, revision: prepared.revision, requestHash: `intake:vision:${meta.requestId}` })) ?? "";
     if (!extracted) { status = "NEEDS_OCR"; error = "原件已保存，但目前没有可靠的可读文本"; }
@@ -263,8 +264,10 @@ export async function understandIntake(actor: ConversationActor, draftId: string
       chatWithLLMWithMeta(prompt, undefined, undefined, undefined,
         { outputTokens: intakeUnderstandingV1.maxOutputTokens, jsonOutput: true },
         { userId: actor.userId, sessionId: actor.sessionId, draftId: draft.id, revision: draft.revision, requestHash, guidanceEpoch })))(messages);
-    understanding = understandingSchema.parse(JSON.parse(result.data));
-  } catch (error) {
+    understanding = parseUnderstandingOutput(result);
+  } catch (rawError) {
+    // 模型输出的问题不能显示成“提交内容不正确”，用户并没有提交错东西。
+    const error = rawError instanceof IntakeModelOutputError ? new AppError(rawError.code, rawError.message, 502) : rawError;
     const code = error instanceof AppError ? error.code : "MODEL_OUTPUT_INVALID";
     if (code !== "CALL_ALREADY_RESERVED") await settleIntakeCloudCall({ draftId: draft.id, requestHash, state: result ? "SETTLED" : "UNKNOWN",
       usage: result?.usage, provider: result?.provider ?? null }).catch(() => undefined);

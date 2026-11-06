@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import util from '@ohos.util';
 import { ConversationDraftStore, ConversationDraft } from '../services/ConversationDraftStore';
 import { ConversationView } from '../models/Conversation';
@@ -18,7 +19,8 @@ export struct ConversationReviewPanel {
   @State @Watch('saveDraft') private selected: string[] = [];
   @State @Watch('saveDraft') private rejected: string[] = [];
   @State @Watch('saveDraft') private feedback: string = '';
-  @State private error: string = '';
+  @State @Watch('alertError') private error: string = '';
+  private alertError(): void { alertError(this.error); }
   private service: ConversationService = new ConversationService();
   private keys: Map<string, string> = new Map<string, string>();
   private generation: number = 0;

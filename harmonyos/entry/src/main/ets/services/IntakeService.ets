@@ -78,7 +78,7 @@ export class IntakeService {
   async understand(draftId: string, requestId: string): Promise<IntakeReadReply> {
     const payload = new IntakeUnderstandPayload();
     payload.requestId = requestId;
-    return this.client.post<IntakeReadReply>(`/api/intake/${encodeURIComponent(draftId)}/understand`, payload, 60000);
+    return this.client.post<IntakeReadReply>(`/api/intake/${encodeURIComponent(draftId)}/understand`, payload, 125000);
   }
 
   async revise(draftId: string, requestId: string, text: string, expectedRevision: number): Promise<IntakeReviseReply> {

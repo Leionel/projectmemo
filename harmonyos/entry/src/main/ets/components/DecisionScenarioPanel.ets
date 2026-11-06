@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { DecisionProposal, DecisionChoice, DecisionInput, DecisionConfirm, DecisionReceipt } from '../models/DecisionEvolution';
 import { DecisionEvolutionService } from '../services/DecisionEvolutionService';
 import { SessionStore } from '../services/SessionStore';
@@ -18,7 +19,8 @@ export struct DecisionScenarioPanel {
  @State selected: string = '';
  @State receipt: DecisionReceipt | null = null;
  @State busy: boolean = false;
- @State error: string = '';
+ @State @Watch('alertError') error: string = '';
+ private alertError(): void { alertError(this.error); }
  @State expanded: string = '';
  onAdopted: () => void = (): void => {};
  private generation: number = 0;

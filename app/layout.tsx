@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Menu } from "lucide-react";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { ErrorPopupHost } from "@/components/ErrorPopupHost";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GlobalNavigation } from "@/components/GlobalNavigation";
 import { UserNav } from "@/components/UserNav";
@@ -54,6 +55,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             </div>
           </header></SiteHeader>
           {children}
+          <ErrorPopupHost />
         </ThemeProvider>
       </body>
     </html>

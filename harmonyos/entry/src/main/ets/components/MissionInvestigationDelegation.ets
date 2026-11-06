@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { DeploymentService } from '../services/DeploymentService';
 import { DeploymentConnection } from '../models/Deployment';
 import { Mission, MissionPolicyEdit, MissionAttentionReceipt, MissionDailyBurst } from '../models/Mission';
@@ -11,7 +12,8 @@ export struct MissionInvestigationDelegation {
   @State until: string = '';
   @State models: string = '8';
   @State tools: string = '12';
-  @State error: string = '';
+  @State @Watch('alertError') error: string = '';
+  private alertError(): void { alertError(this.error); }
   @State saving: boolean = false;
   @State connections: ConnectionView[] = [];
   @State selected: string[] = [];

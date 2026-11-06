@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion } from '../common/DesignTokens';
 import { FeasibilityAssessment, FeasibilityDependency, FeasibilityInput, FeasibilityRequirementBody } from '../models/Action';
 import { ApiError } from '../models/Project';
@@ -24,7 +25,8 @@ export struct ActionFeasibilityEditor {
   @State pickerItems: PickerItem[] = [];
   @State hardRequirement: boolean = true;
   @State isSaving: boolean = false;
-  @State editorError: string = '';
+  @State @Watch('alertEditorError') editorError: string = '';
+  private alertEditorError(): void { alertError(this.editorError); }
   @State pendingRequirementId: string = '';
   @State dependencyVersion: number = 1;
 

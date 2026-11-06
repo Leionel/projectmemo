@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import util from '@ohos.util';
 import { ConversationDraftStore } from '../services/ConversationDraftStore';
 import { SessionStore } from '../services/SessionStore';
@@ -20,7 +21,8 @@ export struct MissionResponsibilitySection {
   @State editing: boolean = false;
   @State expanded: boolean = false;
   @State busy: boolean = false;
-  @State error: string = '';
+  @State @Watch('alertError') error: string = '';
+  private alertError(): void { alertError(this.error); }
   @State goalDraft: string = '';
   @State workingObjectiveDraft: string = '';
   @State deadlineDraft: string = '';

@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import util from '@ohos.util';
 import { AgentMemoryService } from '../services/AgentMemoryService';
 import { ClaimControls, ClaimCommand, ClaimHead, ClaimText, ClaimOrigin } from '../models/AgentMemory';
@@ -21,7 +22,8 @@ export struct ClaimCorrectionPanel {
   onChanged: () => void = (): void => {};
   @State chosenProject: string = '';
   @State busy: boolean = false;
-  @State error: string = '';
+  @State @Watch('alertError') error: string = '';
+  private alertError(): void { alertError(this.error); }
   @State quote: string = '';
   @State selected: string = '';
   @State selectedStart: number = -1;

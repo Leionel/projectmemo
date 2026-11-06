@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import router from '@ohos.router';
 import util from '@ohos.util';
 import { ApiError } from '../models/Project';
@@ -20,7 +21,8 @@ struct ConversationHistory {
   @State private filter: string = '';
   @State private currentId: string = '';
   @State private loading: boolean = false;
-  @State private error: string = '';
+  @State @Watch('alertError') private error: string = '';
+  private alertError(): void { alertError(this.error); }
   @State private creating: boolean = false;
   private service: ConversationService = new ConversationService();
   private originProjectId: string = '';

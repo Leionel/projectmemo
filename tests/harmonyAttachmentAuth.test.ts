@@ -35,10 +35,10 @@ function serviceHarness(status: number, result: string | ArrayBuffer = '{"isDupl
 }
 
 describe("Harmony multipart authentication", () => {
-  it("sends the session without overriding the multipart content type", async () => {
+  it("declares multipart so the native client sends the form, and sends the session", async () => {
     const h = serviceHarness(201);
     await h.service.upload("project", "file://test", "test.txt", "text/plain");
-    expect(h.request.mock.calls[0][1].header).toEqual({ Authorization: "Bearer test-session" });
+    expect(h.request.mock.calls[0][1].header).toEqual({ "Content-Type": "multipart/form-data", Authorization: "Bearer test-session" });
     expect(h.request.mock.calls[0][1].multiFormDataList[0].name).toBe("file");
     expect(h.destroy).toHaveBeenCalledOnce();
   });

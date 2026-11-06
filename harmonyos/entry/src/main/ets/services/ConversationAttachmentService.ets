@@ -24,7 +24,7 @@ export class ConversationAttachmentService {
       if (projectId !== '') { fields.push({ name: 'projectId', contentType: 'text/plain', data: projectId }); }
       const response = await request.request(`${Constants.requireBaseUrl()}/api/conversations/${conversationId}/attachments`, {
         method: http.RequestMethod.POST, header: headers, multiFormDataList: fields,
-        expectDataType: http.HttpDataType.STRING, connectTimeout: 15000, readTimeout: 60000
+        expectDataType: http.HttpDataType.STRING, connectTimeout: 15000, readTimeout: 120000
       });
       const body = response.result as string;
       if (isSuccessCode('POST', response.responseCode)) { return JSON.parse(body) as ConversationAttachmentUpload; }

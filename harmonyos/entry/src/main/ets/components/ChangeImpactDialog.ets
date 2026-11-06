@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion, PMMaterial } from '../common/DesignTokens';
 import {
   ChangeImpactProposal,
@@ -17,7 +18,8 @@ export struct ChangeImpactDialog {
   @State isAnalyzing: boolean = false;
   @State isConfirming: boolean = false;
   @State proposal: ChangeImpactProposal | null = null;
-  @State errorMsg: string = '';
+  @State @Watch('alertErrorMsg') errorMsg: string = '';
+  private alertErrorMsg(): void { alertError(this.errorMsg); }
   @State successMsg: string = '';
   @State selectedCancelledActionIds: string[] = [];
 

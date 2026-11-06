@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction } from '../common/DesignTokens';
 import {
   StateDiff,
@@ -17,7 +18,8 @@ import { AlertIcon } from './PMIcons';
 export struct ProjectStatePanel {
   @Prop projectId: string = '';
   @State private phase: string = 'loading'; // loading | error | empty | ready
-  @State private errorMessage: string = '';
+  @State @Watch('alertErrorMessage') private errorMessage: string = '';
+  private alertErrorMessage(): void { alertError(this.errorMessage); }
   @State private snapshot: StateSnapshot = new StateSnapshot();
   @State private freshness: StateFreshness = new StateFreshness();
   @State private diff: StateDiff = new StateDiff();

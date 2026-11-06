@@ -30,7 +30,7 @@ export class AttachmentService {
         header: { 'Authorization': `Bearer ${token}` },
         expectDataType: http.HttpDataType.ARRAY_BUFFER,
         usingCache: false,
-        maxLimit: 21 * 1024 * 1024,
+        maxLimit: 101 * 1024 * 1024,
         connectTimeout: 15000,
         readTimeout: 30000
       });
@@ -43,7 +43,7 @@ export class AttachmentService {
       if (response.responseCode === 404) throw new ApiError('NOT_FOUND', '附件原件不存在或已无法读取', 404);
       if (response.responseCode !== 200) throw new ApiError('ATTACHMENT_READ_FAILED', '原件读取失败，请稍后重试', response.responseCode);
       const data = response.result as ArrayBuffer;
-      if (data.byteLength === 0 || data.byteLength > 20 * 1024 * 1024) throw new ApiError('INVALID_FILE_SIZE', '附件为空或超过可查看的大小（20 MB）');
+      if (data.byteLength === 0 || data.byteLength > 100 * 1024 * 1024) throw new ApiError('INVALID_FILE_SIZE', '附件为空或超过可查看的大小（100 MB）');
       return data;
     } catch (error) {
       if (error instanceof ApiError) throw error;
@@ -73,7 +73,7 @@ export class AttachmentService {
         }],
         expectDataType: http.HttpDataType.STRING,
         connectTimeout: 15000,
-        readTimeout: 30000
+        readTimeout: 120000
       });
       const responseBody = response.result as string;
       if (isSuccessCode('POST', response.responseCode)) {

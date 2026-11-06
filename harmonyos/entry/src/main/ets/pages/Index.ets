@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { PMPageIntro, PMListRow, PMCloseButton } from '../components/PMReferencePrimitives';
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
@@ -113,14 +114,16 @@ struct Index {
   private dataLoadGeneration: number = 0;
   private gcRequestId: string = '';
   private gcRequestPayload: string = '';
-  @State gcError: string = '';
+  @State @Watch('alertGcError') gcError: string = '';
+  private alertGcError(): void { alertError(this.gcError); }
   @State showGlobalTodo: boolean = false;
   @State gtProjectIndex: number = 0;
   @State gtTitle: string = '';
   @State gtDescription: string = '';
   @State gtPriority: number = 3;
   @State gtSubmitting: boolean = false;
-  @State gtError: string = '';
+  @State @Watch('alertGtError') gtError: string = '';
+  private alertGtError(): void { alertError(this.gtError); }
   @State globalCardStates: CardTemporalStatus[] = [];
   @State selectedGlobalType: string = 'all';
 
@@ -159,7 +162,8 @@ struct Index {
   @State newScenario: string = 'COMPETITION';
   @State newDeadline: string = '';
   @State isCreating: boolean = false;
-  @State createError: string = '';
+  @State @Watch('alertCreateError') createError: string = '';
+  private alertCreateError(): void { alertError(this.createError); }
 
   private projectService: ProjectService = new ProjectService();
   private interventionService: InterventionService = new InterventionService();

@@ -31,10 +31,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return apiError(new AppError("ATTACHMENT_REQUIRED", "请求中没有附件文件", 400));
     }
 
-    // 限制单文件最大 20MB
-    const MAX_SIZE = 20 * 1024 * 1024;
+    // 限制单文件最大 100MB
+    const MAX_SIZE = 100 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      return apiError(new AppError("ATTACHMENT_TOO_LARGE", "附件不能超过 20MB", 400));
+      return apiError(new AppError("ATTACHMENT_TOO_LARGE", "附件不能超过 100MB", 400));
     }
 
     const arrayBuffer = await file.arrayBuffer();
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
-    if (error instanceof Error && /empty|20MB|only PDF|valid PDF|supported image|does not match/i.test(error.message)) {
+    if (error instanceof Error && /empty|100MB|only PDF|valid PDF|supported image|does not match/i.test(error.message)) {
       return apiError(new AppError("ATTACHMENT_INVALID", error.message, 400));
     }
     return apiError(error);

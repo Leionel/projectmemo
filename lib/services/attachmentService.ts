@@ -31,7 +31,7 @@ export interface UploadAttachmentInput {
  *
  * 项目前材料预览复用同一个解析器：不因为还没有 projectId 就换一套实现。
  */
-export async function extractPdfText(buffer: Buffer): Promise<string | null> {
+export async function extractPdfText(buffer: Buffer, maxChars = 100_000): Promise<string | null> {
   const executable = process.env.PDFTOTEXT_PATH || "pdftotext";
   return new Promise((resolve, reject) => {
     const child = spawn(executable, ["-layout", "-", "-"], {
@@ -54,7 +54,7 @@ export async function extractPdfText(buffer: Buffer): Promise<string | null> {
         return;
       }
       const text = Buffer.concat(stdout).toString("utf8").replace(/\u0000/g, "").trim();
-      resolve(text.length >= 20 ? text.slice(0, 100_000) : null);
+      resolve(text.length >= 20 ? text.slice(0, maxChars) : null);
     });
     child.stdin.end(buffer);
   });
@@ -126,8 +126,8 @@ export function inferAndValidateFileType(fileName: string, mimeType: string, buf
   if (buffer.length === 0) {
     throw new Error("Attachment is empty");
   }
-  if (buffer.length > 20 * 1024 * 1024) {
-    throw new Error("Attachment exceeds the 20MB limit");
+  if (buffer.length > 100 * 1024 * 1024) {
+    throw new Error("Attachment exceeds the 100MB limit");
   }
 
   const lowerName = fileName.toLowerCase();

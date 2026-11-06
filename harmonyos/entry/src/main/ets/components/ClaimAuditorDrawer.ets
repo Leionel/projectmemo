@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMotion, PMMaterial } from '../common/DesignTokens';
 import { ArtifactAuditResponse, ArtifactAuditRecheckItem, ArtifactClaimAuditItem, ArtifactGenerationRef } from '../models/Artifact';
 import { ApiError } from '../models/Project';
@@ -11,7 +12,8 @@ export struct ClaimAuditorDrawer {
   @Prop artifactId: string = '';
   @Prop artifactTitle: string = '';
   @State private isLoading: boolean = true;
-  @State private errorMessage: string = '';
+  @State @Watch('alertErrorMessage') private errorMessage: string = '';
+  private alertErrorMessage(): void { alertError(this.errorMessage); }
   @State private audit: ArtifactAuditResponse = new ArtifactAuditResponse();
   private artifactService: ArtifactService = new ArtifactService();
   onClose: () => void = () => {};

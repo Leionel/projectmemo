@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import router from '@ohos.router';
 import { GoalQuestion, GoalQuestionInput } from '../models/DecisionEvolution';
 import { DecisionEvolutionService } from '../services/DecisionEvolutionService';
@@ -14,7 +15,8 @@ export struct GoalQuestionPanel {
  @Prop compact: boolean = false;
  @State question: GoalQuestion | null = null;
  @State mutedMissionId: string = '';
- @State error: string = '';
+ @State @Watch('alertError') error: string = '';
+ private alertError(): void { alertError(this.error); }
  @State busy: boolean = false;
  @State fresh: boolean = false;
  @State showOptions: boolean = false;

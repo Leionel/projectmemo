@@ -182,11 +182,17 @@ export function ProjectIntakeForm({ ownerId, initialDraftId, openDrafts }: { own
   async function understand() {
     if (!draftId) return;
     setBusy("understand"); setError(""); setNotice("");
+    const identity = `understand:${draftId}:${preview?.previewHash ?? ""}`;
     try {
-      await postJson(`/api/intake/${draftId}/understand`, { requestId: requestId(`understand:${draftId}:${preview?.previewHash ?? ""}`), processingConsent: true });
+      await postJson(`/api/intake/${draftId}/understand`, { requestId: requestId(identity), processingConsent: true });
       const data = await reload(draftId);
       adopt(data.preview as IntakePreview);
-    } catch (reason) { setError(reason instanceof Error ? reason.message : "这次没能形成理解"); await reload(draftId).catch(() => undefined); }
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "这次没能形成理解");
+      const data = await reload(draftId).catch(() => null);
+      // 服务端已记录失败，说明这次调用已结束，重试要用新的请求身份；结果未知时仍沿用原身份。
+      if ((data?.preview as IntakePreview | undefined)?.understandingState === "FAILED") identities.current.delete(identity);
+    }
     finally { setBusy(""); }
   }
 

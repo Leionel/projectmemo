@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMotion, PMInteraction } from '../common/DesignTokens';
 import { Intervention, ProposedAction } from '../models/Intervention';
 import { TextFormatters } from '../common/TextFormatters';
@@ -13,7 +14,8 @@ export struct ActionCreateConfirmSheet {
   @Prop intervention: Intervention = new Intervention();
   @Prop actionIndex: number = 0;
   @Prop isSubmitting: boolean = false;
-  @Prop operationError: string = '';
+  @Prop @Watch('alertOperationError') operationError: string = '';
+  private alertOperationError(): void { alertError(this.operationError); }
   onClose: () => void = () => {};
   onConfirm: () => void = () => {};
 

@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { ImpactReply, ImpactItem, ImpactEdge } from '../models/DecisionEvolution';
 import { DecisionEvolutionService } from '../services/DecisionEvolutionService';
 import { SessionStore } from '../services/SessionStore';
@@ -9,7 +10,8 @@ export struct ProjectImpactPanel {
  @State open: boolean = false;
  @State data: ImpactReply | null = null;
  @State busy: boolean = false;
- @State error: string = '';
+ @State @Watch('alertError') error: string = '';
+ private alertError(): void { alertError(this.error); }
  private generation: number = 0;
  private expired: () => void = () => { this.generation++; this.data = null; this.error = ''; this.busy = false; };
  aboutToAppear(): void { SessionStore.onSessionExpired(this.expired); }

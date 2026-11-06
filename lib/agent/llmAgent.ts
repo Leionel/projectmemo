@@ -13,6 +13,9 @@ function config() {
   return getChatProviderConfig();
 }
 
+/** 项目前理解可能送入整篇论文；要短于 nginx 的 120 秒，服务端才来得及记录失败。 */
+const INTAKE_MODEL_TIMEOUT_MS = 110_000;
+
 export async function chatWithLLMWithMeta(prompt: string | ModelMessage[], projectId?: string, workspace?: WorkspaceBilling, review?: ReviewBilling,
   task?: { outputTokens: number; jsonOutput: boolean }, intake?: IntakeBilling): Promise<AgentExecutionResult<string>> {
   const startedAt = Date.now();
@@ -43,7 +46,7 @@ export async function chatWithLLMWithMeta(prompt: string | ModelMessage[], proje
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify(requestBody),
-    signal: AbortSignal.timeout(workspace ? Math.min(timeoutMs, 20000) : timeoutMs),
+    signal: AbortSignal.timeout(workspace ? Math.min(timeoutMs, 20000) : intake ? Math.max(timeoutMs, INTAKE_MODEL_TIMEOUT_MS) : timeoutMs),
   });
   async function rejectReceived(code: string, message: string): Promise<never> {
     if (billing) await settleWorkspaceCloudCall(billing, { data: "", provider: `llm:${provider}:${model}`, status: "FAILED",

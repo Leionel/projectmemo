@@ -1,3 +1,4 @@
+import { alertError } from '../common/ErrorAlert';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion, PMMaterial } from '../common/DesignTokens';
 import { Attachment } from '../models/Attachment';
 import { AttachmentRevisionItem } from '../models/Artifact';
@@ -12,7 +13,8 @@ export struct AttachmentCorrectionModal {
   @Prop attachment: Attachment = new Attachment();
   @State correctedText: string = '';
   @State isSubmitting: boolean = false;
-  @State errorMsg: string = '';
+  @State @Watch('alertErrorMsg') errorMsg: string = '';
+  private alertErrorMsg(): void { alertError(this.errorMsg); }
   @State successMsg: string = '';
 
   @State revisions: AttachmentRevisionItem[] = [];

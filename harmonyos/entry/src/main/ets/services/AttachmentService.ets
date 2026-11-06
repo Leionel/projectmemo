@@ -56,8 +56,8 @@ export class AttachmentService {
   async upload(projectId: string, fileUri: string, fileName: string, mimeType: string): Promise<AttachmentUploadResult> {
     const request = http.createHttp();
     try {
-      // multipart boundary 由系统生成，只补充会话头，不能设置 JSON Content-Type。
-      const headers: Record<string, string> = {};
+      // 系统 http 只有在声明 multipart 时才发送 multiFormDataList；boundary 由系统补上。
+      const headers: Record<string, string> = { 'Content-Type': 'multipart/form-data' };
       const token = SessionStore.getToken();
       if (token !== '') {
         headers['Authorization'] = `Bearer ${token}`;

@@ -16,7 +16,8 @@ export class ConversationAttachmentService {
   async upload(conversationId: string, fileUri: string, fileName: string, mimeType: string, projectId: string): Promise<ConversationAttachmentUpload> {
     const request = http.createHttp();
     try {
-      const headers: Record<string, string> = {};
+      // 系统 http 只有在声明 multipart 时才发送 multiFormDataList；boundary 由系统补上。
+      const headers: Record<string, string> = { 'Content-Type': 'multipart/form-data' };
       const token = SessionStore.getToken();
       if (token !== '') { headers['Authorization'] = `Bearer ${token}`; }
       const fields: http.MultiFormData[] = [{ name: 'file', contentType: mimeType, remoteFileName: fileName, filePath: fileUri }];

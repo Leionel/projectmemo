@@ -46,7 +46,8 @@ export class IntakeService {
   async addFile(draftId: string, requestId: string, localPath: string, fileName: string, mimeType: string): Promise<IntakeMaterialAdded> {
     const request = http.createHttp();
     try {
-      const headers: Record<string, string> = {};
+      // 系统 http 只有在声明 multipart 时才发送 multiFormDataList；boundary 由系统补上。
+      const headers: Record<string, string> = { 'Content-Type': 'multipart/form-data' };
       const token = SessionStore.getToken();
       if (token !== '') headers['Authorization'] = `Bearer ${token}`;
       const response = await request.request(`${Constants.requireBaseUrl()}/api/intake/${encodeURIComponent(draftId)}/materials/file`, {

@@ -1,4 +1,9 @@
+import http from '@ohos.net.http';
 import { ApiClient } from './ApiClient';
+import { Constants } from '../common/Constants';
+import { isSuccessCode, parseApiError } from '../common/ApiContract';
+import { ApiError } from '../models/Project';
+import { SessionStore } from './SessionStore';
 import {
   IntakeAcceptedFields, IntakeConfirmPayload, IntakeConfirmReply, IntakeConsentReply, IntakeCreatePayload,
   IntakeDraftCreated, IntakeMaterialAdded, IntakeMaterialTextReply, IntakeReadReply, IntakeRevisePayload, IntakeReviseReply,
@@ -35,6 +40,33 @@ export class IntakeService {
     payload.requestId = requestId;
     payload.text = text;
     return this.client.post<IntakeMaterialAdded>(`/api/intake/${encodeURIComponent(draftId)}/materials`, payload);
+  }
+
+  /** 图片识别在请求内完成，读超时留足；同一 requestId 重试复用原材料。 */
+  async addFile(draftId: string, requestId: string, localPath: string, fileName: string, mimeType: string): Promise<IntakeMaterialAdded> {
+    const request = http.createHttp();
+    try {
+      const headers: Record<string, string> = {};
+      const token = SessionStore.getToken();
+      if (token !== '') headers['Authorization'] = `Bearer ${token}`;
+      const response = await request.request(`${Constants.requireBaseUrl()}/api/intake/${encodeURIComponent(draftId)}/materials/file`, {
+        method: http.RequestMethod.POST, header: headers,
+        multiFormDataList: [
+          { name: 'requestId', contentType: 'text/plain', data: requestId },
+          { name: 'file', contentType: mimeType, remoteFileName: fileName, filePath: localPath }
+        ],
+        expectDataType: http.HttpDataType.STRING, connectTimeout: 15000, readTimeout: 120000
+      });
+      const body = response.result as string;
+      if (isSuccessCode('POST', response.responseCode)) return JSON.parse(body) as IntakeMaterialAdded;
+      if (response.responseCode === 401) { SessionStore.handleSessionExpired(); throw new ApiError('UNAUTHORIZED', '登录状态已失效，请重新登录', 401); }
+      throw parseApiError(body, response.responseCode);
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError('ATTACHMENT_UPLOAD_FAILED', '文件上传失败，请检查网络或文件格式');
+    } finally {
+      request.destroy();
+    }
   }
 
   async consent(draftId: string): Promise<boolean> {

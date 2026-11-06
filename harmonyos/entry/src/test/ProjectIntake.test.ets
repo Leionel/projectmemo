@@ -1,11 +1,30 @@
 import { describe, it, expect } from '@ohos/hypium';
 import {
   IntakeAcceptedFields, IntakeMaterialSync, IntakeMaterialView, IntakePreview, IntakeSuggested,
-  intakeCanConfirm, intakeEditableFields, intakeSyncSummary, intakeUnderstandingLabel
+  intakeAppliedObjective, intakeCanConfirm, intakeEditableFields, intakeFileName, intakeMaterialStatusLabel, intakeSyncSummary, intakeUnderstandingLabel
 } from '../main/ets/models/ProjectIntake';
 
 export default function projectIntakeContractTest() {
   describe('projectIntakeContract', () => {
+    it('null_objective_is_not_shown_as_text', 0, () => {
+      expect(intakeAppliedObjective(null)).assertEqual('');
+      expect(intakeAppliedObjective(undefined)).assertEqual('');
+      expect(intakeAppliedObjective('先确认设备')).assertEqual('先确认设备');
+    });
+    it('file_name_comes_from_the_picker_uri', 0, () => {
+      expect(intakeFileName('file://docs/storage/%E4%BC%9A%E8%AE%AE.pdf', 'x.pdf')).assertEqual('会议.pdf');
+      expect(intakeFileName('file://media/Photo/1/IMG_1.jpg', 'x.jpg')).assertEqual('IMG_1.jpg');
+      expect(intakeFileName('file://docs/', 'x.pdf')).assertEqual('x.pdf');
+    });
+    it('material_status_keeps_extraction_failures_visible', 0, () => {
+      const item = new IntakeMaterialView();
+      item.extractionStatus = 'FAILED';
+      expect(intakeMaterialStatusLabel(item)).assertEqual('解析失败');
+      item.extractionStatus = 'NEEDS_OCR';
+      expect(intakeMaterialStatusLabel(item)).assertEqual('无可读文本');
+      item.extractionStatus = 'SUCCESS';
+      expect(intakeMaterialStatusLabel(item)).assertEqual('已保存');
+    });
     it('understanding_state_is_not_reported_as_done', 0, () => {
       expect(intakeUnderstandingLabel('READY')).assertEqual('已读懂，请核对');
       expect(intakeUnderstandingLabel('FAILED')).assertEqual('这次没能形成理解');

@@ -245,6 +245,27 @@ export function intakeSyncSummary(materials: IntakeMaterialView[]): string {
   return `已进入项目 ${synced}/${materials.length} 份`;
 }
 
+/** 后端在没有生效范围时返回 null，不能当成文字显示。 */
+export function intakeAppliedObjective(value: string | null | undefined): string {
+  return typeof value === 'string' ? value : '';
+}
+
+export function intakeMaterialStatusLabel(item: IntakeMaterialView): string {
+  if (item.extractionStatus === 'PENDING') return '解析中';
+  if (item.extractionStatus === 'NEEDS_OCR') return '无可读文本';
+  if (item.extractionStatus === 'FAILED') return '解析失败';
+  if (item.sync.state === 'SYNCED') return '已进入项目';
+  if (item.sync.state === 'FAILED') return '同步待重试';
+  return '已保存';
+}
+
+/** 取选择器 URI 的原文件名，作为材料名称；取不到时用备用名。 */
+export function intakeFileName(uri: string, fallback: string): string {
+  const last = uri.split('/').pop() ?? '';
+  if (last === '') return fallback;
+  try { return decodeURIComponent(last); } catch (_e) { return last; }
+}
+
 /** 预览里只有“用户接受”的字段可以写进项目；没有接受字段时用建议值作为编辑起点。 */
 export function intakeEditableFields(preview: IntakePreview): IntakeAcceptedFields {
   const fields = new IntakeAcceptedFields();
@@ -256,7 +277,6 @@ export function intakeEditableFields(preview: IntakePreview): IntakeAcceptedFiel
   fields.goal = source.goal;
   fields.scenario = source.scenario;
   fields.deadline = source.deadline;
-  if (preview.correction.appliedObjective !== '') fields.goal = source.goal;
   return fields;
 }
 

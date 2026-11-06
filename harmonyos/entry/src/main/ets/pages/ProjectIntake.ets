@@ -1,5 +1,9 @@
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
+import { common } from '@kit.AbilityKit';
+import { camera, cameraPicker } from '@kit.CameraKit';
+import { fileIo, fileUri, picker } from '@kit.CoreFileKit';
+import { photoAccessHelper } from '@kit.MediaLibraryKit';
 import { PMAppBar } from '../components/PMAppBar';
 import { PMButton, PMStatusPill } from '../components/PMReferencePrimitives';
 import { PMColors, PMFontSize, PMRadius, PMSpacing } from '../common/DesignTokens';
@@ -7,16 +11,16 @@ import { ApiError } from '../models/Project';
 import { IntakeService } from '../services/IntakeService';
 import { SessionStore } from '../services/SessionStore';
 import {
-  intakeCanConfirm, intakeCoverageItemLabel, intakeCoverageSummary, intakeEditableFields, intakeOriginalPageMatches, intakeOriginalViewKey, intakeSyncSummary, intakeUnderstandingLabel,
+  intakeAppliedObjective, intakeCanConfirm, intakeCoverageItemLabel, intakeFileName, intakeMaterialStatusLabel, intakeCoverageSummary, intakeEditableFields, intakeOriginalPageMatches, intakeOriginalViewKey, intakeSyncSummary, intakeUnderstandingLabel,
   IntakeAcceptedFields, IntakeCandidate, IntakeCoverageItem, IntakeMaterialTextReply, IntakeMaterialView,
   IntakePreview, IntakeStatement, IntakeSyncReply, IntakeUnknown
 } from '../models/ProjectIntake';
 
 /**
- * 手机端的项目前材料核对：贴一段材料 → 看短预览 → 一句话纠正 → 确认。
+ * 手机端的项目前材料核对：贴文字或加文件 → 看短预览 → 一句话纠正 → 确认。
  *
  * 与 Web 是同一份草稿与同一版预览；手机上不做“另一套理解”。
- * 文件材料在 Web 入口加入，手机先把文本材料这条链路走通。
+ * 图片识别要走云模型，先取得这份草稿的云处理同意；PDF 由服务端抽取文本。
  */
 @Entry
 @Component
@@ -168,7 +172,6 @@ struct ProjectIntake {
       await this.own(() => this.service.addText(id, requestId, text));
       if (this.material.trim() === text) this.material = '';
       await this.refresh();
-      this.notice = '材料已保存为预览材料，还不是项目目标或授权。';
     } catch (e) {
       this.error = e instanceof ApiError ? e.message : '材料保存失败';
     } finally {
@@ -176,7 +179,115 @@ struct ProjectIntake {
     }
   }
 
+  private async chooseAttachment(): Promise<void> {
+    if (this.busy) return;
+    let index = -1;
+    try {
+      index = (await promptAction.showActionMenu({ title: '添加附件', buttons: [
+        { text: '拍照', color: '#0A7EA4' }, { text: '从相册选图片', color: '#0A7EA4' }, { text: '选择 PDF', color: '#0A7EA4' }
+      ] })).index;
+    } catch (_e) { return; }
+    if (index === 0) await this.takePhoto();
+    else if (index === 1) await this.pickImage();
+    else if (index === 2) await this.pickPdf();
+  }
+
+  /** 图片要发给云模型识别，服务端要求这份草稿已有同意；取消就不上传。 */
+  private async confirmImageProcessing(): Promise<boolean> {
+    if (this.preview.coverage !== undefined && this.preview.coverage.consentGranted) return true;
+    try {
+      const choice = await promptAction.showDialog({ title: '发送给云模型识别？', message: '图片会发给云模型提取文字，只用于这份材料预览。',
+        buttons: [{ text: '取消', color: '#666666' }, { text: '继续', color: '#0A7EA4' }] });
+      if (choice.index !== 1) return false;
+      const id = await this.ensureDraft();
+      await this.own(() => this.service.consent(id));
+      return true;
+    } catch (e) {
+      if (e instanceof ApiError) this.error = e.message;
+      return false;
+    }
+  }
+
+  // 系统相机写入应用缓存，不申请相机权限；上传结束即删除缓存副本。
+  private async takePhoto(): Promise<void> {
+    if (!(await this.confirmImageProcessing())) return;
+    const context = getContext(this) as common.UIAbilityContext;
+    const localPath = `${context.cacheDir}/intake-photo-${Date.now()}.jpg`;
+    try {
+      fileIo.closeSync(fileIo.openSync(localPath, fileIo.OpenMode.CREATE | fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.TRUNC));
+      const profile: cameraPicker.PickerProfile = { cameraPosition: camera.CameraPosition.CAMERA_POSITION_BACK, saveUri: fileUri.getUriFromPath(localPath) };
+      const result = await cameraPicker.pick(context, [cameraPicker.PickerMediaType.PHOTO], profile);
+      if (result.resultCode === 0 && fileIo.statSync(localPath).size > 0) await this.uploadFile(localPath, `photo-${Date.now()}.jpg`, 'image/jpeg');
+    } catch (_e) {
+      this.error = '相机不可用，可以改从相册选图片';
+    } finally {
+      try { fileIo.unlinkSync(localPath); } catch (_e) {}
+    }
+  }
+
+  private async pickImage(): Promise<void> {
+    if (!(await this.confirmImageProcessing())) return;
+    let uri = '';
+    try {
+      const options = new photoAccessHelper.PhotoSelectOptions();
+      options.MIMEType = photoAccessHelper.PhotoViewMIMETypes.IMAGE_TYPE;
+      options.maxSelectNumber = 1;
+      const result = await new photoAccessHelper.PhotoViewPicker().select(options);
+      if (result.photoUris.length === 0) return;
+      uri = result.photoUris[0];
+    } catch (_e) { return; }
+    await this.uploadPicked(uri, intakeFileName(uri, `image-${Date.now()}.jpg`), 'image/jpeg');
+  }
+
+  private async pickPdf(): Promise<void> {
+    let uri = '';
+    try {
+      const options = new picker.DocumentSelectOptions();
+      options.fileSuffixFilters = ['PDF|.pdf'];
+      options.maxSelectNumber = 1;
+      const uris = await new picker.DocumentViewPicker().select(options);
+      if (uris.length === 0) return;
+      uri = uris[0];
+    } catch (_e) { return; }
+    await this.uploadPicked(uri, intakeFileName(uri, `document-${Date.now()}.pdf`), 'application/pdf');
+  }
+
+  /** 选择器给的 URI 只有临时读权限，先复制进应用缓存再上传，结束后删除。 */
+  private async uploadPicked(uri: string, name: string, mimeType: string): Promise<void> {
+    const context = getContext(this) as common.UIAbilityContext;
+    const localPath = `${context.cacheDir}/intake-${Date.now()}`;
+    try {
+      const source = fileIo.openSync(uri, fileIo.OpenMode.READ_ONLY);
+      try { fileIo.copyFileSync(source.fd, localPath); } finally { fileIo.closeSync(source); }
+      await this.uploadFile(localPath, name, mimeType);
+    } catch (_e) {
+      this.error = '无法读取这个文件，请重新选择';
+    } finally {
+      try { fileIo.unlinkSync(localPath); } catch (_e) {}
+    }
+  }
+
+  private async uploadFile(localPath: string, name: string, mimeType: string): Promise<void> {
+    this.busy = true; this.error = ''; this.notice = '';
+    try {
+      const size = fileIo.statSync(localPath).size;
+      if (size === 0 || size > 20 * 1024 * 1024) { this.error = '文件为空或超过 20MB'; return; }
+      const id = await this.ensureDraft();
+      const requestId = this.stableId(`file:${id}:${name}:${size}`);
+      await this.own(() => this.service.addFile(id, requestId, localPath, name, mimeType));
+      await this.refresh();
+    } catch (e) {
+      this.error = e instanceof ApiError ? e.message : '文件保存失败';
+    } finally {
+      this.busy = false;
+    }
+  }
+
   private async understand(): Promise<void> {
+    if (this.material.trim() !== '') {
+      await this.addMaterial();
+      if (this.error !== '') return;
+    }
     this.busy = true; this.error = ''; this.notice = '';
     try {
       const id = await this.ensureDraft();
@@ -203,7 +314,7 @@ struct ProjectIntake {
       this.preview = reply.preview;
       if (!this.acceptedDirty) this.accepted = intakeEditableFields(reply.preview);
       if (reply.clarify !== null) this.notice = `需要先确认：${reply.clarify.question}`;
-      else if (reply.appliedObjective !== '') this.notice = `已按你的话调整当前范围：${reply.appliedObjective}`;
+      else if (intakeAppliedObjective(reply.appliedObjective) !== '') this.notice = `已按你的话调整当前范围：${reply.appliedObjective}`;
       else this.notice = '这句话还只是解释候选，没有改变范围。';
     } catch (e) {
       this.error = e instanceof ApiError ? e.message : '纠正失败';
@@ -260,9 +371,8 @@ struct ProjectIntake {
         Row({ space: 8 }) {
           Text(item.label).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY).layoutWeight(1)
             .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
-          Text(item.extractionStatus === 'NEEDS_OCR' ? '无可读文本' :
-            item.sync.state === 'SYNCED' ? '已进入项目' : item.sync.state === 'FAILED' ? '同步待重试' : '已保存')
-            .fontSize(PMFontSize.CAPTION).fontColor(item.sync.state === 'FAILED' ? PMColors.RISK : PMColors.INK_TERTIARY)
+          Text(intakeMaterialStatusLabel(item))
+            .fontSize(PMFontSize.CAPTION).fontColor(item.sync.state === 'FAILED' || item.extractionStatus === 'FAILED' ? PMColors.RISK : PMColors.INK_TERTIARY)
         }.width('100%')
       }, (item: IntakeMaterialView) => item.id)
     }.width('100%').alignItems(HorizontalAlign.Start)
@@ -284,10 +394,8 @@ struct ProjectIntake {
   @Builder private CoverageBlock() {
     if (this.preview.coverage !== undefined) {
     Column({ space: 8 }) {
-      Row({ space: 8 }) {
-        Text('模型实际读到的范围').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY).layoutWeight(1)
-        Text(intakeCoverageSummary(this.preview.coverage)).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
-      }.width('100%')
+      Text('模型实际读到的范围').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+      Text(intakeCoverageSummary(this.preview.coverage)).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
       ForEach(this.preview.coverage.current.items, (item: IntakeCoverageItem) => {
         Column({ space: 2 }) {
           Row({ space: 8 }) {
@@ -319,10 +427,6 @@ struct ProjectIntake {
         }.width('100%').alignItems(HorizontalAlign.Start)
       }, (item: IntakeCoverageItem) => item.materialId)
       Text(this.preview.coverage.note).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
-      if (!this.preview.coverage.consentGranted) {
-        Text('同意云处理后才会送入材料；撤回同意不会再次送入。')
-          .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
-      }
       if (this.preview.coverage.current.stale) {
         Text('之后新增的材料还没有送入；建立项目后可在项目中继续深读全文。')
           .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
@@ -362,7 +466,7 @@ struct ProjectIntake {
           Text(this.preview.nextQuestion.why).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
         }.width('100%').alignItems(HorizontalAlign.Start)
       }
-      if (this.preview.correction.appliedObjective !== '') {
+      if (intakeAppliedObjective(this.preview.correction.appliedObjective) !== '') {
         Text(`当前范围：${this.preview.correction.appliedObjective}`).fontSize(PMFontSize.CAPTION).fontColor(PMColors.BRAND)
       }
       ForEach(this.preview.correction.candidates, (candidate: IntakeCandidate) => {
@@ -403,32 +507,35 @@ struct ProjectIntake {
         Column({ space: 14 }) {
           if (this.error !== '') Text(this.error).fontSize(PMFontSize.CAPTION).fontColor(PMColors.RISK)
           if (this.notice !== '') Text(this.notice).fontSize(PMFontSize.CAPTION).fontColor(PMColors.BRAND)
-          if (this.busy) Text('正在处理，请等待服务端回执').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+          if (this.busy) Text('处理中…').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
 
           if (this.projectId === '') {
             Column({ space: 8 }) {
-              Text('第一步 · 放材料').fontSize(PMFontSize.BODY).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
-              Text('粘贴要求、记录或计划，先不用整理成完整目标。')
-                .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
-              TextArea({ text: this.material, placeholder: '例如课程要求、实验记录、群里的通知' })
-                .onChange((value: string) => { this.material = value; }).height(120)
+              TextArea({ text: this.material, placeholder: '粘贴课程要求、实验记录或群通知' })
+                .onChange((value: string) => { this.material = value; }).height(112)
               Row({ space: 8 }) {
-                PMButton({ label: '加入材料', disabled: this.busy || this.material.trim().length === 0,
-                  onAction: (): void => { this.addMaterial(); } })
-                PMButton({ label: '读懂材料', secondary: true, disabled: this.busy || this.preview.materials.length === 0,
-                  onAction: (): void => { this.understand(); } })
-              }
+                Column() {
+                  PMButton({ label: '加入文字', secondary: true, disabled: this.busy || this.material.trim().length === 0,
+                    onAction: (): void => { this.addMaterial(); } })
+                }.layoutWeight(1)
+                Column() {
+                  PMButton({ label: '添加附件', secondary: true, disabled: this.busy,
+                    onAction: (): void => { this.chooseAttachment(); } })
+                }.layoutWeight(1)
+              }.width('100%')
               if (this.preview.materials.length > 0) this.MaterialList()
+              PMButton({ label: this.preview.understandingState === 'READY' ? '重新读懂' : '读懂材料',
+                disabled: this.busy || (this.preview.materials.length === 0 && this.material.trim().length === 0),
+                onAction: (): void => { this.understand(); } })
+              Text('读懂时会把材料发给云模型处理一次').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
             }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.MD)
             .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD).border({ width: 1, color: PMColors.BORDER_SUBTLE })
 
-            if (this.preview.draftId !== '') this.PreviewBody()
+            if (this.preview.draftId !== '' && this.preview.understandingState !== 'NONE') this.PreviewBody()
 
-            if (this.preview.draftId !== '' && this.preview.materials.length > 0) {
+            if (this.preview.draftId !== '' && this.preview.materials.length > 0 && this.preview.understandingState !== 'NONE') {
               Column({ space: 8 }) {
                 Text('用一句话纠正').fontSize(PMFontSize.BODY).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
-                Text('明确、在范围内的要求会直接生效；含糊的会留成待确认的解释。')
-                  .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
                 TextArea({ text: this.correction, placeholder: '例如：本周先确认设备可用性' })
                   .onChange((value: string) => { this.correction = value; }).height(76)
                 PMButton({ label: '按这句话调整', secondary: true,
@@ -438,7 +545,7 @@ struct ProjectIntake {
               .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD).border({ width: 1, color: PMColors.BORDER_SUBTLE })
             }
 
-            if (this.preview.draftId !== '' && this.preview.materials.length > 0) {
+            if (this.preview.draftId !== '' && this.preview.materials.length > 0 && this.preview.understandingState !== 'NONE') {
               Column({ space: 10 }) {
                 this.ConfirmFields()
                 PMButton({ label: '确认理解，建立项目', disabled: this.busy ||
@@ -466,8 +573,3 @@ struct ProjectIntake {
     }.width('100%').height('100%').backgroundColor(PMColors.BACKGROUND)
   }
 }
-
-
-
-
-

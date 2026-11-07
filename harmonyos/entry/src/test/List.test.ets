@@ -17,6 +17,7 @@ import workPacketContractTest from './WorkPacketContract.test';
 import widgetHandoffTest from './WidgetHandoff.test';
 import loginIdentifierTest from './LoginIdentifier.test';
 import workStateBadgeTest from './WorkStateBadge.test';
+import missionRecoveryRegressionTest from './MissionRecoveryRegression.test';
 
 export default function testsuite() {
   localUnitTest();
@@ -38,6 +39,7 @@ export default function testsuite() {
   widgetHandoffTest();
   loginIdentifierTest();
   workStateBadgeTest();
+  missionRecoveryRegressionTest();
 }
 
 

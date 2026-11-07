@@ -4656,7 +4656,7 @@ if (this.attachmentSearchOpen) {
                       .fontSize(12).fontColor(PMColors.INK_SECONDARY)
                   }.margin({ top: 6 })
                 }
-                if (card.displayReason !== '') {
+                if (card.displayReason !== '' && (card.reasonCode !== 'NO_SUPPORTING_EVIDENCE' || this.expandedCardId === card.id)) {
                   Text(card.displayReason)
                     .fontSize(PMFontSize.CAPTION)
                     .fontColor(card.topLevelState === 'SUPERSEDED' ? PMColors.INK_MUTED : PMColors.INK_TERTIARY)

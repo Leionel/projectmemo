@@ -21,7 +21,7 @@ describe("Mission 真实模型响应边界（模拟 HTTP，无付费调用）", 
     expect((await chooseNext("{}", projectTools)).choice).toEqual(decision);
     const body = JSON.parse((mock.mock.calls[0] as unknown as [string, RequestInit])[1].body as string);
     expect(body.response_format).toEqual({ type: "json_object" });
-    expect(body.max_tokens).toBe(1000);
+    expect(body.max_tokens).toBe(2000);
     const prompt = JSON.parse(body.messages[1].content);
     expect(prompt.responseSchema.oneOf).toHaveLength(3);
     expect(prompt.example.args).toEqual({});
@@ -45,10 +45,10 @@ describe("Mission 真实模型响应边界（模拟 HTTP，无付费调用）", 
     expect(JSON.stringify(error)).not.toContain("secret");
     expect(JSON.stringify(error)).not.toContain("test-key");
   });
-  it("finish_reason=length 即使 JSON 完整也拒绝执行，受控接续申请 2000 tokens", async () => {
+  it("finish_reason=length 即使 JSON 完整也拒绝执行，受控接续申请 4000 tokens", async () => {
     const mock = response(JSON.stringify(decision), "length");
-    await expect(chooseNext('{"outputTokenLimit":2000}', projectTools)).rejects.toMatchObject({ diagnostic: { reason: "TRUNCATED", finishReason: "length" } });
-    expect(JSON.parse((mock.mock.calls[0] as unknown as [string, RequestInit])[1].body as string).max_tokens).toBe(2000);
+    await expect(chooseNext('{"outputTokenLimit":4000}', projectTools)).rejects.toMatchObject({ diagnostic: { reason: "TRUNCATED", finishReason: "length" } });
+    expect(JSON.parse((mock.mock.calls[0] as unknown as [string, RequestInit])[1].body as string).max_tokens).toBe(4000);
   });
   it("原生协议只执行一个完整工具调用，不附加 JSON mode", async () => {
     vi.stubEnv("MISSION_MODEL_PROTOCOL", "native");

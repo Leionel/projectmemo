@@ -5,7 +5,7 @@ import { AppError } from "@/lib/api";
 import { getChatProviderConfig } from "@/lib/config/provider";
 import { choiceSchema, type Decision } from "./contracts";
 import type { ToolSet } from "./tools";
-import { ModelProtocolError, protocolDiagnostic, type ProtocolReason } from "./modelProtocol";
+import { ModelProtocolError, protocolDiagnostic, MISSION_DECISION_TOKENS, MISSION_REPAIR_TOKENS, type ProtocolReason } from "./modelProtocol";
 import { DecisionJsonError, parseDecisionJson } from "./decisionJson";
 export type DecisionProvider = (context: string, tools: ToolSet) => Promise<Decision>;
 export const chooseNext: DecisionProvider = async (context, tools) => {
@@ -34,7 +34,7 @@ export const chooseNext: DecisionProvider = async (context, tools) => {
       messages.push({role:"tool",tool_call_id:h.callId,content:JSON.stringify(h.observation)} as unknown as typeof messages[number]);
     }
   }
-  const response = await fetch(`${cfg.baseUrl}/chat/completions`, { method: "POST", signal: AbortSignal.timeout(Math.min(cfg.timeoutMs, 20000)), headers: { "Content-Type": "application/json", Authorization: `Bearer ${cfg.apiKey}` }, body: JSON.stringify({ model: cfg.model, temperature: 0.2, max_tokens: fullContext.outputTokenLimit === 2000 ? 2000 : 1000, messages, ...(native ? { tools: definitions } : functionChoice ? { tools: [decisionFunction], tool_choice: { type: "function", function: { name: "select_mission_step" } } } : deepseek ? { response_format: { type: "json_object" } } : {}), ...(deepseek ? { thinking: { type: "disabled" } } : {}) }) });
+  const response = await fetch(`${cfg.baseUrl}/chat/completions`, { method: "POST", signal: AbortSignal.timeout(Math.min(cfg.timeoutMs, 20000)), headers: { "Content-Type": "application/json", Authorization: `Bearer ${cfg.apiKey}` }, body: JSON.stringify({ model: cfg.model, temperature: 0.2, max_tokens: fullContext.outputTokenLimit === MISSION_REPAIR_TOKENS ? MISSION_REPAIR_TOKENS : MISSION_DECISION_TOKENS, messages, ...(native ? { tools: definitions } : functionChoice ? { tools: [decisionFunction], tool_choice: { type: "function", function: { name: "select_mission_step" } } } : deepseek ? { response_format: { type: "json_object" } } : {}), ...(deepseek ? { thinking: { type: "disabled" } } : {}) }) });
   if (!response.ok) throw new AppError("MODEL_HTTP_ERROR", `模型服务返回 ${response.status}`, response.status >= 500 ? 503 : 409);
   const token = z.number().int().nonnegative().nullable().catch(null);
   const envelope = z.object({ choices: z.array(z.object({ finish_reason: z.string().nullish(), message: z.object({ content: z.string().nullish(), tool_calls: z.array(z.object({ id: z.string().min(1), function: z.object({ name: z.string(), arguments: z.string() }) })).optional() }) })).min(1), usage: z.object({ prompt_tokens: token, completion_tokens: token }).optional() });

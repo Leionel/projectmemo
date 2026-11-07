@@ -94,19 +94,23 @@ export class PersonalMemoryService {
 
   async list(includeStopped: boolean): Promise<PersonalMemoryListResponse> {
     const path = includeStopped ? '/api/me/memory?includeStopped=1' : '/api/me/memory';
-    return this.client.get<PersonalMemoryListResponse>(path);
+    const raw = await this.client.get<Record<string, object>>(path);
+    return PersonalMemoryService.parseList(raw);
+  }
+
+  static parseList(raw: Record<string, object>): PersonalMemoryListResponse {
+    const result = new PersonalMemoryListResponse();
+    const items = Array.isArray(raw['items']) ? raw['items'] as Array<Record<string, object>> : [];
+    for (const item of items) {
+      if (item !== null && typeof item === 'object') result.items.push(PersonalMemoryService.parseEntry(item));
+    }
+    if (raw['policy'] !== null && typeof raw['policy'] === 'object') result.policy = raw['policy'] as PersonalMemoryPolicy;
+    return result;
   }
 
   async listCandidates(): Promise<PersonalEntry[]> {
     const raw = await this.client.get<Record<string, object>>('/api/me/memory?candidates=1');
-    const items = raw['items'] as Array<Record<string, object>>;
-    const result: PersonalEntry[] = [];
-    for (const item of items) {
-      const entry = PersonalMemoryService.parseEntry(item);
-      entry.basis = typeof item['basis'] === 'string' ? item['basis'] as string : '';
-      result.push(entry);
-    }
-    return result;
+    return PersonalMemoryService.parseList(raw).items;
   }
 
   async detail(claimId: string): Promise<PersonalMemoryDetail> {
@@ -139,10 +143,11 @@ export class PersonalMemoryService {
     parsed.revision = typeof entry['revision'] === 'number' ? entry['revision'] as number : 0;
     parsed.updatedAt = typeof entry['updatedAt'] === 'string' ? entry['updatedAt'] as string : '';
     parsed.contentHash = typeof entry['contentHash'] === 'string' ? entry['contentHash'] as string : '';
+    parsed.basis = typeof entry['basis'] === 'string' ? entry['basis'] as string : '';
     const conditions = entry['conditions'] as Record<string, object>;
-    const topics = conditions !== undefined && Array.isArray(conditions['topics']) ? conditions['topics'] as Array<object> : [];
+    const topics = conditions !== undefined && conditions !== null && Array.isArray(conditions['topics']) ? conditions['topics'] as Array<object> : [];
     for (const topic of topics) if (typeof topic === 'string') parsed.topics.push(topic);
-    parsed.expiresAt = conditions !== undefined && typeof conditions['expiresAt'] === 'string' ? conditions['expiresAt'] as string : undefined;
+    parsed.expiresAt = conditions !== undefined && conditions !== null && typeof conditions['expiresAt'] === 'string' ? conditions['expiresAt'] as string : undefined;
     return parsed;
   }
 

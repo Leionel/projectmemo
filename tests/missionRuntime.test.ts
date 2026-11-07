@@ -30,6 +30,19 @@ describe("R3.1 持久执行与原子审批",()=>{
  it("创建幂等，异载荷409；API无会话401，外人404",async()=>{const {p,m}=await fixture();expect((await createMission(userId,{projectId:p.id,requestId:p.id,goal:"整理项目进展"})).id).toBe(m.id);await expect(createMission(userId,{projectId:p.id,requestId:p.id,goal:"其他目标"})).rejects.toMatchObject({status:409});expect((await createRoute(new Request("https://test.invalid/api/missions",{method:"POST",body:"{}"}))).status).toBe(401);await expect(missionDetail("outsider",m.id)).rejects.toMatchObject({status:404});});
  it("真实会话创建快速202，读取不触发执行",async()=>{const {p}=await fixture();const {token}=await createSession(userId);const response=await createRoute(new Request("https://test.invalid/api/missions",{method:"POST",headers:{Authorization:`Bearer ${token}`},body:JSON.stringify({projectId:p.id,requestId:"route",goal:"核对项目材料"})}));expect(response.status).toBe(202);const {mission}=await response.json();expect((await missionDetail(userId,mission.id)).steps).toHaveLength(0);});
  it("观察→草稿→完成，来源版本与步骤保留",async()=>{const {m}=await fixture();let d=await slice(m.id,tool("inspect_project",{}));const source=(d.steps[0].result as {sources:Array<{id:string}>}).sources[0].id;d=await slice(m.id,tool("save_mission_output",{blocks:[{blockId:"p",kind:"PROJECT_OBSERVATION",text:"目标为整理进展",sourceIds:[source]}]}));expect(d.outputs).toHaveLength(1);d=await slice(m.id,{kind:"finish",outputId:d.outputs[0].id});expect(d.status).toBe("SUCCEEDED");expect(d.steps).toHaveLength(2);});
+ it("重新读取后的来源版本不会被历史草稿覆盖",async()=>{
+  const {p,m}=await fixture();let d=await slice(m.id,tool("inspect_project",{}));
+  const original=(d.steps[0].result as {sources:Array<{id:string;hash:string}>}).sources[0];
+  await slice(m.id,tool("save_mission_output",{blocks:[{blockId:"p",kind:"PROJECT_OBSERVATION",text:"原目标为整理进展",sourceIds:[original.id]}]}));
+  await db.project.update({where:{id:p.id},data:{goal:"核对新实验结果"}});
+  d=await slice(m.id,tool("inspect_project",{}));
+  const fresh=(d.steps.at(-1)!.result as {sources:Array<{id:string;hash:string}>}).sources[0];
+  expect(fresh.hash).not.toBe(original.hash);
+  const context=JSON.parse(await buildContext(await db.agentMission.findUniqueOrThrow({where:{id:m.id}})));
+  expect(context.sourceIndex.find((s:{id:string})=>s.id===original.id)?.hash).toBe(fresh.hash);
+  const frozen=await db.agentMissionOutput.findUniqueOrThrow({where:{id:d.outputs[0].id}});
+  expect((frozen.sourceRefsJson as Array<{hash:string}>)[0].hash).toBe(original.hash);
+ });
  it("WAITING_INPUT不运行，回答绑定问题且重放幂等",async()=>{const {m}=await fixture();const d=await slice(m.id,{kind:"ask",question:"请补充实验指标",missing:"PRIVATE"});expect(d.status).toBe("WAITING_INPUT");const mocked=vi.fn(provider(draft()));expect(await runMissionSlice({id:m.id,provider:mocked})).toBe(false);expect(mocked).not.toHaveBeenCalled();await expect(commandMission(userId,m.id,"input",{requestId:"bad",expectedVersion:d.version,questionId:"other",answer:"指标0.8"})).rejects.toMatchObject({status:409});const input={requestId:"answer",expectedVersion:d.version,questionId:d.question!.id,answer:"本地指标0.8"};await commandMission(userId,m.id,"input",input);await commandMission(userId,m.id,"input",input);expect((await missionEvents(userId,m.id)).events.filter(e=>e.type==="INPUT")).toHaveLength(1);});
  it("批准前零写入，20次并发重复批准只创建同一行动",async()=>{const {p,m}=await fixture(["ACTION_CREATED"]);const d=await propose(m.id);expect(await db.actionItem.count({where:{projectId:p.id}})).toBe(0);const a=d.approvals[0];const body={requestId:"concurrent",expectedVersion:d.version,decision:"APPROVED",proposalHash:a.proposalHash};await Promise.all(Array.from({length:20},()=>commandMission(userId,m.id,"approval",body,a.id)));await runMissionSlice({id:m.id,provider:provider(draft())});const actions=await db.actionItem.findMany({where:{projectId:p.id}});expect(actions).toHaveLength(1);expect(actions[0].status).toBe("TODO");expect(await db.agentMissionApproval.count({where:{missionId:m.id,status:"CONSUMED"}})).toBe(1);await commandMission(userId,m.id,"approval",body,a.id);expect(await db.actionItem.count({where:{projectId:p.id}})).toBe(1);});
  it("拒绝和篡改预览都不能写入",async()=>{const {p,m}=await fixture();const d=await propose(m.id),a=d.approvals[0];await expect(commandMission(userId,m.id,"approval",{requestId:"tamper",expectedVersion:d.version,decision:"APPROVED",proposalHash:"changed"},a.id)).rejects.toMatchObject({status:409});await commandMission(userId,m.id,"approval",{requestId:"reject",expectedVersion:d.version,decision:"REJECTED",proposalHash:a.proposalHash},a.id);expect(await db.actionItem.count({where:{projectId:p.id}})).toBe(0);});
@@ -60,9 +73,9 @@ describe("R3.1 持久执行与原子审批",()=>{
   const bad=async()=>{throw new ModelProtocolError(protocolDiagnostic("TRUNCATED","length",25),{provider:"deepseek",model:"fixture",protocol:"JSON_CHOICE",usage:{inputTokens:123,outputTokens:1000}});};
   await runMissionSlice({id:m.id,provider:bad});
   let row=await db.agentMission.findUniqueOrThrow({where:{id:m.id}});
-  expect(usageOf(row.budgetUsedJson)).toMatchObject({models:1,inputTokens:123,outputTokens:1000,unknownCalls:0,reservedOutputTokens:1000});
+  expect(usageOf(row.budgetUsedJson)).toMatchObject({models:1,inputTokens:123,outputTokens:1000,unknownCalls:0,reservedOutputTokens:2000});
   const context=JSON.parse(await buildContext(row));
-  expect(context.outputTokenLimit).toBe(2000);
+  expect(context.outputTokenLimit).toBe(4000);
   expect(context.recentInputs.at(-1).payload).toMatchObject({reason:"TRUNCATED",repairHint:expect.stringContaining("压缩草稿")});
   await db.agentMission.update({where:{id:m.id},data:{budgetJson:json({...row.budgetJson as object,reservedOutputTokens:2500})}});
   const spy=vi.fn(bad);await runMissionSlice({id:m.id,provider:spy});expect(spy).not.toHaveBeenCalled();
@@ -93,8 +106,8 @@ describe("R3.1 持久执行与原子审批",()=>{
   try{
    await runMissionSlice({id:m.id});await runMissionSlice({id:m.id});await runMissionSlice({id:m.id});
    const d=await missionDetail(userId,m.id);expect(d.status).toBe("SUCCEEDED");expect(d.outputs).toHaveLength(1);expect(d.steps).toHaveLength(1);
-   expect(d.used).toMatchObject({models:3,inputTokens:300,outputTokens:1100,unknownCalls:0,reservedOutputTokens:4000});
-   expect(calls.map(c=>c.max_tokens)).toEqual([1000,2000,1000]);
+   expect(d.used).toMatchObject({models:3,inputTokens:300,outputTokens:1100,unknownCalls:0,reservedOutputTokens:8000});
+   expect(calls.map(c=>c.max_tokens)).toEqual([2000,4000,2000]);
    const runs=await db.agentRun.findMany({where:{projectId:m.projectId}});expect(runs.find(r=>r.status==="FAILED")?.provider).toBe("deepseek");
    expect(JSON.stringify(runs)).not.toContain("private-raw-response-secret");
    expect(JSON.stringify((await missionEvents(userId,m.id)).events)).not.toContain("private-raw-response-secret");

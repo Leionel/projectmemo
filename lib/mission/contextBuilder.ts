@@ -103,9 +103,15 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
   const candidateOutputSources = outputs.filter(o=>!adopted||steps.some(step=>step.id===o.stepId&&step.planRevision===m.planRevision)).flatMap(o => o.sourceRefsJson as unknown as Source[]);
   const outputSources = [] as Source[];
   for (const source of candidateOutputSources) if ((await sourceUse(m.ownerUserId, m.projectId, source.id, db, { missionId: m.id })).state === "ALLOWED") outputSources.push(source);
-  const sourceIndex = [...new Map([...steps.filter(s=>!adopted||s.planRevision===m.planRevision).flatMap(s => (s.resultJson as ToolResult | null)?.sources ?? []), ...outputSources]
-    .map(source => [source.id, { id: source.id, hash: source.hash, revision: source.revision, temporalState: source.temporalState ?? source.assessment?.temporalState ?? "UNKNOWN",
-      knowledgeClass: source.knowledgeClass ?? (source.kind === "EXTERNAL" ? "EXTERNAL_REFERENCE" : "PROJECT_OBSERVATION"), observedAt: source.observedAt }])).values()];
+  // 草稿保留冻结引用；来源索引采用最近一次观察，避免旧草稿覆盖重新读取的版本。
+  const indexedSources = new Map<string, Source>();
+  for (const source of [...outputSources.toReversed(), ...steps.filter(s=>!adopted||s.planRevision===m.planRevision).flatMap(s => (s.resultJson as ToolResult | null)?.sources ?? [])]) {
+    const previous = indexedSources.get(source.id);
+    if (!previous?.observedAt || !source.observedAt || source.observedAt >= previous.observedAt) indexedSources.set(source.id, source);
+  }
+  const sourceIndex = [...indexedSources.values()]
+    .map(source => ({ id: source.id, hash: source.hash, revision: source.revision, temporalState: source.temporalState ?? source.assessment?.temporalState ?? "UNKNOWN",
+      knowledgeClass: source.knowledgeClass ?? (source.kind === "EXTERNAL" ? "EXTERNAL_REFERENCE" : "PROJECT_OBSERVATION"), observedAt: source.observedAt }));
   const inputs = [...new Map([...events, ...[question, input].filter(e => e !== null)].map(e => [e.id, e])).values()].sort((a, b) => a.seq - b.seq);
   const actionReadbacks=[];
   for(const approval of await db.agentMissionApproval.findMany({where:{missionId:m.id,status:"CONSUMED"},include:{step:true}})){

@@ -26,6 +26,7 @@ import { SessionStore } from '../services/SessionStore';
 import { WidgetDataService } from '../services/WidgetDataService';
 import { missionStatusLabel, mergeMissionEvents, missionTerminal, missionToolLabel, missionCompletionFacts, missionErrorPhaseLabel, missionBackgroundNotice, missionBackgroundOk } from '../common/MissionContract';
 import { MissionProgressPresentation } from '../common/MissionProgressPresentation';
+import { missionSourceTarget } from '../common/MissionSourceNavigation';
 import { PMColors, PMSpacing, PMRadius, PMFontSize } from '../common/DesignTokens';
 import { PMAppBar } from '../components/PMAppBar';
 import { PMStatusPill, PMButton } from '../components/PMReferencePrimitives';
@@ -65,6 +66,8 @@ struct MissionDetail {
   @State @Watch('alertError') error: string = '';
   private alertError(): void { alertError(this.error); }
   @State notice: string = '';
+  private detailScroller: Scroller = new Scroller();
+  private refreshTask: Promise<void> | null = null;
   @State updatedAt: string = '';
   @State missionUiEnabled: boolean = false;
   @State backgroundNotice: string = '';
@@ -162,6 +165,12 @@ struct MissionDetail {
 
   }
   private async refresh(): Promise<void> {
+    if (this.refreshTask !== null) return this.refreshTask;
+    const task = this.readLatest();
+    this.refreshTask = task;
+    try { await task; } finally { if (this.refreshTask === task) this.refreshTask = null; }
+  }
+  private async readLatest(): Promise<void> {
     if (this.refreshing || !this.visible || !this.appActive || this.projectId === '') return;
     if (this.timer !== -1) clearTimeout(this.timer);
     this.timer = -1; this.refreshing = true;
@@ -379,14 +388,54 @@ struct MissionDetail {
       this.notice = action.kind === 'VIEW_RESULT' ? '已定位到原结果与回执；完成状态仍以原回执为准。' : '已定位到执行记录；失败原因与已执行结果分别保留。';
       return;
     }
-    // RECHECK_AUTHORITY / CHECK_UNKNOWN_EFFECT / CHECK_STOP_SETTLEMENT：只重新读取，不用读取核销 UNKNOWN。
-    this.notice = action.kind === 'CHECK_STOP_SETTLEMENT'
-      ? '已重新读取服务端状态；停止请求在结算前仍显示为未完成。'
-      : action.kind === 'CHECK_UNKNOWN_EFFECT'
-        ? '已重新读取服务端状态；读取不会核销未结算效果，仍以原请求/回执为准。'
-        : '已重新读取服务端状态；请按当前版本与许可再次核对。';
-    this.readbackRefreshKey++;
-    this.refresh();
+    this.recheckPacket(action);
+  }
+  private async recheckPacket(action: WorkPacketActionView): Promise<void> {
+    const generation = this.generation; const token = SessionStore.getToken();
+    const id = this.missionId;
+    this.busy = true;
+    promptAction.showToast({ message: '正在核对当前状态' });
+    try {
+      await this.refresh();
+      if (!this.current(generation, token) || id !== this.missionId || this.readState !== 'fresh') return;
+      this.readbackRefreshKey++;
+      const sourceChanged = this.mission.error?.code === 'SOURCE_CHANGED';
+      const message = action.kind === 'CHECK_STOP_SETTLEMENT'
+        ? '已读取最新状态。停止请求的结算进度见执行记录。'
+        : action.kind === 'CHECK_UNKNOWN_EFFECT'
+          ? '已读取最新状态。原请求的结果仍需按回执核对。'
+          : sourceChanged ? '项目依据已变化，请在方案页重新对比并确认后接续。'
+            : this.mission.error?.recovery?.message ?? this.mission.error?.message ?? '已读取最新状态，可查看当前执行记录与恢复条件。';
+      this.notice = message;
+      const result = await promptAction.showDialog({ title: '当前状态已核对', message: message,
+        buttons: [{ text: '返回', color: $r('app.color.pm_ink_secondary') }, { text: sourceChanged ? '查看方案' : '查看执行记录', color: $r('app.color.pm_brand') }] });
+      if (result.index === 1 && this.current(generation, token) && id === this.missionId) {
+        this.detailView = sourceChanged ? 'plan' : 'progress';
+        setTimeout(() => { if (this.current(generation, token) && id === this.missionId) this.detailScroller.scrollEdge(Edge.Top); }, 50);
+      }
+    } catch (e) { if (this.current(generation, token) && id === this.missionId) this.fail(e); }
+    finally { if (generation === this.generation) this.busy = false; }
+  }
+  private draftSource(output: MissionOutput, sourceId: string): MissionSource | undefined {
+    const frozen = output.sourceRefsJson?.find((source: MissionSource) => source.id === sourceId);
+    if (frozen !== undefined) return frozen;
+    for (let i = this.mission.steps.length - 1; i >= 0; i--) {
+      const source = this.mission.steps[i].result?.sources?.find((item: MissionSource) => item.id === sourceId);
+      if (source !== undefined) return source;
+    }
+    return undefined;
+  }
+  private draftSourceLabel(output: MissionOutput, sourceId: string, index: number): string {
+    const source = this.draftSource(output, sourceId);
+    const title = source !== undefined ? MissionProgressPresentation.sourceTitle(source)
+      : sourceId.startsWith('project:') ? '项目状态' : sourceId.startsWith('card:') ? '项目记忆'
+        : sourceId.startsWith('action:') ? '行动记录' : '原始资料';
+    return `来源 ${index + 1} · ${title} ›`;
+  }
+  private openDraftSource(sourceId: string): void {
+    const target = missionSourceTarget(this.projectId, this.missionId, sourceId);
+    if (target === null) { this.error = '原资料定位信息不完整，请重新读取委托'; return; }
+    router.pushUrl({ url: target.url, params: target.params });
   }
   private async cancel(): Promise<void> {
     const result = await promptAction.showDialog({ title: '取消长期委托', message: '停止后续执行，保留已有成果与审批历史。', buttons: [{ text: '返回', color: '#64748B' }, { text: '确认取消', color: '#B91C1C' }] });
@@ -693,9 +742,13 @@ struct MissionDetail {
               .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
           }
           if (this.mission.status === 'PAUSED' && this.missionUiEnabled) {
-            Button(this.isBudgetPause() ? '加额度并继续' : '继续原委托', { type: ButtonType.Normal }).width('100%').height(48).borderRadius(PMRadius.BUTTON)
+            Button(this.isBudgetPause() ? '加额度并继续' : this.mission.error?.code === 'SOURCE_CHANGED' ? '重新对比方案' : '继续原委托', { type: ButtonType.Normal }).width('100%').height(48).borderRadius(PMRadius.BUTTON)
               .backgroundColor(PMColors.BRAND).fontColor(PMColors.SURFACE).fontSize(15).fontWeight(FontWeight.Medium)
-              .enabled(this.readState === 'fresh' && !this.busy).onClick(() => { if (this.isBudgetPause()) { this.addBudgetAndResume(); } else { this.command('resume'); } })
+              .enabled(this.readState === 'fresh' && !this.busy).onClick(() => {
+                if (this.isBudgetPause()) { this.addBudgetAndResume(); }
+                else if (this.mission.error?.code === 'SOURCE_CHANGED') { this.detailView = 'plan'; this.detailScroller.scrollEdge(Edge.Top); }
+                else { this.command('resume'); }
+              })
             this.BudgetCard()
           }
         }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.LG)
@@ -832,13 +885,24 @@ struct MissionDetail {
           Column({ space: 8 }) {
             Text(`草稿修订 ${output.revision} · 待审阅`).fontSize(13).fontColor(PMColors.INK_SECONDARY)
             ForEach(output.contentJson.blocks, (block: MissionBlock) => {
-              Text(`${this.knowledge(block.kind)}\n${block.text}\n来源：${block.sourceIds.join('、') || '未引用'}`)
+              Column({ space: 8 }) {
+                Text(this.knowledge(block.kind)).fontSize(11).fontColor(PMColors.INK_TERTIARY)
+                Text(block.text).fontSize(PMFontSize.BODY).lineHeight(25).fontColor(PMColors.INK_PRIMARY).copyOption(CopyOptions.LocalDevice)
+                ForEach(block.sourceIds ?? [], (sourceId: string, index: number) => {
+                  Button(this.draftSourceLabel(output, sourceId, index), { type: ButtonType.Normal })
+                    .constraintSize({ minHeight: 44 }).fontSize(13).fontColor(PMColors.BRAND)
+                    .backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(10).padding({ left: 12, right: 12 })
+                    .onClick(() => { this.openDraftSource(sourceId); })
+                }, (sourceId: string) => sourceId)
+              }.width('100%').alignItems(HorizontalAlign.Start).padding({ top: 10, bottom: 10 })
+                .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
             }, (block: MissionBlock) => block.blockId)
             ForEach(output.claimChecksJson ?? [], (claim: MissionClaim) => {
               Text(`${this.claimStatus(claim.status)}：${claim.text ?? '该段内容尚未逐句核验'}`).fontSize(13)
             }, (claim: MissionClaim, index: number) => claim.claimId ?? `${claim.blockId}-${index}`)
             if (this.mission.artifactAdoptionEnabled) { Button('预览归入项目周报 ›').type(ButtonType.Normal).height(44).fontSize(13).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 }).enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.previewOutput(output); }) }
-          }.width('100%').alignItems(HorizontalAlign.Start)
+          }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.LG)
+            .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.LG).border({ width: 1, color: PMColors.BORDER })
         }, (output: MissionOutput) => output.id)
       }.width('100%').alignItems(HorizontalAlign.Start)
       MissionReadbackView({
@@ -910,7 +974,7 @@ struct MissionDetail {
     Column() {
       PMAppBar({ title: this.form === 'create' ? '新建长期委托' : '长期委托', backLabel: '项目', rightActionText: '刷新', onRightTextAction: () => { this.error = ''; this.errorCount = 0; this.refresh(); } })
       if (this.focusConversationId !== '') { PMButton({ label: '继续原焦点讨论', secondary: true, onAction: (): void => { router.pushUrl({ url: 'pages/FocusConversation', params: { conversationId: this.focusConversationId, projectId: this.projectId } }); } }) }
-      Scroll() {
+      Scroll(this.detailScroller) {
         Column({ space: 14 }) {
           if (this.projectId === '') { Text('缺少项目参数，请返回项目后重新进入') }
           if (this.error !== '') { Text(this.error).fontColor(PMColors.RISK) }

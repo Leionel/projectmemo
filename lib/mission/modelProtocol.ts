@@ -95,9 +95,11 @@ export function missionFailure(error: unknown, phase: MissionPhase) {
 }
 
 export type ProtocolReason = "INVALID_RESPONSE" | "EMPTY_CONTENT" | "INVALID_JSON" | "TRUNCATED" | "INVALID_CHOICE" | "INVALID_TOOL_ARGUMENTS" | "MULTIPLE_TOOL_CALLS" | "UNKNOWN_TOOL";
-export function decisionTokenLimit(lastError: unknown): 1000 | 2000 {
+export const MISSION_DECISION_TOKENS = 2000;
+export const MISSION_REPAIR_TOKENS = 4000;
+export function decisionTokenLimit(lastError: unknown): 2000 | 4000 {
   const error = lastError as {code?:string;diagnostic?:{reason?:string}} | null;
-  return error?.code === "MODEL_PROTOCOL_ERROR" && error.diagnostic?.reason === "TRUNCATED" ? 2000 : 1000;
+  return error?.code === "MODEL_PROTOCOL_ERROR" && error.diagnostic?.reason === "TRUNCATED" ? MISSION_REPAIR_TOKENS : MISSION_DECISION_TOKENS;
 }
 const hints: Record<ProtocolReason, string> = {
   INVALID_RESPONSE: "返回一个包含单次决策的 JSON 对象。",

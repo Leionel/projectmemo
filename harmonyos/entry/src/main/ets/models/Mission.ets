@@ -76,7 +76,7 @@ export interface MissionApproval { id: string; proposalHash: string; proposal: M
 export interface MissionBlock { blockId: string; text: string; kind: string; sourceIds: string[]; }
 export interface MissionContent { blocks: MissionBlock[]; }
 export interface MissionClaim { claimId?: string; blockId?: string; text?: string; status: string; mode?: string; }
-export interface MissionOutput { id: string; revision: number; contentJson: MissionContent; verificationStatus: string; claimChecksJson: MissionClaim[]; }
+export interface MissionOutput { id: string; revision: number; contentJson: MissionContent; verificationStatus: string; claimChecksJson: MissionClaim[]; sourceRefsJson?: MissionSource[]; }
 export interface MissionRecovery {
   kind: string; automatic: boolean; message: string;
   attempt?: number; maxAttempts?: number; nextAttemptAt?: string;

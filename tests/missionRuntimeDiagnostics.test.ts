@@ -108,7 +108,7 @@ describe("Mission 阶段诊断与恢复（独立 SQLite，无模型或网络请�
     const { detail, runs, events } = await failureArtifacts(m.id, p.id);
     expect(detail.status).toBe("PAUSED");
     expect(detail.error).toMatchObject({ code: "EXECUTION_FAILED", phase: "DECISION", category: "TIMEOUT", recovery: { automatic: false } });
-    expect(usageOf(detail.used)).toMatchObject({ models: 1, unknownCalls: 1, reservedOutputTokens: 1000, inputTokens: 0, outputTokens: 0 });
+    expect(usageOf(detail.used)).toMatchObject({ models: 1, unknownCalls: 1, reservedOutputTokens: 2000, inputTokens: 0, outputTokens: 0 });
     expect(runs[0].trace).toMatchObject({ phase: "DECISION", contextManifest: { schemaVersion: 1, contextVersion: m.contextVersion } });
     expect(JSON.stringify([runs, detail.error, events.filter(event => event.type === "EXECUTION_STOPPED")])).not.toContain(secret);
   });
@@ -134,8 +134,8 @@ describe("Mission 阶段诊断与恢复（独立 SQLite，无模型或网络请�
     detail = await missionDetail(userId, m.id);
     expect(detail.status).toBe("PAUSED");
     expect(detail.error).toMatchObject({ recovery: { kind: "REVIEW_REQUIRED", automatic: false, attempt: 2, maxAttempts: 2 } });
-    expect(usageOf(detail.used)).toMatchObject({ models: 2, unknownCalls: 2, outputTokens: 2000, reservedOutputTokens: 3000 });
-    expect(contextsSeen.map(context => JSON.parse(context).outputTokenLimit)).toEqual([1000, 2000]);
+    expect(usageOf(detail.used)).toMatchObject({ models: 2, unknownCalls: 2, outputTokens: 2000, reservedOutputTokens: 6000 });
+    expect(contextsSeen.map(context => JSON.parse(context).outputTokenLimit)).toEqual([2000, 4000]);
     expect(await runMissionSlice({ id: m.id, provider: decide })).toBe(false);
     const { runs, events } = await failureArtifacts(m.id, p.id);
     expect(runs).toHaveLength(2);

@@ -1609,6 +1609,7 @@ model UserMemoryPolicy {
  useInContextEnabled Boolean @default(true)
  explicitCaptureEnabled Boolean @default(true)
  candidateInferenceEnabled Boolean @default(false)
+ expressionSuggestEnabled Boolean @default(true)
  cloudProcessingEnabled Boolean @default(false)
  settingsVersion Int @default(1)
  privacyRevision Int @default(1)

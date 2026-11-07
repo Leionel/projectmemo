@@ -1,3 +1,4 @@
+import { PersonalEntry, PersonalMemoryService } from '../services/PersonalMemoryService';
 import { alertError } from '../common/ErrorAlert';
 import { PMPageIntro, PMListRow, PMCloseButton } from '../components/PMReferencePrimitives';
 import router from '@ohos.router';
@@ -70,6 +71,7 @@ struct Index {
   @State focusRefreshKey: number = 0;
   @StorageProp(PMStorageKey.WIDTH_BP) widthBp: string = PMWidthBp.SM;
   @StorageLink('pm.reduceMotion') reduceMotion: boolean = false;
+  @State pendingMemoryCount: number = 0;
 
   // 认证与会话状态
   @State isAuthenticated: boolean = false;
@@ -417,6 +419,7 @@ struct Index {
   }
 
   private async loadLlmSettings(): Promise<void> {
+    new PersonalMemoryService().listCandidates().then((items: PersonalEntry[]) => { this.pendingMemoryCount = items.length; }).catch(() => {});
     try {
       const res = await this.settingsService.getSettings();
       this.llmMode = res.llmMode;
@@ -2491,8 +2494,8 @@ struct Index {
           .margin({ top: PMSpacing.LG, bottom: PMSpacing.XS, left: 4 })
 
         Column() {
-          this.SettingsNavRow('我的记忆', '查看、纠正或停止使用个人偏好与背景', '',
-            PMColors.INK_TERTIARY, PMColors.SURFACE_SUBTLE, 'memory')
+          this.SettingsNavRow('我的记忆', '查看、纠正或停止使用个人偏好与背景', this.pendingMemoryCount > 0 ? `${this.pendingMemoryCount} 条待确认` : '',
+            this.pendingMemoryCount > 0 ? PMColors.WARNING : PMColors.INK_TERTIARY, this.pendingMemoryCount > 0 ? PMColors.WARNING_LIGHT : PMColors.SURFACE_SUBTLE, 'memory')
 
           Divider().color(PMColors.BORDER_SUBTLE)
 

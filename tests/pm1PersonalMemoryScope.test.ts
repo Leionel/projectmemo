@@ -39,7 +39,7 @@ describe("PM-1 迁移与范围保护", () => {
   test("旧库副本升级：先建旧 schema 插入遗留行，再应用新迁移完成回填且数据保留", async () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pm1-upgrade-"));
     const file = path.join(dir, "upgrade.db");
-    const migrations = fs.readdirSync("prisma/migrations").sort().filter(name => name !== "20261101170000_pm1_account_memory_scope");
+    const migrations = fs.readdirSync("prisma/migrations").sort().filter(name => name !== "20261101170000_pm1_account_memory_scope" && name !== "20261107130000_personal_expression_suggest");
     const legacy = new Database(file.replaceAll("\\", "/"));
     for (const name of migrations) {
       const sqlFile = path.join("prisma/migrations", name, "migration.sql");
@@ -52,6 +52,7 @@ describe("PM-1 迁移与范围保护", () => {
     legacy.close();
     const upgraded = new Database(file.replaceAll("\\", "/"));
     upgraded.exec(fs.readFileSync("prisma/migrations/20261101170000_pm1_account_memory_scope/migration.sql", "utf8"));
+    upgraded.exec(fs.readFileSync("prisma/migrations/20261107130000_personal_expression_suggest/migration.sql", "utf8"));
     const row = upgraded.prepare(`SELECT "scopeType","projectId","canonicalStatement" FROM "AgentClaim" WHERE id='c-up'`).get() as { scopeType: string; projectId: string; canonicalStatement: string };
     expect(row.scopeType).toBe("PROJECT");
     expect(row.projectId).toBe("p-up");

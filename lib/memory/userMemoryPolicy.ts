@@ -12,7 +12,7 @@ export const USER_MEMORY_POLICY_VERSION = "user-memory-policy-v1";
 
 export type UserMemoryPolicyRow = {
   ownerUserId: string; useInContextEnabled: boolean; explicitCaptureEnabled: boolean;
-  candidateInferenceEnabled: boolean; cloudProcessingEnabled: boolean;
+  candidateInferenceEnabled: boolean; expressionSuggestEnabled: boolean; cloudProcessingEnabled: boolean;
   settingsVersion: number; privacyRevision: number; extractionNotBefore: Date | null;
 };
 

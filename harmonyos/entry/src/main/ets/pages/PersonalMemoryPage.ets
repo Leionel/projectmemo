@@ -34,6 +34,7 @@ struct PersonalMemoryPage {
   @State showAddSheet: boolean = false;
   @State addQuote: string = '';
   @State addKindIndex: number = 0;
+  @State policySuggestEnabled: boolean = true;
   @State addTopic: string = '';
   @State detail: PersonalMemoryDetail | null = null;
   private service: PersonalMemoryService = new PersonalMemoryService();
@@ -57,6 +58,7 @@ struct PersonalMemoryPage {
         this.hasPolicy = true;
         this.policyUseEnabled = result.policy.useInContextEnabled;
         this.policyCloudEnabled = result.policy.cloudProcessingEnabled;
+        this.policySuggestEnabled = result.policy.expressionSuggestEnabled !== false;
         this.policyVersion = result.policy.settingsVersion;
       } else {
         this.hasPolicy = false;
@@ -178,6 +180,23 @@ struct PersonalMemoryPage {
     .alignItems(HorizontalAlign.Start)
   }
 
+  private async toggleSuggest(enabled: boolean): Promise<void> {
+    if (this.busy) { return; }
+    this.busy = true;
+    try {
+      const input = new PersonalMemoryPolicyInput();
+      input.requestId = `pm-suggest-${Date.now()}`;
+      input.expectedVersion = this.policyVersion;
+      input.expressionSuggestEnabled = enabled;
+      await this.service.updatePolicy(input);
+      this.notice = enabled ? '已开启发现。' : '已关闭发现；已确认的内容不受影响。';
+      await this.load();
+    } catch (e) {
+      this.error = personalMemoryErrorMessage(e);
+    } finally {
+      this.busy = false;
+    }
+  }
   private commandFor(entry: PersonalEntry, operation: string): PersonalMemoryCommandInput {
     const input = new PersonalMemoryCommandInput();
     input.requestId = `pm-${operation}-${entry.claimId}-${entry.revision}-${Date.now()}`;
@@ -350,7 +369,7 @@ struct PersonalMemoryPage {
               } else if (this.entries.length === 0) {
                 EmptyStateView({
                   title: '还没有保存任何内容',
-                  description: '你可以在对话里明确说明一次，或点击右上角“添加”写入一条非敏感偏好或背景。',
+                  description: '你在对话或随手记录里说到的习惯和背景，会出现在这里等你确认；也可以点右上角“添加”写入一条非敏感偏好或背景。',
                   actionText: '添加一条',
                   onAction: () => {
                     this.showAddSheet = true;
@@ -452,6 +471,28 @@ struct PersonalMemoryPage {
                     .onChange((isOn: boolean) => {
                       this.togglePolicy(isOn, undefined, isOn ? '已开启使用。' : '已关闭使用；项目资料与原任务不受影响。');
                     })
+                }
+                .width('100%')
+                .alignItems(VerticalAlign.Top)
+
+                Row() {
+                  Column({ space: 2 }) {
+                    Text('从日常输入中发现')
+                      .fontSize(PMFontSize.SECONDARY)
+                      .fontWeight(FontWeight.Medium)
+                      .fontColor(PMColors.INK_PRIMARY)
+                    Text('用规则识别你说过的习惯和背景，确认后才生效')
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontColor(PMColors.INK_TERTIARY)
+                  }
+                  .alignItems(HorizontalAlign.Start)
+                  .layoutWeight(1)
+
+                  Toggle({ type: ToggleType.Switch, isOn: this.policySuggestEnabled })
+                    .selectedColor(PMColors.BRAND)
+                    .enabled(this.hasPolicy && !this.busy)
+                    .accessibilityText('从日常输入中发现个人记忆')
+                    .onChange((isOn: boolean) => { this.toggleSuggest(isOn); })
                 }
                 .width('100%')
                 .alignItems(VerticalAlign.Top)

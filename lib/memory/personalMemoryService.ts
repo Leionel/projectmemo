@@ -144,7 +144,7 @@ export async function commandPersonalMemory(userId: string, raw: PersonalCommand
         throw new AppError("CLAIM_CHANGED", "该候选已在另一端处理，请刷新后操作", 409);
       if (claim.statusProjection !== "CANDIDATE") throw new AppError("CLAIM_STATE_CHANGED", "该候选已处理或已变化，请刷新后操作", 409);
       const origin = claim.originJson as { kind?: string; rootIds?: string[]; projectId?: string };
-      if (origin.kind !== "MODEL_CANDIDATE") throw new AppError("CLAIM_STATE_CHANGED", "只有模型归纳的候选走确认流程", 409);
+      if (origin.kind !== "MODEL_CANDIDATE" && origin.kind !== "USER_EXPRESSION") throw new AppError("CLAIM_STATE_CHANGED", "只有待确认的候选走确认流程", 409);
       const contentNow = personalEntryContentHash(claim);
       if (raw.operation === "CONFIRM_CANDIDATE") {
         // 冻结核对：候选内容、策略版本与来源根必须仍是预览时的状态。
@@ -268,7 +268,7 @@ export async function personalEntryDetail(userId: string, claimId: string) {
   const uses = await readPersonalMemoryUses(userId, claim.id);
   return { entry: entryView(claim, events.find(e => e.eventKind === "PERSONAL_ADD")?.userQuote ?? null),
     source: { kind: origin.kind === "MODEL_CANDIDATE" ? "MODEL_CANDIDATE" : "USER_ENTRY",
-      description: origin.kind === "MODEL_CANDIDATE"
+      description: origin.kind === "USER_EXPRESSION" ? `${origin.basis ?? "来自你的一句话"}，由你确认后保存。` : origin.kind === "MODEL_CANDIDATE"
         ? `来自你在项目中的原任务输出归纳（${origin.basis ?? "依据未记录"}）；确认前未参与任何决策。`
         : origin.via === "ADD_FROM_EXPRESSION" ? "你在对话或输入中明确提出，按明确范围保存。" : "你在\"我的记忆\"中主动添加。",
       formedAt: claim.createdAt.toISOString() },

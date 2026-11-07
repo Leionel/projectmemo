@@ -7,6 +7,7 @@ import { ProjectAgentContextService } from '../services/ProjectAgentContextServi
 import { EvidenceAssessment, evidenceAssessmentText } from '../models/Copilot';
 import router from '@ohos.router';
 import { FocusAgentLauncher, LauncherScrollTracker } from '../components/FocusAgentLauncher';
+import { copyPickedFile, pickedFileName, removePickedCopy } from '../common/PickedFile';
 import promptAction from '@ohos.promptAction';
 import { missionHandoffRoute } from '../common/MissionWidgetContract';
 import { captureSourceCardId } from '../models/WorkPacket';
@@ -619,7 +620,7 @@ struct ProjectHome {
       options.maxSelectNumber = 1;
       const uris = await new picker.DocumentViewPicker().select(options);
       if (uris.length > 0) {
-        await this.uploadAttachment(uris[0], `project-document-${Date.now()}.pdf`, 'application/pdf');
+        await this.uploadAttachment(uris[0], pickedFileName(uris[0], `project-document-${Date.now()}.pdf`), 'application/pdf');
       }
     } catch (error) {
       this.attachmentFeedback = '未选择 PDF 或文件选择器不可用';
@@ -643,8 +644,10 @@ struct ProjectHome {
     this.attachmentRetryId = '';
     this.attachmentFeedbackTone = 'info';
     this.attachmentFeedback = '正在上传并提取内容…';
+    let localPath = '';
     try {
-      const result = await this.attachmentService.upload(this.projectId, uri, fileName, mimeType);
+      localPath = copyPickedFile((getContext(this) as common.UIAbilityContext).cacheDir, uri);
+      const result = await this.attachmentService.upload(this.projectId, localPath, fileName, mimeType);
       if (uploadToken !== SessionStore.getToken()) return;
       this.lastUploadedAttachmentId = result.attachment.id;
       if (this.materialOwnerId === SessionStore.getUser().id) this.materialSourceId = `attachment:${result.attachment.id}`;
@@ -671,9 +674,10 @@ struct ProjectHome {
       }
       await this.loadAllData();
     } catch (error) {
-      this.attachmentFeedback = error instanceof ApiError ? error.message : '附件上传失败';
+      this.attachmentFeedback = error instanceof ApiError ? error.message : localPath === '' ? '无法读取所选文件，请换一个文件再试' : '附件上传失败';
       this.attachmentFeedbackTone = 'error';
     } finally {
+      removePickedCopy(uri, localPath);
       this.isUploadingAttachment = false;
     }
   }
@@ -4031,7 +4035,7 @@ struct ProjectHome {
       }
       if (this.attachments.length > 0) {
         Button(`全部附件 ${this.attachments.length} 份 · 查看原件`, { type: ButtonType.Normal })
-          .constraintSize({ minHeight: 44 }).backgroundColor(Color.Transparent).fontColor(PMColors.BRAND)
+          .constraintSize({ minHeight: 44 }).padding({ left: 0, right: PMSpacing.SM }).fontSize(PMFontSize.SECONDARY).backgroundColor(Color.Transparent).fontColor(PMColors.BRAND)
           .onClick(() => { this.showEntrySheet = false; this.currentTabIndex = 1; this.materialsMode = 'attachments'; })
       }
       if (this.attachments.filter((a: Attachment) => a.extractionStatus !== 'SUCCESS').length > 0) {
@@ -4165,7 +4169,7 @@ struct ProjectHome {
         })
     }
     .width('100%')
-    .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: 96 })
+    .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.LG })
     .alignItems(HorizontalAlign.Start)
   }
 

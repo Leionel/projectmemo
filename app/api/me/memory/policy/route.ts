@@ -14,6 +14,7 @@ const policySchema = z.object({
   useInContextEnabled: z.boolean().optional(),
   cloudProcessingEnabled: z.boolean().optional(),
   candidateInferenceEnabled: z.boolean().optional(),
+  expressionSuggestEnabled: z.boolean().optional(),
 }).strict();
 
 export async function GET(request: Request) {
@@ -23,7 +24,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ policy: policy ?? null, explanation: {
       useInContext: "保存的条目才会进入你自己的对话与委托上下文；关闭后项目资料与原任务照常可用。",
       cloudProcessing: "账户个人正文默认不发给远端模型或检索服务；开启后仍受当轮原有云模型许可约束。",
-      candidates: "模型归纳的候选理解默认关闭；显式保存不受影响。" } });
+      candidates: "模型归纳的候选理解默认关闭；显式保存不受影响。",
+      expressionSuggest: "用规则从你亲手写的短文本里发现可能的习惯和背景，不调用模型；确认前不生效。" } });
   } catch (error) {
     return apiError(error);
   }
@@ -43,14 +45,17 @@ export async function PATCH(request: Request) {
       }
       const current = await policyInTx(tx, user.id);
       if (input.expectedVersion !== undefined && input.expectedVersion !== current.settingsVersion) throw new Error("POLICY_CHANGED");
+      // 这个开关只影响是否再提议候选，不改变任何已生效内容，不需要让消费者重协调。
+      const affectsConsumers = input.useInContextEnabled !== undefined || input.cloudProcessingEnabled !== undefined || input.candidateInferenceEnabled !== undefined;
       const policy = await tx.userMemoryPolicy.update({ where: { ownerUserId: user.id }, data: {
+        ...(input.expressionSuggestEnabled !== undefined ? { expressionSuggestEnabled: input.expressionSuggestEnabled } : {}),
         ...(input.useInContextEnabled !== undefined ? { useInContextEnabled: input.useInContextEnabled } : {}),
         ...(input.cloudProcessingEnabled !== undefined ? { cloudProcessingEnabled: input.cloudProcessingEnabled } : {}),
         ...(input.candidateInferenceEnabled !== undefined ? { candidateInferenceEnabled: input.candidateInferenceEnabled } : {}),
-        settingsVersion: { increment: 1 }, privacyRevision: { increment: 1 } } });
+        settingsVersion: { increment: 1 }, ...(affectsConsumers ? { privacyRevision: { increment: 1 } } : {}) } });
       // 策略变化也是三类变更之一：同步推进 privacyRevision，并让所有活跃消费者重协调。
       // 账户策略变化（关闭使用、云处理开关）：所有带个人依赖的消费者一起重协调，未使用者不受影响。
-      await invalidatePersonalMemoryConsumers(tx, user.id, ["policy:" + policy.settingsVersion], { scope: "ALL_DEPENDENT" });
+      if (affectsConsumers) await invalidatePersonalMemoryConsumers(tx, user.id, ["policy:" + policy.settingsVersion], { scope: "ALL_DEPENDENT" });
       await tx.userMemoryControlReceipt.create({ data: { ownerUserId: user.id, requestId: input.requestId, operation: "POLICY_UPDATE",
         payloadHash, resultVersionJson: { policyVersion: policy.settingsVersion, privacyRevision: policy.privacyRevision }, purgeJson: {} } });
       return { replayed: false, policy };
@@ -61,7 +66,7 @@ export async function PATCH(request: Request) {
     });
     return NextResponse.json({ replayed: result.replayed, policy: { settingsVersion: result.policy.settingsVersion, privacyRevision: result.policy.privacyRevision,
       useInContextEnabled: result.policy.useInContextEnabled, cloudProcessingEnabled: result.policy.cloudProcessingEnabled,
-      candidateInferenceEnabled: result.policy.candidateInferenceEnabled } });
+      candidateInferenceEnabled: result.policy.candidateInferenceEnabled, expressionSuggestEnabled: result.policy.expressionSuggestEnabled } });
   } catch (error) {
     return apiError(error);
   }

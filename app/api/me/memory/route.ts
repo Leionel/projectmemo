@@ -34,11 +34,12 @@ export async function GET(request: Request) {
     const includeStopped = url.searchParams.get("includeStopped") === "1";
     const list = await listPersonalMemory(user.id, { includeStopped });
     const policy = await readPolicy(user.id);
-    return NextResponse.json({ ...list, policy: policy ? {
-      useInContextEnabled: policy.useInContextEnabled, explicitCaptureEnabled: policy.explicitCaptureEnabled,
-      candidateInferenceEnabled: policy.candidateInferenceEnabled, cloudProcessingEnabled: policy.cloudProcessingEnabled,
-      settingsVersion: policy.settingsVersion, privacyRevision: policy.privacyRevision,
-      extractionNotBefore: policy.extractionNotBefore?.toISOString() ?? null } : null });
+    // 账号还没有策略行时按数据库默认值返回，否则客户端的开关会全部显示为关闭且不可操作。
+    return NextResponse.json({ ...list, policy: {
+      useInContextEnabled: policy?.useInContextEnabled ?? true, explicitCaptureEnabled: policy?.explicitCaptureEnabled ?? true,
+      candidateInferenceEnabled: policy?.candidateInferenceEnabled ?? false, expressionSuggestEnabled: policy?.expressionSuggestEnabled ?? true,
+      cloudProcessingEnabled: policy?.cloudProcessingEnabled ?? false, settingsVersion: policy?.settingsVersion ?? 1, privacyRevision: policy?.privacyRevision ?? 1,
+      extractionNotBefore: policy?.extractionNotBefore?.toISOString() ?? null } });
   } catch (error) {
     return apiError(error);
   }

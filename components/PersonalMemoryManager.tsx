@@ -12,7 +12,7 @@ type PersonalEntry = {
 
 type Policy = {
   useInContextEnabled: boolean; explicitCaptureEnabled: boolean;
-  candidateInferenceEnabled: boolean; cloudProcessingEnabled: boolean;
+  candidateInferenceEnabled: boolean; expressionSuggestEnabled?: boolean; cloudProcessingEnabled: boolean;
   settingsVersion: number; privacyRevision: number;
 } | null;
 
@@ -213,7 +213,7 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
         {loading ? (
           <p className="mt-4 flex items-center gap-2 text-sm text-[var(--muted)]"><LoaderCircle size={16} className="animate-spin" />正在读取…</p>
         ) : entries.length === 0 ? (
-          <p className="card-surface mt-3 rounded-xl p-5 text-sm leading-6 text-[var(--ink-soft)]">还没有保存任何内容。你可以在对话里明确说明一次，或在上面的表单里添加。</p>
+          <p className="card-surface mt-3 rounded-xl p-5 text-sm leading-6 text-[var(--ink-soft)]">还没有保存任何内容。你在对话或随手记录里说到的习惯和背景，会出现在这里等你确认；也可以用上面的表单添加。</p>
         ) : (
           <ul className="mt-3 space-y-2">
             {entries.map((entry) => (
@@ -286,7 +286,7 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
 
       {candidates.length > 0 && (
         <section className="mt-6">
-          <h2 className="text-sm font-bold text-[var(--ink)]">待确认的理解（{candidates.length}）</h2>
+          <h2 className="text-sm font-bold text-[var(--ink)]">忆程发现的，要记住吗（{candidates.length}）</h2>
           <ul className="mt-3 space-y-2">
             {candidates.map((candidate) => (
               <li key={candidate.claimId} className="card-surface rounded-xl p-4">
@@ -335,6 +335,13 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
                 <span className="mt-0.5 block text-xs leading-5 text-[var(--ink-soft)]">关闭后项目资料与原任务照常可用，已保存内容保留。</span></span>
               <input type="checkbox" checked={policy.useInContextEnabled} disabled={busy}
                 onChange={(event) => void togglePolicy({ useInContextEnabled: event.target.checked }, event.target.checked ? "已开启使用。" : "已关闭使用；项目资料与原任务不受影响。")}
+                className="mt-1 h-4 w-4 shrink-0" />
+            </label>
+            <label className="flex items-start justify-between gap-3 border-t border-[var(--rule)]/60 pt-3">
+              <span className="min-w-0"><span className="font-bold text-[var(--ink)]">从日常输入中发现</span>
+                <span className="mt-0.5 block text-xs leading-5 text-[var(--ink-soft)]">用规则识别你说过的习惯和背景，不调用模型；确认后才生效。</span></span>
+              <input type="checkbox" checked={policy.expressionSuggestEnabled !== false} disabled={busy}
+                onChange={(event) => void togglePolicy({ expressionSuggestEnabled: event.target.checked }, event.target.checked ? "已开启发现。" : "已关闭发现；已确认的内容不受影响。")}
                 className="mt-1 h-4 w-4 shrink-0" />
             </label>
             <label className="flex items-start justify-between gap-3 border-t border-[var(--rule)]/60 pt-3">

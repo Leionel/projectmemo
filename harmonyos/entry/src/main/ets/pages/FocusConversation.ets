@@ -15,6 +15,8 @@ import { AttachmentService } from '../services/AttachmentService';
 import promptAction from '@ohos.promptAction';
 import { photoAccessHelper } from '@kit.MediaLibraryKit';
 import { picker } from '@kit.CoreFileKit';
+import { copyPickedFile, pickedFileName, removePickedCopy } from '../common/PickedFile';
+import { common } from '@kit.AbilityKit';
 import { missionStatusLabel } from '../common/MissionContract';
 import { ConversationPresentation } from '../common/ConversationPresentation';
 import { PMAppBar } from '../components/PMAppBar';
@@ -217,7 +219,7 @@ struct FocusConversation {
         const options = new picker.DocumentSelectOptions(); options.fileSuffixFilters = ['PDF|.pdf']; options.maxSelectNumber = 1;
         const uris = await new picker.DocumentViewPicker().select(options);
         if (uris.length === 0) { return; }
-        uri = uris[0]; name = uris[0].split('/').pop() ?? `discussion-${Date.now()}.pdf`; mime = 'application/pdf';
+        uri = uris[0]; name = pickedFileName(uris[0], `discussion-${Date.now()}.pdf`); mime = 'application/pdf';
       }
     } catch (_e) { return; }
     const projectId = this.attachProjectId();
@@ -228,17 +230,19 @@ struct FocusConversation {
         : [{ text: '仅用于本次讨论', color: '#0A7EA4' }] })).index;
     } catch (_e) { return; }
     this.attachBusy = true; this.error = '';
+    let localPath = '';
     try {
+      localPath = copyPickedFile((getContext(this) as common.UIAbilityContext).cacheDir, uri);
       if (use === 0) {
-        const reply = await this.attachmentService.upload(this.view.id, uri, name, mime, projectId);
+        const reply = await this.attachmentService.upload(this.view.id, localPath, name, mime, projectId);
         if (!this.attachmentChips.some((c: ConversationAttachmentChip) => c.id === reply.attachment.id)) { this.attachmentChips = [...this.attachmentChips, reply.attachment]; }
         this.pending = null;
       } else {
-        await this.projectAttachmentService.upload(projectId, uri, name, mime);
+        await this.projectAttachmentService.upload(projectId, localPath, name, mime);
         this.text = (this.text !== '' ? this.text + '\n' : '') + '我刚把一份资料加入了项目记忆，'; this.saveComposer();
       }
     } catch (e) { this.fail(e); }
-    finally { this.attachBusy = false; }
+    finally { removePickedCopy(uri, localPath); this.attachBusy = false; }
   }
   private async promoteAttachment(chip: ConversationAttachmentChip): Promise<void> {
     const projectId = this.attachProjectId();

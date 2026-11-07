@@ -1,5 +1,6 @@
 import { describe, it, expect } from '@ohos/hypium';
 import { Attachment } from '../main/ets/models/Attachment';
+import { pickedFileName } from '../main/ets/common/PickedFile';
 import { attachmentFilePath, attachmentPreviewKind, attachmentSaveName, attachmentSize, attachmentStatus } from '../main/ets/common/AttachmentPresentation';
 
 export default function attachmentPresentationTest() {
@@ -20,6 +21,10 @@ export default function attachmentPresentationTest() {
       expect(attachmentStatus(item).includes('原件可查看')).assertTrue();
       item.extractionStatus = 'NEEDS_OCR';
       expect(attachmentStatus(item).includes('原件可查看')).assertTrue();
+    });
+    it('picked_file_name_decodes_uri_and_falls_back', 0, () => {
+      expect(pickedFileName('file://docs/storage/Users/currentUser/Download/%E4%BC%9A%E8%AE%AE.pdf', 'x.pdf')).assertEqual('会议.pdf');
+      expect(pickedFileName('file://media/Photo/1/', 'x.jpg')).assertEqual('x.jpg');
     });
     it('save_name_preserves_chinese_and_removes_paths', 0, () => {
       expect(attachmentSaveName('../阶段/报告.pdf')).assertEqual('.._阶段_报告.pdf');

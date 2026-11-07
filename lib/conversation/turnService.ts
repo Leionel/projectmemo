@@ -1,3 +1,4 @@
+import { suggestFromExpression } from "@/lib/memory/personalExpression";
 import { publishConversationDigest } from "@/lib/memory/conversationDigest";
 import { conversationAttachmentContext } from "@/lib/services/conversationAttachmentService";
 import { db } from "@/lib/db";
@@ -102,6 +103,7 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     return { turn, replay: false };
   });
   if (reserved.replay) return { turnId: reserved.turn.id, status: reserved.turn.status, conversation: await readConversation(actor, id) };
+  if (!evaluation) await suggestFromExpression(actor.userId, input.message, { via: "CONVERSATION", conversationId: id });
   if (options?.defer) return { turnId: reserved.turn.id, status: reserved.turn.status, conversation: await readConversation(actor, id) };
   return reserved.turn.leaseToken ? withTurnLease(reserved.turn.id, reserved.turn.leaseToken, () => executeAcceptedConversationTurn(actor, id, reserved.turn, evaluation)) : executeAcceptedConversationTurn(actor, id, reserved.turn, evaluation);
 }

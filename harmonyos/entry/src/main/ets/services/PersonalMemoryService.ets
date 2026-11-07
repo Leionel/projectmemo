@@ -21,6 +21,7 @@ export class PersonalMemoryPolicy {
   useInContextEnabled: boolean = false;
   explicitCaptureEnabled: boolean = true;
   candidateInferenceEnabled: boolean = false;
+  expressionSuggestEnabled: boolean = true;
   cloudProcessingEnabled: boolean = false;
   settingsVersion: number = 0;
   privacyRevision: number = 0;
@@ -79,6 +80,7 @@ export class PersonalMemoryPolicyInput {
   expectedVersion: number | undefined = undefined;
   useInContextEnabled: boolean | undefined = undefined;
   cloudProcessingEnabled: boolean | undefined = undefined;
+  expressionSuggestEnabled: boolean | undefined = undefined;
 }
 
 export class PersonalMemoryPolicyResult {

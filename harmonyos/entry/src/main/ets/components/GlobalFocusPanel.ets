@@ -10,7 +10,8 @@ import { ApiError } from '../models/Project';
 import { LoadingStateView, ErrorStateView } from './AsyncStateView';
 import { PMColors, PMFontFamily, PMRadius } from '../common/DesignTokens';
 import { PMButton, PMStatusPill, PMPageIntro, PMListRow } from './PMReferencePrimitives';
-import { FilterIcon } from './PMIcons';
+import { FilterIcon, PlusIcon } from './PMIcons';
+import { QuickCaptureSheet } from './QuickCaptureSheet';
 import { FocusAgentLauncher, LauncherScrollTracker } from './FocusAgentLauncher';
 import { WorkStateBadges } from './WorkStateBadge';
 import { nextActorLabel, primaryActionTone } from '../common/WorkStateBadge';
@@ -23,6 +24,7 @@ import { missionToolLabel } from '../common/MissionContract';
 export struct GlobalFocusPanel {
   @State private agentEnabled: boolean = false;
   @State private launcherCollapsed: boolean = false;
+  @State private showQuickCapture: boolean = false;
   private launcherTracker: LauncherScrollTracker = new LauncherScrollTracker();
   @Prop @Watch('refresh') refreshKey: number = 0;
   onOpenActions: (reminders: boolean) => void = (_reminders: boolean): void => {};
@@ -190,6 +192,14 @@ export struct GlobalFocusPanel {
   private askReason(item: FocusEntry): void {
     router.pushUrl({ url: 'pages/FocusConversation', params: { projectId: item.projectId, originKind: 'INTERVENTION', originId: item.id } });
   }
+  @Builder
+  private QuickCapture() {
+    QuickCaptureSheet({
+      preferredProjectId: this.primary()?.projectId ?? '',
+      onClose: (): void => { this.showQuickCapture = false; },
+      onSaved: (): void => { this.refresh(); }
+    })
+  }
   private focusMenuItems(): MenuElement[] {
     const items: MenuElement[] = [];
     items.push({ value: this.includeArchived ? '包含归档项目 · 已开启' : '包含归档项目 · 未开启', action: (): void => {
@@ -321,6 +331,11 @@ export struct GlobalFocusPanel {
           if (this.errorText !== '') { Text(this.errorText).fontSize(12).fontColor(PMColors.RISK) }
           Row({ space: 8 }) {
             PMPageIntro({ eyebrow: this.dateLabel(), title: '今日焦点', compact: true }).layoutWeight(1)
+            Button({ type: ButtonType.Circle }) { PlusIcon({ iconSize: 20, iconColor: PMColors.BRAND }) }
+              .width(44).height(44).backgroundColor(Color.Transparent)
+              .accessibilityText('记录进展')
+              .onClick(() => { this.showQuickCapture = true; })
+              .bindSheet($$this.showQuickCapture, this.QuickCapture(), { height: SheetSize.FIT_CONTENT, dragBar: true, showClose: false })
             Button({ type: ButtonType.Circle }) { FilterIcon({ iconSize: 18, isSelected: this.includeArchived }) }
               .width(40).height(40).backgroundColor(this.includeArchived ? PMColors.BRAND_LIGHT : Color.Transparent)
               .accessibilityText(this.includeArchived ? '焦点范围：已包含归档项目，可刷新' : '焦点范围：归档筛选与刷新')

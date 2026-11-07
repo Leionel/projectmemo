@@ -25,6 +25,7 @@ test("CT1 direction correction, stale confirmation, original Mission resume, wit
     const rejected = await page.request.post(`/api/conversations/${f.conversationId}/proposals/${f.old.executionId}/confirm`, { headers,
       data: { requestId: "old-button", proposalHash: f.old.proposalHash, confirmed: true } });
     expect(rejected.status()).toBe(409); expect((await rejected.json()).error.code).toBe("CONTINUITY_CHANGED");
+    await ct.getByText(/项待接续/).click();
     await ct.getByRole("button", { name: "整理演示记录", exact: true }).click();
     await panel.getByRole("button", { name: "预览接续原委托", exact: true }).click();
     await panel.getByRole("button", { name: "确认此操作", exact: true }).click();

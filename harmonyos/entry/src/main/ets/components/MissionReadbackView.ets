@@ -185,8 +185,10 @@ export struct MissionReadbackView {
           readAtText: this.readAtLabel(),
           onPrimaryAction: (action: WorkPacketActionView): void => { this.onPrimaryAction(action); }
         })
-        Text(`读取于 ${this.readAtLabel()} · 委托版本 ${this.versionLabel()}`).fontSize(11).fontColor(PMColors.INK_TERTIARY)
-        Text(observationLine(this.delta.observation)).fontSize(11).fontColor(PMColors.INK_TERTIARY)
+        if (!this.hasPacket()) {
+          Text(`读取于 ${this.readAtLabel()} · 委托版本 ${this.versionLabel()}`).fontSize(11).fontColor(PMColors.INK_TERTIARY)
+          Text(observationLine(this.delta.observation)).fontSize(11).fontColor(PMColors.INK_TERTIARY)
+        }
         if (this.mode === 'packet') {
           if (!this.hasPacket()) {
             Text('完整原委托读回（资料、草稿、回执与用量）仍在「进展」页，不受摘要缺失影响。').fontSize(12).fontColor(PMColors.INK_SECONDARY)

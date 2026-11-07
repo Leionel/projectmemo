@@ -1,5 +1,5 @@
 import { alertError } from '../common/ErrorAlert';
-import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMotion, PMMaterial } from '../common/DesignTokens';
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMotion } from '../common/DesignTokens';
 import { ArtifactAuditResponse, ArtifactAuditRecheckItem, ArtifactClaimAuditItem, ArtifactGenerationRef } from '../models/Artifact';
 import { ApiError } from '../models/Project';
 import { ArtifactService } from '../services/ArtifactService';
@@ -131,7 +131,7 @@ export struct ClaimAuditorDrawer {
         .width('100%')
         .height('100%')
         .backgroundColor(PMColors.SCRIM)
-        .backgroundBlurStyle(PMMaterial.SCRIM, PMMaterial.OPTIONS)
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
         .onClick(() => {
           this.onClose();
         })
@@ -144,14 +144,16 @@ export struct ClaimAuditorDrawer {
             Circle({ width: 8, height: 8 })
               .fill(PMColors.BRAND)
               .margin({ right: PMSpacing.SM })
-            Text('证据透视镜 (Claim Auditor)')
+            Text('证据透视')
               .fontSize(PMFontSize.TITLE)
               .fontWeight(FontWeight.Bold)
               .fontColor(PMColors.INK_PRIMARY)
+              .layoutWeight(1)
           }
           .alignItems(VerticalAlign.Center)
+          .layoutWeight(1)
 
-          PMCloseButton({ accessibilityLabel: '关闭证据透视镜', onAction: (): void => { this.onClose(); } })
+          PMCloseButton({ accessibilityLabel: '关闭证据透视', onAction: (): void => { this.onClose(); } })
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)

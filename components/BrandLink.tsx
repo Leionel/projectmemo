@@ -9,7 +9,7 @@ export function BrandLink({ descriptor = false }: { descriptor?: boolean }) {
       aria-label="忆程 ProjectMemo 首页"
       className="app-brand focus-ring"
     >
-      <Image src="/logo.png" alt="" width={28} height={28} priority unoptimized/>
+      <Image src="/brand-mark.png" alt="" width={28} height={28} priority unoptimized/>
       <span className="app-brand-name">
         忆程<span className="app-brand-english"> ProjectMemo</span>
       </span>

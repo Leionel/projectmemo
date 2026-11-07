@@ -1,5 +1,5 @@
-.blocks { display:grid; gap:1.15rem; min-width:0; font-size:.96875rem; line-height:1.8; color:var(--ink); }
-.blocks h3,.blocks h4 { font-size:1rem; font-weight:650; line-height:1.65; }
+.blocks { position:relative; display:grid; gap:1.15rem; min-width:0; font-size:.96875rem; line-height:1.8; color:var(--ink); }
+.blocks h3,.blocks h4 { font-size:1rem; font-weight:600; line-height:1.65; }
 .blocks h4 { font-size:.9375rem; }
 .prose { overflow-wrap:anywhere; min-width:0; }
 .prose > * + * { margin-top:.65rem; }
@@ -23,7 +23,7 @@
 .state[data-state=BLOCKED] { color:var(--brick); background:color-mix(in srgb,var(--brick) 8%,var(--card-bg)); }
 .state[data-state=VERIFIED] { color:var(--teal-strong); background:var(--teal-pale); }
 .criterion { display:flex; align-items:baseline; gap:.6rem; flex-wrap:wrap; }
-.criterion strong { font-size:.875rem; font-weight:550; }
+.criterion strong { font-size:.875rem; font-weight:600; }
 .criterion > span { font-size:.75rem; color:var(--muted); flex-shrink:0; }
 .goal li p { color:var(--ink-soft); font-size:.84375rem; margin-top:.2rem; }
 .nextNeed { color:var(--teal-strong); font-size:.8125rem; margin-top:.9rem; }
@@ -31,7 +31,13 @@
 .blocks summary { display:flex; align-items:center; gap:.5rem; min-height:44px; padding:.55rem .7rem; cursor:pointer; font-size:.8125rem; color:var(--ink-soft); list-style:none; }
 .blocks summary::-webkit-details-marker { display:none; }
 .blocks summary span { flex:1; min-width:0; }
-.source { padding:.7rem .85rem; border-top:1px solid var(--rule); }
+.source { padding:.7rem .85rem; border-top:1px solid var(--rule); transition:background-color var(--dur-state) ease; }
+.source[data-tether] { background:var(--teal-pale); }
+.source blockquote { transition:border-color var(--dur-state) ease; }
+.blocks [data-tether-line] { position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; }
+.blocks [data-tether-line] path { fill:none; stroke:var(--teal); stroke-width:1.5; stroke-dasharray:1; stroke-dashoffset:1; animation:tetherDraw var(--dur-trace) var(--ease-standard) forwards; }
+@keyframes tetherDraw { to { stroke-dashoffset:0; } }
+.change { animation:blockSettle var(--dur-settle) var(--ease-out) both; }
 .source blockquote { margin:0; padding-left:.75rem; border-left:2px solid var(--teal); color:var(--ink); font-size:.875rem; white-space:pre-wrap; overflow-wrap:anywhere; }
 .source p { font-size:.8125rem; color:var(--ink-soft); margin-top:.5rem; }
 .source small { display:block; color:var(--brick); font-size:.75rem; margin-top:.35rem; }
@@ -40,32 +46,40 @@
 .trace li { display:flex; gap:.65rem; align-items:flex-start; font-size:.8125rem; }
 .trace li > span { color:var(--teal-strong); margin-top:.3rem; }
 .trace li p { color:var(--muted); font-size:.75rem; }
-.trace li strong { font-weight:500; }
-.approval { padding:1rem; border:1px solid color-mix(in srgb,var(--teal) 28%,var(--rule)); background:color-mix(in srgb,var(--teal-pale) 25%,var(--card-bg)); border-radius:12px; }
+.trace li strong { font-weight:400; }
+.approval { padding:1rem; border:1px solid color-mix(in srgb,var(--rule-strong) 45%,var(--rule)); background:var(--card-bg); border-radius:12px; }
+/* 等待确认是唯一使用琥珀的块：出现时淡入一次，之后完全静止，按钮不位移。 */
+.approval[data-state="PENDING"] { border-color:color-mix(in srgb,var(--amber) 55%,var(--rule)); background:color-mix(in srgb,var(--amber) 7%,var(--card-bg)); animation:blockSettle var(--dur-settle) var(--ease-out) both; }
+.approval[data-state="PENDING"] .status { color:var(--amber); font-weight:600; }
+.approval[data-state="STALE"] .status,.approval[data-state="EXPIRED"] .status,.approval[data-state="UNKNOWN"] .status { color:var(--amber); }
+.approval[data-state="DECLINED"] .status { color:var(--muted); }
 .status { display:block; font-size:.75rem; color:var(--teal-strong); margin-bottom:.4rem; }
 .approval p { font-size:.875rem; color:var(--ink-soft); margin-top:.4rem; white-space:pre-wrap; }
 .actions { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
 .actions:has(button) { margin-top:.8rem; }
 .actions small { width:100%; color:var(--muted); font-size:.75rem; }
-.primary,.secondary { display:inline-flex; align-items:center; justify-content:center; gap:.4rem; min-height:44px; padding:.55rem .85rem; border-radius:8px; font-size:.84375rem; font-weight:550; }
+.primary,.secondary { display:inline-flex; align-items:center; justify-content:center; gap:.4rem; min-height:44px; padding:.55rem .85rem; border-radius:8px; font-size:.84375rem; font-weight:600; }
 .primary { background:var(--teal-strong); color:var(--paper-strong); }
 .secondary { background:var(--card-bg); color:var(--ink-soft); border:1px solid var(--rule); }
 .primary:disabled,.secondary:disabled { opacity:.5; cursor:not-allowed; }
 .primary:focus-visible,.secondary:focus-visible,.choices button:focus-visible { outline:2px solid var(--teal); outline-offset:3px; }
 .receipt { display:flex; gap:.75rem; padding:1rem; border:1px solid var(--rule); border-radius:12px; background:var(--paper); }
-.receiptMark { display:grid; place-items:center; width:2rem; height:2rem; border-radius:10px; flex-shrink:0; color:var(--teal-strong); background:var(--teal-pale); }
+.receiptMark { display:grid; place-items:center; width:2rem; height:2rem; border-radius:10px; flex-shrink:0; color:var(--muted); background:var(--paper-strong); box-shadow:inset 0 0 0 1px var(--rule); }
+.receipt[data-state="SUCCEEDED"] .receiptMark { color:var(--teal-strong); background:var(--teal-pale); box-shadow:none; animation:blockSettle var(--dur-settle) var(--ease-out) both; }
+.receipt[data-state="FAILED"] .receiptMark { color:var(--brick); background:var(--brick-pale); box-shadow:none; }
+.receipt[data-state="UNKNOWN"] .receiptMark,.receipt[data-state="WAITING_USER"] .receiptMark { color:var(--amber); }
 .receipt strong { font-size:.9375rem; }
 .receipt p { margin-top:.25rem; font-size:.875rem; }
 .receipt small { font-size:.75rem; color:var(--muted); }
 .comparison h3 { margin-bottom:.65rem; }
 .choices { display:grid; gap:.5rem; }
-.choices button { padding:.8rem; text-align:left; border:1px solid var(--rule); border-radius:9px; min-height:44px; }
+.choices button { padding:.8rem; text-align:left; border:1px solid var(--rule); border-radius:9px; min-height:44px; transition:border-color var(--dur-state) ease,background-color var(--dur-state) ease; }
 .choices button[aria-pressed=true] { border-color:var(--teal); background:var(--teal-pale); }
 .choices button > * { display:block; }
 .choices button strong { font-size:.875rem; font-weight:600; }
 .choices button span,.choices button small { font-size:.8125rem; color:var(--ink-soft); margin-top:.25rem; }
 .question { display:grid; gap:.65rem; }
-.question label { font-weight:550; font-size:.9375rem; }
+.question label { font-weight:600; font-size:.9375rem; }
 .question textarea { width:100%; min-height:6rem; padding:.7rem; border:1px solid var(--rule-strong); border-radius:10px; background:var(--card-bg); color:var(--ink); resize:vertical; font:inherit; font-size:.9375rem; }
 .question > button { justify-self:start; }
 .change { padding-left:.85rem; border-left:2px solid var(--teal); }
@@ -73,4 +87,6 @@
 .timeline { border-left:1px solid var(--rule-strong); padding-left:1rem; display:grid; gap:.8rem; }
 .timeline time { font-size:.75rem; color:var(--muted); }
 .timeline p { font-size:.875rem; }
+@keyframes blockSettle { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+@media(prefers-reduced-motion:reduce) { .approval[data-state="PENDING"],.receipt[data-state="SUCCEEDED"] .receiptMark,.change { animation:none; } .blocks [data-tether-line] path { animation:none; stroke-dashoffset:0; } }
 @media(max-width:500px) { .blocks { font-size:.9375rem; } .approval,.receipt { padding:.85rem; } .actions { gap:.4rem; } }

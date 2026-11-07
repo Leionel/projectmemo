@@ -21,10 +21,20 @@ describe("Mission 面板调用方",()=>{
   await waitFor(()=>expect(f.requests.find(r=>r.url==="/api/missions")?.body).toMatchObject({successCriteria:["DRAFT_EXISTS","FIXED_METRIC_JOB_RECORDED","PAPER_METADATA_READ","ACTION_CREATED","ACTION_RESULT_RECORDED"],llmContextApproved:true}));
   expect(f.requests.some(r=>r.url.includes("research-scope")||r.url.includes("approval"))).toBe(false);
  });
- it("预算复核明确累计上限，提交原版本且不会自动继续或消费批准",async()=>{
-  const f=fixture();Object.assign(f.mission,{status:"PAUSED",budget:{models:12,tools:16,activeMs:180000,reservedOutputTokens:12000},used:{models:12,tools:10}});render(createElement(MissionPanel,{projectId:"p"}));fireEvent.click(await screen.findByRole("button",{name:"整理阶段汇报 · 已暂停"}));await screen.findByRole("heading",{name:"整理阶段汇报"});fireEvent.click(screen.getByText("复核累计预算"));
-  fireEvent.click(screen.getByRole("button",{name:"确认累计上限，保持暂停"}));await waitFor(()=>expect(f.requests.find(r=>r.url.endsWith("/budget-review"))?.body).toMatchObject({expectedVersion:1,totals:{models:18,tools:24,activeMs:360000,reservedOutputTokens:24000}}));
-  expect(f.requests.some(r=>r.url.endsWith("/resume")||r.url.includes("/approvals/"))).toBe(false);
+ it("额度用完时一个按钮提高上限并继续，只提交原版本，不消费批准",async()=>{
+  const f=fixture();Object.assign(f.mission,{status:"PAUSED",pauseReason:"BUDGET",error:{code:"BUDGET_EXHAUSTED",message:"任务预算已用完"},budget:{models:12,tools:16,activeMs:180000,reservedOutputTokens:12000},used:{models:12,tools:10}});render(createElement(MissionPanel,{projectId:"p"}));fireEvent.click(await screen.findByRole("button",{name:"整理阶段汇报 · 已暂停"}));await screen.findByRole("heading",{name:"整理阶段汇报"});
+  expect(screen.queryByRole("button",{name:"确认后继续执行"})).toBeNull();
+  fireEvent.click(screen.getByRole("button",{name:"加额度并继续"}));
+  await waitFor(()=>expect(f.requests.find(r=>r.url.endsWith("/resume"))).toBeTruthy());
+  expect(f.requests.find(r=>r.url.endsWith("/budget-review"))?.body).toMatchObject({expectedVersion:1,totals:{models:18,tools:24,activeMs:360000,reservedOutputTokens:24000}});
+  expect(f.requests.some(r=>r.url.includes("/approvals/"))).toBe(false);
+ });
+ it("其他原因暂停时只继续，不提高额度",async()=>{
+  const f=fixture();Object.assign(f.mission,{status:"PAUSED",pauseReason:"USER",error:{code:"MODEL_ERROR",message:"模型暂不可用"},budget:{models:12,tools:16,activeMs:180000,reservedOutputTokens:12000},used:{models:1,tools:1}});render(createElement(MissionPanel,{projectId:"p"}));fireEvent.click(await screen.findByRole("button",{name:"整理阶段汇报 · 已暂停"}));await screen.findByRole("heading",{name:"整理阶段汇报"});
+  expect(screen.queryByRole("button",{name:"加额度并继续"})).toBeNull();
+  fireEvent.click(screen.getByRole("button",{name:"确认后继续执行"}));
+  await waitFor(()=>expect(f.requests.find(r=>r.url.endsWith("/resume"))).toBeTruthy());
+  expect(f.requests.some(r=>r.url.endsWith("/budget-review"))).toBe(false);
  });
  it("表单在服务端输出中不可提前编辑，客户端就绪后才接收委托目标",()=>{
   fixture();const markup=renderToStaticMarkup(createElement(MissionPanel,{projectId:"p"}));

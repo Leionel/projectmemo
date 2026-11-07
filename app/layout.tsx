@@ -6,6 +6,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { GlobalNavigation } from "@/components/GlobalNavigation";
 import { UserNav } from "@/components/UserNav";
 import { SiteHeader } from "@/components/SiteHeader";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import {BrandLink} from "@/components/BrandLink";
 import { accountMailConfiguration } from "@/lib/auth/mail";
 import { connection } from "next/server";
@@ -46,7 +47,6 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
                     <Menu size={16} />
                   </summary>
                   <div className="absolute right-0 top-full mt-2 flex w-48 flex-col gap-1 rounded-2xl border border-[var(--rule)] bg-[var(--card-bg)] p-2 shadow-xl">
-                    <GlobalNavigation mobile />
                     <ThemeToggle isMenuItem />
                     <UserNav isMenuItem liveLlm={liveLlm} />
                   </div>
@@ -55,6 +55,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             </div>
           </header></SiteHeader>
           {children}
+          <MobileBottomNav />
           <ErrorPopupHost />
         </ThemeProvider>
       </body>

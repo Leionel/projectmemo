@@ -1,7 +1,7 @@
 import { agentStateLabel, receiptDetail } from '../common/AgentPresentationContract';
 import { AgentPresentation, HydratedBlock, AllowedAction, RichTextNode, ExperienceInlineText, EvidenceLink, GoalCriterion, ExperienceCandidate, InvestigationStep, ExperienceTimelineEvent, ExperienceChoice, ExperienceBranch } from '../models/AgentExperience';
 import { ConversationDraftStore, ConversationDraft } from '../services/ConversationDraftStore';
-import { PMColors } from '../common/DesignTokens';
+import { PMColors, PMMotion } from '../common/DesignTokens';
 
 @Component
 struct AgentRichText {
@@ -40,6 +40,7 @@ struct AgentRichText {
 }
 @Component
 struct AgentSemanticBlock {
+  private isPendingApproval(): boolean { return this.block.semanticType === 'approval' && this.block.state === 'PENDING'; }
   @Prop block: HydratedBlock = { blockKey: '', semanticType: '', emphasis: 'supporting', fallbackText: '', refs: [], actionBindingIds: [] };
   @Prop actions: AllowedAction[] = [];
   @Prop conversationId: string = '';
@@ -86,12 +87,13 @@ struct AgentSemanticBlock {
         this.Controls()
       } else if (this.block.semanticType === 'approval' || this.block.semanticType === 'receipt') {
         Column({ space: 10 }) {
-          Text(agentStateLabel(this.block.state ?? 'UNKNOWN')).fontSize(13).fontColor(PMColors.BRAND)
+          Text(agentStateLabel(this.block.state ?? 'UNKNOWN')).fontSize(13).fontWeight(this.isPendingApproval() ? FontWeight.Medium : FontWeight.Normal).fontColor(this.isPendingApproval() ? PMColors.WARNING : this.block.state === 'SUCCEEDED' || this.block.state === 'COMMITTED' ? PMColors.BRAND : this.block.state === 'FAILED' ? PMColors.RISK : PMColors.INK_SECONDARY)
           Text(this.block.fallbackText.split('\n')[0]).fontSize(16).lineHeight(26).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
           if (this.block.fallbackText.includes('\n')) { Text(this.block.fallbackText.split('\n').slice(1).join('\n')).fontSize(14).lineHeight(23).fontColor(PMColors.INK_SECONDARY) }
           if (this.block.semanticType === 'receipt') { Text(receiptDetail(this.block.state ?? 'UNKNOWN', this.block.verification ?? 'NOT_CHECKED')).fontSize(13).lineHeight(22).fontColor(PMColors.INK_SECONDARY) }
           this.Controls()
-        }.padding(16).width('100%').alignItems(HorizontalAlign.Start).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(12).border({ width: 1, color: PMColors.BORDER_SUBTLE })
+        }.padding(16).width('100%').alignItems(HorizontalAlign.Start).backgroundColor(this.isPendingApproval() ? PMColors.WARNING_LIGHT : PMColors.SURFACE_SUBTLE).borderRadius(12).border({ width: 1, color: this.isPendingApproval() ? PMColors.WARNING : PMColors.BORDER_SUBTLE })
+        .transition(TransitionEffect.OPACITY.combine(TransitionEffect.translate({ y: 4 })).animation({ duration: PMMotion.SETTLE, curve: PMMotion.CURVE_CONTENT }))
       } else if (this.block.semanticType === 'evidence' || this.block.semanticType === 'investigation') {
         Button(this.block.fallbackText + (this.expanded ? '  ⌃' : '  ⌄'), { type: ButtonType.Normal }).constraintSize({ minHeight: 44 }).fontSize(14).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 0, right: 6 }).onClick(() => { this.expanded = !this.expanded; })
         if (this.expanded) {

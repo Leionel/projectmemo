@@ -14,7 +14,7 @@
 .root h4 {
   margin: 0;
   font-size: 0.8125rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.5;
 }
 
@@ -34,7 +34,7 @@
   background: var(--teal);
   color: var(--paper-strong);
   font-size: 0.8125rem;
-  font-weight: 650;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -101,7 +101,7 @@
   background: var(--brick-pale);
   color: var(--brick);
   font-size: 0.8125rem;
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.7;
   overflow-wrap: anywhere;
 }
@@ -222,7 +222,7 @@
   min-height: 2rem;
   color: var(--ink-soft);
   font-size: 0.75rem;
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.7;
   overflow-wrap: anywhere;
 }
@@ -236,7 +236,7 @@
   margin: 0.5rem 0 0;
   color: var(--ink-soft);
   font-size: 0.75rem;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .budget {

@@ -97,7 +97,7 @@ export function missionWorkState(m: MissionStateInput, now = new Date()): WorkSt
   else if (m.status === "RUNNING") {
     if (m.leaseUntil && +m.leaseUntil > +now) {
       // 停止请求在途已在更前面优先处理；这里只剩没有停止请求的正常执行。
-      set("RUNNING", "AGENT", "LEASE_ACTIVE", "正在调查，进展来自已保存步骤", "查看委托进展");
+      set("RUNNING", "AGENT", "LEASE_ACTIVE", "正在推进", "查看委托进展");
     } else { set("UNAVAILABLE", "SYSTEM", "LEASE_UNCONFIRMED", "执行状态需重新核对，已保存步骤保留", "核对执行状态"); result.freshness = "UNAVAILABLE"; }
   } else if (m.status === "WAITING_APPROVAL") {
     set("WAITING_APPROVAL", "USER", pending ? "APPROVAL_PENDING" : "APPROVAL_EXPIRED", pending ? "请审阅原执行提案，确认后才会执行" : "原提案已过期，请重新核对依据", pending ? "审阅待批准提案" : "重新核对提案");

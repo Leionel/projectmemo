@@ -71,8 +71,8 @@ test("部署持续观察不依赖CI；同一状态与时间刷新零新增模型
 test("HTTP扩额只复用原显式预算复核，保留UNKNOWN且仍暂停",async()=>{
  const {u,m}=await fixture();const paused=await db.agentMission.update({where:{id:m.id},data:{status:"PAUSED",budgetUsedJson:{metadataRequests:24,unknownCalls:1}}});
  const {reviewMissionBudget}=await import("@/lib/mission/budgetReview");
- await expect(reviewMissionBudget(u.id,m.id,{requestId:"too-low",expectedVersion:paused.version,totals:{models:12,tools:16,activeMs:180000,reservedOutputTokens:12000,metadataRequests:23}})).rejects.toMatchObject({code:"BUDGET_TOTAL_TOO_SMALL"});
- const reviewed=await reviewMissionBudget(u.id,m.id,{requestId:"http-review",expectedVersion:paused.version,totals:{models:12,tools:16,activeMs:180000,reservedOutputTokens:12000,metadataRequests:48}});
+ await expect(reviewMissionBudget(u.id,m.id,{requestId:"too-low",expectedVersion:paused.version,totals:{models:24,tools:32,activeMs:360000,reservedOutputTokens:24000,metadataRequests:23}})).rejects.toMatchObject({code:"BUDGET_TOTAL_TOO_SMALL"});
+ const reviewed=await reviewMissionBudget(u.id,m.id,{requestId:"http-review",expectedVersion:paused.version,totals:{models:24,tools:32,activeMs:360000,reservedOutputTokens:24000,metadataRequests:48}});
  expect(reviewed.status).toBe("PAUSED");expect(reviewed.budgetUsedJson).toMatchObject({metadataRequests:24,unknownCalls:1});expect(reviewed.budgetJson).toMatchObject({metadataRequests:48});
 });
 

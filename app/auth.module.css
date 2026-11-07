@@ -1,7 +1,7 @@
 @font-face {
   font-family: "PM Editorial";
-  src: url("/fonts/pm-editorial-serif.ttf") format("truetype");
-  font-weight: 500;
+  src: url("/fonts/pm-editorial.woff2") format("woff2");
+  font-weight: 400 600;
   font-display: swap;
 }
 .auth {
@@ -32,7 +32,7 @@
 .introduction h2,
 .panel h1 {
   font-family: "PM Editorial", "Songti SC", "SimSun", serif;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: -0.035em;
 }
 .introduction h2 {
@@ -74,7 +74,7 @@
   display: block;
   color: var(--ink);
   font-size: 0.85rem;
-  font-weight: 550;
+  font-weight: 600;
 }
 .projectNote span {
   display: block;
@@ -110,7 +110,7 @@
 .field label {
   display: block;
   font-size: 0.83rem;
-  font-weight: 550;
+  font-weight: 600;
   color: var(--ink);
 }
 .field input {
@@ -176,7 +176,7 @@
   background: var(--teal);
   color: var(--paper-strong);
   font-size: 0.88rem;
-  font-weight: 550;
+  font-weight: 600;
   cursor: pointer;
   transition:
     transform 100ms,
@@ -272,7 +272,7 @@
 }
 .success h2 {
   font-size: 1rem;
-  font-weight: 550;
+  font-weight: 600;
 }
 .success p {
   font-size: 0.85rem;

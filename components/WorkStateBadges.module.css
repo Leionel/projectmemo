@@ -1,5 +1,5 @@
 .group { display:inline-flex; flex-wrap:wrap; align-items:center; gap:.375rem; min-width:0; }
-.badge { display:inline-flex; align-items:center; gap:.3rem; padding:.0625rem .5625rem; border:1px solid transparent; border-radius:999px; font-size:.75rem; font-weight:550; line-height:1.6; white-space:nowrap; }
+.badge { display:inline-flex; align-items:center; gap:.3rem; padding:.0625rem .5625rem; border:1px solid transparent; border-radius:999px; font-size:.75rem; font-weight:600; line-height:1.6; white-space:nowrap; }
 .dot { width:.3125rem; height:.3125rem; border-radius:50%; background:currentColor; flex-shrink:0; }
 
 .badge[data-tone="user"] { background:color-mix(in srgb,var(--amber) 12%,var(--card-bg)); color:var(--amber); }

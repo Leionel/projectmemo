@@ -1,0 +1,50 @@
+{
+ "tilt": {
+  "rx": "1.50deg",
+  "ry": "1.60deg",
+  "hot": true
+ },
+ "homeFonts": [
+  "PM Brand",
+  "PM Editorial",
+  "Manrope"
+ ],
+ "edges": {
+  "home": {
+   "brand": 80,
+   "h1": 80
+  },
+  "focus": {
+   "brand": 80,
+   "h1": 80
+  },
+  "projects": {
+   "brand": 80,
+   "h1": 80
+  },
+  "project": {
+   "brand": 80,
+   "h1": 80
+  }
+ },
+ "firstActionY": 768,
+ "errors": [],
+ "mFirstActionY": 1079,
+ "composer": {
+  "top": 126,
+  "height": 525,
+  "pct": 62,
+  "composer": 175
+ },
+ "overflow": true,
+ "scrollMotion": {
+  "frames": 292,
+  "taskPerFrame": 10.63,
+  "recalc": 357
+ },
+ "scrollReduced": {
+  "frames": 302,
+  "taskPerFrame": 3.18,
+  "recalc": 1
+ }
+}

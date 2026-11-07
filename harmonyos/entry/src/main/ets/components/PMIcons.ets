@@ -127,35 +127,25 @@ export struct TaskIcon {
   @Prop isSelected: boolean = false;
   @Prop iconSize: number = 20;
 
-  build() {
-    // 待办清单板
-    Stack() {
-      Row()
-        .width(this.iconSize * 0.85)
-        .height(this.iconSize)
-        .backgroundColor(this.isSelected ? PMColors.BRAND_LIGHT : 'transparent')
-        .border({ width: 1.5, color: this.isSelected ? PMColors.BRAND : PMColors.INK_TERTIARY })
-        .borderRadius(3)
+  @Builder
+  private Line(width: number) {
+    Row({ space: 3 }) {
+      Row().width(4).height(4).borderRadius(2).backgroundColor(this.isSelected ? PMColors.BRAND : PMColors.INK_TERTIARY)
+      Row().width(width).height(1.5).backgroundColor(this.isSelected ? PMColors.BRAND : PMColors.INK_TERTIARY)
+    }.alignItems(VerticalAlign.Center)
+  }
 
-      Column({ space: 3 }) {
-        Row()
-          .width(this.iconSize * 0.45)
-          .height(1.5)
-          .backgroundColor(this.isSelected ? PMColors.BRAND : PMColors.INK_TERTIARY)
-        Row()
-          .width(this.iconSize * 0.45)
-          .height(1.5)
-          .backgroundColor(this.isSelected ? PMColors.BRAND : PMColors.INK_TERTIARY)
-        Row()
-          .width(this.iconSize * 0.3)
-          .height(1.5)
-          .backgroundColor(this.isSelected ? PMColors.BRAND : PMColors.INK_TERTIARY)
-      }
-      .alignItems(HorizontalAlign.Start)
-      .margin({ top: 3 })
+  build() {
+    // 清单：圆点 + 横线，不带外框，与成果的文档外框区分开
+    Column({ space: 4 }) {
+      this.Line(this.iconSize * 0.62)
+      this.Line(this.iconSize * 0.62)
+      this.Line(this.iconSize * 0.42)
     }
     .width(this.iconSize)
     .height(this.iconSize)
+    .alignItems(HorizontalAlign.Start)
+    .justifyContent(FlexAlign.Center)
   }
 }
 

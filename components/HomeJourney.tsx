@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { prefersReducedMotion } from "./motionHooks";
 import {
   ArrowLeft,
   ArrowRight,
@@ -86,6 +87,14 @@ const demoDiff: ProjectStateDiff = {
 
 export function HomeJourney() {
   const [active, setActive] = useState(0);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const previousActive = useRef(0);
+  useEffect(() => {
+    const direction = Math.sign(active - previousActive.current);
+    previousActive.current = active;
+    if (!direction || !panelRef.current?.animate || prefersReducedMotion()) return;
+    panelRef.current.animate([{ opacity: 0, transform: `translateX(${direction * 8}px)` }, { opacity: 1, transform: "none" }], { duration: 220, easing: "cubic-bezier(.22,1,.36,1)" });
+  }, [active]);
   const [confirmed, setConfirmed] = useState(false);
   const [draft, setDraft] = useState("");
   const [receipt, setReceipt] = useState("");
@@ -128,7 +137,7 @@ export function HomeJourney() {
   }
   return (
     <div
-      className={styles.storyFrame}
+      className={styles.storyFrame} data-reveal
       role="group"
       aria-label="参赛项目交互示例"
     >
@@ -190,6 +199,7 @@ export function HomeJourney() {
       </div>
       <div
         className={styles.storyBody}
+        ref={panelRef}
         role="tabpanel"
         id="story-panel"
         aria-labelledby={"story-tab-" + active}

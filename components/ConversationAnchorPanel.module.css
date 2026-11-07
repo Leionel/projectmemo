@@ -5,7 +5,7 @@
 .header button,.actions button { font-size:.6875rem; }
 .panel ul { list-style:none; margin:.4rem 0 0; padding:0; }
 .panel li { padding:.65rem 0; border-bottom:1px solid var(--rule); }
-.title strong { min-width:0; overflow-wrap:anywhere; font-weight:500; }
+.title strong { min-width:0; overflow-wrap:anywhere; font-weight:400; }
 .title span { flex-shrink:0; color:var(--teal-strong); font-size:.625rem; }
 .actions { display:flex; flex-wrap:wrap; gap:.25rem .85rem; margin-top:.3rem; }
 .error { color:var(--brick); line-height:1.8; }

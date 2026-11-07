@@ -18,6 +18,7 @@ import { picker } from '@kit.CoreFileKit';
 import { missionStatusLabel } from '../common/MissionContract';
 import { ConversationPresentation } from '../common/ConversationPresentation';
 import { PMAppBar } from '../components/PMAppBar';
+import { AgentRunThread } from '../components/AgentRunThread';
 import { PMButton } from '../components/PMReferencePrimitives';
 import { PMColors, PMSpacing, PMRadius, PMInteraction } from '../common/DesignTokens';
 import { ConversationWorkRef } from '../models/ConversationWork';
@@ -701,11 +702,7 @@ struct FocusConversation {
           }
           if (this.workRef) { ForEach([this.workRef], (ref: ConversationWorkRef) => { ConversationWorkPanel({ conversation: this.view, workRef: ref, onUpdated: (v: ConversationView): void => { this.view = v; }, onClose: (): void => { this.workRef = null; } }) }, (ref: ConversationWorkRef) => this.view.id + ref.id) }
           if (this.busy) {
-            Column({ space: 8 }) {
-              Row({ space: 10 }) { LoadingProgress().width(18).height(18).color(PMColors.BRAND); Text(this.progressLabel()).fontSize(14).fontColor(PMColors.INK_SECONDARY) }.width('100%')
-              ForEach(this.view.activeTurn?.progress?.steps ?? [], (s: ConversationReadStep) => { Text((s.status === 'SUCCEEDED' ? '✓ ' : '· ') + s.label).fontSize(13).fontColor(PMColors.INK_SECONDARY) })
-              if (this.view.activeTurn?.progress) { Button('停止本轮调查', { type: ButtonType.Normal }).constraintSize({ minHeight: 44 }).fontSize(13).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).enabled(this.view.activeTurn.progress.phase !== 'STOPPING').onClick(() => { this.stop(); }) }
-            }.width('100%').alignItems(HorizontalAlign.Start).padding({ top: 4, bottom: 8 })
+            AgentRunThread({ progress: this.view.activeTurn?.progress, label: this.progressLabel(), onStop: (): void => { this.stop(); } })
           }
         }.padding({ left: 20, right: 20, top: 18, bottom: 24 }).width('100%').alignItems(HorizontalAlign.Start).justifyContent(FlexAlign.Start)
       }.layoutWeight(1).width('100%').scrollBar(BarState.Off).align(Alignment.TopStart)

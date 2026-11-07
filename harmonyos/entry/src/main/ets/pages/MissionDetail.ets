@@ -101,6 +101,7 @@ struct MissionDetail {
   private reviewedVersion: number = 0;
   private editSnapshot: Mission = new Mission();
   private requestKeys: Record<string, string> = {};
+  private raisedVersion: number = -1;
   private errorCount: number = 0;
   private sessionExpired: () => void = () => {
     this.stop(); this.loaded = false; this.readState = 'unavailable'; this.mission = new Mission(); this.missions = []; this.events = []; this.candidates = [];
@@ -278,17 +279,39 @@ struct MissionDetail {
     const review = new EvidenceReview(); review.mode = this.evidenceMode; review.note = this.answer.trim().substring(0, 1000); review.premiseHash = premise.premiseHash;
     return review;
   }
-  private async reviewBudget():Promise<void> {
-    if(this.busy||this.readState!=='fresh')return;
-    const body=new MissionBudgetReview();body.expectedVersion=this.mission.version;
-    body.totals.metadataRequests=Math.min(960,(this.mission.budget.metadataRequests??24)+24);
-    body.totals.browserRequests=Math.min(1000,(this.mission.budget.browserRequests??40)+40);body.totals.browserBytes=Math.min(64000000,(this.mission.budget.browserBytes??4000000)+4000000);
-    body.totals.calendarRequests=Math.min(128,(this.mission.budget.calendarRequests??8)+16);body.totals.externalWrites=Math.min(32,(this.mission.budget.externalWrites??2)+10);
-    body.totals.models=Math.min(240,this.mission.budget.models+6);body.totals.tools=Math.min(640,this.mission.budget.tools+8);
-    body.totals.activeMs=Math.min(86400000,this.mission.budget.activeMs+180000);body.totals.reservedOutputTokens=Math.min(480000,this.mission.budget.reservedOutputTokens+12000);
-    body.requestId=this.requestKey(body);this.busy=true;
-    try{await this.service.budgetReview(this.missionId,body);this.notice='累计预算已复核，已用与UNKNOWN预占保留；委托保持暂停';}
-    catch(e){this.error=(e as Error).message;}finally{this.busy=false;await this.refresh();}
+  /** 加额度继续后，旧的额度错误要等下一步执行才会被覆盖；这段时间不再提示“需要恢复”。 */
+  private isStaleBudgetError(): boolean {
+    return this.mission.error?.code === 'BUDGET_EXHAUSTED' && (this.mission.status === 'READY' || this.mission.status === 'RUNNING');
+  }
+  private isBudgetPause(): boolean {
+    if (this.mission.status !== 'PAUSED') { return false; }
+    const reason = this.mission.pauseReason ?? '';
+    return reason === 'BUDGET' || reason === 'BUDGET_EXCEEDED' || this.mission.error?.code === 'BUDGET_EXHAUSTED';
+  }
+  /** 一次完成“提高上限 + 继续”。上限已提高但继续失败时，再点只重试继续，不会再加一档。 */
+  private async addBudgetAndResume(): Promise<void> {
+    if (this.busy || this.readState !== 'fresh') { return; }
+    let version = this.mission.version;
+    this.busy = true; this.error = '';
+    try {
+      if (this.raisedVersion !== version) {
+        const body = new MissionBudgetReview(); body.expectedVersion = version;
+        body.totals.metadataRequests = Math.min(960, (this.mission.budget.metadataRequests ?? 24) + 24);
+        body.totals.browserRequests = Math.min(1000, (this.mission.budget.browserRequests ?? 40) + 40); body.totals.browserBytes = Math.min(64000000, (this.mission.budget.browserBytes ?? 4000000) + 4000000);
+        body.totals.calendarRequests = Math.min(128, (this.mission.budget.calendarRequests ?? 8) + 16); body.totals.externalWrites = Math.min(32, (this.mission.budget.externalWrites ?? 2) + 10);
+        body.totals.models = Math.min(240, this.mission.budget.models + 6); body.totals.tools = Math.min(640, this.mission.budget.tools + 8);
+        body.totals.activeMs = Math.min(86400000, this.mission.budget.activeMs + 180000); body.totals.reservedOutputTokens = Math.min(480000, this.mission.budget.reservedOutputTokens + 12000);
+        body.requestId = this.requestKey(body);
+        const reply = await this.service.budgetReview(this.missionId, body);
+        version = reply.mission.version; this.raisedVersion = version;
+      }
+      const resume = new MissionCommand(); resume.expectedVersion = version;
+      resume.requestId = this.requestKey(`resume:${JSON.stringify(resume)}`);
+      await this.service.command(this.missionId, 'resume', resume, '');
+      this.notice = '已加额度并继续';
+      this.readbackRefreshKey++;
+    } catch (e) { this.error = (e as Error).message; }
+    finally { this.busy = false; await this.refresh(); }
   }
   private async command(action: string, decision: string = ''): Promise<void> {
     if (this.busy || this.readState !== 'fresh') return;
@@ -410,7 +433,7 @@ struct MissionDetail {
   /** 暂停原因可能是服务端枚举，也可能是自然语言；枚举转为用户可读，原文进技术诊断。 */
   private pauseReasonText(): string {
     const raw = this.mission.pauseReason ?? '';
-    const labels: Record<string, string> = { 'REVIEW_REQUIRED': '暂停等待人工核对：请确认预算与执行条件后再继续。', 'BUDGET_EXCEEDED': '执行预算已用完：可复核累计预算或调整后继续。', 'PAUSE_REQUESTED': '已按你的请求暂停，可随时继续。', 'CANCEL_REQUESTED': '正在等待取消流程完成。' };
+    const labels: Record<string, string> = { 'REVIEW_REQUIRED': '暂停等待人工核对：请确认预算与执行条件后再继续。', 'BUDGET_EXCEEDED': '这次委托的额度用完了，可加额度后继续。', 'PAUSE_REQUESTED': '已按你的请求暂停，可随时继续。', 'CANCEL_REQUESTED': '正在等待取消流程完成。' };
     if (labels[raw] !== undefined) { return labels[raw]; }
     return raw === '' ? '服务端未提供具体原因，请查看执行回执。' : raw;
   }
@@ -545,31 +568,18 @@ struct MissionDetail {
         .fontSize(13).fontColor(PMColors.INK_PRIMARY)
     }.width('100%')
   }
-  /** 运行额度：默认展示已用与主要上限；复核只是提高累计上限并保持暂停，与继续执行是两个操作。 */
+  /** 额度明细只读，默认收起；提高额度由“加额度并继续”一个按钮完成。 */
   @Builder private BudgetCard() {
     Column({ space: 10 }) {
-      Row({ space: 8 }) {
-        Text('运行额度').fontSize(15).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY).layoutWeight(1)
-        Button(this.showBudgetDetail ? '收起全部额度' : '展开全部额度', { type: ButtonType.Normal }).height(40).fontSize(12)
-          .fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 8, right: 0 })
-          .onClick(() => { this.showBudgetDetail = !this.showBudgetDetail; })
-      }.width('100%')
-      this.BudgetRow('模型调用', this.mission.used.models ?? 0, this.mission.budget.models, Math.min(240, this.mission.budget.models + 6), ' 次')
-      this.BudgetRow('工具调用', this.mission.used.tools ?? 0, this.mission.budget.tools, Math.min(640, this.mission.budget.tools + 8), ' 次')
-      this.BudgetRow('活动时间', Math.round((this.mission.used.activeMs ?? 0) / 60000), Math.round(this.mission.budget.activeMs / 60000), Math.round(Math.min(86400000, this.mission.budget.activeMs + 180000) / 60000), ' 分钟')
-      this.BudgetRow('输出预留（tokens）', this.mission.used.reservedOutputTokens ?? 0, this.mission.budget.reservedOutputTokens, Math.min(480000, this.mission.budget.reservedOutputTokens + 12000), '')
+      Button(this.showBudgetDetail ? '收起额度明细' : '查看额度明细', { type: ButtonType.Normal }).constraintSize({ minHeight: 44 }).fontSize(13)
+        .fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 })
+        .onClick(() => { this.showBudgetDetail = !this.showBudgetDetail; })
       if (this.showBudgetDetail) {
-        this.BudgetRow('元数据与环境 HTTP', this.mission.used.metadataRequests ?? 0, this.mission.budget.metadataRequests ?? 24, Math.min(960, (this.mission.budget.metadataRequests ?? 24) + 24), ' 次')
-        this.BudgetRow('浏览器请求', this.mission.used.browserRequests ?? 0, this.mission.budget.browserRequests ?? 40, Math.min(1000, (this.mission.budget.browserRequests ?? 40) + 40), '')
-        this.BudgetRow('浏览器字节', this.mission.used.browserBytes ?? 0, this.mission.budget.browserBytes ?? 4000000, Math.min(64000000, (this.mission.budget.browserBytes ?? 4000000) + 4000000), '')
-        this.BudgetRow('日历调用', this.mission.used.calendarRequests ?? 0, this.mission.budget.calendarRequests ?? 8, Math.min(128, (this.mission.budget.calendarRequests ?? 8) + 16), '')
-        this.BudgetRow('外部写入', this.mission.used.externalWrites ?? 0, this.mission.budget.externalWrites ?? 2, Math.min(32, (this.mission.budget.externalWrites ?? 2) + 10), '')
-        Text('UNKNOWN 预占与已用都会保留；新外部效果仍需逐项批准。').fontSize(12).fontColor(PMColors.INK_TERTIARY)
+        Text(`模型调用 ${this.mission.used.models ?? 0} / ${this.mission.budget.models} 次`).fontSize(13).fontColor(PMColors.INK_SECONDARY)
+        Text(`工具调用 ${this.mission.used.tools ?? 0} / ${this.mission.budget.tools} 次`).fontSize(13).fontColor(PMColors.INK_SECONDARY)
+        Text(`活动时间 ${Math.round((this.mission.used.activeMs ?? 0) / 60000)} / ${Math.round(this.mission.budget.activeMs / 60000)} 分钟`).fontSize(13).fontColor(PMColors.INK_SECONDARY)
       }
-      Text('预算复核只提高累计上限并保持暂停；确认后仍需你再次继续原委托。').fontSize(12).fontColor(PMColors.INK_SECONDARY).lineHeight(18)
-      PMButton({ label: '确认累计预算，保持暂停', secondary: true, disabled: this.busy || this.readState !== 'fresh', onAction: (): void => { this.reviewBudget(); } })
-    }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.LG)
-      .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.LG).border({ width: 1, color: PMColors.BORDER_SUBTLE })
+    }.width('100%').alignItems(HorizontalAlign.Start)
   }
   @Builder private ViewTab(label: string, key: string) {
     Text(label).fontSize(14).fontWeight(this.detailView === key ? FontWeight.Medium : FontWeight.Normal)
@@ -662,29 +672,31 @@ struct MissionDetail {
           }
         }.width('100%').alignItems(HorizontalAlign.Start)
       }
-      if (this.mission.error !== null || this.mission.status === 'PAUSED' || this.mission.status === 'FAILED') {
+      if ((this.mission.error !== null && !this.isStaleBudgetError()) || this.mission.status === 'PAUSED' || this.mission.status === 'FAILED') {
         Column({ space: PMSpacing.SM }) {
           Text('当前状态').fontSize(12).fontColor(PMColors.INK_TERTIARY)
           Text(this.mission.status === 'PAUSED' ? '执行已暂停，已有进度保留' : this.mission.status === 'FAILED' ? '执行失败，已执行的结果保留' : '本次执行需要恢复，已有进度保留')
             .fontSize(PMFontSize.SECTION_TITLE).fontWeight(FontWeight.Medium).fontColor(PMColors.RISK)
-          Text(this.mission.status === 'PAUSED' ? this.pauseReasonText()
+          Text(this.isBudgetPause() ? '这次委托的额度用完了。' : this.mission.status === 'PAUSED' ? this.pauseReasonText()
             : this.mission.error?.message ?? this.mission.pauseReason ?? '服务端未提供具体原因，请查看执行回执。')
             .fontSize(PMFontSize.BODY).fontColor(PMColors.INK_PRIMARY).lineHeight(24)
           if (this.mission.error?.recovery?.automatic) { Text('由服务端按限次策略处理，无需手动重试').fontSize(12).fontColor(PMColors.INK_SECONDARY) }
+          if (!this.isBudgetPause()) {
           Column({ space: 5 }) {
             Text('继续前请核对').fontSize(11).fontColor(PMColors.INK_TERTIARY)
             Text(this.mission.error?.recovery?.message ?? (this.mission.status === 'PAUSED' ? '检查服务配置及执行回执，再继续原委托。' : this.mission.status === 'FAILED' ? '核对执行回执后，返回列表重新委托。' : '请读取最新状态，服务端会保留此前进度。'))
               .fontSize(13).fontColor(PMColors.INK_PRIMARY).lineHeight(20)
           }.width('100%').alignItems(HorizontalAlign.Start).padding(12).backgroundColor(PMColors.WARNING_LIGHT).borderRadius(12)
-          if (this.mission.error?.code || this.mission.error?.phase) {
+          }
+          if (!this.isBudgetPause() && (this.mission.error?.code || this.mission.error?.phase)) {
             Text(`技术诊断：${this.mission.error?.code ?? ''}${this.mission.error?.phase ? ' · 发生阶段：' + missionErrorPhaseLabel(this.mission.error!.phase) : ''}`)
               .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
           }
           if (this.mission.status === 'PAUSED' && this.missionUiEnabled) {
-            this.BudgetCard()
-            Button('继续原委托', { type: ButtonType.Normal }).width('100%').height(48).borderRadius(PMRadius.BUTTON)
+            Button(this.isBudgetPause() ? '加额度并继续' : '继续原委托', { type: ButtonType.Normal }).width('100%').height(48).borderRadius(PMRadius.BUTTON)
               .backgroundColor(PMColors.BRAND).fontColor(PMColors.SURFACE).fontSize(15).fontWeight(FontWeight.Medium)
-              .enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.command('resume'); })
+              .enabled(this.readState === 'fresh' && !this.busy).onClick(() => { if (this.isBudgetPause()) { this.addBudgetAndResume(); } else { this.command('resume'); } })
+            this.BudgetCard()
           }
         }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.LG)
           .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.LG).border({ width: 1, color: PMColors.BORDER_SUBTLE })

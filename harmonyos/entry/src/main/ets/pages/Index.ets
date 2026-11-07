@@ -27,7 +27,7 @@ import { DateOnly } from '../common/DateOnly';
 import { ReminderSettingsView } from '../components/ReminderSettingsView';
 import { ReadinessBreakdownSheet } from '../components/ReadinessBreakdownSheet';
 
-import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction, PMMotion, PMMaterial, PMTransition, PMCardStyle } from '../common/DesignTokens';
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction, PMMotion, PMTransition, PMCardStyle } from '../common/DesignTokens';
 import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/AsyncStateView';
 import { SeverityBadge, StatusBadge, MemoryTypeBadge, CategoryBadge, TemporalBadge } from '../components/MetricBadge';
 import { DashboardIcon, FolderIcon, TaskIcon, MemoryIcon, SettingsIcon, AlertIcon, BookOpenIcon, PaperclipIcon, ClockIcon, SearchIcon, PlusIcon } from '../components/PMIcons';
@@ -61,12 +61,15 @@ class ProjectAggregate {
   failed: boolean = false;
 }
 
+PersistentStorage.persistProp<boolean>('pm.reduceMotion', false);
+
 @Entry
 @Component
 struct Index {
   @State currentMainTabIndex: number = 4;
   @State focusRefreshKey: number = 0;
   @StorageProp(PMStorageKey.WIDTH_BP) widthBp: string = PMWidthBp.SM;
+  @StorageLink('pm.reduceMotion') reduceMotion: boolean = false;
 
   // 认证与会话状态
   @State isAuthenticated: boolean = false;
@@ -857,6 +860,7 @@ struct Index {
     Column() {
       // 场景分类筛选胶囊 + 排序切换：选中态用底色与字色表达，不再叠 2px 描边
       Row() {
+        Stack({ alignContent: Alignment.End }) {
         Scroll() {
           Row() {
             ForEach(['ALL', 'COURSE_DESIGN', 'RESEARCH', 'COMPETITION', 'INNOVATION', 'LAB_TASK'], (scenario: string) => {
@@ -880,6 +884,9 @@ struct Index {
         .scrollable(ScrollDirection.Horizontal)
         .scrollBar(BarState.Off)
         .align(Alignment.Start)
+          Row().width(28).height(36).hitTestBehavior(HitTestMode.Transparent)
+            .linearGradient({ angle: 90, colors: [[$r('app.color.pm_background_fade'), 0], [PMColors.BACKGROUND, 1]] })
+        }
         .layoutWeight(1)
 
         Button(this.projectSortMode === 'attention' ? '需要关注' : '最近更新', { type: ButtonType.Capsule })
@@ -962,7 +969,8 @@ struct Index {
         }
         .width('100%')
         .layoutWeight(1)
-        .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.LG })
+        .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM })
+        .contentEndOffset(PMSpacing.LG)
       }
     }
     .layoutWeight(1)
@@ -1381,12 +1389,13 @@ struct Index {
           .maxLines(2)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .margin({ top: PMSpacing.SM })
+          .sharedTransition(`project-title-${project.id}`, { duration: PMMotion.ENTER, curve: Curve.Friction })
       }
       .width('100%')
       .alignItems(HorizontalAlign.Start)
       .clickEffect(PMInteraction.PRESS_EFFECT)
       .onClick(() => {
-        router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: project.id } });
+        router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: project.id, title: TextFormatters.readableText(project.title, '') } });
       })
       .accessibilityText(`打开项目 ${TextFormatters.readableText(project.title, '项目')}`)
 
@@ -1611,7 +1620,7 @@ struct Index {
             }
           }, (item: ActionItem) => item.id)
         }
-      }.layoutWeight(1).padding({ left: 16, right: 16, bottom: 16 })
+      }.layoutWeight(1).padding({ left: 16, right: 16 }).contentEndOffset(16)
     }.layoutWeight(1).constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
   }
 
@@ -2488,6 +2497,16 @@ struct Index {
           Divider().color(PMColors.BORDER_SUBTLE)
 
           this.SettingsNavRow('提醒策略', '每日上限 · 免打扰时段 · 全部项目共享', '', PMColors.INK_TERTIARY, PMColors.SURFACE_SUBTLE, 'policy')
+
+          Divider().color(PMColors.BORDER_SUBTLE)
+
+          Row() {
+            Text('减少动效').fontSize(PMFontSize.BODY).fontColor(PMColors.INK_PRIMARY).layoutWeight(1)
+            Toggle({ type: ToggleType.Switch, isOn: this.reduceMotion })
+              .accessibilityText('减少动效')
+              .onChange((isOn: boolean) => { this.reduceMotion = isOn; })
+          }
+          .width('100%').constraintSize({ minHeight: 52 })
         }
         .width('100%')
         .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
@@ -3144,7 +3163,7 @@ struct Index {
         .width('100%')
         .height('100%')
         .backgroundColor(PMColors.SCRIM)
-        .backgroundBlurStyle(PMMaterial.SCRIM, PMMaterial.OPTIONS)
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
         .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
         .justifyContent(FlexAlign.Center)
         .transition(TransitionEffect.OPACITY.animation({ duration: PMMotion.COLOR, curve: PMMotion.CURVE_CONTENT }))
@@ -3284,7 +3303,7 @@ struct Index {
         .width('100%')
         .height('100%')
         .backgroundColor(PMColors.SCRIM)
-        .backgroundBlurStyle(PMMaterial.SCRIM, PMMaterial.OPTIONS)
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
         .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
         .justifyContent(FlexAlign.Center)
         .transition(TransitionEffect.OPACITY.animation({ duration: PMMotion.COLOR, curve: PMMotion.CURVE_CONTENT }))
@@ -3483,7 +3502,7 @@ struct Index {
         .width('100%')
         .height('100%')
         .backgroundColor(PMColors.SCRIM)
-        .backgroundBlurStyle(PMMaterial.SCRIM, PMMaterial.OPTIONS)
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
         .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
         .justifyContent(FlexAlign.Center)
         .transition(TransitionEffect.OPACITY.animation({ duration: PMMotion.COLOR, curve: PMMotion.CURVE_CONTENT }))

@@ -14,7 +14,7 @@ import { ActionReminderBlock } from '../components/ActionReminderBlock';
 import { DeviceCalendarReadCard } from '../components/DeviceCalendarReadCard';
 import { DeviceIdentity } from '../common/DeviceIdentity';
 import { common } from '@kit.AbilityKit';
-import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMaterial, PMInteraction } from '../common/DesignTokens';
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction } from '../common/DesignTokens';
 import { PMAppBar } from '../components/PMAppBar';
 import { MoreIcon } from '../components/PMIcons';
 import { PMCloseButton } from '../components/PMReferencePrimitives';
@@ -1505,7 +1505,7 @@ struct ActionBoard {
         .width('100%')
         .height('100%')
         .backgroundColor(PMColors.SCRIM)
-        .backgroundBlurStyle(PMMaterial.SCRIM, PMMaterial.OPTIONS)
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
         .padding({ left: PMSpacing.XL, right: PMSpacing.XL })
         .justifyContent(FlexAlign.Center)
       }

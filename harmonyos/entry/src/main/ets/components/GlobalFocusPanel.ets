@@ -11,7 +11,7 @@ import { LoadingStateView, ErrorStateView } from './AsyncStateView';
 import { PMColors, PMFontFamily, PMRadius } from '../common/DesignTokens';
 import { PMButton, PMStatusPill, PMPageIntro, PMListRow } from './PMReferencePrimitives';
 import { FilterIcon } from './PMIcons';
-import { FocusAgentLauncher } from './FocusAgentLauncher';
+import { FocusAgentLauncher, LauncherScrollTracker } from './FocusAgentLauncher';
 import { WorkStateBadges } from './WorkStateBadge';
 import { nextActorLabel, primaryActionTone } from '../common/WorkStateBadge';
 import { MissionService } from '../services/MissionService';
@@ -22,6 +22,8 @@ import { missionToolLabel } from '../common/MissionContract';
 @Component
 export struct GlobalFocusPanel {
   @State private agentEnabled: boolean = false;
+  @State private launcherCollapsed: boolean = false;
+  private launcherTracker: LauncherScrollTracker = new LauncherScrollTracker();
   @Prop @Watch('refresh') refreshKey: number = 0;
   onOpenActions: (reminders: boolean) => void = (_reminders: boolean): void => {};
   onOpenSettings: () => void = (): void => {};
@@ -37,7 +39,7 @@ export struct GlobalFocusPanel {
   private boundaryTimer:number=-1;
   private service: GlobalFocusService = new GlobalFocusService();
   private expired: () => void = () => { this.generation++; this.view = new GlobalFocusReply(); this.lastKnown = false; this.observedAt = ''; this.errorText = '请重新登录后查看焦点'; this.busy = false; };
-  aboutToAppear(): void { SessionStore.onSessionExpired(this.expired); this.refresh(); const epoch = this.generation; new ConversationService().capabilities().then(c => { if (epoch === this.generation) this.agentEnabled = c.enabled; }).catch(() => {}); }
+  aboutToAppear(): void { SessionStore.onSessionExpired(this.expired); this.refresh(); new ConversationService().capabilities().then(c => { this.agentEnabled = c.enabled; }).catch(() => {}); }
   aboutToDisappear(): void { if(this.boundaryTimer>=0)clearTimeout(this.boundaryTimer);this.generation++; SessionStore.offSessionExpired(this.expired); }
   private async refresh(): Promise<void> {
     const generation = ++this.generation; const token = SessionStore.getToken();
@@ -340,8 +342,9 @@ export struct GlobalFocusPanel {
           if (this.view.hasMore || this.view.coverage?.complete===false) { Text('当前显示部分摘要，进入所属项目可查看全部。').fontSize(12).fontColor(PMColors.INK_TERTIARY).margin({ top: 8 }) }
         }.width('100%').alignItems(HorizontalAlign.Start).padding({ left: 16, right: 16, top: 18, bottom: 88 })
       }.width('100%').height('100%').align(Alignment.TopStart).scrollBar(BarState.Off)
+      .onTouch((event: TouchEvent) => { this.launcherTracker.update(event, (collapsed: boolean): void => { this.launcherCollapsed = collapsed; }); })
       if (this.agentEnabled) {
-        FocusAgentLauncher({ onOpen: (): void => { router.pushUrl({ url: 'pages/FocusConversation' }); } })
+        FocusAgentLauncher({ collapsed: this.launcherCollapsed, onOpen: (): void => { router.pushUrl({ url: 'pages/FocusConversation' }); } })
           .margin({ right: 16, bottom: 16 })
       }
       }.width('100%').height('100%')

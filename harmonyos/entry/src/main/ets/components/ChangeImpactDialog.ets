@@ -1,5 +1,5 @@
 import { alertError } from '../common/ErrorAlert';
-import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion, PMMaterial } from '../common/DesignTokens';
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion } from '../common/DesignTokens';
 import {
   ChangeImpactProposal,
   ChangeImpactItem,
@@ -110,7 +110,7 @@ export struct ChangeImpactDialog {
         .width('100%')
         .height('100%')
         .backgroundColor(PMColors.SCRIM)
-        .backgroundBlurStyle(PMMaterial.SCRIM, PMMaterial.OPTIONS)
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
         .onClick(() => {
           if (!this.isAnalyzing && !this.isConfirming) {
             this.onClose();

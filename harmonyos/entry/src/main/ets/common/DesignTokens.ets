@@ -8,8 +8,8 @@ export class PMFontFamily {
   static readonly SANS: string = 'HarmonyOS Sans';
   // ArkUI 的 fontFamily 不解析逗号回退列表，自定义注册字体必须单独精确引用
   static readonly BRAND_SERIF: string = 'PMSerifBrand';
-  static readonly SERIF: string = 'PMSerifBrand, Noto Serif SC, Source Han Serif SC, serif';
-  static readonly SERIF_BLACK: string = 'PMSerifBrand, Noto Serif SC Black, Noto Serif SC, Source Han Serif SC, serif';
+  static readonly SERIF: string = 'HarmonyOS Sans';
+  static readonly SERIF_BLACK: string = 'HarmonyOS Sans';
 }
 
 export class PMColors {
@@ -125,8 +125,13 @@ export class PMButtonSize {
  * 全屏约 350ms 内）。这里只保留页面真正用到的两档，其余按需再加。
  */
 export class PMMotion {
+  static readonly PRESS: number = 90;
   static readonly COLOR: number = 100;
+  static readonly STATE: number = 160;
   static readonly LOCAL: number = 200;
+  static readonly ENTER: number = 220;
+  static readonly SETTLE: number = 320;
+  static readonly TRACE: number = 640;
   // 内容进出用 Sharp（减速收住），保持方向感。
   static readonly CURVE_CONTENT: Curve = Curve.Sharp;
 }
@@ -149,19 +154,6 @@ export class PMInteraction {
 }
 
 /**
- * 只给覆盖层（弹层遮罩）用材质，内容卡片保持实心纸面。
- *
- * 本项目 SDK 为 6.1.1(24)：BlurStyle 最高只有 COMPONENT_ULTRA_THICK，
- * 没有 HarmonyOS 7 的 systemMaterial / IMMERSIVE_*。
- * 该版本的自适应材质（systemMaterialEffect）只在 HdsTabsFloatingStyle
- * 与 TitleBarStyleOptions 上开放，因此顶栏/底栏要真正的玻璃材质，
- * 需要把手绘导航换成 HdsTabs / HdsNavigation，而不是给普通 Row 叠 blur——
- * 现有导航在布局流里，背后没有滚动内容，blur 只会糊到一片纯色背景上，看不出来。
+ * 弹层遮罩是纯色，不用实时模糊：45% 遮罩下背后内容本来就不可辨，模糊只增加每帧负载。
+ * SDK 6.1.1(24) 的系统材质只开放给 HdsTabs、HdsNavigation，普通组件不要手工仿造玻璃。
  */
-export class PMMaterial {
-  static readonly SCRIM: BlurStyle = BlurStyle.COMPONENT_ULTRA_THICK;
-  static readonly OPTIONS: BackgroundBlurStyleOptions = {
-    colorMode: ThemeColorMode.SYSTEM,
-    adaptiveColor: AdaptiveColor.AVERAGE
-  };
-}

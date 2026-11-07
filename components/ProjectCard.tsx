@@ -35,10 +35,10 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
       <div className="project-card-bar"><div style={{ width: `${dashboard.readiness.percentage}%` }} /></div>
     </div>}
     <p className="project-card-stats">
-      <span data-alert={dashboard.activeReminderCount > 0 ? "true" : undefined}><strong>{dashboard.activeReminderCount}</strong> 条提醒</span>
-      <span><strong>{dashboard.activeActionCount}</strong> 项待办</span>
-      <span><strong>{project._count.cards}</strong> 张卡片</span>
-      <span><strong>{project._count.artifacts}</strong> 份成果</span>
+      {dashboard.activeReminderCount > 0 && <span data-alert="true"><strong>{dashboard.activeReminderCount}</strong> 条提醒</span>}
+      {dashboard.activeActionCount > 0 && <span><strong>{dashboard.activeActionCount}</strong> 项待办</span>}
+      {project._count.cards > 0 && <span><strong>{project._count.cards}</strong> 张卡片</span>}
+      {project._count.artifacts > 0 && <span><strong>{project._count.artifacts}</strong> 份成果</span>}
     </p>
     <div className="project-card-actions">
       <Link prefetch={false} href={`/projects/${project.id}`} className="project-card-open focus-ring">打开项目</Link>

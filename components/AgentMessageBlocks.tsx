@@ -6,6 +6,7 @@ import type { ConversationMessage } from "@/lib/types/conversation";
 import { ConversationAnswer } from "./ConversationFileGuides";
 import { conversationHref } from "@/lib/conversation/navigation";
 import styles from "./AgentMessageBlocks.module.css";
+import { useEvidenceTether } from "./motionHooks";
 import { readConversationDraft, saveConversationDraft } from "@/lib/client/conversationDrafts";
 
 const goalLabels: Record<string, string> = { VERIFIED: "已核验", REPORTED: "记录已报告", UNKNOWN: "待明确", BLOCKED: "有阻碍", NOT_APPLICABLE: "本目标不要求" };
@@ -48,6 +49,7 @@ export function AgentMessageBlocks({ message, conversationId, busy, onAction }: 
       readConversationDraft(`${conversationId}:${message.id}:${b.blockKey}`).selected[0] ?? ""])
   ));
   const presentation = message.presentation;
+  const tether = useEvidenceTether<HTMLDivElement>();
   if (!supportsAgentPresentation(message) || !presentation) return null;
   const actionButtons = (block: HydratedBlock) => block.actionBindingIds.map(id => presentation.allowedActions.find(a => a.bindingId === id)).filter((a): a is AllowedAction => !!a);
   function controls(block: HydratedBlock) {
@@ -57,7 +59,7 @@ export function AgentMessageBlocks({ message, conversationId, busy, onAction }: 
       title={action.disabledReason ?? undefined} onClick={() => void onAction(action)}>{action.label}{action.actionKind === "OPEN" && <ArrowUpRight size={15} aria-hidden="true"/>}</button>)}
       {actions.find(a => a.disabledReason) && <small>{actions.find(a => a.disabledReason)?.disabledReason}</small>}</div>;
   }
-  return <div className={styles.blocks} data-testid="agent-message-blocks">{presentation.blocks.map(block => {
+  return <div ref={tether} className={styles.blocks} data-testid="agent-message-blocks">{presentation.blocks.map(block => {
     const common = { "data-block": block.semanticType, "data-emphasis": block.emphasis };
     if (block.semanticType === "prose") return <div key={block.blockKey} {...common} className={styles.prose}><RichText nodes={block.content} message={message} conversationId={conversationId}/></div>;
     if (block.semanticType === "goal_gap") return <section key={block.blockKey} {...common} className={styles.goal} aria-label="目标差距">
@@ -71,7 +73,7 @@ export function AgentMessageBlocks({ message, conversationId, busy, onAction }: 
       <summary><FileText size={16} aria-hidden="true"/><span>{block.fallbackText}</span><ChevronDown size={14} aria-hidden="true"/></summary>
       {block.evidence.map((e, i) => {
         const file = message.fileGuides?.find(f => f.sourceId === e.source.id);
-        return <div key={e.source.id + i} className={styles.source}><blockquote>{e.quote}</blockquote><p>{e.claim}</p>
+        return <div key={e.source.id + i} data-source={e.source.id} className={styles.source}><blockquote>{e.quote}</blockquote><p>{e.claim}</p>
           {e.relation === "CONTRADICTS" && <small>这条记录与目标条件存在冲突</small>}
           {file && !file.missing && <a className="focus-ring" href={file.kind === "ATTACHMENT" ? file.href : conversationHref(file.href, conversationId, message.id)} target={file.kind === "ATTACHMENT" ? "_blank" : undefined} rel={file.kind === "ATTACHMENT" ? "noopener noreferrer" : undefined}>查看原资料 <ArrowUpRight size={14} aria-hidden="true"/></a>}
         </div>;
@@ -93,10 +95,10 @@ export function AgentMessageBlocks({ message, conversationId, busy, onAction }: 
         {picked && <details><summary>什么情况下继续或停止</summary><p>{block.candidates.find(c => c.id === picked)?.stopCondition}</p>{block.candidates.find(c => c.id === picked)?.branches.map((b, i) => <p key={i}>{b.observation} → {b.consequence}</p>)}</details>}
       </section>;
     }
-    if (block.semanticType === "approval") return <section key={block.blockKey} {...common} className={styles.approval} aria-label="行动确认"><span className={styles.status}>{approvalLabels[block.state]}</span><h3>{block.fallbackText.split("\n")[0]}</h3>
+    if (block.semanticType === "approval") return <section key={block.blockKey} {...common} className={styles.approval} data-state={block.state} aria-label="行动确认"><span className={styles.status}>{approvalLabels[block.state]}</span><h3>{block.fallbackText.split("\n")[0]}</h3>
       <p>{block.fallbackText.split("\n").slice(1).join("\n")}</p>{controls(block)}
     </section>;
-    if (block.semanticType === "receipt") return <section key={block.blockKey} {...common} className={styles.receipt} aria-label="原业务回执"><span className={styles.receiptMark}><Check size={17}/></span><div><strong>{receiptLabels[block.state]}</strong><p>{block.fallbackText}</p>
+    if (block.semanticType === "receipt") return <section key={block.blockKey} {...common} className={styles.receipt} data-state={block.state} aria-label="原业务回执"><span className={styles.receiptMark}>{block.state === "SUCCEEDED" ? <Check size={17}/> : <Circle size={10}/>}</span><div><strong>{receiptLabels[block.state]}</strong><p>{block.fallbackText}</p>
       <small>{block.state === "CREATED" ? "等待执行，目标条件尚未验收" : block.verification === "VERIFIED" ? "已有独立核验依据" : "按原任务记录显示"}</small>{controls(block)}</div></section>;
     if (block.semanticType === "question") return <section key={block.blockKey} {...common}><Question key={block.draftKey} block={block} actions={actionButtons(block)} busy={busy} onAction={onAction}/></section>;
     if (block.semanticType === "change") return <section key={block.blockKey} {...common} className={styles.change}><h3>{block.disposition === "KEEP_PLAN" ? "保留当前计划" : block.fallbackText}</h3><p>{block.goalQuote}</p><p>{block.relevance}</p>{block.unknowns.map((s, i) => <p key={i}>{s}</p>)}{controls(block)}</section>;

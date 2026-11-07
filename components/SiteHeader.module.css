@@ -23,7 +23,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  width: min(1240px, calc(100% - 40px));
+  width: min(var(--page-width), calc(100% - 40px));
   height: 56px;
   margin-inline: auto;
 }
@@ -56,7 +56,7 @@
 .homeHeader .homeNav {
   gap: 24px;
   font-size: 14px;
-  font-weight: 550;
+  font-weight: 600;
 }
 .homeHeader .headerCta {
   height: 44px;
@@ -66,7 +66,7 @@
   background: var(--teal);
   color: var(--paper-strong);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
 }
 .homeHeader .headerCta:hover {
   color: var(--paper-strong);
@@ -74,7 +74,7 @@
 }
 /* 首页页头允许轻微半透明，页面内容从其下方穿过；账号页不受影响。 */
 .homeHeader {
-  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  background: color-mix(in srgb, var(--paper) var(--bar-alpha), transparent);
   -webkit-backdrop-filter: blur(14px) saturate(1.12);
   backdrop-filter: blur(14px) saturate(1.12);
 }

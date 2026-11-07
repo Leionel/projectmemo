@@ -11,6 +11,7 @@ import { jsonHash as sourceJsonHash } from "./contracts";
 import { effectiveContinuity } from "@/lib/continuity/directiveService";
 import { sourceUse, type SourceUse } from "@/lib/continuity/sourcePolicy";
 import { validateSources } from "./repository";
+import { buildEarlierProgress, EARLIER_PROGRESS_MAX_CHARS, type EarlierStep } from "./earlierProgress";
 import { db } from "@/lib/db";
 import { missionStrategyV2 } from "@/lib/agent/specialistPrompts";
 import type { AgentMission } from "@/lib/generated/prisma/client";
@@ -126,14 +127,47 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
     outputs: outputs.map(o => ({ id: o.id, revision: o.revision, kind: o.kind, verificationStatus: o.verificationStatus })),
     keySources: outputSources.slice(0, 8).map(source => sourceContext(source, policies.get(source.id))), sourceIndex, observations };
   const excluded: string[] = stepIndex.map(step => step.id).filter(id => !steps.some(step => step.id === id));
-  while (JSON.stringify(base).length > 24000) {
+  // 一旦有步骤要被挤出，就给早期进展摘要留出位置，总量仍不超过原上限。
+  while (JSON.stringify(base).length + (excluded.length ? EARLIER_PROGRESS_MAX_CHARS : 0) > 24000) {
     const index = observations.findIndex(o => !pinned.has(o.stepId));
     if (index < 0) break;
     excluded.push(observations.splice(index, 1)[0].stepId);
   }
+  const earlierRows = excluded.length ? await db.agentMissionStep.findMany({ where: { id: { in: excluded } }, select: { id: true, ordinal: true, toolName: true, status: true, planRevision: true, resultJson: true, failureJson: true } }) : [];
+  const toolNotes = new Map<string, unknown>();
+  if (earlierRows.length) for (const row of await db.agentMissionEvent.findMany({ where: { ...where, type: "TOOL_STARTED" }, orderBy: { seq: "desc" }, take: 256 })) {
+    const payload = record(row.payloadJson);
+    if (typeof payload.stepId === "string" && !toolNotes.has(payload.stepId)) toolNotes.set(payload.stepId, payload.summary);
+  }
+  const sourceStates = new Map<string, string>();
+  const readSourceState = async (id: string) => {
+    if (!sourceStates.has(id)) sourceStates.set(id, (await sourceUse(m.ownerUserId, m.projectId, id, db, { missionId: m.id })).state);
+    return sourceStates.get(id)!;
+  };
+  /** 与完整步骤同一套来源许可：受限或无法判断时，摘要里只留序号和工具。 */
+  const earlierAllowed = async (row: typeof earlierRows[number]) => {
+    const result = row.resultJson as ToolResult | null, sources = result?.sources ?? [];
+    if (suppressing && !sources.length) return false;
+    if (row.toolName === "inspect_project") for (const action of (result as { data?: { actions?: Array<{ id: string }> } } | null)?.data?.actions ?? []) if (await readSourceState("action:" + action.id) !== "ALLOWED") return false;
+    for (const source of sources) { const state = await readSourceState(source.id); if (state === "SUPPRESSED" || state === "UNKNOWN" && suppressing) return false; }
+    if (["inspect_experiment_metrics", "compare_experiment_metrics", "propose_metric_verification"].includes(row.toolName)) { try { await validateSources(m.projectId, sources, db, m.id); } catch { return false; } }
+    return true;
+  };
+  const earlierSteps: EarlierStep[] = [];
+  for (const row of earlierRows) {
+    const allowed = await earlierAllowed(row), sources = (row.resultJson as ToolResult | null)?.sources ?? [];
+    earlierSteps.push({ ordinal: row.ordinal, tool: row.toolName, status: row.status, historical: adopted && row.planRevision !== m.planRevision, withheld: !allowed,
+      note: toolNotes.get(row.id) as string | undefined, failure: record(row.failureJson).message as string | undefined,
+      sources: sources.map(source => (source as { title?: string }).title ?? source.id) });
+  }
+  const includedInputSeqs = new Set(inputs.map(e => e.seq));
+  const earlierInputs = suppressing || !(excluded.length || stepCount > stepIndex.length) ? [] : (await db.agentMissionEvent.findMany({ where: { ...where, type: "INPUT" }, orderBy: { seq: "desc" }, take: 32 }))
+    .filter(e => !includedInputSeqs.has(e.seq)).map(e => ({ seq: e.seq, answer: String(record(e.payloadJson).answer ?? "") }));
+  const earlierProgress = buildEarlierProgress(earlierSteps, earlierInputs, Math.max(0, stepCount - stepIndex.length));
+  const baseWithEarlier = { ...base, earlierProgress };
   // Cognition facets are bounded against the remaining capacity and report what was left out.
-  const fitted = fitCognitiveFacets({ hypotheses, effectiveMemory }, Math.max(0, 29400 - JSON.stringify(base).length));
-  const context = { ...base, hypotheses: fitted.hypotheses, effectiveMemory: fitted.effectiveMemory };
+  const fitted = fitCognitiveFacets({ hypotheses, effectiveMemory }, Math.max(0, 29400 - JSON.stringify(baseWithEarlier).length));
+  const context = { ...baseWithEarlier, hypotheses: fitted.hypotheses, effectiveMemory: fitted.effectiveMemory };
   if (JSON.stringify(context).length > 30000) throw new Error("CONTEXT_LIMIT");
   // CT-8 项目内经验：只有条件 MATCH + ACTIVE + 来源有效的经验进入模型上下文；
   // 上下文上限显式裁剪，检索命中/注入分别记录。经验只是建议，不改变权限、目标或系统 Prompt。
@@ -171,6 +205,6 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
   if (experienceDecisions.length) await recordRetrieval(m, experienceDecisions, hash);
   return JSON.stringify({ ...contextWithPersonal, experienceAdvisories, experienceReadSet, experienceCoverage,
     personalCoverage: { ...personal.coverage, omissions: personal.omissions, omittedForBudget: personalOmittedForBudget, nextBoundary: personal.nextBoundary }, manifest: { excludedStepIds: excluded, unlistedStepCount: Math.max(0, stepCount - stepIndex.length), historyStepCount: stepCount, notLoadedStepCount: stepCount - steps.length,
-    historyEventCount: eventCount, includedEventSeqs: [...new Set([...inputs.map(e => e.seq),...fitReviews.map(e=>e.seq)])].sort((a,b)=>a-b), promptVersion: context.promptVersion, source: "MISSION_EVENTS_AND_STEPS", hash,
+    historyEventCount: eventCount, includedEventSeqs: [...new Set([...inputs.map(e => e.seq),...fitReviews.map(e=>e.seq),...(earlierProgress?.inputs ?? []).map(e=>e.seq)])].sort((a,b)=>a-b), promptVersion: context.promptVersion, source: "MISSION_EVENTS_AND_STEPS", hash,
     omittedCognition: fitted.omitted } });
 }

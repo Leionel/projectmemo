@@ -430,7 +430,7 @@ export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = fa
       </div>
     </div>}
 
-    {sourceDrawer && <div role="dialog" aria-label="来源详情" className="fixed inset-0 z-50 flex justify-end bg-[rgba(15,23,42,.35)]" onClick={() => setSourceDrawer(null)}>
+    {sourceDrawer && <div role="dialog" aria-modal="true" aria-label="来源详情" className="fixed inset-0 z-50 flex justify-end bg-[var(--scrim)] scrim-enter" onClick={() => setSourceDrawer(null)}>
       <div className="h-full w-full max-w-md overflow-y-auto bg-[var(--paper)] p-5 shadow-xl" onClick={(event) => event.stopPropagation()}>
         <div className="flex items-start justify-between gap-3 border-b archive-rule pb-3">
           <div className="min-w-0">

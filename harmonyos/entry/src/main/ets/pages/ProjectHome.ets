@@ -6,7 +6,7 @@ import { ProjectAgentContext } from '../models/ProjectAgentContext';
 import { ProjectAgentContextService } from '../services/ProjectAgentContextService';
 import { EvidenceAssessment, evidenceAssessmentText } from '../models/Copilot';
 import router from '@ohos.router';
-import { FocusAgentLauncher } from '../components/FocusAgentLauncher';
+import { FocusAgentLauncher, LauncherScrollTracker } from '../components/FocusAgentLauncher';
 import promptAction from '@ohos.promptAction';
 import { missionHandoffRoute } from '../common/MissionWidgetContract';
 import { captureSourceCardId } from '../models/WorkPacket';
@@ -46,7 +46,7 @@ import { ReentryService, EpisodePreviewBody, EpisodeConfirmBody } from '../servi
 import { ReentryData, Episode, EpisodeRevision, EpisodeSummarySection, EpisodeClaim, EpisodeSourceRef } from '../models/Reentry';
 import { ReminderService } from '../services/ReminderService';
 
-import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction, PMMotion, PMMaterial, PMTransition, PMButtonSize } from '../common/DesignTokens';
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction, PMMotion, PMTransition, PMButtonSize } from '../common/DesignTokens';
 import { PMBreakpoint, PMStorageKey, PMWidthBp } from '../common/WindowMetrics';
 import { SeverityBadge, StatusBadge, MemoryTypeBadge, CategoryBadge } from '../components/MetricBadge';
 import { EvidenceItemView } from '../components/EvidenceItemView';
@@ -128,6 +128,9 @@ struct ProjectHome {
   @State private focusConversationId: string = '';
   @State private focusAgentEnabled: boolean = false;
   @State currentTabIndex: number = 0;
+  @State launcherCollapsed: boolean = false;
+  private launcherTracker: LauncherScrollTracker = new LauncherScrollTracker();
+  @State private transitionTitle: string = '';
   @State missionRefreshKey: number = 0;
   @State showProjectStatus: boolean = false;
   @State showQuickCopilot: boolean = false;
@@ -369,6 +372,7 @@ struct ProjectHome {
       return;
     }
     this.projectId = params['projectId'] ?? '';
+    this.transitionTitle = params['title'] ?? '';
     this.focusConversationId = params['conversationId'] ?? '';
     const focusToken = SessionStore.getToken();
     new ConversationService().capabilities().then(v => { if (focusToken === SessionStore.getToken()) this.focusAgentEnabled = v.enabled; }).catch(() => {});
@@ -2794,7 +2798,8 @@ struct ProjectHome {
   @Builder
   private TopHeader() {
     PMAppBar({
-      title: this.project.title !== '' ? TextFormatters.readableText(this.project.title, '项目名称无法读取') : '项目档案',
+      title: this.project.title !== '' ? TextFormatters.readableText(this.project.title, '项目名称无法读取') : (this.transitionTitle !== '' ? this.transitionTitle : '项目档案'),
+      titleShareId: this.projectId !== '' && this.transitionTitle !== '' ? `project-title-${this.projectId}` : '',
       backLabel: '项目',
       backDescription: '返回项目列表',
       showRepository: true,
@@ -4742,7 +4747,8 @@ if (this.attachmentSearchOpen) {
         }, (card: KnowledgeCard) => card.id)
       }
       .layoutWeight(1)
-      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: 96 })
+      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD })
+      .contentEndOffset(96)
       }
     }
     .layoutWeight(1)
@@ -5135,7 +5141,8 @@ if (this.attachmentSearchOpen) {
         }, (action: ActionItem) => action.id)
       }
       .layoutWeight(1)
-      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: 96 })
+      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD })
+      .contentEndOffset(96)
     }
     .layoutWeight(1)
     .transition(PMTransition.CONTENT_ENTER)
@@ -6064,7 +6071,7 @@ if (this.attachmentSearchOpen) {
             }
           })
         } else if (this.isLoading && !this.hasLoadedProjectSnapshot) {
-          LoadingStateView({ message: '正在同步项目档案...' })
+          Column() { LoadingStateView({ message: '正在同步项目档案...' }) }.width('100%').layoutWeight(1)
         } else if (this.errorMessage !== '' && !this.hasLoadedProjectSnapshot) {
           ErrorStateView({
             message: this.errorMessage,
@@ -6117,9 +6124,10 @@ if (this.attachmentSearchOpen) {
       .width('100%')
       .height('100%')
       .backgroundColor(PMColors.BACKGROUND)
+      .onTouch((event: TouchEvent) => { this.launcherTracker.update(event, (collapsed: boolean): void => { this.launcherCollapsed = collapsed; }); })
 
       if ((this.focusConversationId !== '' || this.focusAgentEnabled) && this.hasLoadedProjectSnapshot && this.routeError === '' && !this.isArtifactReader && !this.showQuickCopilot && !this.showCreateAction && !this.showEntrySheet && !this.showReadinessSheet && !this.showStateDiffSheet && !this.showChangeImpactDialog) {
-        FocusAgentLauncher({ onOpen: (): void => { router.pushUrl({ url: 'pages/FocusConversation', params: { conversationId: this.focusConversationId, projectId: this.projectId } }); } })
+        FocusAgentLauncher({ collapsed: this.launcherCollapsed || this.currentTabIndex !== 0, onOpen: (): void => { router.pushUrl({ url: 'pages/FocusConversation', params: { conversationId: this.focusConversationId, projectId: this.projectId } }); } })
           .align(Alignment.BottomEnd).margin({ right: 18, bottom: 90 })
       }
       if (this.showCreateAction) {
@@ -6222,7 +6230,7 @@ if (this.attachmentSearchOpen) {
         .width('100%')
         .height('100%')
         .backgroundColor(PMColors.SCRIM)
-        .backgroundBlurStyle(PMMaterial.SCRIM, PMMaterial.OPTIONS)
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
         .justifyContent(FlexAlign.Center)
       }
 
@@ -6293,7 +6301,7 @@ if (this.attachmentSearchOpen) {
         .width('100%')
         .height('100%')
         .backgroundColor(PMColors.SCRIM)
-        .backgroundBlurStyle(PMMaterial.SCRIM, PMMaterial.OPTIONS)
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
         .padding({ left: PMSpacing.XL, right: PMSpacing.XL })
         .justifyContent(FlexAlign.Center)
         .transition(TransitionEffect.OPACITY.animation({ duration: PMMotion.COLOR, curve: PMMotion.CURVE_CONTENT }))
@@ -6685,7 +6693,7 @@ if (this.attachmentSearchOpen) {
               }
             }
             .width('100%')
-            .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: 96 })
+            .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.LG })
           }
           .width('100%')
           .constraintSize({ maxHeight: '85%' })
@@ -6698,7 +6706,7 @@ if (this.attachmentSearchOpen) {
         .width('100%')
         .height('100%')
         .backgroundColor(PMColors.SCRIM)
-        .backgroundBlurStyle(PMMaterial.SCRIM, PMMaterial.OPTIONS)
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
         .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
         .justifyContent(FlexAlign.Center)
         .transition(TransitionEffect.OPACITY.animation({ duration: PMMotion.COLOR, curve: PMMotion.CURVE_CONTENT }))

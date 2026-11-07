@@ -79,8 +79,8 @@ export function ProjectSettings({ project, canDelete = false }: ProjectSettingsP
   const field = "focus-ring editorial-input mt-2 w-full px-3.5 py-2.5 text-sm";
   return <>
     <button ref={triggerRef} type="button" onClick={() => { setOpen(true); setError(""); }} className="focus-ring editorial-button-secondary"><Pencil size={16} /> 编辑项目</button>
-    {open && <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-[rgba(16,27,50,.46)] p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) setOpen(false); }}>
-      <section ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="project-settings-title" className="card-surface my-6 w-full max-w-2xl rounded-lg bg-[var(--paper-strong)] p-5 shadow-[var(--shadow-lg)] sm:p-7">
+    {open && <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-[var(--scrim)] p-4 scrim-enter" onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) setOpen(false); }}>
+      <section ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="project-settings-title" className="dialog-enter card-surface my-6 w-full max-w-2xl rounded-lg bg-[var(--paper-strong)] p-5 shadow-[var(--shadow-lg)] sm:p-7">
         <div className="flex items-start justify-between gap-4 border-b archive-rule pb-4"><div><p className="archive-label">项目设置</p><h2 id="project-settings-title" className="mt-2 text-xl font-black">编辑项目档案</h2></div><button type="button" onClick={() => setOpen(false)} disabled={busy} aria-label="关闭项目设置" className="focus-ring rounded-lg p-2 text-[var(--muted)] hover:bg-[var(--paper-strong)]"><X size={19} /></button></div>
         <form onSubmit={save} className="mt-5 space-y-4" aria-busy={saving}>
           <fieldset disabled={busy} className="space-y-4 disabled:opacity-70">

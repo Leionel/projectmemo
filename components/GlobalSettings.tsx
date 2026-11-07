@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useFocusTrap } from "./motionHooks";
 import { createPortal } from "react-dom";
 import { Cpu, Globe, KeyRound, LoaderCircle, Save, Settings, X } from "lucide-react";
 
@@ -30,6 +31,7 @@ const initialSettings: RuntimeSettings = {
 /** `inline` 用于设置页「模型与安全」：进入即读取，不经弹窗；读取与保存仍走同一 /api/settings。 */
 export function GlobalSettings({ isMenuItem = false, inline = false }: { isMenuItem?: boolean; inline?: boolean }) {
   const [open, setOpen] = useState(false);
+  const dialogRef = useFocusTrap<HTMLElement>(open);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -193,8 +195,8 @@ export function GlobalSettings({ isMenuItem = false, inline = false }: { isMenuI
       </button>
 
       {open && typeof document !== "undefined" && createPortal(
-        <div className="fixed inset-0 z-[100] grid place-items-center overflow-y-auto bg-[rgba(16,27,50,.46)] p-4 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving) setOpen(false); }}>
-          <section role="dialog" aria-modal="true" aria-labelledby="global-settings-title" className="card-surface my-6 w-full max-w-2xl rounded-[2rem] bg-[var(--paper-strong)] p-1 shadow-2xl">
+        <div className="fixed inset-0 z-[100] grid place-items-center overflow-y-auto bg-[var(--scrim)] p-4 scrim-enter" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving) setOpen(false); }}>
+          <section ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="global-settings-title" className="dialog-enter card-surface my-6 w-full max-w-2xl rounded-2xl bg-[var(--paper-strong)] p-1 shadow-2xl">
             <div className="rounded-lg bg-[var(--card-bg)] p-5 sm:p-8">
               <div className="flex items-center justify-between pb-6">
                 <div>

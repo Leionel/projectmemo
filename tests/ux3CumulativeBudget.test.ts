@@ -29,14 +29,14 @@ async function fixture(daily=false){
 function lease(m:NonNullable<Awaited<ReturnType<typeof claimMission>>>):Lease{return{id:m.id,owner:m.leaseOwner!,epoch:m.leaseEpoch,contextVersion:m.contextVersion,planRevision:m.planRevision};}
 test("调查许可不能提高原预算；显式复核累计上限不清空UNKNOWN或偷偷恢复",async()=>{
   const {u,m}=await fixture();
-  await db.agentMission.update({where:{id:m.id},data:{budgetUsedJson:{tools:16,models:12,unknownCalls:2}}});
+  await db.agentMission.update({where:{id:m.id},data:{budgetUsedJson:{tools:32,models:24,unknownCalls:2}}});
   const claimed=await claimMission("budget-probe",m.id);
   await expect(reserve(lease(claimed!),"tools","inspect_project")).rejects.toMatchObject({code:"BUDGET_EXHAUSTED"});
   const view=await readMissionResponsibility(u.id,m.id);
-  expect(view.budget.limits).toMatchObject({models:12,tools:16,metadataRequests:24});
+  expect(view.budget.limits).toMatchObject({models:24,tools:32,metadataRequests:24});
   const paused=await db.agentMission.update({where:{id:m.id},data:{status:"PAUSED",executionSlot:null,leaseOwner:null,leaseUntil:null}});
   const reviewed=await reviewMissionBudget(u.id,m.id,{requestId:"review",expectedVersion:paused.version,totals:{models:30,tools:72,activeMs:1200000,reservedOutputTokens:60000}});
-  expect(reviewed.status).toBe("PAUSED");expect(reviewed.budgetUsedJson).toMatchObject({tools:16,models:12,unknownCalls:2});
+  expect(reviewed.status).toBe("PAUSED");expect(reviewed.budgetUsedJson).toMatchObject({tools:32,models:24,unknownCalls:2});
   expect((await readMissionResponsibility(u.id,m.id)).budget.limits).toMatchObject({models:30,tools:72,metadataRequests:24});
 });
 test("每日上限等待本地次日；恢复保留累计账本，STOP不会随日期越界解除",async()=>{
@@ -69,7 +69,7 @@ test("夏令时换日使用本地日期边界，不能假设每天24小时",()=>
 test("新增工具预算按累计总额复核：遗漏不扩权，UNKNOWN不退还，旧版本及降低被拒绝",async()=>{
  const {u,m}=await fixture();const used={calendarRequests:5,externalWrites:2,unknownCalls:1};
  const paused=await db.agentMission.update({where:{id:m.id},data:{status:"PAUSED",budgetUsedJson:used}});
- const base={models:12,tools:16,activeMs:180000,reservedOutputTokens:12000};
+ const base={models:24,tools:32,activeMs:360000,reservedOutputTokens:24000};
  const first=await reviewMissionBudget(u.id,m.id,{requestId:"omit",expectedVersion:paused.version,totals:base});
  expect(first.budgetJson).toMatchObject({calendarRequests:8,externalWrites:2});
  const body={requestId:"expand",expectedVersion:first.version,totals:{...base,calendarRequests:40,externalWrites:10,browserRequests:80,browserBytes:8000000}};

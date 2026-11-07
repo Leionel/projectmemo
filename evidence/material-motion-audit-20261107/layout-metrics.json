@@ -1,0 +1,54 @@
+{
+ "leftEdges": {
+  "home": {
+   "brand": 100,
+   "content": 110,
+   "brandFont": "16px"
+  },
+  "focus": {
+   "brand": 64,
+   "content": 100,
+   "brandFont": "19px"
+  },
+  "projects": {
+   "brand": 64,
+   "content": 100,
+   "brandFont": "19px"
+  },
+  "project": {
+   "brand": 64,
+   "content": 40,
+   "brandFont": "19px"
+  },
+  "actions": {
+   "brand": 64,
+   "content": 40,
+   "brandFont": "19px"
+  }
+ },
+ "firstActionY": 642,
+ "yaheiInk": {
+  "300": 1335,
+  "400": 1956,
+  "500": 1956,
+  "550": 2977,
+  "600": 2977,
+  "650": 2977,
+  "700": 2977,
+  "800": 2977
+ },
+ "composer": {
+  "before": {
+   "top": 195,
+   "height": 344,
+   "viewportPct": 41,
+   "composer": 287
+  },
+  "after": {
+   "top": 138,
+   "height": 518,
+   "viewportPct": 61,
+   "composer": 170
+  }
+ }
+}

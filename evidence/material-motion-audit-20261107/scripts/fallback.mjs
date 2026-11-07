@@ -1,0 +1,16 @@
+import { createRequire } from "node:module";
+const require = createRequire("D:/Projects/hongmen/package.json");
+const { chromium } = require("playwright-core");
+const BASE = "http://127.0.0.1:33399", SHOTS = "D:/Projects/hongmen/evidence/material-motion-audit-20261107/screens";
+const browser = await chromium.launch();
+const auth = await browser.newContext();
+await auth.request.post(BASE + "/api/auth/login", { data: { username: "e2e-reviewer", password: "e2e-reviewer-password", client: "web" } });
+const state = await auth.storageState(); await auth.close();
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 760 }, storageState: state });
+const p = await ctx.newPage();
+await p.goto(BASE + "/focus", { waitUntil: "load" }); await p.waitForTimeout(1500);
+await p.screenshot({ path: SHOTS + "/font-focus-with-noto.jpg", type: "jpeg", quality: 82 });
+await p.addStyleTag({ content: 'h1,h2,.app-brand-name,[class*=hero] h2{font-family:"PM Brand",SimSun,serif!important}' });
+await p.waitForTimeout(400);
+await p.screenshot({ path: SHOTS + "/font-focus-without-noto-simulated.jpg", type: "jpeg", quality: 82 });
+await ctx.close(); await browser.close();

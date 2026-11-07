@@ -22,6 +22,7 @@ import { missionStatusLabels } from "@/lib/mission/presentation";
 import { useConversationAttachments, type ConversationAttachmentChip } from "./ConversationAttachments";
 import styles from "./ConversationPanel.module.css";
 import { AgentMessageBlocks, supportsAgentPresentation } from "./AgentMessageBlocks";
+import { AgentRunThread } from "./AgentRunThread";
 import { OverlayPanel } from "./OverlayPanel";
 import type { AllowedAction } from "@/lib/types/agentExperience";
 import { clearConversationDrafts, clearConversationDraft, readConversationDraft, saveConversationDraft } from "@/lib/client/conversationDrafts";
@@ -285,7 +286,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       </div>
       <button type="button" className="editorial-button focus-ring" disabled={working} onClick={() => { setHistoryOpen(false); void create(); }}>新建讨论</button>
     </OverlayPanel>}
-    <div ref={messageRegion} className={styles.messages} aria-live="polite" aria-busy={busy}
+    <div ref={messageRegion} className={styles.messages} aria-busy={busy}
       onScroll={e => { const el = e.currentTarget; nearBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 160; }}>
       {view && <ConversationAnchorPanel key={view.id} conversationId={view.id} revision={view.version} busy={busy || workRef !== null}
         acquire={() => { if (busyRef.current || workRef !== null) return false; setBusy(true); return true; }}
@@ -339,9 +340,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
           }}/>
       </article>)}
       {view && workRef && <ConversationWorkCard key={view.id + workRef.kind + workRef.id} conversation={view} workRef={workRef} onChange={v => { setView(v); onUpdated?.(); }} onClose={() => setWorkRef(null)}/>}
-      {working && <div className={styles.liveProgress} role="status"><strong>{({ RECOORDINATING: "\u65b9\u5411\u5df2\u66f4\u65b0\uff0c\u6b63\u5728\u91cd\u65b0\u534f\u8c03", ROUTING: "正在定位相关项目", READING_SOURCE: "正在读取原资料", EVALUATING: "正在判断目标差距", WAITING_MODEL: "正在整理结论", READY: "正在保存本轮回答", WAITING_USER: "正在整理需要你补充的条件", STOPPING: "正在停止后续调查" } as Record<string, string>)[view?.activeTurn?.progress?.phase ?? ""] ?? "正在读取和处理…"}</strong>
-        {view?.activeTurn?.progress?.steps.map(s => <span key={s.id}>{s.status === "SUCCEEDED" ? "✓" : "·"} {s.label}</span>)}
-        {view?.activeTurn?.progress && <button type="button" className="workspace-link focus-ring" disabled={view.activeTurn.progress.phase === "STOPPING"} onClick={() => { const epoch = generation.current; void api<{ conversation: ConversationView }>(`/api/conversations/${view.id}/turns/${view.activeTurn!.id}/stop`, "POST", {}).then(r => { if (epoch === generation.current) setView(r.conversation); }).catch(e => { if (epoch === generation.current) setError(e.message); }); }}>停止本轮调查</button>}</div>}
+      {working && <AgentRunThread progress={view?.activeTurn?.progress} onStop={!view ? undefined : () => { const epoch = generation.current; void api<{ conversation: ConversationView }>(`/api/conversations/${view.id}/turns/${view.activeTurn!.id}/stop`, "POST", {}).then(r => { if (epoch === generation.current) setView(r.conversation); }).catch(e => { if (epoch === generation.current) setError(e.message); }); }}/>}
     </div>
     {error && <p role="alert" className={styles.error}>{error} {view && <button className="workspace-link focus-ring" onClick={() => void load(view.id, generation.current).catch(e => setError(e.message))}>读取原状态</button>}</p>}
     {view && target && calendarWriteAvailable && <div className={styles.calendarBar}>
@@ -350,8 +349,8 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
     </div>}
     {view && <form className={styles.composer} onSubmit={ask}>
       {reply && <div className={styles.reply}>围绕：{reply.content.slice(0, 55)}<button type="button" className="workspace-link focus-ring" onClick={() => { setReply(null); pending.current = null; }}>取消追问</button></div>}
-      <ConversationContinuity key={view.id + ":" + (view.homeProjectId ?? view.focusProjectId)} view={view} onChange={setView} onError={setError} onWork={(kind, id, projectId) => setWorkRef({ kind, id, projectId })}/>
-      <ConversationResearchScope view={view} projectId={target} disabled={working} onChange={setView} onError={setError}/>
+      <div className={styles.composerContext}><ConversationContinuity key={view.id + ":" + (view.homeProjectId ?? view.focusProjectId)} view={view} onChange={setView} onError={setError} onWork={(kind, id, projectId) => setWorkRef({ kind, id, projectId })}/>
+      <ConversationResearchScope view={view} projectId={target} disabled={working} onChange={setView} onError={setError}/></div>
       {attachments.panel}
       <label className={styles.inputLabel}><textarea aria-label="与忆程讨论项目" value={text} rows={2} maxLength={3000} placeholder="问忆程：先做什么？或请帮我继续…" disabled={working}
         onChange={e => { setText(e.target.value); const el = e.currentTarget; el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 132) + "px"; }}

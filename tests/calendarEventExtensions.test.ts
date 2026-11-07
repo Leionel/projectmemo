@@ -238,7 +238,7 @@ it("十项批次经原预算复核后纵向完成，每个HTTP和外部创建累
  let current=await db.agentMission.findUniqueOrThrow({where:{id:mission.id}});
  await commandMission(user.id,mission.id,"pause",{requestId:"pause-budget",expectedVersion:current.version});
  current=await db.agentMission.findUniqueOrThrow({where:{id:mission.id}});
- const reviewed=await reviewMissionBudget(user.id,mission.id,{requestId:"review-ten",expectedVersion:current.version,totals:{models:12,tools:16,activeMs:180000,reservedOutputTokens:12000,externalWrites:10,calendarRequests:40}});
+ const reviewed=await reviewMissionBudget(user.id,mission.id,{requestId:"review-ten",expectedVersion:current.version,totals:{models:24,tools:32,activeMs:360000,reservedOutputTokens:24000,externalWrites:10,calendarRequests:40}});
  await commandMission(user.id,mission.id,"resume",{requestId:"resume-ten",expectedVersion:reviewed.version});
  await approve(user.id,mission.id,f);expect(f.creates()).toBe(10);
  const step=await db.agentMissionStep.findFirstOrThrow({where:{missionId:mission.id,toolName:"propose_calendar_events"}});expect(step.status).toBe("SUCCEEDED");

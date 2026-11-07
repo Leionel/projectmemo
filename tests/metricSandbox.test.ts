@@ -51,7 +51,7 @@ test("late completed receipt after source correction stays historical and never 
 
 test("budget review keeps UNKNOWN reservations and the same job; CAS and replay cannot reset usage",async()=>{
  const f=await fixture(),docker=fakeDocker();await runMissionSlice({id:f.m.id,sandbox:async args=>{const value=await docker.run(args);if(args[0]==="start")throw new Error("LOST_REPLY");return value;}});
- const before=await db.agentMission.findUniqueOrThrow({where:{id:f.m.id}}),body={requestId:"review",expectedVersion:before.version,totals:{models:18,tools:24,activeMs:360000,reservedOutputTokens:24000}};
+ const before=await db.agentMission.findUniqueOrThrow({where:{id:f.m.id}}),body={requestId:"review",expectedVersion:before.version,totals:{models:30,tools:40,activeMs:540000,reservedOutputTokens:36000}};
  const after=await reviewMissionBudget(f.user.id,f.m.id,body);expect(after.status).toBe("PAUSED");expect(after.budgetUsedJson).toEqual(before.budgetUsedJson);expect(after.leaseEpoch).toBeGreaterThan(before.leaseEpoch);expect(after.contextVersion).toBe(before.contextVersion);
  await reviewMissionBudget(f.user.id,f.m.id,body);expect(await db.agentMissionEvent.count({where:{missionId:f.m.id,type:"BUDGET_REVIEWED"}})).toBe(1);
  await expect(reviewMissionBudget(f.user.id,f.m.id,{...body,requestId:"race"})).rejects.toMatchObject({code:"MISSION_CHANGED"});

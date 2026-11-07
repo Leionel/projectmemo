@@ -1,0 +1,1617 @@
+{
+ "pages": {
+  "home-desktop": {
+   "elements": 355,
+   "backdrop": 1,
+   "anims": 1,
+   "radii": {
+    "10.4px": 1,
+    "6px": 17,
+    "8px": 6,
+    "16px": 2,
+    "12px": 1,
+    "999px": 2,
+    "10px": 4,
+    "20px": 1,
+    "11.2px": 1,
+    "5.6px": 1,
+    "12.8px": 1,
+    "4.8px": 3,
+    "14px": 2,
+    "50%": 4,
+    "14.4px": 1
+   },
+   "fonts": {
+    "14px": 24,
+    "16px": 12,
+    "15px": 20,
+    "72.72px": 2,
+    "17px": 9,
+    "13.44px": 4,
+    "13px": 13,
+    "12px": 21,
+    "48px": 6,
+    "12.8px": 21,
+    "14.4px": 9,
+    "18px": 4,
+    "13.12px": 8,
+    "24px": 1,
+    "21.6px": 1,
+    "15.2px": 2,
+    "20.8px": 3,
+    "13.6px": 4,
+    "16.8px": 1,
+    "51.2px": 1,
+    "13.76px": 4
+   },
+   "family": {
+    "Inter": 7,
+    "\"PM Brand\"": 2,
+    "Manrope": 144,
+    "\"PM Editorial\"": 17
+   },
+   "shadows": 3,
+   "shadowElems": 4,
+   "transAll": 0,
+   "docH": 6146,
+   "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+   "h1": "人可以下线，项目别掉线。"
+  },
+  "focus-desktop": {
+   "status": 200,
+   "url": "/focus",
+   "elements": 330,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 5,
+    "3.35544e+07px": 1,
+    "10px": 3,
+    "18px": 1,
+    "999px": 10,
+    "4px": 21,
+    "11px": 4,
+    "8px": 17,
+    "14px": 1,
+    "50%": 4,
+    "16px": 3,
+    "7px": 16,
+    "9px": 3,
+    "22px": 1
+   },
+   "fonts": {
+    "14px": 27,
+    "19px": 2,
+    "15px": 15,
+    "13px": 25,
+    "32px": 1,
+    "12px": 31,
+    "28px": 1,
+    "17px": 3,
+    "10px": 11,
+    "15.5px": 6,
+    "13.5px": 8,
+    "12.5px": 12,
+    "11px": 7
+   },
+   "family": {
+    "Inter": 141,
+    "\"PM Brand\"": 4,
+    "Georgia": 4
+   },
+   "shadows": 4,
+   "shadowElems": 4,
+   "transAll": 0,
+   "docH": 1643,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "今日项目焦点"
+  },
+  "projects-desktop": {
+   "status": 200,
+   "url": "/projects",
+   "elements": 490,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 38,
+    "3.35544e+07px": 1,
+    "10px": 34,
+    "18px": 12,
+    "4px": 11,
+    "999px": 7,
+    "8px": 22,
+    "12px": 1
+   },
+   "fonts": {
+    "14px": 51,
+    "19px": 2,
+    "15px": 5,
+    "32px": 1,
+    "12px": 147,
+    "21px": 11,
+    "13px": 23
+   },
+   "family": {
+    "Inter": 226,
+    "\"PM Brand\"": 14
+   },
+   "shadows": 2,
+   "shadowElems": 12,
+   "transAll": 0,
+   "docH": 2045,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "我的项目空间"
+  },
+  "project-desktop": {
+   "status": 200,
+   "url": "/projects/cmw4ohyjz0000b88osiggwy11",
+   "elements": 229,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 7,
+    "3.35544e+07px": 1,
+    "4px": 2,
+    "10px": 11,
+    "18px": 1,
+    "14px": 2,
+    "8px": 2
+   },
+   "fonts": {
+    "14px": 31,
+    "19px": 2,
+    "15px": 10,
+    "13px": 26,
+    "12px": 16,
+    "30px": 1,
+    "11px": 1,
+    "24px": 1,
+    "17px": 4
+   },
+   "family": {
+    "Inter": 84,
+    "\"PM Brand\"": 4,
+    "ui-monospace": 4
+   },
+   "shadows": 2,
+   "shadowElems": 2,
+   "transAll": 0,
+   "docH": 1963,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "人工智能创意赛 忆程 ProjectMemo 作品开发"
+  },
+  "records-desktop": {
+   "status": 200,
+   "url": "/projects/cmw4ohyjz0000b88osiggwy11/records",
+   "elements": 153,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 5,
+    "3.35544e+07px": 1,
+    "4px": 1,
+    "10px": 11,
+    "8px": 2,
+    "16px": 2,
+    "12px": 1
+   },
+   "fonts": {
+    "14px": 12,
+    "19px": 2,
+    "15px": 9,
+    "13px": 18,
+    "12px": 11,
+    "30px": 1,
+    "11px": 1,
+    "26px": 1,
+    "17px": 1
+   },
+   "family": {
+    "Inter": 51,
+    "\"PM Brand\"": 4,
+    "ui-monospace": 1
+   },
+   "shadows": 2,
+   "shadowElems": 3,
+   "transAll": 0,
+   "docH": 1117,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "人工智能创意赛 忆程 ProjectMemo 作品开发"
+  },
+  "projActions-desktop": {
+   "status": 200,
+   "url": "/projects/cmw4ohyjz0000b88osiggwy11/actions",
+   "elements": 452,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 34,
+    "3.35544e+07px": 1,
+    "4px": 15,
+    "10px": 23,
+    "16px": 2,
+    "8px": 27,
+    "12px": 1
+   },
+   "fonts": {
+    "14px": 52,
+    "19px": 2,
+    "15px": 9,
+    "13px": 14,
+    "12px": 87,
+    "30px": 1,
+    "11px": 4,
+    "26px": 1,
+    "17px": 3,
+    "16px": 1,
+    "13.5px": 1
+   },
+   "family": {
+    "Inter": 170,
+    "\"PM Brand\"": 4,
+    "ui-monospace": 1
+   },
+   "shadows": 4,
+   "shadowElems": 8,
+   "transAll": 0,
+   "docH": 2567,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "人工智能创意赛 忆程 ProjectMemo 作品开发"
+  },
+  "missions-desktop": {
+   "status": 200,
+   "url": "/projects/cmw4ojjqp0001xo8oasaqbwl6/missions",
+   "elements": 533,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 17,
+    "3.35544e+07px": 1,
+    "4px": 10,
+    "10px": 8,
+    "8px": 29,
+    "999px": 2,
+    "50%": 2,
+    "16px": 1,
+    "14px": 1
+   },
+   "fonts": {
+    "14px": 54,
+    "19px": 2,
+    "15px": 9,
+    "13px": 44,
+    "12px": 169,
+    "30px": 1,
+    "11px": 10,
+    "26px": 1,
+    "18px": 1,
+    "13.5px": 3,
+    "28px": 1,
+    "17px": 1
+   },
+   "family": {
+    "Inter": 290,
+    "\"PM Brand\"": 5,
+    "ui-monospace": 1
+   },
+   "shadows": 1,
+   "shadowElems": 1,
+   "transAll": 0,
+   "docH": 3004,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "UX1 原任务 1793951732341"
+  },
+  "health-desktop": {
+   "status": 200,
+   "url": "/projects/cmw4ohyjz0000b88osiggwy11/health",
+   "elements": 296,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 12,
+    "3.35544e+07px": 3,
+    "4px": 13,
+    "10px": 17,
+    "8px": 8,
+    "16px": 4
+   },
+   "fonts": {
+    "14px": 24,
+    "19px": 2,
+    "15px": 9,
+    "13px": 14,
+    "12px": 43,
+    "30px": 1,
+    "11px": 19,
+    "26px": 1,
+    "17px": 5,
+    "20px": 1,
+    "18px": 5
+   },
+   "family": {
+    "Inter": 119,
+    "\"PM Brand\"": 4,
+    "ui-monospace": 1
+   },
+   "shadows": 1,
+   "shadowElems": 1,
+   "transAll": 0,
+   "docH": 1333,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "人工智能创意赛 忆程 ProjectMemo 作品开发"
+  },
+  "memory-desktop": {
+   "status": 200,
+   "url": "/memory",
+   "elements": 287,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 25,
+    "3.35544e+07px": 1,
+    "10px": 3,
+    "8px": 2,
+    "999px": 6,
+    "14px": 16,
+    "4px": 19
+   },
+   "fonts": {
+    "14px": 41,
+    "19px": 2,
+    "15px": 4,
+    "32px": 1,
+    "12px": 19,
+    "13px": 80,
+    "16px": 16
+   },
+   "family": {
+    "Inter": 157,
+    "\"PM Brand\"": 3,
+    "ui-monospace": 3
+   },
+   "shadows": 2,
+   "shadowElems": 2,
+   "transAll": 0,
+   "docH": 2766,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "项目记忆档案"
+  },
+  "actions-desktop": {
+   "status": 200,
+   "url": "/actions",
+   "elements": 127,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 14,
+    "3.35544e+07px": 1,
+    "10px": 2,
+    "14px": 8,
+    "4px": 8
+   },
+   "fonts": {
+    "14px": 22,
+    "19px": 2,
+    "15px": 4,
+    "32px": 1,
+    "12px": 11,
+    "17px": 2,
+    "13px": 11,
+    "16px": 8
+   },
+   "family": {
+    "Inter": 58,
+    "\"PM Brand\"": 3
+   },
+   "shadows": 1,
+   "shadowElems": 1,
+   "transAll": 0,
+   "docH": 1570,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "行动与提醒"
+  },
+  "settings-desktop": {
+   "status": 404,
+   "url": "/settings",
+   "elements": 29,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 2,
+    "3.35544e+07px": 1,
+    "10px": 1
+   },
+   "fonts": {
+    "14px": 4,
+    "19px": 2,
+    "15px": 4,
+    "30px": 1
+   },
+   "family": {
+    "Inter": 9,
+    "\"PM Brand\"": 2
+   },
+   "shadows": 0,
+   "shadowElems": 0,
+   "transAll": 0,
+   "docH": 900,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "没有找到这个项目"
+  },
+  "login-desktop": {
+   "status": 200,
+   "url": "/login",
+   "elements": 49,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 2,
+    "6px": 2,
+    "8px": 1,
+    "24px": 1,
+    "9.6px": 2
+   },
+   "fonts": {
+    "14px": 4,
+    "16px": 5,
+    "12.8px": 1,
+    "15.2px": 1,
+    "56px": 2,
+    "30.4px": 1,
+    "13.6px": 1,
+    "13.28px": 2,
+    "11.68px": 1,
+    "14.08px": 1,
+    "11.52px": 1,
+    "12.48px": 1,
+    "11.2px": 1
+   },
+   "family": {
+    "Inter": 17,
+    "\"PM Brand\"": 2,
+    "\"PM Editorial\"": 3
+   },
+   "shadows": 1,
+   "shadowElems": 1,
+   "transAll": 0,
+   "docH": 900,
+   "title": "登录忆程｜忆程 ProjectMemo",
+   "h1": "登录忆程"
+  },
+  "home-mobile": {
+   "elements": 348,
+   "backdrop": 1,
+   "anims": 1,
+   "radii": {
+    "10.4px": 1,
+    "6px": 17,
+    "8px": 6,
+    "16px": 3,
+    "12px": 2,
+    "999px": 2,
+    "10px": 4,
+    "8.8px": 1,
+    "5.6px": 1,
+    "12.8px": 1,
+    "4.8px": 3,
+    "14px": 2,
+    "50%": 4
+   },
+   "fonts": {
+    "14px": 23,
+    "16px": 8,
+    "15px": 17,
+    "35.1px": 2,
+    "12.8px": 32,
+    "13px": 13,
+    "12px": 21,
+    "17px": 4,
+    "28px": 6,
+    "14.4px": 15,
+    "18px": 4,
+    "20px": 1,
+    "14.08px": 4,
+    "19.2px": 3,
+    "13.12px": 5,
+    "13.6px": 3,
+    "15.2px": 1,
+    "28.8px": 1
+   },
+   "family": {
+    "Inter": 2,
+    "\"PM Brand\"": 2,
+    "Manrope": 142,
+    "\"PM Editorial\"": 17
+   },
+   "shadows": 3,
+   "shadowElems": 4,
+   "transAll": 0,
+   "docH": 7079,
+   "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+   "h1": "人可以下线，项目别掉线。"
+  },
+  "focus-mobile": {
+   "status": 200,
+   "url": "/focus",
+   "elements": 211,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 8,
+    "12px": 1,
+    "16px": 1,
+    "10px": 3,
+    "8px": 15,
+    "18px": 1,
+    "999px": 10,
+    "4px": 10,
+    "11px": 1,
+    "14px": 1,
+    "50%": 3
+   },
+   "fonts": {
+    "14px": 25,
+    "19px": 2,
+    "12px": 19,
+    "13px": 17,
+    "26px": 1,
+    "22px": 1,
+    "15px": 11,
+    "17px": 3
+   },
+   "family": {
+    "Inter": 75,
+    "\"PM Brand\"": 4
+   },
+   "shadows": 3,
+   "shadowElems": 4,
+   "transAll": 0,
+   "docH": 2699,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "今日项目焦点"
+  },
+  "projects-mobile": {
+   "status": 200,
+   "url": "/projects",
+   "elements": 518,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 44,
+    "12px": 2,
+    "16px": 1,
+    "10px": 34,
+    "18px": 12,
+    "4px": 11,
+    "999px": 7,
+    "8px": 22
+   },
+   "fonts": {
+    "14px": 56,
+    "19px": 2,
+    "12px": 148,
+    "26px": 1,
+    "21px": 11,
+    "13px": 23,
+    "15px": 1
+   },
+   "family": {
+    "Inter": 228,
+    "\"PM Brand\"": 14
+   },
+   "shadows": 2,
+   "shadowElems": 12,
+   "transAll": 0,
+   "docH": 5106,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "我的项目空间"
+  },
+  "project-mobile": {
+   "status": 200,
+   "url": "/projects/cmw4ohyjz0000b88osiggwy11",
+   "elements": 273,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 13,
+    "12px": 1,
+    "16px": 1,
+    "4px": 2,
+    "10px": 11,
+    "18px": 1,
+    "14px": 2,
+    "8px": 4
+   },
+   "fonts": {
+    "14px": 41,
+    "19px": 2,
+    "12px": 17,
+    "13px": 31,
+    "22px": 1,
+    "24px": 1,
+    "15px": 1,
+    "17px": 4
+   },
+   "family": {
+    "Inter": 91,
+    "\"PM Brand\"": 4,
+    "ui-monospace": 3
+   },
+   "shadows": 2,
+   "shadowElems": 2,
+   "transAll": 0,
+   "docH": 2503,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "人工智能创意赛 忆程 ProjectMemo 作品开发"
+  },
+  "records-mobile": {
+   "status": 200,
+   "url": "/projects/cmw4ohyjz0000b88osiggwy11/records",
+   "elements": 180,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 11,
+    "12px": 2,
+    "16px": 3,
+    "4px": 1,
+    "10px": 11,
+    "8px": 2
+   },
+   "fonts": {
+    "14px": 17,
+    "19px": 2,
+    "12px": 12,
+    "13px": 23,
+    "22px": 1,
+    "26px": 1,
+    "17px": 1
+   },
+   "family": {
+    "Inter": 53,
+    "\"PM Brand\"": 4
+   },
+   "shadows": 2,
+   "shadowElems": 3,
+   "transAll": 0,
+   "docH": 1426,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "人工智能创意赛 忆程 ProjectMemo 作品开发"
+  },
+  "projActions-mobile": {
+   "status": 200,
+   "url": "/projects/cmw4ohyjz0000b88osiggwy11/actions",
+   "elements": 479,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 40,
+    "12px": 2,
+    "16px": 3,
+    "4px": 15,
+    "10px": 23,
+    "8px": 27
+   },
+   "fonts": {
+    "14px": 57,
+    "19px": 2,
+    "12px": 88,
+    "13px": 19,
+    "22px": 1,
+    "26px": 1,
+    "17px": 3,
+    "11px": 3,
+    "16px": 1,
+    "13.5px": 1
+   },
+   "family": {
+    "Inter": 172,
+    "\"PM Brand\"": 4
+   },
+   "shadows": 4,
+   "shadowElems": 8,
+   "transAll": 0,
+   "docH": 4398,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "人工智能创意赛 忆程 ProjectMemo 作品开发"
+  },
+  "missions-mobile": {
+   "status": 200,
+   "url": "/projects/cmw4ojjqp0001xo8oasaqbwl6/missions",
+   "elements": 559,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 23,
+    "12px": 1,
+    "16px": 2,
+    "4px": 10,
+    "10px": 8,
+    "8px": 29,
+    "999px": 2,
+    "50%": 2,
+    "14px": 1
+   },
+   "fonts": {
+    "14px": 59,
+    "19px": 2,
+    "12px": 169,
+    "13px": 49,
+    "22px": 1,
+    "26px": 1,
+    "18px": 1,
+    "13.5px": 3,
+    "28px": 1,
+    "11px": 9,
+    "17px": 1
+   },
+   "family": {
+    "Inter": 291,
+    "\"PM Brand\"": 5
+   },
+   "shadows": 1,
+   "shadowElems": 1,
+   "transAll": 0,
+   "docH": 4309,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "UX1 原任务 1793951732341"
+  },
+  "health-mobile": {
+   "status": 200,
+   "url": "/projects/cmw4ohyjz0000b88osiggwy11/health",
+   "elements": 323,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 18,
+    "12px": 1,
+    "16px": 5,
+    "4px": 13,
+    "10px": 17,
+    "8px": 8,
+    "3.35544e+07px": 2
+   },
+   "fonts": {
+    "14px": 29,
+    "19px": 2,
+    "12px": 44,
+    "13px": 19,
+    "22px": 1,
+    "26px": 1,
+    "17px": 5,
+    "11px": 18,
+    "20px": 1,
+    "18px": 5
+   },
+   "family": {
+    "Inter": 121,
+    "\"PM Brand\"": 4
+   },
+   "shadows": 1,
+   "shadowElems": 1,
+   "transAll": 0,
+   "docH": 1669,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "人工智能创意赛 忆程 ProjectMemo 作品开发"
+  },
+  "memory-mobile": {
+   "status": 200,
+   "url": "/memory",
+   "elements": 313,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 31,
+    "12px": 1,
+    "16px": 1,
+    "10px": 3,
+    "8px": 2,
+    "999px": 6,
+    "14px": 16,
+    "4px": 19
+   },
+   "fonts": {
+    "14px": 46,
+    "19px": 2,
+    "12px": 18,
+    "26px": 1,
+    "13px": 80,
+    "16px": 16
+   },
+   "family": {
+    "Inter": 157,
+    "\"PM Brand\"": 3,
+    "ui-monospace": 3
+   },
+   "shadows": 2,
+   "shadowElems": 2,
+   "transAll": 0,
+   "docH": 4416,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "项目记忆档案"
+  },
+  "actions-mobile": {
+   "status": 200,
+   "url": "/actions",
+   "elements": 155,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 20,
+    "12px": 1,
+    "16px": 1,
+    "10px": 2,
+    "14px": 8,
+    "4px": 8
+   },
+   "fonts": {
+    "14px": 27,
+    "19px": 2,
+    "12px": 12,
+    "26px": 1,
+    "17px": 2,
+    "13px": 11,
+    "16px": 8
+   },
+   "family": {
+    "Inter": 60,
+    "\"PM Brand\"": 3
+   },
+   "shadows": 1,
+   "shadowElems": 1,
+   "transAll": 0,
+   "docH": 2209,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "行动与提醒"
+  },
+  "settings-mobile": {
+   "status": 404,
+   "url": "/settings",
+   "elements": 57,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 1,
+    "6px": 8,
+    "12px": 1,
+    "16px": 1,
+    "10px": 1
+   },
+   "fonts": {
+    "14px": 9,
+    "19px": 2,
+    "12px": 1,
+    "30px": 1
+   },
+   "family": {
+    "Inter": 11,
+    "\"PM Brand\"": 2
+   },
+   "shadows": 1,
+   "shadowElems": 1,
+   "transAll": 0,
+   "docH": 844,
+   "title": "忆程 ProjectMemo｜你的个人项目 Agent",
+   "h1": "没有找到这个项目"
+  },
+  "login-mobile": {
+   "status": 200,
+   "url": "/login",
+   "elements": 48,
+   "backdrop": 0,
+   "anims": 0,
+   "radii": {
+    "10.4px": 2,
+    "6px": 2,
+    "8px": 1,
+    "19.2px": 1,
+    "9.6px": 2
+   },
+   "fonts": {
+    "14px": 4,
+    "16px": 5,
+    "12.8px": 1,
+    "30.4px": 2,
+    "26.4px": 1,
+    "13.6px": 1,
+    "13.28px": 2,
+    "11.68px": 1,
+    "14.08px": 1,
+    "11.52px": 1,
+    "12.48px": 1,
+    "11.2px": 1
+   },
+   "family": {
+    "Inter": 16,
+    "\"PM Brand\"": 2,
+    "\"PM Editorial\"": 3
+   },
+   "shadows": 1,
+   "shadowElems": 1,
+   "transAll": 0,
+   "docH": 1011,
+   "title": "登录忆程｜忆程 ProjectMemo",
+   "h1": "登录忆程"
+  }
+ },
+ "resources": {
+  "home": [
+   {
+    "u": "/logo.png",
+    "t": "image",
+    "kb": 810.7
+   },
+   {
+    "u": "/_next/static/chunks/1p4p8mz5apamc.js",
+    "t": "script",
+    "kb": 222.1
+   },
+   {
+    "u": "/fonts/manrope-variable.ttf",
+    "t": "font",
+    "kb": 160.8
+   },
+   {
+    "u": "/fonts/pm-editorial-serif.ttf",
+    "t": "font",
+    "kb": 158.3
+   },
+   {
+    "u": "/_next/static/chunks/2tdy1tzpq-rlq.js",
+    "t": "script",
+    "kb": 138.7
+   },
+   {
+    "u": "/_next/static/chunks/2evubs12spfiy.css",
+    "t": "stylesheet",
+    "kb": 84.1
+   },
+   {
+    "u": "/",
+    "t": "document",
+    "kb": 70.3
+   },
+   {
+    "u": "/_next/static/chunks/1ntn7efqc-iiw.js",
+    "t": "script",
+    "kb": 53.5
+   },
+   {
+    "u": "/_next/static/chunks/3y9rm5oa5myh5.css",
+    "t": "stylesheet",
+    "kb": 53.1
+   },
+   {
+    "u": "/_next/static/chunks/3nc6x0_y5iwnk.js",
+    "t": "script",
+    "kb": 43.4
+   },
+   {
+    "u": "/_next/static/chunks/1lkb_fh6i3hn_.js",
+    "t": "script",
+    "kb": 32
+   },
+   {
+    "u": "/_next/static/chunks/3mvu3sky9-4jz.js",
+    "t": "script",
+    "kb": 30.7
+   },
+   {
+    "u": "/_next/static/chunks/1y8ba484lqgyt.js",
+    "t": "script",
+    "kb": 29.9
+   },
+   {
+    "u": "/_next/static/chunks/20rsvzxaa4crp.js",
+    "t": "script",
+    "kb": 14
+   }
+  ]
+ },
+ "a11yTargets": {
+  "home": {
+   "total": 27,
+   "under44": 2,
+   "under24": 0,
+   "sample": [
+    {
+     "h": 28,
+     "w": 179,
+     "t": "忆程 ProjectMemo 首页"
+    },
+    {
+     "h": 26,
+     "w": 148,
+     "t": "忆程 ProjectMemo"
+    }
+   ]
+  },
+  "focus": {
+   "total": 44,
+   "under44": 38,
+   "under24": 6,
+   "sample": [
+    {
+     "h": 29,
+     "w": 206,
+     "t": "忆程 ProjectMemo 首页"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "焦点"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "项目"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "记忆"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "行动"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "切换深浅色主题"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "退出登录"
+    },
+    {
+     "h": 38,
+     "w": 90,
+     "t": "全部项目"
+    },
+    {
+     "h": 17,
+     "w": 17,
+     "t": "INPUT"
+    },
+    {
+     "h": 22,
+     "w": 277,
+     "t": "人工智能创意赛 忆程 ProjectMemo 作"
+    }
+   ]
+  },
+  "projects": {
+   "total": 91,
+   "under44": 57,
+   "under24": 0,
+   "sample": [
+    {
+     "h": 29,
+     "w": 206,
+     "t": "忆程 ProjectMemo 首页"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "焦点"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "项目"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "记忆"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "行动"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "切换深浅色主题"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "退出登录"
+    },
+    {
+     "h": 41,
+     "w": 312,
+     "t": "处理高优先提醒：5 条提醒等待确认"
+    },
+    {
+     "h": 28,
+     "w": 86,
+     "t": "项目操作"
+    },
+    {
+     "h": 38,
+     "w": 166,
+     "t": "归档项目"
+    }
+   ]
+  },
+  "project": {
+   "total": 47,
+   "under44": 30,
+   "under24": 4,
+   "sample": [
+    {
+     "h": 29,
+     "w": 206,
+     "t": "忆程 ProjectMemo 首页"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "焦点"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "项目"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "记忆"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "行动"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "切换深浅色主题"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "退出登录"
+    },
+    {
+     "h": 36,
+     "w": 73,
+     "t": "项目空间"
+    },
+    {
+     "h": 34,
+     "w": 115,
+     "t": "项目目标与简介"
+    },
+    {
+     "h": 36,
+     "w": 358,
+     "t": "项目功能"
+    }
+   ]
+  },
+  "records": {
+   "total": 38,
+   "under44": 23,
+   "under24": 0,
+   "sample": [
+    {
+     "h": 29,
+     "w": 206,
+     "t": "忆程 ProjectMemo 首页"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "焦点"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "项目"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "记忆"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "行动"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "切换深浅色主题"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "退出登录"
+    },
+    {
+     "h": 36,
+     "w": 73,
+     "t": "项目空间"
+    },
+    {
+     "h": 34,
+     "w": 115,
+     "t": "项目目标与简介"
+    },
+    {
+     "h": 36,
+     "w": 81,
+     "t": "记录与附件"
+    }
+   ]
+  },
+  "projActions": {
+   "total": 79,
+   "under44": 45,
+   "under24": 9,
+   "sample": [
+    {
+     "h": 29,
+     "w": 206,
+     "t": "忆程 ProjectMemo 首页"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "焦点"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "项目"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "记忆"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "行动"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "切换深浅色主题"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "退出登录"
+    },
+    {
+     "h": 36,
+     "w": 73,
+     "t": "项目空间"
+    },
+    {
+     "h": 34,
+     "w": 115,
+     "t": "项目目标与简介"
+    },
+    {
+     "h": 36,
+     "w": 358,
+     "t": "项目功能"
+    }
+   ]
+  },
+  "missions": {
+   "total": 95,
+   "under44": 45,
+   "under24": 13,
+   "sample": [
+    {
+     "h": 29,
+     "w": 206,
+     "t": "忆程 ProjectMemo 首页"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "焦点"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "项目"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "记忆"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "行动"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "切换深浅色主题"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "退出登录"
+    },
+    {
+     "h": 36,
+     "w": 73,
+     "t": "项目空间"
+    },
+    {
+     "h": 34,
+     "w": 115,
+     "t": "项目目标与简介"
+    },
+    {
+     "h": 36,
+     "w": 358,
+     "t": "项目功能"
+    }
+   ]
+  },
+  "health": {
+   "total": 43,
+   "under44": 25,
+   "under24": 2,
+   "sample": [
+    {
+     "h": 29,
+     "w": 206,
+     "t": "忆程 ProjectMemo 首页"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "焦点"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "项目"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "记忆"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "行动"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "切换深浅色主题"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "退出登录"
+    },
+    {
+     "h": 36,
+     "w": 73,
+     "t": "项目空间"
+    },
+    {
+     "h": 34,
+     "w": 115,
+     "t": "项目目标与简介"
+    },
+    {
+     "h": 36,
+     "w": 358,
+     "t": "项目功能"
+    }
+   ]
+  },
+  "memory": {
+   "total": 43,
+   "under44": 39,
+   "under24": 1,
+   "sample": [
+    {
+     "h": 29,
+     "w": 206,
+     "t": "忆程 ProjectMemo 首页"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "焦点"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "项目"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "记忆"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "行动"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "切换深浅色主题"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "退出登录"
+    },
+    {
+     "h": 32,
+     "w": 80,
+     "t": "个人记忆你的协作偏好与背景"
+    },
+    {
+     "h": 32,
+     "w": 80,
+     "t": "项目记忆项目记录与当前理解"
+    },
+    {
+     "h": 40,
+     "w": 362,
+     "t": "INPUT"
+    }
+   ]
+  },
+  "actions": {
+   "total": 22,
+   "under44": 18,
+   "under24": 1,
+   "sample": [
+    {
+     "h": 29,
+     "w": 206,
+     "t": "忆程 ProjectMemo 首页"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "焦点"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "项目"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "记忆"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "行动"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "切换深浅色主题"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "退出登录"
+    },
+    {
+     "h": 40,
+     "w": 362,
+     "t": "INPUT"
+    },
+    {
+     "h": 38,
+     "w": 124,
+     "t": "全部项目E2E Mission 17939518"
+    },
+    {
+     "h": 13,
+     "w": 13,
+     "t": "INPUT"
+    }
+   ]
+  },
+  "settings": {
+   "total": 10,
+   "under44": 7,
+   "under24": 0,
+   "sample": [
+    {
+     "h": 29,
+     "w": 206,
+     "t": "忆程 ProjectMemo 首页"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "焦点"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "项目"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "记忆"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "行动"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "切换深浅色主题"
+    },
+    {
+     "h": 38,
+     "w": 174,
+     "t": "退出登录"
+    }
+   ]
+  },
+  "login": {
+   "total": 9,
+   "under44": 1,
+   "under24": 0,
+   "sample": [
+    {
+     "h": 28,
+     "w": 179,
+     "t": "忆程 ProjectMemo 首页"
+    }
+   ]
+  }
+ },
+ "misc": {}
+}

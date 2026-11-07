@@ -1,6 +1,15 @@
 "use client";
-import { missionBudgetReviewCaps as caps } from "@/lib/types/missionBudget";
-export function MissionBudgetReview({budget,used,busy,onReview}:{budget:Record<string,number>;used:Record<string,number>;busy:boolean;onReview:(totals:{models:number;tools:number;activeMs:number;reservedOutputTokens:number;metadataRequests?:number;browserRequests?:number;browserBytes?:number;calendarRequests?:number;externalWrites?:number})=>void}){
- const totals={metadataRequests:Math.min(caps.metadataRequests,(budget.metadataRequests??24)+24),browserRequests:Math.min(caps.browserRequests,(budget.browserRequests??40)+40),browserBytes:Math.min(caps.browserBytes,(budget.browserBytes??4000000)+4000000),calendarRequests:Math.min(caps.calendarRequests,(budget.calendarRequests??8)+16),externalWrites:Math.min(caps.externalWrites,(budget.externalWrites??2)+10),models:Math.max(budget.models,Math.min(caps.models,budget.models+6)),tools:Math.max(budget.tools,Math.min(caps.tools,budget.tools+8)),activeMs:Math.max(budget.activeMs,Math.min(caps.activeMs,budget.activeMs+180000)),reservedOutputTokens:Math.max(budget.reservedOutputTokens,Math.min(caps.reservedOutputTokens,budget.reservedOutputTokens+12000))};
- return <details><summary>复核累计预算</summary><p>模型已用或预占 {used.models??0} 次，上限 {budget.models} → {totals.models}；工具 {used.tools??0} 次，上限 {budget.tools} → {totals.tools}；元数据与环境 HTTP 已用或预占 {used.metadataRequests??0} 次，上限 {budget.metadataRequests??24} → {totals.metadataRequests}。活动时间上限 {Math.round(totals.activeMs/60000)} 分钟，累计输出预留上限 {totals.reservedOutputTokens} tokens。浏览器请求上限 {budget.browserRequests??40} → {totals.browserRequests}，字节上限 {budget.browserBytes??4000000} → {totals.browserBytes}；日历HTTP已用 {used.calendarRequests??0}，上限 {budget.calendarRequests??8} → {totals.calendarRequests}；外部创建已用 {used.externalWrites??0}，上限 {budget.externalWrites??2} → {totals.externalWrites}。UNKNOWN 和原预占继续计入；这不批准任何新外部效果。</p><button disabled={busy||Object.entries(totals).every(([key,value])=>value===budget[key])} onClick={()=>onReview(totals)}>确认累计上限，保持暂停</button></details>;
+
+const rows: Array<[string, string, (value: number) => string]> = [
+  ["模型调用", "models", value => `${value} 次`],
+  ["工具调用", "tools", value => `${value} 次`],
+  ["活动时间", "activeMs", value => `${Math.round(value / 60000)} 分钟`],
+  ["输出预留", "reservedOutputTokens", value => `${value} tokens`],
+];
+
+/** 额度明细只读，默认收起；提高额度由“加额度并继续”一个按钮完成。 */
+export function MissionBudgetDetails({ budget, used }: { budget: Record<string, number>; used: Record<string, number> }) {
+  return <details><summary>查看额度明细</summary><ul>
+    {rows.map(([label, key, format]) => <li key={key}>{label}：{format(used[key] ?? 0)} / {format(budget[key] ?? 0)}</li>)}
+  </ul></details>;
 }

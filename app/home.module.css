@@ -2,13 +2,13 @@
 
 @font-face {
   font-family: "PM Editorial";
-  src: url("/fonts/pm-editorial-serif.ttf") format("truetype");
-  font-weight: 500;
+  src: url("/fonts/pm-editorial.woff2") format("woff2");
+  font-weight: 400 600;
   font-display: swap;
 }
 @font-face {
   font-family: "Manrope";
-  src: url("/fonts/manrope-variable.ttf") format("truetype");
+  src: url("/fonts/manrope-variable.woff2") format("woff2");
   font-weight: 200 800;
   font-display: swap;
 }
@@ -48,7 +48,7 @@
   touch-action: manipulation;
 }
 .shell {
-  width: min(1220px, calc(100% - 64px));
+  width: min(var(--page-width), calc(100% - 64px));
   margin-inline: auto;
 }
 
@@ -57,19 +57,12 @@
 .hero {
   border-bottom: 1px solid var(--rule);
 }
-/* 滚动深度：卡片与文案以不同速度离场，仅 transform，减少动画时停用。 */
-.home[data-motion="on"] [data-hero-copy] {
-  translate: 0 calc(var(--hero-shift, 0) * 10px);
-}
-.home[data-motion="on"] [data-hero-lens] {
-  translate: 0 calc(var(--hero-shift, 0) * -18px);
-}
 .heroInner {
   display: grid;
   grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
   gap: clamp(2.5rem, 4.2vw, 4.5rem);
   align-items: start;
-  width: min(1220px, calc(100% - 64px));
+  width: min(var(--page-width), calc(100% - 64px));
   margin-inline: auto;
   padding-block: clamp(2.25rem, 3.8vw, 3.75rem) clamp(2.75rem, 4.4vw, 4.75rem);
 }
@@ -91,13 +84,13 @@
 .positioning strong {
   color: var(--teal);
   font-size: 1rem;
-  font-weight: 650;
+  font-weight: 600;
 }
 .headline {
   margin-top: 1.3rem;
   font-family: var(--editorial-font);
   font-size: clamp(3rem, 5.05vw, 4.85rem);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.14;
   letter-spacing: -0.04em;
   text-wrap: balance;
@@ -105,6 +98,11 @@
 .headline span {
   display: block;
   color: var(--teal);
+  animation: headlineLine 900ms var(--ease-out) 260ms both;
+}
+.headline .headlineFirst {
+  color: inherit;
+  animation-delay: 80ms;
 }
 .heroSub {
   max-width: 32rem;
@@ -179,159 +177,11 @@
 }
 
 /* 产品镜头：同一委托的四问工作包。 */
-.lens {
-  min-width: 0;
-  overflow: hidden;
-  border: 1px solid var(--rule);
-  border-radius: 1.25rem;
-  background: var(--paper-strong);
-  box-shadow:
-    0 44px 90px -60px rgb(28 46 44 / 55%),
-    0 1px 2px rgb(28 46 44 / 5%);
-  animation: heroRise 620ms var(--ease-out) 140ms both;
-}
-:global(.dark) .lens {
-  box-shadow:
-    0 44px 90px -60px rgb(0 0 0 / 75%),
-    inset 0 1px 0 rgb(255 255 255 / 4%);
-}
-.lensHead {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 1.35rem 0.85rem;
-  border-bottom: 1px solid var(--rule);
-}
-.lensIdentity {
-  min-width: 0;
-}
-.lensKicker {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: var(--muted);
-  font-size: 0.8rem;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
-}
-.lensKicker span {
-  opacity: 0.55;
-}
-.lensMission {
-  margin-top: 0.25rem;
-  font-family: var(--editorial-font);
-  font-size: 1.4rem;
-  font-weight: 500;
-  letter-spacing: -0.015em;
-  line-height: 1.4;
-}
-.lensStatus {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.3rem 0.6rem;
-  border: 1px solid color-mix(in srgb, var(--amber) 30%, var(--rule));
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--amber) 8%, var(--paper-strong));
-  color: var(--amber);
-  font-size: 0.8rem;
-  font-weight: 550;
-  line-height: 1.5;
-  white-space: nowrap;
-}
 .statusDot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: currentColor;
-}
-.stageTabs {
-  display: flex;
-  gap: 0.25rem;
-  padding: 0.45rem 0.55rem 0.3rem;
-  border-bottom: 1px solid var(--rule);
-  background: color-mix(in srgb, var(--ink) 2%, var(--paper-strong));
-}
-.stageTab {
-  display: inline-flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  min-height: 44px;
-  border-bottom: 2px solid transparent;
-  border-radius: 0.4rem 0.4rem 0 0;
-  color: var(--muted);
-  font-size: 0.84rem;
-  line-height: 1.5;
-  cursor: pointer;
-  transition:
-    color 140ms ease,
-    background-color 140ms ease;
-}
-.stageIndex {
-  font-size: 0.8rem;
-  font-variant-numeric: tabular-nums;
-  opacity: 0.7;
-}
-.stageTab:hover {
-  background: color-mix(in srgb, var(--ink) 2%, transparent);
-  color: var(--ink);
-}
-.stageTab[aria-selected="true"] {
-  border-bottom-color: var(--teal);
-  color: var(--ink);
-  font-weight: 650;
-}
-.lensBody {
-  padding: 0.95rem 1.35rem 1.05rem;
-}
-.lensRows {
-  margin: 0;
-  animation: lensRowsNext 240ms var(--ease-out) both;
-}
-.lensRows[data-direction="prev"] {
-  animation-name: lensRowsPrev;
-}
-.lensRow {
-  display: grid;
-  grid-template-columns: 4.1rem minmax(0, 1fr);
-  gap: 0.3rem 1rem;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--rule) 72%, transparent);
-}
-.lensRow:first-child {
-  padding-top: 0.1rem;
-}
-.lensRow:last-child {
-  padding-bottom: 0.35rem;
-  border-bottom: 0;
-}
-.lensRow dt {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding-top: 0.12rem;
-  color: var(--muted);
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  line-height: 1.5;
-}
-.rowIcon {
-  flex-shrink: 0;
-}
-.lensRow dd {
-  margin: 0;
-  font-size: 0.9375rem;
-  line-height: 1.7;
-}
-.rowValue {
-  display: block;
-  color: var(--ink);
-  text-wrap: pretty;
 }
 .rowMeta {
   display: block;
@@ -339,145 +189,6 @@
   color: var(--muted);
   font-size: 0.82rem;
   line-height: 1.65;
-}
-.lensRow[data-tone="waiting"] {
-  margin-left: -0.85rem;
-  padding-left: 0.85rem;
-  border-left: 2px solid var(--amber);
-}
-.lensRow[data-tone="waiting"] dt {
-  color: var(--amber);
-}
-.lensRow[data-tone="done"] dt {
-  color: var(--teal);
-}
-.lensActions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 0.75rem;
-  padding-top: 0.7rem;
-  border-top: 1px solid var(--rule);
-}
-.lensButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 44px;
-  padding-inline: 0.3rem;
-  border-radius: 0.3rem;
-  color: var(--teal);
-  font-size: 0.84rem;
-  font-weight: 550;
-  line-height: 1.5;
-  cursor: pointer;
-}
-.lensButton:hover {
-  text-decoration: underline;
-  text-underline-offset: 0.22em;
-}
-.chevron {
-  transition: transform 180ms var(--ease-out);
-}
-.chevron[data-open="true"] {
-  transform: rotate(180deg);
-}
-.lensLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  min-height: 44px;
-  color: var(--ink);
-  font-size: 0.84rem;
-  font-weight: 600;
-  line-height: 1.5;
-}
-.lensLink:hover {
-  color: var(--teal);
-}
-.lensLink svg {
-  transition: transform 160ms var(--ease-out);
-}
-.lensLink:hover svg {
-  transform: translateX(2px);
-}
-.evidenceWrap {
-  display: grid;
-  grid-template-rows: 0fr;
-  visibility: hidden;
-  opacity: 0;
-  transition:
-    grid-template-rows 280ms var(--ease-out),
-    opacity 200ms ease,
-    visibility 0s 280ms;
-}
-.evidenceWrap[data-open="true"] {
-  grid-template-rows: 1fr;
-  visibility: visible;
-  opacity: 1;
-  transition:
-    grid-template-rows 300ms var(--ease-out),
-    opacity 220ms ease 60ms,
-    visibility 0s;
-}
-.evidenceInner {
-  min-height: 0;
-  overflow: hidden;
-}
-.evidencePanel {
-  padding: 0.95rem 0 0.2rem;
-}
-.evidenceIntro {
-  color: var(--muted);
-  font-size: 0.82rem;
-  line-height: 1.6;
-}
-.evidenceList {
-  display: grid;
-  gap: 0.6rem;
-  margin: 0.6rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-.evidenceList li {
-  padding: 0.55rem 0.8rem;
-  border: 1px solid var(--rule);
-  border-radius: 0.55rem;
-  background: color-mix(in srgb, var(--ink) 2%, var(--paper));
-}
-.evidenceName {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  font-size: 0.84rem;
-  font-weight: 600;
-  line-height: 1.5;
-}
-.evidenceName span {
-  color: var(--muted);
-  font-size: 0.8rem;
-  font-weight: 400;
-}
-.evidenceList q {
-  display: block;
-  margin-top: 0.25rem;
-  color: var(--ink-soft);
-  font-size: 0.86rem;
-  line-height: 1.75;
-  quotes: "「" "」";
-}
-.lensFoot {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.6rem 1.35rem;
-  border-top: 1px solid var(--rule);
-  background: color-mix(in srgb, var(--ink) 2%, var(--paper-strong));
-  color: var(--muted);
-  font-size: 0.8rem;
-  line-height: 1.6;
 }
 
 /* ----------------------------------------------------------- S2 离开以后 */
@@ -501,40 +212,15 @@
   align-items: end;
   margin-bottom: clamp(2rem, 3.6vw, 3.25rem);
 }
-.kicker {
-  display: flex;
-  grid-column: 1 / -1;
-  align-items: center;
-  gap: 0.6rem;
-  color: var(--muted);
-  font-size: 0.82rem;
-  letter-spacing: 0.05em;
-  line-height: 1.5;
-}
-.kicker > span {
-  color: var(--teal);
-  font-weight: 650;
-  font-variant-numeric: tabular-nums;
-}
-.kicker::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  margin-left: 0.75rem;
-  background: var(--rule);
-  transform-origin: left center;
-}
-.home[data-motion="on"] .kicker::after {
-  transform: scaleX(0);
-}
-.home[data-motion="on"] .kicker[data-drawn="true"]::after {
-  transform: scaleX(1);
-  transition: transform 720ms var(--ease-out);
+.sectionHead h2,
+.splitHead h2 {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 .sectionHead h2 {
   font-family: var(--editorial-font);
   font-size: clamp(2rem, 3.4vw, 3rem);
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: -0.03em;
   line-height: 1.32;
   text-wrap: balance;
@@ -562,7 +248,7 @@
   border-top: 1px solid var(--rule);
   list-style: none;
 }
-/* 滚动进度线：把“来源 → 变化 → 判断 → 等你”的先后顺序画出来。 */
+/* 接续线：进入视口时画一次，节点依次点亮，停在“等你”。无 JS 或减少动效时直接呈现结果。 */
 .railProgress {
   position: absolute;
   top: -1px;
@@ -570,7 +256,6 @@
   left: 0;
   height: 2px;
   background: var(--teal);
-  transform: scaleX(var(--rail-progress, 1));
   transform-origin: left center;
   pointer-events: none;
 }
@@ -605,21 +290,35 @@
   border-color: var(--amber);
   background: var(--amber);
 }
-.home[data-motion="on"] .railStep::before {
-  transition:
-    background-color 260ms ease,
-    border-color 260ms ease,
-    transform 260ms var(--ease-out);
+.home[data-motion="on"] [data-rail]:not([data-played]) .railProgress {
+  transform: scaleX(0);
 }
-.home[data-motion="on"] .railStep[data-active]::before {
-  transform: scale(1.2);
+.home[data-motion="on"] [data-rail][data-played] .railProgress {
+  transition: transform 1100ms var(--ease-standard);
+}
+.home[data-motion="on"] [data-rail]:not([data-played]) .railStep::before {
+  transform: scale(.6);
+  border-color: var(--rule-strong);
+  background: var(--paper);
+}
+.home[data-motion="on"] [data-rail][data-played] .railStep::before {
+  transition:
+    background-color var(--dur-state) ease,
+    border-color var(--dur-state) ease,
+    transform var(--dur-settle) var(--ease-out);
+}
+.home[data-motion="on"] [data-rail] .railStep:nth-child(2)::before { transition-delay: 280ms; }
+.home[data-motion="on"] [data-rail] .railStep:nth-child(3)::before { transition-delay: 560ms; }
+.home[data-motion="on"] [data-rail] .railStep:nth-child(4)::before { transition-delay: 840ms; }
+.railStep:first-child::before {
   border-color: var(--teal);
   background: var(--teal);
 }
-.home[data-motion="on"]
-  .railStep[data-state="waiting"][data-active]::before {
-  border-color: var(--amber);
-  background: var(--amber);
+.home[data-motion="on"] [data-rail]:not([data-played]) .railStep[data-emphasis="true"] {
+  background: transparent;
+}
+.home[data-motion="on"] [data-rail][data-played] .railStep[data-emphasis="true"] {
+  transition: background-color var(--dur-settle) ease 560ms;
 }
 .railStep[data-emphasis="true"] {
   background: color-mix(in srgb, var(--amber) 5%, var(--paper));
@@ -640,7 +339,7 @@
 .railStep h3 {
   margin-top: 0.8rem;
   font-size: 1.0625rem;
-  font-weight: 620;
+  font-weight: 600;
   line-height: 1.65;
   text-wrap: pretty;
 }
@@ -686,14 +385,6 @@
 .conditions p + p {
   margin-top: 0.6rem;
 }
-.demoNote {
-  align-self: start;
-  border-left: 2px solid var(--rule);
-  padding-left: 1rem;
-  color: var(--muted);
-  font-size: 0.9rem;
-  line-height: 1.85;
-}
 
 /* -------------------------------------------------------- S3 五步示例 */
 
@@ -709,14 +400,10 @@
   gap: clamp(2.5rem, 5vw, 5rem);
   align-items: start;
 }
-.splitHead .kicker {
-  display: flex;
-  margin-bottom: 1rem;
-}
 .splitHead h2 {
   font-family: var(--editorial-font);
   font-size: clamp(2rem, 3.4vw, 3rem);
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: -0.03em;
   line-height: 1.32;
   text-wrap: balance;
@@ -764,7 +451,7 @@
 }
 .pathTitle h3 {
   font-size: 1.0625rem;
-  font-weight: 620;
+  font-weight: 600;
   line-height: 1.5;
 }
 .pathLine {
@@ -811,7 +498,7 @@
 .scenarioList h3 {
   font-family: var(--editorial-font);
   font-size: 1.3rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.5;
 }
 .scenarioList p {
@@ -894,7 +581,7 @@
 }
 .videoFacadeTitle {
   font-size: 1.05rem;
-  font-weight: 620;
+  font-weight: 600;
   line-height: 1.5;
 }
 .videoFacadeMeta {
@@ -950,19 +637,6 @@
   color: var(--paper);
 }
 /* 阅读进度：位置固定、只做合成层缩放，不隐藏任何内容。 */
-.scrollProgress {
-  position: fixed;
-  top: 56px;
-  right: 0;
-  left: 0;
-  z-index: 39;
-  height: 2px;
-  background: var(--teal);
-  transform: scaleX(0);
-  transform-origin: left center;
-  pointer-events: none;
-  opacity: 0.85;
-}
 .closingInner {
   display: flex;
   align-items: flex-end;
@@ -974,7 +648,7 @@
   max-width: 22ch;
   font-family: var(--editorial-font);
   font-size: clamp(2rem, 3.6vw, 3.2rem);
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: -0.03em;
   line-height: 1.32;
   color: var(--paper);
@@ -1003,7 +677,7 @@
   background: var(--paper);
   color: var(--ink);
   font-size: 0.95rem;
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.4;
   transition: filter 140ms ease;
 }
@@ -1024,23 +698,6 @@
   color: var(--paper);
 }
 
-.boundary {
-  width: min(1220px, calc(100% - 64px));
-  margin-inline: auto;
-  padding-block: 1.6rem;
-  border-top: 1px solid var(--rule);
-}
-.boundary p {
-  color: var(--muted);
-  font-size: 0.9rem;
-  line-height: 1.85;
-}
-.boundary span {
-  margin-right: 0.6rem;
-  color: var(--ink-soft);
-  font-weight: 600;
-}
-
 /* ----------------------------------------------------------- 页脚 */
 
 .footer {
@@ -1057,7 +714,7 @@
 .footerBrand {
   font-family: var(--editorial-font);
   font-size: 1.0625rem;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.5;
 }
@@ -1097,26 +754,6 @@
     transform: translate3d(0, 0, 0);
   }
 }
-@keyframes lensRowsNext {
-  from {
-    opacity: 0;
-    transform: translate3d(8px, 4px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-@keyframes lensRowsPrev {
-  from {
-    opacity: 0;
-    transform: translate3d(-8px, 4px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
 
 /* ----------------------------------------------------------- 断点 */
 
@@ -1134,8 +771,7 @@
 }
 @media (max-width: 980px) {
   .shell,
-  .heroInner,
-  .boundary {
+  .heroInner {
     width: calc(100% - 48px);
   }
   .heroInner {
@@ -1209,8 +845,7 @@
 }
 @media (max-width: 720px) {
   .shell,
-  .heroInner,
-  .boundary {
+  .heroInner {
     width: calc(100% - 36px);
   }
   .railProgress {
@@ -1220,7 +855,6 @@
     left: 0;
     width: 2px;
     height: auto;
-    transform: scaleY(var(--rail-progress, 1));
     transform-origin: center top;
   }
   .heroInner {
@@ -1261,69 +895,9 @@
     margin-top: 0.8rem;
     font-size: 0.8rem;
   }
-  .lens {
-    border-radius: 1rem;
-  }
-  .lensHead {
-    padding: 0.8rem 0.95rem 0.7rem;
-  }
-  .lensKicker {
-    font-size: 0.8rem;
-  }
-  .lensMission {
-    font-size: 1.15rem;
-  }
-  .lensStatus {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.8rem;
-  }
-  .stageTabs {
-    padding: 0.35rem 0.35rem 0.25rem;
-  }
-  .stageTab {
-    gap: 0.3rem;
-    font-size: 0.8rem;
-  }
-  .lensBody {
-    padding: 0.8rem 0.95rem 0.85rem;
-  }
-  .lensRow {
-    grid-template-columns: 3.6rem minmax(0, 1fr);
-    gap: 0.15rem 0.65rem;
-    padding: 0.45rem 0;
-  }
-  .lensRow dt {
-    font-size: 0.8rem;
-  }
-  .lensRow dd {
-    font-size: 0.9rem;
-    line-height: 1.65;
-  }
   .rowMeta {
     font-size: 0.8rem;
     line-height: 1.6;
-  }
-  .lensRow[data-tone="waiting"] {
-    margin-left: -0.55rem;
-    padding-left: 0.55rem;
-  }
-  .lensActions {
-    margin-top: 0.7rem;
-    padding-top: 0.65rem;
-  }
-  .lensButton,
-  .lensLink {
-    font-size: 0.8rem;
-  }
-  .evidencePanel {
-    padding: 0.8rem 0 0.1rem;
-  }
-  .evidenceList q {
-    font-size: 0.84rem;
-  }
-  .lensFoot {
-    padding: 0.6rem 0.95rem;
-    font-size: 0.8rem;
   }
   .section > .shell {
     padding-block: 2.75rem;
@@ -1377,9 +951,6 @@
   .railFoot {
     margin-top: 1.25rem;
   }
-  .splitHead .kicker {
-    margin-bottom: 0.75rem;
-  }
   .splitHead .sectionIntro {
     margin-top: 0.9rem;
   }
@@ -1430,12 +1001,6 @@
     min-height: 48px;
     font-size: 0.9rem;
   }
-  .boundary {
-    padding-block: 1.25rem;
-  }
-  .boundary p {
-    font-size: 0.84rem;
-  }
   .footerInner {
     align-items: flex-start;
     gap: 0.75rem;
@@ -1458,7 +1023,6 @@
   .home[data-motion="on"] [data-hero-lens] {
     translate: none;
   }
-  .scrollProgress,
   .railProgress {
     transform: scale(0) !important;
   }
@@ -1469,23 +1033,10 @@
     transition: none !important;
     scroll-behavior: auto;
   }
-  .evidenceWrap .evidenceInner {
-    transition: none;
-  }
 }
 @media (prefers-contrast: more) {
-  .lens,
-  .videoLink,
   .railStep[data-emphasis="true"] {
     border-color: var(--ink-soft);
-  }
-  .lens {
-    box-shadow: none;
-  }
-}
-@media (prefers-reduced-transparency: reduce) {
-  .home .evidenceList li {
-    background: var(--paper);
   }
 }
 
@@ -1510,17 +1061,19 @@
 .resumeChange s { color: var(--muted); }
 .resumeRefs { display: flex; flex-wrap: wrap; gap: .375rem; margin-top: .25rem; }
 .resumeRefs span, .scenarioTags span { padding: .0625rem .5rem; border: 1px solid var(--rule); border-radius: 6px; font-size: .75rem; color: var(--ink-soft); }
-.resumeActions, .missionActions { display: flex; flex-wrap: wrap; gap: .5rem; }
-.resumeActions span, .missionActions span { display: inline-flex; align-items: center; min-height: 2.5rem; padding: 0 1rem; border: 1px solid var(--rule); border-radius: 10px; font-size: .875rem; color: var(--ink); }
-.resumeActions span:first-child, .missionActions span:first-child { background: var(--teal); border-color: var(--teal); color: var(--paper-strong); }
+.resumeGo { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--teal-strong); font-size: .875rem; font-weight: 600; }
+.resumeGo:hover { text-decoration: underline; text-underline-offset: .2em; }
+/* 首屏只播一次：原判断被划掉，新判断落定。 */
+.resumeWas s { text-decoration-color: currentColor; animation: resumeStrike 480ms var(--ease-standard) 700ms backwards; }
+.resumeNow { display: block; animation: resumeRise var(--dur-settle) var(--ease-out) 1100ms backwards; }
+@keyframes resumeStrike { from { text-decoration-color: transparent; } }
+@keyframes resumeRise { from { opacity: 0; transform: translateY(4px); } }
 .resumeNote { font-size: .75rem; color: var(--muted); }
 
 /* ------------------------------------------------ 设计稿对齐：工作方式入口、长期委托 */
-.flowLink { display: inline-flex; align-items: center; gap: .375rem; margin-top: 1.5rem; min-height: 2.75rem; color: var(--teal); font-weight: 600; }
-.flowLink:hover { text-decoration: underline; }
 .missionCard { display: grid; gap: 1rem; padding: 1.5rem; border: 1px solid var(--rule); border-radius: 16px; background: var(--card-bg); min-width: 0; }
 .missionCard > header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; }
-.missionCard h3 { font-size: 1.125rem; font-weight: 650; color: var(--ink); }
+.missionCard h3 { font-size: 1.125rem; font-weight: 600; color: var(--ink); }
 .missionWaiting { padding: .0625rem .5625rem; border-radius: 999px; background: color-mix(in srgb, var(--amber) 12%, var(--card-bg)); color: var(--amber); font-size: .75rem; font-weight: 600; }
 .missionSteps { display: grid; gap: .875rem; margin: 0; padding: 0 0 0 1.5rem; list-style: none; position: relative; }
 .missionSteps::before { content: ""; position: absolute; left: .375rem; top: .5rem; bottom: .5rem; width: 2px; background: var(--rule); }
@@ -1536,13 +1089,10 @@
 .scenarioTags { display: flex; flex-wrap: wrap; gap: .375rem; }
 .scenarioList p.scenarioTags { margin-top: .875rem; }
 .platformShot { grid-column: 1 / -1; margin: 1.5rem 0 0; border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; background: var(--card-bg); box-shadow: var(--shadow-md); }
-.platformShot figcaption { display: flex; align-items: center; gap: .375rem; padding: .5rem .875rem; border-bottom: 1px solid var(--rule); font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.platformShot figcaption span { width: .5rem; height: .5rem; border-radius: 50%; background: var(--rule-strong); }
-.platformShot figcaption span:nth-child(3) { margin-right: .5rem; }
 .platformShot img { display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 1280 / 760; object-fit: cover; object-position: top center; }
 .principles { padding-block: clamp(2.5rem, 5vw, 4rem); border-top: 1px solid var(--rule); }
 .principles ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem 2.5rem; margin: 0; padding: 0; list-style: none; }
-.principles h3 { font-family: var(--editorial-font); font-size: 1.125rem; font-weight: 500; color: var(--ink); }
+.principles h3 { font-family: var(--editorial-font); font-size: 1.125rem; font-weight: 400; color: var(--ink); }
 .principles p { margin-top: .375rem; font-size: .875rem; line-height: 1.8; color: var(--ink-soft); }
 .closingInner { flex-wrap: wrap; }
 .githubCard { display: grid; gap: .5rem; flex: 1 1 100%; max-width: 34rem; padding: 1.25rem 1.375rem; border: 1px solid color-mix(in srgb, var(--paper) 22%, transparent); border-radius: 14px; color: var(--paper); }
@@ -1553,4 +1103,186 @@
 @media (max-width: 760px) {
   .principles ul { grid-template-columns: minmax(0, 1fr); }
   .resumeCard, .missionCard { padding: 1.125rem; }
+}
+.conditions summary::before { content:none; }
+
+/* ------------------------------------------------ 官网动效：只在本页，内容层以外不复用 */
+@keyframes headlineLine {
+  from { opacity: 0; clip-path: inset(0 0 100% 0); transform: translateY(38%); }
+  to { opacity: 1; clip-path: inset(0 0 -12% 0); transform: none; }
+}
+
+/* 滚动揭示：data-motion 由 JS 设置，无 JS 时内容直接可见。 */
+.home[data-motion="on"] [data-reveal] {
+  transition: opacity 760ms var(--ease-out), transform 760ms var(--ease-out);
+}
+.home[data-motion="on"] [data-reveal]:not([data-in]) {
+  opacity: 0;
+  transform: translateY(28px);
+}
+
+/* 子项错峰进入 */
+.home[data-motion="on"] .scenarioList[data-reveal] > li,
+.home[data-motion="on"] .principles ul[data-reveal] > li {
+  transition: opacity 640ms var(--ease-out), transform 640ms var(--ease-out), border-color var(--dur-state) ease, box-shadow 240ms ease;
+}
+.home[data-motion="on"] .scenarioList[data-reveal]:not([data-in]) > li,
+.home[data-motion="on"] .principles ul[data-reveal]:not([data-in]) > li {
+  opacity: 0;
+  transform: translateY(22px);
+}
+.home[data-motion="on"] [data-reveal] > li:nth-child(2) { transition-delay: 110ms, 110ms, 0ms, 0ms; }
+.home[data-motion="on"] [data-reveal] > li:nth-child(3) { transition-delay: 220ms, 220ms, 0ms, 0ms; }
+
+/* 首屏纸卡：一叠卡片展开，鼠标带动 3D 倾斜，高光跟随指针。 */
+.resumeStack {
+  position: relative;
+  min-width: 0;
+  perspective: 1200px;
+  animation: stackRise 900ms var(--ease-out) 160ms both;
+}
+.resumeStack::before,
+.resumeStack::after {
+  content: "";
+  position: absolute;
+  inset: 10px 14px -10px;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: var(--card-bg);
+  transform-origin: 50% 100%;
+  animation: stackBack 1100ms var(--ease-out) 420ms both;
+}
+.resumeStack::after {
+  inset: 20px 30px -20px;
+  background: color-mix(in srgb, var(--teal-pale) 55%, var(--card-bg));
+  animation-name: stackBackFar;
+}
+.resumeStack .resumeCard {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+  transition: transform 420ms var(--ease-out), box-shadow 320ms ease;
+}
+.resumeStack[data-hot] .resumeCard {
+  will-change: transform;
+  transition: transform 90ms linear, box-shadow 320ms ease;
+  box-shadow: 0 34px 70px -38px rgb(28 46 44 / 42%);
+}
+.resumeStack .resumeCard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 30%), color-mix(in srgb, var(--teal) 13%, transparent), transparent 62%);
+  transition: opacity 300ms ease;
+}
+.resumeStack[data-hot] .resumeCard::after { opacity: 1; }
+.resumeStack .resumeCard > * { position: relative; z-index: 1; }
+@keyframes stackRise { from { opacity: 0; transform: translateY(26px) scale(.985); } }
+@keyframes stackBack { from { opacity: 0; transform: translateY(-12px) rotate(0deg); } to { opacity: 1; transform: rotate(-1.6deg); } }
+@keyframes stackBackFar { from { opacity: 0; transform: translateY(-22px) rotate(0deg); } to { opacity: 1; transform: rotate(1.8deg); } }
+
+/* 光斑卡片：描边和底色跟随指针亮起。 */
+.home [data-spot] { position: relative; isolation: isolate; }
+.home [data-spot]:not(.resumeStack)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), var(--teal), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  transition: opacity 260ms ease;
+}
+.home [data-spot][data-hot]:not(.resumeStack)::before { opacity: 1; }
+
+/* 场景与原则改成真正的卡片，悬停抬起。 */
+.scenarioList { gap: 1rem; border: 0; }
+.home .scenarioList > li,
+.home .principles ul > li {
+  padding: 1.5rem;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: var(--card-bg);
+}
+.home[data-motion="on"] .scenarioList[data-in] > li:hover,
+.home[data-motion="on"] .principles ul[data-in] > li:hover,
+.missionCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 26px 50px -36px rgb(28 46 44 / 40%);
+}
+.missionCard { transition: transform 280ms var(--ease-out), box-shadow 280ms ease; }
+
+/* 委托卡：进入视口时步骤依次亮起，等你的节点扩散两次后静止。 */
+.home[data-motion="on"] .missionCard:not([data-in]) .missionSteps li { opacity: 0; transform: translateX(-8px); }
+.home[data-motion="on"] .missionSteps li { transition: opacity 520ms var(--ease-out), transform 520ms var(--ease-out); }
+.home[data-motion="on"] .missionSteps li:nth-child(2) { transition-delay: 240ms; }
+.home[data-motion="on"] .missionSteps li:nth-child(3) { transition-delay: 480ms; }
+.home[data-motion="on"] .missionCard[data-in] .missionSteps li[data-state="waiting"]::after {
+  content: "";
+  position: absolute;
+  left: -1.5rem;
+  top: .35rem;
+  width: .875rem;
+  height: .875rem;
+  border-radius: 50%;
+  border: 2px solid var(--amber);
+  animation: waitingRing 1400ms var(--ease-out) 700ms 2 both;
+  pointer-events: none;
+}
+@keyframes waitingRing { from { opacity: .8; transform: scale(1); } to { opacity: 0; transform: scale(2.6); } }
+
+/* 产品截图：随滚动从略小展开到完整，浏览器合成线程驱动。 */
+@supports (animation-timeline: view()) {
+  .home[data-motion="on"] .platformShot[data-in] {
+    animation: shotOpen linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 42%;
+  }
+  @keyframes shotOpen { from { transform: perspective(1400px) rotateX(9deg) scale(.95); box-shadow: 0 8px 20px -18px rgb(28 46 44 / 30%); } to { transform: none; } }
+}
+
+/* 主按钮扫光 */
+.ctaPrimary { position: relative; overflow: hidden; isolation: isolate; }
+.ctaPrimary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(105deg, transparent 30%, rgb(255 255 255 / 26%) 50%, transparent 70%);
+  transform: translateX(-120%);
+}
+.ctaPrimary:hover::after { transform: translateX(120%); transition: transform 760ms var(--ease-standard); }
+
+/* 收尾深色区：青绿光随指针移动 */
+.closing { overflow: hidden; }
+.closing[data-spot]::before {
+  padding: 0 !important;
+  -webkit-mask: none !important;
+  mask: none !important;
+  z-index: 0 !important;
+  background: radial-gradient(620px circle at var(--mx, 70%) var(--my, 40%), color-mix(in srgb, var(--teal) 48%, transparent), transparent 68%) !important;
+  transition: opacity 600ms ease !important;
+}
+.closing > * { position: relative; z-index: 1; }
+
+@media (max-width: 760px) {
+  .resumeStack::before { inset: 8px 8px -8px; }
+  .resumeStack::after { inset: 16px 18px -16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .headline span, .resumeStack, .resumeStack::before, .resumeStack::after { animation: none !important; }
+  .resumeStack::before { transform: rotate(-1.6deg); }
+  .resumeStack::after { transform: rotate(1.8deg); }
+  .home [data-spot]::before { display: none; }
+  .home [data-reveal], .home [data-reveal] > li { transition: none !important; }
+  .platformShot { animation: none !important; }
 }

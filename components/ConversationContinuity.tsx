@@ -4,6 +4,7 @@ import {readConversationDraft,saveConversationDraft,clearConversationDraft} from
 import Link from "next/link";
 import type { ConversationView } from "@/lib/types/conversation";
 import type { Admission, DirectiveCommand, DirectiveScope } from "@/lib/types/continuity";
+import styles from "./ConversationPanel.module.css";
 
 function directiveRetryKey(body:unknown){return JSON.stringify({...body as Record<string,unknown>,commandId:undefined,expectedSeq:undefined});}
 function pendingDirective(key:string):Map<string,unknown>{const map=new Map<string,unknown>();try{const saved=JSON.parse(readConversationDraft(key).directiveRequest||"null");if(saved)map.set(directiveRetryKey(saved),saved);}catch{}return map;}
@@ -46,11 +47,12 @@ export function ConversationContinuity({ view, onChange, onError, onWork }: { vi
       onWork(kind, id, projectId);
     } catch (e) { onError(e instanceof Error ? e.message : "原任务暂不可访问"); }
   }
-  return <section aria-label="当前工作与接续" style={{ padding: "12px 0", borderBottom: "1px solid var(--border-subtle, #ddd)" }}>
-    {ct.workingObjective && <p><strong>当前重点：</strong>{ct.workingObjective}</p>}
+  const handoffCount = (ct.handoff?.missions.length ?? 0) + (ct.handoff?.results.length ?? 0);
+  return <section aria-label="当前工作与接续" className={styles.continuity}>
+    {ct.workingObjective && <p className={styles.continuityObjective}><strong>当前重点：</strong>{ct.workingObjective}</p>}
     {ct.stopped && <p role="status">这项工作已暂停</p>}
     {ct.directives.map(d => <div key={d.id} style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 6 }}>
-      <span>{d.quote}{d.validUntil && <small> · 到 {new Date(d.validUntil).toLocaleString("zh-CN")}</small>}</span>
+      <span>{d.quote !== ct.workingObjective && d.quote}{d.validUntil && <small>{d.quote !== ct.workingObjective && " · "}有效到 {new Date(d.validUntil).toLocaleString("zh-CN")}</small>}</span>
       <button type="button" className="workspace-link focus-ring" disabled={saving} onClick={() => void send({ ...base(), scope: d.scope, operation: "WITHDRAW", directiveId: d.directiveId })}>撤回</button>
     </div>)}
     <button type="button" className="workspace-link focus-ring" onClick={() => setEditing(!editing)}>调整当前方向</button>
@@ -66,7 +68,9 @@ export function ConversationContinuity({ view, onChange, onError, onWork }: { vi
       {preview && <div role="group" aria-label="工作指引确认"><p>{preview.scope.missionId ? "仅此委托" : "仅此项目"}：{preview.quote}，有效到 {new Date(preview.validUntil!).toLocaleString("zh-CN")}。</p>
         <button type="button" disabled={saving} onClick={() => void send(preview)}>确认这条工作指引</button><button type="button" onClick={() => setPreview(null)}>返回修改</button></div>}
     </div>}
+    {handoffCount > 0 && <details className={styles.continuityHandoff}><summary>{handoffCount} 项待接续</summary>
     {ct.handoff?.missions.map(m => <p key={m.id}><button type="button" className="workspace-link focus-ring" onClick={() => void openWork("MISSION", m.id)}>{m.goal}</button> · {m.workState?.reasonText ?? (m.nextOwner === "USER" ? "等你接续" : m.nextOwner === "AGENT" ? "等待 Agent 接续" : "状态需核对")}</p>)}
     {ct.handoff?.results.map(a => <p key={a.id}><button type="button" className="workspace-link focus-ring" onClick={() => void openWork("ACTION", a.id)}>{a.title}</button> · 已记录结果 <Link href={a.href}>查看原回执</Link></p>)}
+    </details>}
   </section>;
 }

@@ -142,7 +142,7 @@ export struct MissionWorkPacketView {
             .fontSize(12).fontColor(PMColors.WARNING).width('100%')
         } else if (this.action().present && this.action().kindKnown && this.action().kind !== 'NONE') {
           if (this.action().kind === 'WAIT_FOR_OBSERVATION') {
-            Text('等待服务端继续；读取与刷新不会推进成功观察时间。').fontSize(12).fontColor(PMColors.INK_SECONDARY).width('100%')
+            Text('正在后台推进，有结果会更新。').fontSize(12).fontColor(PMColors.INK_SECONDARY).width('100%')
           } else if (this.inlinePrimaryAction && this.inlineKind(this.action().kind)) {
             Text(this.inlineHint(this.action().kind)).fontSize(12).fontColor(PMColors.INK_SECONDARY).width('100%')
           } else {

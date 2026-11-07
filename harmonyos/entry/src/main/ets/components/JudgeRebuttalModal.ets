@@ -1,4 +1,4 @@
-import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion, PMMaterial } from '../common/DesignTokens';
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion } from '../common/DesignTokens';
 import { AlertIcon, PaperclipIcon } from './PMIcons';
 import { PMCloseButton } from './PMReferencePrimitives';
 
@@ -32,23 +32,23 @@ export struct JudgeRebuttalModal {
       '方案变更时态闭环',
       'ProjectMemo 内置时态账本引擎。方案变更时系统生成变更候选：识别冲突与受影响对象，由你确认后建立取代关系并更新受影响待办；成果中受影响的引用会标注“已被新决策取代”。',
       false,
-      '实现依据：时态账本引擎 (changeImpactService) 与 CardRelation 表'
+      '依据：变更影响分析与卡片关系记录'
     ),
     new JudgeQuestionItem(
       'q2',
       '你们项目宣称的性能指标提升，原始实验记录在哪里？',
       '证据可溯源性',
-      '记录可关联底层原始碎片。点击“证据透视镜”可查看已关联的原始记录与时间来源；缺失的信息会标记待补，不做无法保证的宣称。',
+      '记录可关联底层原始碎片。点击“证据透视”可查看已关联的原始记录与时间来源；缺失的信息会标记待补，不做无法保证的宣称。',
       false,
-      '实现依据：Claim Auditor 证据透视抽屉与底库原始实验卡片'
+      '依据：证据透视与原始实验记录'
     ),
     new JudgeQuestionItem(
       'q3',
       '本项目是否在极低功耗边缘设备（如低端 MCU）上做过压力实测？',
-      '防幻觉确凿拒答',
-      '【严谨拒答规范范式】遵循真实性与防幻觉底线：在真实运行中，当知识库与实验档案无对应实测记录时，系统严格执行拒答策略，不提供未经实测虚构断言，并建议立项发起实测补充。',
+      '没有依据时拒答',
+      '遵循真实性底线：在真实运行中，当知识库与实验档案无对应实测记录时，系统严格执行拒答策略，不提供未经实测虚构断言，并建议立项发起实测补充。',
       true,
-      '规范依据：学术诚信原则与动态检索无证据拒答规范'
+      '依据：没有记录就不下结论'
     ),
     new JudgeQuestionItem(
       'q4',
@@ -67,7 +67,7 @@ export struct JudgeRebuttalModal {
         .width('100%')
         .height('100%')
         .backgroundColor(PMColors.SCRIM)
-        .backgroundBlurStyle(PMMaterial.SCRIM, PMMaterial.OPTIONS)
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
         .onClick(() => {
           this.onClose();
         })
@@ -80,20 +80,22 @@ export struct JudgeRebuttalModal {
             Circle({ width: 8, height: 8 })
               .fill(PMColors.RISK)
               .margin({ right: PMSpacing.SM })
-            Text('评委答辩质询透视镜 (Judge Rebuttal)')
+            Text('答辩质询预演')
               .fontSize(PMFontSize.TITLE)
               .fontWeight(FontWeight.Bold)
               .fontColor(PMColors.INK_PRIMARY)
+              .layoutWeight(1)
           }
           .alignItems(VerticalAlign.Center)
+          .layoutWeight(1)
 
-          PMCloseButton({ accessibilityLabel: '关闭评委答辩质询透视镜', onAction: (): void => { this.onClose(); } })
+          PMCloseButton({ accessibilityLabel: '关闭答辩质询预演', onAction: (): void => { this.onClose(); } })
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
         .alignItems(VerticalAlign.Center)
 
-        Text('【功能演示与防幻觉规范】内置典型答辩质询应对范式。真实联机环境下系统动态检索知识库，无证据时严格执行此“严谨拒答”规范。')
+        Text('示例问答。真实使用时检索项目资料，没有依据就明确拒答。')
           .fontSize(PMFontSize.CAPTION)
           .fontColor(PMColors.INK_SECONDARY)
           .lineHeight(18)
@@ -164,7 +166,7 @@ export struct JudgeRebuttalModal {
                   .fontWeight(FontWeight.Bold)
                   .fontColor(this.questions[this.selectedIndex].isRefusal ? PMColors.RISK : PMColors.BRAND)
 
-                Text(this.questions[this.selectedIndex].isRefusal ? '【确凿拒答 · 严守底线】' : '【证据确凿】')
+                Text(this.questions[this.selectedIndex].isRefusal ? '没有依据' : '有依据')
                   .fontSize(PMFontSize.CAPTION)
                   .fontWeight(FontWeight.Bold)
                   .fontColor(this.questions[this.selectedIndex].isRefusal ? PMColors.RISK : PMColors.SUCCESS)

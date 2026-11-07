@@ -1,5 +1,5 @@
 import router from '@ohos.router';
-import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction } from '../common/DesignTokens';
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction, PMMotion } from '../common/DesignTokens';
 import { MoreIcon } from './PMIcons';
 
 /**
@@ -8,6 +8,9 @@ import { MoreIcon } from './PMIcons';
 @Component
 export struct PMAppBar {
   @Prop title: string = '';
+  /** 非空时标题参与页面间共享元素转场 */
+  @Prop titleShareId: string = '';
+  @StorageProp('pm.reduceMotion') private reduceMotion: boolean = false;
   @Prop subtitle: string = '';
   @Prop showBack: boolean = true;
   @Prop backLabel: string = '项目';
@@ -52,6 +55,7 @@ export struct PMAppBar {
           .maxLines(1)
           .lineHeight(22)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .sharedTransition(this.titleShareId !== '' && !this.reduceMotion ? this.titleShareId : `pm-app-bar-${this.title}`, { duration: PMMotion.ENTER, curve: Curve.Friction })
 
         if (this.subtitle !== '') {
           Text(this.subtitle)
@@ -127,7 +131,7 @@ export struct PMAppBar {
     .alignItems(VerticalAlign.Center)
     .constraintSize({ minHeight: 58 })
     .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 7, bottom: 7 })
-    .backgroundColor(PMColors.SURFACE)
+    .backgroundColor(PMColors.BACKGROUND)
     .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
   }
 }

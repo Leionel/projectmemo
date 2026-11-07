@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { useListFlip } from "./motionHooks";
 import { ArrowRight, CalendarClock, CalendarDays, Check, ChevronDown, Circle, LoaderCircle, MoreHorizontal, Pause, Pencil, Play, Plus, SlidersHorizontal, Star, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -91,6 +92,7 @@ export function ActionBoard({ projectId, initialActions, reminderEnabled = false
     if (view === "completed") return item.status === "DONE";
     return true;
   }), sortMode, now);
+  const listRef = useListFlip<HTMLDivElement>(visibleActions.map(action => action.id).join());
 
   function notify(areas: Array<"actions" | "cards" | "interventions" | "metrics">) {
     emitWorkspaceChange(projectId, areas);
@@ -238,7 +240,7 @@ export function ActionBoard({ projectId, initialActions, reminderEnabled = false
     </div>
 
     {message && <p role="status" className="mt-3 rounded-lg bg-[var(--teal-pale)] px-3 py-2 text-xs font-semibold text-[var(--teal-strong)]">{message}</p>}
-    <div className="mt-4 space-y-3">{visibleActions.length ? visibleActions.map((action) => <ActionCard key={action.id} action={action} now={now} busy={busy} resultFor={resultFor} resultText={resultText} editFor={editFor} editDraft={editDraft} cancelFor={cancelFor} allActions={projectActions} feasibilityFor={feasibilityFor} reminderFor={reminderFor} reminderEnabled={reminderEnabled} onToggleFeasibility={(id) => setFeasibilityFor((current) => current === id ? null : id)} onToggleReminder={(id) => setReminderFor((current) => current === id ? null : id)} onDependencyChanged={() => notify(["actions", "metrics"])} onSetResultFor={setResultFor} onSetResultText={setResultText} onBeginEdit={beginEdit} onSetEditDraft={setEditDraft} onCloseEdit={() => { setEditFor(null); setEditDraft(null); }} onSetCancelFor={setCancelFor} onPatch={patchAction} onComplete={complete} onOpenResult={openResult} completionPrompt={completionPrompt} onSetCompletionDisposition={(value) => setCompletionPrompt((previous) => previous ? { ...previous, disposition: value } : previous)} />) : <EmptyState view={view} hasActions={projectActions.length > 0} onShowActive={() => setView("active")} />}</div>
+    <div ref={listRef} className="mt-4 space-y-3">{visibleActions.length ? visibleActions.map((action) => <div key={action.id} data-flip-key={action.id}><ActionCard action={action} now={now} busy={busy} resultFor={resultFor} resultText={resultText} editFor={editFor} editDraft={editDraft} cancelFor={cancelFor} allActions={projectActions} feasibilityFor={feasibilityFor} reminderFor={reminderFor} reminderEnabled={reminderEnabled} onToggleFeasibility={(id) => setFeasibilityFor((current) => current === id ? null : id)} onToggleReminder={(id) => setReminderFor((current) => current === id ? null : id)} onDependencyChanged={() => notify(["actions", "metrics"])} onSetResultFor={setResultFor} onSetResultText={setResultText} onBeginEdit={beginEdit} onSetEditDraft={setEditDraft} onCloseEdit={() => { setEditFor(null); setEditDraft(null); }} onSetCancelFor={setCancelFor} onPatch={patchAction} onComplete={complete} onOpenResult={openResult} completionPrompt={completionPrompt} onSetCompletionDisposition={(value) => setCompletionPrompt((previous) => previous ? { ...previous, disposition: value } : previous)} /></div>) : <EmptyState view={view} hasActions={projectActions.length > 0} onShowActive={() => setView("active")} />}</div>
     {view === "active" && recentDone.length > 0 && <section aria-labelledby="actions-recent-done" className="mt-6 border-t border-[var(--rule)] pt-4">
       <h3 id="actions-recent-done" className="text-sm font-bold text-[var(--ink)]">最近完成</h3>
       <ul className="mt-2 divide-y divide-[var(--rule)]">{recentDone.map(action => <li key={action.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2.5 text-sm">

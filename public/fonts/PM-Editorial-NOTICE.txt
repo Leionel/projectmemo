@@ -1,11 +1,15 @@
-PM Editorial is a landing-page character subset of Noto Serif SC,
-instanced at weight 500 and renamed for this project.
+PM Brand, PM Editorial, PM Serif and PM Serif Ext are character subsets of
+Noto Serif SC, instanced at a fixed weight and renamed for this project.
+
+- PM Brand (pm-brand.woff2): wordmark, weight 600.
+- PM Editorial (pm-editorial.woff2): public site and account headings, weight 500.
+- PM Serif (pm-serif-core.woff2) and PM Serif Ext (pm-serif-ext.woff2):
+  workspace headings, weight 600.
 
 Upstream copyright: 2017-2023 Adobe (http://www.adobe.com/).
 License: SIL Open Font License 1.1, included in OFL.txt in this directory.
 Upstream project: https://github.com/notofonts/noto-cjk
-Source metadata: Noto Serif SC, Version 2.02;241114204558;non-release.
-Reproduction: evidence/pre-r4/20261023-home-story/subset-font.py
+Reproduction: scripts/build-web-fonts.py
 
-The subset is used only for public-homepage editorial headings.
-Body text and product controls retain the existing interface font.
+manrope-variable.woff2 is the unmodified Manrope variable font in WOFF2 form;
+see Manrope-OFL.txt.

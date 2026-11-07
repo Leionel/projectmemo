@@ -67,7 +67,6 @@ export default async function Home() {
 
   return (
     <main id="main-content" className={styles.home} tabIndex={-1}>
-      <div className={styles.scrollProgress} data-scroll-progress aria-hidden="true" />
       <section
         id="home-heading"
         className={styles.hero}
@@ -81,7 +80,7 @@ export default async function Home() {
               <strong>个人项目 Agent</strong>
             </p>
             <h1 id="hero-title" className={styles.headline}>
-              人可以下线，
+              <span className={styles.headlineFirst}>人可以下线，</span>
               <span>项目别掉线。</span>
             </h1>
             <p className={styles.heroSub}>
@@ -92,9 +91,9 @@ export default async function Home() {
                 {workspaceLabel}
                 <ArrowRight size={16} aria-hidden="true" />
               </Link>
-              <a className={styles.ctaSecondary} href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-                在 GitHub 查看源码
-                <ArrowUpRight size={16} aria-hidden="true" />
+              <a className={styles.ctaSecondary} href="#experience">
+                无需登录，先试试
+                <ArrowDown size={16} aria-hidden="true" />
               </a>
             </div>
             <p className={styles.heroNote}>
@@ -111,7 +110,7 @@ export default async function Home() {
         aria-labelledby="continuity-title"
       >
         <div className={styles.shell}>
-          <header className={styles.sectionHead}>
+          <header className={styles.sectionHead} data-reveal>
             <h2 id="continuity-title">
               新情况出现时，
               <br className={styles.mobileBreak} />
@@ -122,7 +121,7 @@ export default async function Home() {
             </p>
           </header>
 
-          <div className={styles.railFrame} data-rail>
+          <div className={styles.railFrame} data-rail data-reveal>
             <ol className={styles.rail}>
               {continuitySteps.map((step) => (
                 <li
@@ -152,28 +151,24 @@ export default async function Home() {
                 暂停后不会从头另建任务；继续前，服务端会重新检查授权、预算和材料是否仍然适用。
               </p>
             </details>
-            <p className={styles.demoNote}>
-              这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。
-            </p>
           </div>
-          <a className={styles.flowLink} href="#experience">体验一段项目接续，无需登录<ArrowDown size={15} aria-hidden="true" /></a>
-        </div>
+          </div>
       </section>
       <section id="missions" className={`${styles.section} ${styles.sectionTint}`} aria-labelledby="missions-title">
         <div className={`${styles.shell} ${styles.split}`}>
-          <header className={styles.splitHead}>
+          <header className={styles.splitHead} data-reveal>
             <h2 id="missions-title">长期委托会保留进度，<br className={styles.mobileBreak} />需要你时停下来。</h2>
             <p className={styles.sectionIntro}>比如“用已有材料整理阶段汇报”。步骤和草稿都在同一份委托里：缺材料就补来源，要批准就先核对提案。</p>
             <p className={styles.sectionIntro}>暂停后不会从头再来。继续之前，服务端会重新检查授权、预算和材料是否仍然适用。</p>
           </header>
-          <article className={styles.missionCard} aria-label="公开示例：长期委托">
+          <article className={styles.missionCard} aria-label="公开示例：长期委托" data-reveal data-spot>
             <header><h3>整理参赛项目的阶段汇报</h3><span className={styles.missionWaiting}>等待补充材料</span></header>
             <ol className={styles.missionSteps}>
               <li data-state="done"><strong>读取项目记忆</strong><span>已找到参赛要求与任务安排</span></li>
               <li data-state="waiting"><strong>需要补充：{exampleProject.missing.title}</strong><span>{exampleProject.missing.detail}</span></li>
               <li data-state="next"><strong>继续整理汇报草稿</strong><span>补充材料并确认后继续</span></li>
             </ol>
-            <div className={styles.missionActions} aria-hidden="true"><span>补充材料</span><span>查看草稿</span></div>
+            
           </article>
         </div>
       </section>
@@ -184,7 +179,7 @@ export default async function Home() {
         aria-labelledby="experience-title"
       >
         <div className={styles.shell}>
-          <header className={`${styles.sectionHead} ${styles.experienceHead}`}>
+          <header className={`${styles.sectionHead} ${styles.experienceHead}`} data-reveal>
             <h2 id="experience-title">
               同一份素材，
               <br className={styles.mobileBreak} />
@@ -204,12 +199,12 @@ export default async function Home() {
         aria-labelledby="moments-title"
       >
         <div className={styles.shell}>
-          <header className={styles.sectionHead}>
+          <header className={styles.sectionHead} data-reveal>
             <h2 id="moments-title">竞赛、科研、课程设计。</h2>
           </header>
-          <ul className={styles.scenarioList}>
+          <ul className={styles.scenarioList} data-reveal>
             {scenarios.map((scenario) => (
-              <li key={scenario.title}>
+              <li key={scenario.title} data-spot>
                 <h3>{scenario.title}</h3>
                 <p>{scenario.text}</p>
                 <p className={styles.scenarioTags}>{scenario.tags.map(tag => <span key={tag}>{tag}</span>)}</p>
@@ -221,7 +216,7 @@ export default async function Home() {
 
       <section className={styles.section} aria-labelledby="platform-title">
         <div className={`${styles.shell} ${styles.split}`}>
-          <header className={styles.splitHead}>
+          <header className={styles.splitHead} data-reveal>
             <h2 id="platform-title">
               电脑上看依据，
               <br className={styles.mobileBreak} />
@@ -234,7 +229,7 @@ export default async function Home() {
               界面示意 · 实际可用范围取决于部署与授权
             </p>
           </header>
-          <div className={styles.pathList}>
+          <div className={styles.pathList} data-reveal>
             <p className={styles.taskIdentity}>
               <span>同一任务</span>
               整理阶段汇报
@@ -274,8 +269,7 @@ export default async function Home() {
               </p>
             </div>
           </div>
-          <figure className={styles.platformShot}>
-            <figcaption><span aria-hidden="true" /><span aria-hidden="true" /><span aria-hidden="true" />project.luojiatutor.xyz</figcaption>
+          <figure className={styles.platformShot} data-reveal data-spot>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/home/workspace-desktop.jpg" alt="忆程 Web 工作台：项目焦点与长期委托（公开示例截图）" width={1280} height={760} loading="lazy" />
           </figure>
@@ -288,13 +282,12 @@ export default async function Home() {
         aria-labelledby="demo-title"
       >
         <div className={`${styles.shell} ${styles.demoSplit}`}>
-          <header className={styles.splitHead}>
+          <header className={styles.splitHead} data-reveal>
             <h2 id="demo-title">
               看一遍决赛演示。
             </h2>
             <p className={styles.sectionIntro}>
-              2026 C4-AI 决赛演示视频。默认只显示本地画面；点击后在本页加载
-              Bilibili 官方播放器，也可以在新窗口打开。
+              2026 C4-AI 决赛演示视频。
             </p>
           </header>
           <DemoVideoPlayer />
@@ -302,15 +295,15 @@ export default async function Home() {
       </section>
       <section className={styles.principles} aria-label="使用原则">
         <div className={styles.shell}>
-          <ul>
-            <li><h3>来源可以回看</h3><p>判断链接到原始记录和附件原件。</p></li>
-            <li><h3>缺口会标出来</h3><p>没有依据的内容不写成结论，未知不当作否定。</p></li>
-            <li><h3>重要操作先确认</h3><p>建议和提案经你确认后，才会改动项目。</p></li>
+          <ul data-reveal>
+            <li data-spot><h3>来源可以回看</h3><p>判断链接到原始记录和附件原件。</p></li>
+            <li data-spot><h3>缺口会标出来</h3><p>没有依据的内容不写成结论，未知不当作否定。</p></li>
+            <li data-spot><h3>重要操作先确认</h3><p>建议和提案经你确认后，才会改动项目。</p></li>
           </ul>
         </div>
       </section>
 
-      <section className={styles.closing} aria-labelledby="closing-title">
+      <section className={styles.closing} aria-labelledby="closing-title" data-spot>
         <div className={`${styles.shell} ${styles.closingInner}`}>
           <div>
             <h2 id="closing-title">
@@ -325,7 +318,7 @@ export default async function Home() {
             </Link>
             {!user && <Link href="/login" className={styles.closingLink}>登录</Link>}
           </div>
-          <a className={styles.githubCard} href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
+          <a className={styles.githubCard} href={GITHUB_URL} target="_blank" rel="noopener noreferrer" data-spot>
             <strong>Leionel/projectmemo</strong>
             <span>面向项目式学习的智能记忆与主动复盘助手，代码在 GitHub 公开。</span>
             <span className={styles.scenarioTags}><span>Next.js</span><span>TypeScript</span><span>Prisma</span><span>HarmonyOS ArkTS</span></span>

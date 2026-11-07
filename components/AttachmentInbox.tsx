@@ -575,7 +575,7 @@ export function AttachmentInbox({ projectId, enabled, onMaterialSaved }: { proje
           role="dialog"
           aria-modal="true"
           aria-label="附件原件在线预览"
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-3 sm:p-6 backdrop-blur-xs animate-fade-in"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-3 sm:p-6 scrim-enter"
           onClick={(e) => {
             if (e.target === e.currentTarget) setPreview(null);
           }}

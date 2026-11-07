@@ -2,7 +2,8 @@
 import Link from "next/link";
 import {workPhaseLabel} from "@/lib/client/focusPresentation";
 import { MetricJobInputs,type MetricJobInput } from "./MetricJobInputs";
-import { MissionBudgetReview } from "./MissionBudgetReview";
+import { MissionBudgetDetails } from "./MissionBudgetReview";
+import { isBudgetPause, isStaleBudgetError, nextBudgetTotals } from "@/lib/client/missionBudget";
 import { MissionMetricReceipts } from "./MissionMetricReceipts";
 import { MissionInvestigationDelegation } from "./MissionInvestigationDelegation";
 import { MissionResponsibilityPanel } from "./MissionResponsibilityPanel";
@@ -75,7 +76,23 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
   setError("网络结果尚未确认，已读取最新状态。请先核对委托列表或当前进度；重试会保留原请求编号。");
  }else handleError(e);
  }finally{pending.current=false;setBusy(false);}}
+ const raisedVersion=useRef<number|null>(null);
  function requestId(payload:unknown){const key=JSON.stringify(payload);let id=requestKeys.current.get(key);if(!id){id=crypto.randomUUID();requestKeys.current.set(key,id);}return id;}
+ /** 一次完成“提高上限 + 继续”。上限已提高但继续失败时，再点只重试继续，不会再加一档。 */
+ async function addBudgetAndResume(){
+  if(!mission?.budget)return;
+  const current=mission,budget=mission.budget,totals=nextBudgetTotals(budget);
+  await perform(async()=>{
+   let version=current.version;
+   if(raisedVersion.current!==version){
+    const reply:{mission:{version:number}}=await api(`/api/missions/${current.id}/budget-review`,"POST",{requestId:requestId({kind:"budget",version,totals}),expectedVersion:version,totals});
+    version=reply.mission.version;raisedVersion.current=version;
+   }
+   await api(`/api/missions/${current.id}/resume`,"POST",{requestId:requestId({missionId:current.id,action:"resume",expectedVersion:version}),expectedVersion:version});
+   setNotice("已加额度并继续。");
+   await refresh(current.id);
+  });
+ }
  async function command(action:string,extra:Record<string,unknown>={}){if(!mission)return;const payload={missionId:mission.id,action,expectedVersion:mission.version,...extra};await perform(async()=>{await api(`/api/missions/${mission.id}/${action}`,"POST",{requestId:requestId(payload),expectedVersion:mission.version,...extra});setNotice(action.startsWith("approvals/")?"审批已记录，执行结果以原步骤回执为准。":action==="input"?"答复已保存，委托将重新评估资料与缺口。":action==="pause"?"暂停请求已受理，请查看服务端状态。":action==="cancel"?"取消请求已受理，已有历史仍保留。":"请求已受理，请查看最新状态。");await refresh(mission.id);setReadbackRefreshKey(v=>v+1);});}
  const terminal=["SUCCEEDED","CANCELLED"].includes(mission?.status??"");
  const done=mission?.steps.filter(s=>s.status==="SUCCEEDED").length??0;
@@ -134,7 +151,7 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
      <div className={styles.detailTop}><div className={styles.detailMeta}>{mission.workState?<WorkStateBadges state={mission.workState}/>:<span className={styles.badge} data-status={mission.status}>{labels[mission.status]??"状态待确认"}</span>}{nextActorLabel(mission.workState?.nextActor)&&<span>下一步：<strong>{nextActorLabel(mission.workState?.nextActor)}</strong></span>}<span>{done} 个步骤已执行 · {mission.outputs.length} 份草稿</span></div>
      <div className={styles.detailTools}><Link className="workspace-link focus-ring" href={"/focus?entryKind=MISSION&entryId="+mission.id+"&entryProject="+projectId}>调整当前重点／继续讨论</Link>{!["SUCCEEDED","CANCELLED"].includes(mission.status)&&<ProjectAgentFocusButton projectId={projectId} missionId={mission.id}/>}</div></div>
      {mission.workingObjective&&<p>当前重点：{mission.workingObjective}</p>}<h3 className={styles.goal}>{mission.goal.length>90?`${[...mission.goal].slice(0,90).join("")}…`:mission.goal}</h3>{mission.goal.length>90&&<details><summary>查看完整委托目标</summary><p>{mission.goal}</p></details>}
-     <p className={styles.versionLine}>委托版本 v{mission.version} · 最近观察 {mission.workState?.observedAt?new Date(mission.workState.observedAt).toLocaleString("zh-CN",{hour12:false}):"尚无成功观察"}{mission.workState?.checkedAt&&<> · 读取于 {new Date(mission.workState.checkedAt).toLocaleTimeString("zh-CN",{hour12:false})}</>}</p>
+     <details className={styles.versionLine}><summary>技术细节</summary>委托版本 v{mission.version} · 最近观察 {mission.workState?.observedAt?new Date(mission.workState.observedAt).toLocaleString("zh-CN",{hour12:false}):"尚无成功观察"}{mission.workState?.checkedAt&&<> · 读取于 {new Date(mission.workState.checkedAt).toLocaleTimeString("zh-CN",{hour12:false})}</>}</details>
      {mission.delegation?.attention?.level==="URGENT"&&<p role="alert" data-no-popup>临近任务截止，需要你核对当前问题后决定下一步。</p>}
 
      <div role="status" className={styles.statusText}>{(mission.workState?.phase==="WAITING_USER"?"等待你回答下方原问题":mission.workState?.reasonText)??labels[mission.status]}{!mission.workState&&(mission.status==="RUNNING"?"，最近已完成的步骤见下方":mission.status==="READY"?"，进度已保存，等待开始":mission.status==="WAITING_INPUT"?"，补充后可继续同一委托":mission.status==="WAITING_APPROVAL"?"，确认预览后才会执行该提案":"")}</div>
@@ -146,25 +163,25 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
       {!terminal&&<button className={styles.cancel} disabled={busy} onClick={()=>void command("cancel")}>取消委托</button>}
      </div>
     </header>
-    {(mission.question||mission.approvals.length>0||mission.error||(mission.status==="PAUSED"&&mission.budget&&mission.used))&&<section className={styles.nextStep} aria-labelledby="mission-next-title">
+    {(mission.question||mission.approvals.length>0||(mission.error&&!isStaleBudgetError(mission))||(mission.status==="PAUSED"&&mission.budget&&mission.used))&&<section className={styles.nextStep} aria-labelledby="mission-next-title">
      <div className={styles.nextHead}><p>下一步{mission.workState?` · ${workPhaseLabel(mission.workState.phase)}`:""}</p><h4 id="mission-next-title">{mission.workState?.actionLabel??labels[mission.status]??"查看委托进展"}</h4></div>
-    {mission.status==="PAUSED"&&mission.budget&&mission.used&&<MissionBudgetReview budget={mission.budget} used={mission.used} busy={busy} onReview={totals=>void perform(async()=>{await api(`/api/missions/${mission.id}/budget-review`,"POST",{requestId:requestId({kind:"budget",version:mission.version,totals}),expectedVersion:mission.version,totals});await refresh(mission.id);})}/>}
-    {mission.error&&<section id="mission-error-block" className={styles.stoppedBlock} role={mission.status==="PAUSED"||mission.status==="FAILED"?"alert":"status"} aria-label="暂停原因与恢复条件">
+    {mission.status==="PAUSED"&&mission.budget&&mission.used&&<MissionBudgetDetails budget={mission.budget} used={mission.used}/>}
+    {mission.error&&!isStaleBudgetError(mission)&&<section id="mission-error-block" className={styles.stoppedBlock} role={mission.status==="PAUSED"||mission.status==="FAILED"?"alert":"status"} aria-label="暂停原因与恢复条件">
       <strong>{mission.status==="PAUSED"?"执行已暂停，已有进度已保留":mission.status==="FAILED"?"执行失败，已执行的结果保留":"本次执行需要恢复，已有进度已保留"}</strong>
-      <p>{mission.error.code==="MODEL_PROTOCOL_ERROR"&&mission.error.message==="委托执行失败，请检查服务配置后继续"?"模型回复格式不符合要求，尚未执行新步骤。修复后可继续此委托。":mission.error.message}</p>
-      {mission.error.phase&&<p>发生阶段：{missionErrorPhaseLabel(mission.error.phase)} · 错误类别：{mission.error.code??"未记录"}</p>}
-      {mission.error.recovery?.message&&<p>{mission.error.recovery.message}{mission.error.recovery.automatic?"（由服务端按限次策略处理）":""}</p>}
-      <div className={styles.recovery}>
+      <p>{isBudgetPause(mission)?"这次委托的额度用完了。":mission.error.code==="MODEL_PROTOCOL_ERROR"&&mission.error.message==="委托执行失败，请检查服务配置后继续"?"模型回复格式不符合要求，尚未执行新步骤。修复后可继续此委托。":mission.error.message}</p>
+      {mission.error.phase&&!isBudgetPause(mission)&&<p>发生阶段：{missionErrorPhaseLabel(mission.error.phase)} · 错误类别：{mission.error.code??"未记录"}</p>}
+      {mission.error.recovery?.message&&!isBudgetPause(mission)&&<p>{mission.error.recovery.message}{mission.error.recovery.automatic?"（由服务端按限次策略处理）":""}</p>}
+      {!isBudgetPause(mission)&&<div className={styles.recovery}>
         <p>继续前请核对：</p>
         <ul>
           <li>模型服务可用且协议校验通过——「已配置」不代表本次能执行成功；</li>
           <li>重复重试不会创建重复草稿或行动（同一请求会保留原请求编号）；</li>
           <li>你对该项目的所有权和授权范围仍然有效。</li>
         </ul>
-      </div>
+      </div>}
       <div className={styles.actions}>
 
-        {mission.status==="PAUSED"&&<button className={styles.primary} disabled={busy} onClick={()=>void command("resume")}>确认后继续执行</button>}
+        {mission.status==="PAUSED"&&(isBudgetPause(mission)&&mission.budget?<button className={styles.primary} disabled={busy} onClick={()=>void addBudgetAndResume()}>加额度并继续</button>:<button className={styles.primary} disabled={busy} onClick={()=>void command("resume")}>确认后继续执行</button>)}
         <button disabled={busy} onClick={()=>{document.getElementById("mission-progress-summary")?.scrollIntoView({behavior:"smooth",block:"start"});(document.getElementById("mission-progress-summary")?.closest("details") as HTMLDetailsElement|null)?.setAttribute("open","");}}>查看执行轨迹</button>
       </div>
       <details className={styles.diagnostic}><summary>技术诊断（错误码与协议详情）</summary><div><p className={styles.muted}>错误类型：{mission.error.code}{mission.error.diagnostic?.reason?` · ${mission.error.diagnostic.reason}`:""}</p>{mission.error.diagnostic&&"repairHint" in mission.error.diagnostic&&<p className={styles.muted}>修复提示：{(mission.error.diagnostic as {repairHint?:string}).repairHint}</p>}<p className={styles.muted}>请结合后端配置、协议版本与请求轨迹排查；不要用重复点击「继续」掩盖模型不可用。</p></div></details>

@@ -12,6 +12,13 @@ import { loadGlobalWorkspace, type WorkspaceFilters } from "@/lib/server/globalW
 const primaryTypes = ["experiment_log", "meeting_note", "requirement", "risk"] as const;
 const moreTypes = knowledgeTypes.filter(t => !(primaryTypes as readonly string[]).includes(t));
 
+/** 标题常是摘要的截断：只差标点或省略号时不重复显示。 */
+function sameText(title: string, summary: string) {
+  const clean = (value: string) => value.replace(/[\s。.…,，;；:：!！?？]+$/u, "").trim();
+  const a = clean(title), b = clean(summary);
+  return a === b || (title.trim().endsWith("…") && b.startsWith(a)) || (title.trim().endsWith("...") && b.startsWith(a));
+}
+
 export async function GlobalWorkspacePage({ userId, mode, input }: { userId: string; mode: "memory" | "actions"; input: WorkspaceFilters }) {
   const data = await loadGlobalWorkspace(userId, mode, input);
   const { filters: f } = data;
@@ -48,7 +55,7 @@ export async function GlobalWorkspacePage({ userId, mode, input }: { userId: str
       {data.cards.map(card => { const state = card.temporal && card.temporal.reasonCode !== "NO_SUPPORTING_EVIDENCE" ? card.temporal.topLevelState : null;
         return <article key={card.id} className="ws-card" data-superseded={state === "SUPERSEDED" ? "true" : undefined}><div className="ws-card-main">
           <div className="ws-card-meta"><span className="ws-tag" data-type={card.type}>{knowledgeTypeLabels[card.type]}</span><span>{card.project.title}{card.project.archivedAt ? " · 已归档" : ""}</span>{card.capture.sourceType && <span>{card.capture.sourceType}</span>}</div>
-          <h3>{card.title}</h3>{card.summary.trim() !== card.title.trim() && <p><EvidenceText text={card.summary} /></p>}</div>
+          <h3>{card.title}</h3>{!sameText(card.title, card.summary) && <p><EvidenceText text={card.summary} /></p>}</div>
           <div className="ws-card-side">{state && <span className="ws-state" data-state={state} title={`时态只描述与当前结论的关系：${card.temporal!.displayReason}`}>时态：{temporalStateLabels[state]}</span>}<span>保存于 <time dateTime={card.createdAt.toISOString()}>{card.createdAt.toLocaleDateString("zh-CN", { month: "2-digit", day: "2-digit" })}</time></span>
             <Link prefetch={false} className="focus-ring" href={`/projects/${card.project.id}/knowledge#card-${card.id}`}>{state === "SUPERSEDED" ? "查看结论演进" : "查看记忆与来源"}<ArrowRight size={14} aria-hidden="true" /></Link></div></article>; })}
       {!data.cards.length && <Empty filtered={filtered || f.page > 1} memory />}

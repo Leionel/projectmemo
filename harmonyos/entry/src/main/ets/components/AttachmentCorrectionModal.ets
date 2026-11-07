@@ -1,5 +1,5 @@
 import { alertError } from '../common/ErrorAlert';
-import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion, PMMaterial } from '../common/DesignTokens';
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion } from '../common/DesignTokens';
 import { Attachment } from '../models/Attachment';
 import { AttachmentRevisionItem } from '../models/Artifact';
 import { AttachmentService } from '../services/AttachmentService';
@@ -81,7 +81,7 @@ export struct AttachmentCorrectionModal {
         .width('100%')
         .height('100%')
         .backgroundColor(PMColors.SCRIM)
-        .backgroundBlurStyle(PMMaterial.SCRIM, PMMaterial.OPTIONS)
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
         .onClick(() => {
           if (!this.isSubmitting) {
             this.onClose();

@@ -2,11 +2,13 @@
 
 import { useEffect } from "react";
 
+const MAX_TILT = 5;
+
 /**
- * 官网的滚动动效控制器。
+ * 官网动效控制器：滚动揭示、接续线、卡片 3D 倾斜与光斑。
  *
- * 原则：动效只辅助阅读，不承载事实；无 JS 或减少动画时内容完全可见；
- * 只用 transform / translate / scale，不隐藏内容、不做布局动画、不做逐段淡入。
+ * 原则：不监听滚动、不写继承到大子树的变量；指针变量只写在被指向的卡片上，每帧最多一次。
+ * 无 JS 或减少动画时内容完整呈现；触屏没有指针效果。
  */
 export function HomeMotion() {
   useEffect(() => {
@@ -15,109 +17,97 @@ export function HomeMotion() {
     if (!("IntersectionObserver" in window)) return;
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const observers: IntersectionObserver[] = [];
-    const drawables = Array.from(root.querySelectorAll<HTMLElement>("[data-draw]"));
-
-    const hero = root.querySelector<HTMLElement>("[data-hero]");
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
     const rail = root.querySelector<HTMLElement>("[data-rail]");
-    const railSteps = Array.from(root.querySelectorAll<HTMLElement>("[data-rail-step]"));
-    const progressBar = root.querySelector<HTMLElement>("[data-scroll-progress]");
-    const stackedRail = window.matchMedia("(max-width: 720px)");
+    const reveals = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"));
+    const pointerCards = Array.from(root.querySelectorAll<HTMLElement>("[data-spot],[data-tilt]"));
+    const observers: IntersectionObserver[] = [];
+    let cleanupPointer: Array<() => void> = [];
 
-    let frame = 0;
-    let enabled = false;
-    const clamp = (value: number, min: number, max: number) =>
-      Math.min(max, Math.max(min, value));
-
-    const update = () => {
-      frame = 0;
-      if (!enabled || reduceMotion.matches) return;
-      const viewport = window.innerHeight;
-
-      if (progressBar) {
-        const scrollable = Math.max(document.documentElement.scrollHeight - viewport, 1);
-        const pageProgress = clamp(window.scrollY / scrollable, 0, 1);
-        progressBar.style.transform = `scaleX(${pageProgress.toFixed(4)})`;
-        progressBar.toggleAttribute("data-visible", pageProgress > 0.005);
-      }
-
-      if (hero) {
-        const heroHeight = Math.max(hero.offsetHeight, 1);
-        const shift = clamp(window.scrollY / (heroHeight * 0.85), 0, 1);
-        hero.style.setProperty("--hero-shift", shift.toFixed(3));
-      }
-
-      if (rail) {
-        const rect = rail.getBoundingClientRect();
-        let progress: number;
-        if (stackedRail.matches) {
-          progress = clamp(
-            (viewport * 0.72 - rect.top) / Math.max(rect.height * 0.92, 1),
-            0,
-            1,
-          );
-        } else {
-          const start = viewport * 0.86;
-          const span = Math.max(viewport * 0.5, 240);
-          progress = clamp((start - rect.top) / span, 0, 1);
-        }
-        rail.style.setProperty("--rail-progress", progress.toFixed(3));
-        railSteps.forEach((step, index) => {
-          const threshold = (index + 0.55) / railSteps.length;
-          step.toggleAttribute("data-active", progress >= threshold);
-        });
-      }
-    };
-
-    const requestUpdate = () => {
-      if (!enabled || reduceMotion.matches || frame) return;
-      frame = window.requestAnimationFrame(update);
-    };
-
-    const stopMotion = () => {
-      enabled = false;
-      window.cancelAnimationFrame(frame);
-      frame = 0;
-      window.removeEventListener("scroll", requestUpdate);
-      window.removeEventListener("resize", requestUpdate);
-      stackedRail.removeEventListener("change", requestUpdate);
+    const stop = () => {
       observers.splice(0).forEach((observer) => observer.disconnect());
-      hero?.style.setProperty("--hero-shift", "0");
-      rail?.style.setProperty("--rail-progress", "0");
-      railSteps.forEach((step) => step.removeAttribute("data-active"));
-      if (progressBar) {
-        progressBar.style.transform = "scaleX(0)";
-        progressBar.removeAttribute("data-visible");
-      }
+      cleanupPointer.forEach((off) => off());
+      cleanupPointer = [];
+    };
+
+    const bindPointer = (card: HTMLElement) => {
+      let frame = 0;
+      let x = 0;
+      let y = 0;
+      const tilt = card.hasAttribute("data-tilt");
+      const paint = () => {
+        frame = 0;
+        const box = card.getBoundingClientRect();
+        const px = (x - box.left) / Math.max(box.width, 1);
+        const py = (y - box.top) / Math.max(box.height, 1);
+        card.style.setProperty("--mx", `${(px * 100).toFixed(1)}%`);
+        card.style.setProperty("--my", `${(py * 100).toFixed(1)}%`);
+        if (tilt) {
+          card.style.setProperty("--rx", `${((0.5 - py) * MAX_TILT).toFixed(2)}deg`);
+          card.style.setProperty("--ry", `${((px - 0.5) * MAX_TILT).toFixed(2)}deg`);
+        }
+      };
+      const move = (event: PointerEvent) => {
+        x = event.clientX;
+        y = event.clientY;
+        card.setAttribute("data-hot", "");
+        if (!frame) frame = window.requestAnimationFrame(paint);
+      };
+      const leave = () => {
+        window.cancelAnimationFrame(frame);
+        frame = 0;
+        card.removeAttribute("data-hot");
+        card.style.removeProperty("--rx");
+        card.style.removeProperty("--ry");
+      };
+      card.addEventListener("pointermove", move);
+      card.addEventListener("pointerleave", leave);
+      cleanupPointer.push(() => {
+        card.removeEventListener("pointermove", move);
+        card.removeEventListener("pointerleave", leave);
+        leave();
+      });
     };
 
     const applyPreference = () => {
+      stop();
       if (reduceMotion.matches) {
-        stopMotion();
         root.setAttribute("data-motion", "reduced");
+        rail?.removeAttribute("data-played");
+        reveals.forEach((element) => element.removeAttribute("data-in"));
         return;
       }
-      if (enabled) return;
-      enabled = true;
       root.setAttribute("data-motion", "on");
-      if (drawables.length) {
-        const drawObserver = new IntersectionObserver(
+      if (finePointer.matches) pointerCards.forEach(bindPointer);
+
+      const pending = reveals.filter((element) => !element.hasAttribute("data-in"));
+      if (pending.length) {
+        const revealObserver = new IntersectionObserver(
           (entries, observer) => {
             for (const entry of entries) {
               if (!entry.isIntersecting) continue;
-              entry.target.setAttribute("data-drawn", "true");
+              entry.target.setAttribute("data-in", "");
               observer.unobserve(entry.target);
             }
           },
-          { rootMargin: "0px 0px -10% 0px", threshold: 0.15 },
+          { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
         );
-        drawables.forEach((element) => drawObserver.observe(element));
-        observers.push(drawObserver);
+        pending.forEach((element) => revealObserver.observe(element));
+        observers.push(revealObserver);
       }
-      window.addEventListener("scroll", requestUpdate, { passive: true });
-      window.addEventListener("resize", requestUpdate);
-      stackedRail.addEventListener("change", requestUpdate);
-      update();
+
+      if (rail && !rail.hasAttribute("data-played")) {
+        const railObserver = new IntersectionObserver(
+          (entries, observer) => {
+            if (!entries.some((entry) => entry.isIntersecting)) return;
+            rail.setAttribute("data-played", "");
+            observer.disconnect();
+          },
+          { threshold: 0.35 },
+        );
+        railObserver.observe(rail);
+        observers.push(railObserver);
+      }
     };
 
     reduceMotion.addEventListener("change", applyPreference);
@@ -125,7 +115,7 @@ export function HomeMotion() {
 
     return () => {
       reduceMotion.removeEventListener("change", applyPreference);
-      stopMotion();
+      stop();
       root.removeAttribute("data-motion");
     };
   }, []);

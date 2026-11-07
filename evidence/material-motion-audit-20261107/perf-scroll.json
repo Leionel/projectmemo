@@ -1,0 +1,447 @@
+{
+ "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4060 Laptop GPU (0x000028E0) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+ "note": "Median-by-p95 of 3 runs. rAF-driven scroll in headless Chromium on the audit host; relative comparison only, not a device benchmark.",
+ "rows": [
+  {
+   "profile": "desktop-1x",
+   "page": "home",
+   "scenario": "asIs",
+   "fps": 431,
+   "p50": 0.5,
+   "p95": 17.5,
+   "p99": 18.2,
+   "jankPct": 0,
+   "recalc": 2689,
+   "layout": 1,
+   "recalcMs": 274,
+   "layoutMs": 0,
+   "taskMs": 855,
+   "scrollPx": 5246,
+   "allP95": [
+    17.5,
+    17.5,
+    17.6
+   ]
+  },
+  {
+   "profile": "desktop-1x",
+   "page": "home",
+   "scenario": "noHeaderBlur",
+   "fps": 429.4,
+   "p50": 0.5,
+   "p95": 17.5,
+   "p99": 18.1,
+   "jankPct": 0,
+   "recalc": 2636,
+   "layout": 1,
+   "recalcMs": 276,
+   "layoutMs": 0,
+   "taskMs": 798,
+   "scrollPx": 5246,
+   "allP95": [
+    17.4,
+    17.5,
+    17.6
+   ]
+  },
+  {
+   "profile": "desktop-1x",
+   "page": "home",
+   "scenario": "asIs+reducedMotion",
+   "fps": 142.8,
+   "p50": 0.5,
+   "p95": 18.1,
+   "p99": 18.6,
+   "jankPct": 0,
+   "recalc": 1,
+   "layout": 1,
+   "recalcMs": 0,
+   "layoutMs": 0,
+   "taskMs": 120,
+   "scrollPx": 5246,
+   "allP95": [
+    18.1,
+    18.1,
+    18.2
+   ]
+  },
+  {
+   "profile": "desktop-1x",
+   "page": "projects",
+   "scenario": "asIs",
+   "fps": 113.2,
+   "p50": 0.8,
+   "p95": 18.2,
+   "p99": 18.5,
+   "jankPct": 0,
+   "recalc": 1,
+   "layout": 0,
+   "recalcMs": 0,
+   "layoutMs": 0,
+   "taskMs": 99,
+   "scrollPx": 1145,
+   "allP95": [
+    18.1,
+    18.2,
+    18.3
+   ]
+  },
+  {
+   "profile": "desktop-1x",
+   "page": "projects",
+   "scenario": "headerBlur14",
+   "fps": 113.6,
+   "p50": 0.6,
+   "p95": 18.4,
+   "p99": 18.7,
+   "jankPct": 0,
+   "recalc": 1,
+   "layout": 0,
+   "recalcMs": 0,
+   "layoutMs": 0,
+   "taskMs": 98,
+   "scrollPx": 1145,
+   "allP95": [
+    18.3,
+    18.4,
+    18.5
+   ]
+  },
+  {
+   "profile": "desktop-1x",
+   "page": "projects",
+   "scenario": "headerBlur8Scrim",
+   "fps": 112.2,
+   "p50": 0.8,
+   "p95": 18.3,
+   "p99": 18.6,
+   "jankPct": 0,
+   "recalc": 1,
+   "layout": 0,
+   "recalcMs": 0,
+   "layoutMs": 0,
+   "taskMs": 97,
+   "scrollPx": 1145,
+   "allP95": [
+    18.2,
+    18.3,
+    18.3
+   ]
+  },
+  {
+   "profile": "desktop-1x",
+   "page": "projects",
+   "scenario": "allCardsGlass",
+   "fps": 110.2,
+   "p50": 1.6,
+   "p95": 27.5,
+   "p99": 29.8,
+   "jankPct": 0,
+   "recalc": 1,
+   "layout": 0,
+   "recalcMs": 0,
+   "layoutMs": 0,
+   "taskMs": 178,
+   "scrollPx": 1145,
+   "allP95": [
+    18.1,
+    27.5,
+    29.7
+   ]
+  },
+  {
+   "profile": "mobile-dpr3-cpu4x",
+   "page": "home",
+   "scenario": "asIs",
+   "fps": 166.2,
+   "p50": 5.6,
+   "p95": 12.8,
+   "p99": 21.8,
+   "jankPct": 0,
+   "recalc": 1126,
+   "layout": 1,
+   "recalcMs": 1044,
+   "layoutMs": 2,
+   "taskMs": 4498,
+   "scrollPx": 6235,
+   "allP95": [
+    12.2,
+    12.8,
+    13.7
+   ]
+  },
+  {
+   "profile": "mobile-dpr3-cpu4x",
+   "page": "home",
+   "scenario": "noHeaderBlur",
+   "fps": 144.8,
+   "p50": 6.1,
+   "p95": 13.9,
+   "p99": 25.9,
+   "jankPct": 0,
+   "recalc": 1009,
+   "layout": 1,
+   "recalcMs": 1074,
+   "layoutMs": 2,
+   "taskMs": 4623,
+   "scrollPx": 6235,
+   "allP95": [
+    12.9,
+    13.9,
+    14.5
+   ]
+  },
+  {
+   "profile": "mobile-dpr3-cpu4x",
+   "page": "home",
+   "scenario": "asIs+reducedMotion",
+   "fps": 284.2,
+   "p50": 1.9,
+   "p95": 17.4,
+   "p99": 26.7,
+   "jankPct": 0,
+   "recalc": 1,
+   "layout": 1,
+   "recalcMs": 1,
+   "layoutMs": 0,
+   "taskMs": 2522,
+   "scrollPx": 6235,
+   "allP95": [
+    17.4,
+    17.4,
+    17.4
+   ]
+  },
+  {
+   "profile": "mobile-dpr3-cpu4x",
+   "page": "projects",
+   "scenario": "asIs",
+   "fps": 239.6,
+   "p50": 2.1,
+   "p95": 25.3,
+   "p99": 30.1,
+   "jankPct": 0,
+   "recalc": 1,
+   "layout": 0,
+   "recalcMs": 0,
+   "layoutMs": 0,
+   "taskMs": 2372,
+   "scrollPx": 4262,
+   "allP95": [
+    23.6,
+    25.3,
+    26.4
+   ]
+  },
+  {
+   "profile": "mobile-dpr3-cpu4x",
+   "page": "projects",
+   "scenario": "headerBlur14",
+   "fps": 272.6,
+   "p50": 1.9,
+   "p95": 22.4,
+   "p99": 30.1,
+   "jankPct": 0,
+   "recalc": 1,
+   "layout": 0,
+   "recalcMs": 1,
+   "layoutMs": 0,
+   "taskMs": 2504,
+   "scrollPx": 4262,
+   "allP95": [
+    7.7,
+    22.4,
+    23.9
+   ]
+  },
+  {
+   "profile": "mobile-dpr3-cpu4x",
+   "page": "projects",
+   "scenario": "headerBlur8Scrim",
+   "fps": 259.2,
+   "p50": 1.9,
+   "p95": 24.2,
+   "p99": 30.4,
+   "jankPct": 0,
+   "recalc": 1,
+   "layout": 0,
+   "recalcMs": 1,
+   "layoutMs": 0,
+   "taskMs": 2433,
+   "scrollPx": 4262,
+   "allP95": [
+    5.9,
+    24.2,
+    26.2
+   ]
+  },
+  {
+   "profile": "mobile-dpr3-cpu4x",
+   "page": "projects",
+   "scenario": "allCardsGlass",
+   "fps": 291,
+   "p50": 2.2,
+   "p95": 7.5,
+   "p99": 30.2,
+   "jankPct": 0,
+   "recalc": 1,
+   "layout": 0,
+   "recalcMs": 6,
+   "layoutMs": 0,
+   "taskMs": 3109,
+   "scrollPx": 4262,
+   "allP95": [
+    5.9,
+    7.5,
+    25.5
+   ]
+  },
+  {
+   "profile": "mobile-dpr3-cpu6x",
+   "page": "home",
+   "scenario": "asIs",
+   "fps": 87.8,
+   "p50": 11.1,
+   "p95": 22.5,
+   "p99": 45.3,
+   "jankPct": 2.3,
+   "recalc": 594,
+   "layout": 1,
+   "recalcMs": 1058,
+   "layoutMs": 3,
+   "taskMs": 4823,
+   "scrollPx": 6235,
+   "allP95": [
+    19.8,
+    22.5,
+    32.7
+   ]
+  },
+  {
+   "profile": "mobile-dpr3-cpu6x",
+   "page": "home",
+   "scenario": "noHeaderBlur",
+   "fps": 127.2,
+   "p50": 6.9,
+   "p95": 19.6,
+   "p99": 32.5,
+   "jankPct": 0.8,
+   "recalc": 799,
+   "layout": 1,
+   "recalcMs": 1069,
+   "layoutMs": 2,
+   "taskMs": 4724,
+   "scrollPx": 6235,
+   "allP95": [
+    18.1,
+    19.6,
+    19.6
+   ]
+  },
+  {
+   "profile": "mobile-dpr3-cpu6x",
+   "page": "home",
+   "scenario": "asIs+reducedMotion",
+   "fps": 210.6,
+   "p50": 2.5,
+   "p95": 17.6,
+   "p99": 28.2,
+   "jankPct": 0.4,
+   "recalc": 1,
+   "layout": 1,
+   "recalcMs": 1,
+   "layoutMs": 4,
+   "taskMs": 3130,
+   "scrollPx": 6235,
+   "allP95": [
+    17.4,
+    17.6,
+    17.6
+   ]
+  },
+  {
+   "profile": "mobile-dpr3-cpu6x",
+   "page": "projects",
+   "scenario": "asIs",
+   "fps": 151.6,
+   "p50": 4.9,
+   "p95": 20.9,
+   "p99": 30.5,
+   "jankPct": 0.1,
+   "recalc": 1,
+   "layout": 0,
+   "recalcMs": 3,
+   "layoutMs": 0,
+   "taskMs": 3888,
+   "scrollPx": 4262,
+   "allP95": [
+    19.2,
+    20.9,
+    23.9
+   ]
+  },
+  {
+   "profile": "mobile-dpr3-cpu6x",
+   "page": "projects",
+   "scenario": "headerBlur14",
+   "fps": 166.6,
+   "p50": 4.2,
+   "p95": 21.1,
+   "p99": 32.1,
+   "jankPct": 0.6,
+   "recalc": 1,
+   "layout": 0,
+   "recalcMs": 1,
+   "layoutMs": 0,
+   "taskMs": 3511,
+   "scrollPx": 4262,
+   "allP95": [
+    11.8,
+    21.1,
+    25.5
+   ]
+  },
+  {
+   "profile": "mobile-dpr3-cpu6x",
+   "page": "projects",
+   "scenario": "headerBlur8Scrim",
+   "fps": 321.2,
+   "p50": 1.2,
+   "p95": 17.5,
+   "p99": 18.1,
+   "jankPct": 0,
+   "recalc": 1,
+   "layout": 0,
+   "recalcMs": 1,
+   "layoutMs": 0,
+   "taskMs": 2210,
+   "scrollPx": 4262,
+   "allP95": [
+    17.4,
+    17.5,
+    17.6
+   ]
+  },
+  {
+   "profile": "mobile-dpr3-cpu6x",
+   "page": "projects",
+   "scenario": "allCardsGlass",
+   "fps": 350.4,
+   "p50": 1.3,
+   "p95": 17.3,
+   "p99": 18.4,
+   "jankPct": 0,
+   "recalc": 1,
+   "layout": 0,
+   "recalcMs": 2,
+   "layoutMs": 0,
+   "taskMs": 2456,
+   "scrollPx": 4262,
+   "allP95": [
+    17.2,
+    17.3,
+    17.3
+   ]
+  }
+ ]
+}

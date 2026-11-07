@@ -9,6 +9,10 @@
       "value": "#F7F5EF"
     },
     {
+      "name": "pm_background_fade",
+      "value": "#00F7F5EF"
+    },
+    {
       "name": "pm_surface",
       "value": "#FFFFFF"
     },

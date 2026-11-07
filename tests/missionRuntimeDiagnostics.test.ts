@@ -173,7 +173,7 @@ describe("Mission 阶段诊断与恢复（独立 SQLite，无模型或网络请�
 
   it("预算耗尽保留DECISION阶段与原额度，继续不触发调用", async () => {
     const { m } = await fixture();
-    await db.agentMission.update({ where: { id: m.id }, data: { budgetUsedJson: json({ ...usageOf({}), models: 12 }) } });
+    await db.agentMission.update({ where: { id: m.id }, data: { budgetUsedJson: json({ ...usageOf({}), models: 24 }) } });
     const decide = vi.fn(provider(chooseTool("inspect_project")));
     await runMissionSlice({ id: m.id, provider: decide });
     let detail = await missionDetail(userId, m.id);
@@ -181,8 +181,56 @@ describe("Mission 阶段诊断与恢复（独立 SQLite，无模型或网络请�
     await commandMission(userId, m.id, "resume", { requestId: "resume-diagnostics", expectedVersion: detail.version });
     await runMissionSlice({ id: m.id, provider: decide });
     detail = await missionDetail(userId, m.id);
-    expect(usageOf(detail.used).models).toBe(12);
+    expect(usageOf(detail.used).models).toBe(24);
     expect(decide).not.toHaveBeenCalled();
+  });
+
+  it("加额度并继续：同一次操作提高上限后恢复执行，已用保留，错误清除", async () => {
+    const { reviewMissionBudget } = await import("@/lib/mission/budgetReview");
+    const { nextBudgetTotals, isBudgetPause, isStaleBudgetError } = await import("@/lib/client/missionBudget");
+    const { m } = await fixture();
+    await db.agentMission.update({ where: { id: m.id }, data: { budgetUsedJson: json({ ...usageOf({}), models: 24 }) } });
+    const decide = vi.fn(provider(chooseTool("inspect_project")));
+    await runMissionSlice({ id: m.id, provider: decide });
+    const paused = await missionDetail(userId, m.id);
+    expect(isBudgetPause(paused)).toBe(true);
+    const reviewed = await reviewMissionBudget(userId, m.id, { requestId: "one-button-review", expectedVersion: paused.version, totals: nextBudgetTotals(paused.budget as Record<string, number>) });
+    await commandMission(userId, m.id, "resume", { requestId: "one-button-resume", expectedVersion: reviewed.version });
+    const queued = await missionDetail(userId, m.id);
+    expect(queued.status).toBe("READY");
+    expect(queued.error === null || isStaleBudgetError(queued)).toBe(true);
+    await runMissionSlice({ id: m.id, provider: decide });
+    const after = await missionDetail(userId, m.id);
+    expect(decide).toHaveBeenCalledTimes(1);
+    expect(usageOf(after.used).models).toBe(25);
+    expect(isBudgetPause(after)).toBe(false);
+  });
+
+  it("长委托把挤出上下文的早期步骤滚动成线索，不带结果正文，总量不超限", async () => {
+    const { buildContext } = await import("@/lib/mission/contextBuilder");
+    const { event } = await import("@/lib/mission/repository");
+    const { jsonHash } = await import("@/lib/mission/contracts");
+    const { m } = await fixture();
+    const canary = "早期结果正文CANARY";
+    for (let i = 1; i <= 24; i++) {
+      const step = await db.agentMissionStep.create({ data: { missionId: m.id, ordinal: i, planRevision: 1, toolName: "search_memory", status: "SUCCEEDED", canonicalInputJson: {}, readSetJson: [], inputHash: jsonHash(i), resultJson: json({ data: canary + "填充".repeat(40), sources: [] }), finishedAt: new Date() } });
+      await db.$transaction(tx => event(tx, m.id, "TOOL_STARTED", { stepId: step.id, tool: "search_memory", summary: "第" + i + "步查找依据", phase: "TOOL" }));
+    }
+    const context = JSON.parse(await buildContext(await db.agentMission.findUniqueOrThrow({ where: { id: m.id } })));
+    const notes = context.earlierProgress.steps.map((s: { note: string }) => s.note);
+    expect(notes).toContain("第1步查找依据");
+    expect(notes).toContain("第8步查找依据");
+    expect(JSON.stringify(context.earlierProgress)).not.toContain(canary);
+    expect(context.observations.length).toBeLessThanOrEqual(16);
+    expect(context.sourceIndex.length).toBe(0);
+    expect(JSON.stringify(context.earlierProgress).length).toBeLessThanOrEqual(2400);
+  });
+
+  it("短委托没有早期进展字段", async () => {
+    const { buildContext } = await import("@/lib/mission/contextBuilder");
+    const { m } = await fixture();
+    const context = JSON.parse(await buildContext(await db.agentMission.findUniqueOrThrow({ where: { id: m.id } })));
+    expect(context.earlierProgress).toBeUndefined();
   });
 
   it("重复观察无进展归TOOL阶段，不被模型格式纠错重新排队", async () => {

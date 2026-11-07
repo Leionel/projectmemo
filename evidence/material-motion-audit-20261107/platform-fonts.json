@@ -1,0 +1,59 @@
+{
+ "home-h1": {
+  "css": "\"PM Editorial\", \"Noto Serif SC\", \"Songti SC\", STSong, SimSun, serif | wt 500",
+  "used": [
+   "PM Editorial(11)",
+   "Noto Serif SC(1)"
+  ]
+ },
+ "home-h2": {
+  "css": "\"PM Editorial\", \"Noto Serif SC\", \"Songti SC\", STSong, SimSun, serif | wt 500",
+  "used": [
+   "PM Editorial(15)"
+  ]
+ },
+ "home-body": {
+  "css": "Manrope, Inter, \"SF Pro Text\", \"Segoe UI Variable Text\", \"Segoe UI\", \" | wt 400",
+  "used": [
+   "Microsoft YaHei(46)"
+  ]
+ },
+ "focus-h1": {
+  "css": "\"PM Brand\", \"Noto Serif SC\", \"Songti SC\", serif | wt 600",
+  "used": [
+   "Noto Serif SC(6)"
+  ]
+ },
+ "focus-hero-h2": {
+  "css": "\"PM Brand\", \"Noto Serif SC\", \"Songti SC\", serif | wt 600",
+  "used": [
+   "Noto Serif SC(22)"
+  ]
+ },
+ "brand": {
+  "css": "\"PM Brand\", \"Noto Serif SC\", \"Songti SC\", SimSun, serif | wt 600",
+  "used": [
+   "Noto Serif SC(14)"
+  ]
+ },
+ "projects-card": {
+  "css": "\"PM Brand\", \"Noto Serif SC\", \"Songti SC\", serif | wt 600",
+  "used": [
+   "Noto Serif SC(11)",
+   "Noto Serif SC(15)"
+  ]
+ },
+ "project-h1": {
+  "css": "\"PM Brand\", \"Noto Serif SC\", \"Songti SC\", serif | wt 600",
+  "used": [
+   "Noto Serif SC(11)",
+   "Noto Serif SC(16)"
+  ]
+ },
+ "body": {
+  "css": "Inter, \"SF Pro Text\", \"Segoe UI Variable Text\", \"Segoe UI\", \"PingFang  | wt 700",
+  "used": [
+   "Microsoft YaHei(2)"
+  ]
+ }
+}

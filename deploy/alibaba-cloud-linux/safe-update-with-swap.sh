@@ -5,10 +5,11 @@ exec 8>/run/lock/projectmemo-swap-update.lock
 flock -n 8 || { echo '另一个临时 swap 更新正在运行'; exit 1; }
 
 APP=/opt/projectmemo/app
+as_app() { setpriv --reuid=projectmemo --regid=projectmemo --init-groups -- env HOME=/home/projectmemo "$@"; }
 TARGET=${1:?请提供已验证并推送的40位目标提交}
 [[ "$TARGET" =~ ^[0-9a-f]{40}$ ]] || { echo '目标提交必须为40位SHA'; exit 1; }
 OLD_VM=$(sysctl -n vm.swappiness)
-CG_REL=$(sudo -H -u projectmemo awk -F: '$2=="memory" {print $3}' /proc/self/cgroup)
+CG_REL=$(as_app awk -F: '$2=="memory" {print $3}' /proc/self/cgroup)
 [[ "$CG_REL" == /* && "$CG_REL" != / ]] || { echo '当前内存组与已诊断环境不同，停止'; exit 1; }
 CG_FILE="/sys/fs/cgroup/memory${CG_REL}/memory.swappiness"
 [[ -r "$CG_FILE" && -w "$CG_FILE" ]] || { echo '无法读取或调整当前内存组，停止'; exit 1; }
@@ -37,8 +38,8 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-sudo -H -u projectmemo git -C "$APP" fetch origin master
-sudo -H -u projectmemo git -C "$APP" show \
+as_app git -C "$APP" fetch origin master
+as_app git -C "$APP" show \
   "$TARGET:deploy/alibaba-cloud-linux/safe-update.sh" > "$UPDATE_SCRIPT"
 test -s "$UPDATE_SCRIPT"
 bash -n "$UPDATE_SCRIPT"

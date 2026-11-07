@@ -63,7 +63,7 @@ describe("ECS update script controlled rollback (no ECS, sudo, database or servi
   });
   it.each([["exit 0", 0], ["exit 43", 43], ["kill -TERM $$", 143]])("临时换页策略包装器在 %s 后恢复原值并保留退出码", (command, expected) => {
     const wrapper = fs.readFileSync("deploy/alibaba-cloud-linux/safe-update-with-swap.sh", "utf8");
-    const cleanup = wrapper.slice(wrapper.indexOf("cleanup() {"), wrapper.indexOf('sudo -H -u projectmemo git'));
+    const cleanup = wrapper.slice(wrapper.indexOf("cleanup() {"), wrapper.indexOf('as_app git'));
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), "pm-swap-restore-")); temporary.push(directory);
     const group = path.join(directory, "group"), vm = path.join(directory, "vm"), update = path.join(directory, "update.sh");
     fs.writeFileSync(group, "60"); fs.writeFileSync(vm, "60"); fs.writeFileSync(update, "fixture");

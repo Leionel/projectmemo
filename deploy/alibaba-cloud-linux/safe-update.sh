@@ -18,7 +18,8 @@ STOPPED=0
 DEPS_MOVED=0
 GENERATED_MOVED=0
 BUILD_SWITCHED=0
-as_app() { sudo -H -u projectmemo env PATH="$NODE_BIN:/usr/local/bin:/usr/bin:/bin" "$@"; }
+# 保持 systemd 后台发布所在的 cgroup；不经 sudo/PAM 创建短命 session。
+as_app() { setpriv --reuid=projectmemo --regid=projectmemo --init-groups -- env HOME=/home/projectmemo PATH="$NODE_BIN:/usr/local/bin:/usr/bin:/bin" "$@"; }
 check_build_memory() {
   BUILD_HEAP_MB=${PROJECTMEMO_BUILD_HEAP_MB:-3072}
   if [[ ! "$BUILD_HEAP_MB" =~ ^[1-9][0-9]{3,4}$ ]] || (( BUILD_HEAP_MB < 1024 || BUILD_HEAP_MB > 16384 )); then

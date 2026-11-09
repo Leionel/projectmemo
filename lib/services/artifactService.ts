@@ -113,7 +113,8 @@ export async function prepareArtifactGeneration(projectId: string, artifactType:
         data: mock.content,
         provider: "mock-fallback",
         status: "FALLBACK",
-        fallbackReason: error instanceof Error ? error.message.slice(0, 240) : "llm_error",
+        // 审计保留模型失败原因（如 MODEL_OUTPUT_TRUNCATED），中文 message 只用于提示。
+        fallbackReason: error instanceof AppError ? error.code : error instanceof Error ? error.message.slice(0, 240) : "llm_error",
         durationMs: Date.now() - startedAt,
       };
     }

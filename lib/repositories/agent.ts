@@ -250,7 +250,7 @@ export async function updateAction(projectId: string, actionId: string, input: A
     }
   }
   const updated = await db.actionItem.update({
-    where: { id: actionId },
+    where: { id: actionId, projectId, status: existing.status, updatedAt: existing.updatedAt },
     data: {
       ...(input.title !== undefined ? { title: input.title } : {}),
       ...(input.description !== undefined ? { description: input.description } : {}),
@@ -260,6 +260,11 @@ export async function updateAction(projectId: string, actionId: string, input: A
       ...(input.resultText !== undefined ? { resultText: input.resultText } : {}),
       ...(input.status === "DONE" ? { completedAt: new Date() } : {}),
     },
+  }).catch((error: unknown) => {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      throw new AppError("ACTION_CHANGED", "行动已变化，请刷新后重新操作", 409);
+    }
+    throw error;
   });
   const stateRefreshPending = await refreshProjectStateAfterMutation(projectId);
   return { ...updated, stateRefreshPending };

@@ -12,7 +12,10 @@ import { processCapture } from "@/lib/services/captureService";
 import { requireProject } from "@/lib/repositories/projects";
 import { AppError } from "@/lib/api";
 import { structureCaptureWithMeta } from "@/lib/agent";
-import { saveCaptureResult } from "@/lib/repositories/cards";
+import { loadRecentCards, saveCaptureResult } from "@/lib/repositories/cards";
+import { saveAgentRun } from "@/lib/repositories/agent";
+import { captureProcessing } from "@/lib/captureProcessing";
+import { ensureCardEmbedding } from "@/lib/repositories/embeddings";
 import { KeywordVectorStore } from "@/lib/memory/vectorStore";
 import { recordLifecycleEventInTx } from "@/lib/services/memoryLifecycleService";
 import { isFeatureEnabled } from "@/lib/config/features";
@@ -21,6 +24,7 @@ import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateSer
 import { spawn } from "node:child_process";
 import { pagesFromBbox } from "@/lib/documents/pdfLayout";
 import { intactPrefix } from "@/lib/intake/textRange";
+import { CAPTURE_MODEL_TEXT_LIMIT } from "@/lib/agent/specialistPrompts";
 
 export interface UploadAttachmentInput {
   projectId: string;
@@ -31,7 +35,7 @@ export interface UploadAttachmentInput {
 /** 单份 PDF 保留的文字上限（字符）。 */
 const PDF_TEXT_LIMIT = 300_000;
 /** 附件导入时送去结构化成卡片的上限：卡片只是摘要，全文留在附件上。 */
-const ATTACHMENT_CAPTURE_LIMIT = 100_000;
+const ATTACHMENT_CAPTURE_LIMIT = CAPTURE_MODEL_TEXT_LIMIT;
 
 /** 超出上限时明说，模型和用户都要知道后面还有内容。 */
 function keepWithin(text: string, maxChars: number) {
@@ -57,6 +61,8 @@ export async function extractPdfText(buffer: Buffer, maxChars = PDF_TEXT_LIMIT):
     const timeout = setTimeout(() => child.kill(), 15_000);
     child.stdout.on("data", (chunk: Buffer) => stdout.push(chunk));
     child.stderr.on("data", (chunk: Buffer) => stderr.push(chunk));
+    // 提取器可能在读完附件前退出，失败原因由进程的 error/close 统一返回。
+    child.stdin.on("error", () => {});
     child.on("error", (error) => {
       clearTimeout(timeout);
       reject(new Error(`PDF extractor unavailable: ${error.message}`));
@@ -320,68 +326,102 @@ export async function listProjectAttachments(projectId: string) {
 }
 
 export async function retryAttachmentExtraction(projectId: string, attachmentId: string) {
-  await requireProject(projectId);
-  const attachment = await db.attachment.findFirst({
+  const project = await requireProject(projectId);
+  const snapshot = await db.attachment.findFirst({
     where: { id: attachmentId, projectId },
-    include: { cards: true },
+    include: {
+      cards: { orderBy: [{ createdAt: "desc" }, { id: "desc" }] },
+      revisions: { orderBy: { revisionIndex: "desc" }, take: 1, select: { id: true, revisionIndex: true } },
+    },
   });
-  if (!attachment) throw new Error("Attachment not found in this project");
+  if (!snapshot) throw new AppError("NOT_FOUND", "附件不存在或不属于当前项目", 404);
+  const { cards, revisions, ...attachment } = snapshot;
+  const isMetric = attachment.type === "CSV" || attachment.type === "JSON";
+  if (isMetric && !isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED", false)) {
+    throw new AppError("EXPERIMENT_OBSERVER_DISABLED", "实验指标读取已关闭", 503);
+  }
+  if (attachment.extractionStatus === "SUCCESS" && attachment.extractedText && (cards.length > 0 || isMetric)) {
+    return { attachment, card: cards[0] ?? null };
+  }
 
-  const buffer = await readAttachmentFile(attachment.storageKey);
-  const fileType = inferAndValidateFileType(attachment.fileName, attachment.mimeType, buffer);
-  let extractedText: string | null = null;
-  try {
-    extractedText = fileType === "PDF" ? await extractPdfText(buffer) : fileType==="CSV"||fileType==="JSON" ? new TextDecoder("utf-8",{fatal:true}).decode(buffer) : await extractImageText(attachment.mimeType, buffer, () => reserveCloudCall(projectId));
-  } catch (error) {
-    const failed = await db.attachment.update({
-      where: { id: attachment.id, project: { deletionRequestedAt: null } },
-      data: {
-        extractedText: null,
-        extractionStatus: "FAILED",
-        extractionError: error instanceof Error ? error.message : "Extraction failed",
-      },
+  type PreparedCapture = {
+    rawText: string; sourceType: string;
+    execution: Awaited<ReturnType<typeof structureCaptureWithMeta>>;
+    links: Awaited<ReturnType<KeywordVectorStore["search"]>>;
+  };
+  async function commitExtraction(text: string | null, status: string, error: string | null, prepared?: PreparedCapture) {
+    return db.$transaction(async tx => {
+      const active = await tx.project.updateMany({ where: { id: projectId, deletionRequestedAt: null }, data: { contextRevision: { increment: 0 } } });
+      if (!active.count) throw new AppError("PROJECT_NOT_FOUND", "项目已停用，未发布附件解析结果", 404);
+      const current = await tx.attachment.findFirst({ where: { id: attachmentId, projectId }, include: {
+        revisions: { orderBy: { revisionIndex: "desc" }, take: 1, select: { id: true, revisionIndex: true } },
+      } });
+      if (!current || current.extractedText !== attachment.extractedText || current.extractionStatus !== attachment.extractionStatus ||
+        current.extractionError !== attachment.extractionError || current.revisions[0]?.id !== revisions[0]?.id) {
+        throw new AppError("ATTACHMENT_TEXT_CHANGED", "附件已被校对或重新提取，请重新载入后再操作", 409);
+      }
+      const updated = await tx.attachment.update({ where: { id: attachmentId }, data: {
+        extractedText: text, extractionStatus: status, extractionError: error,
+      } });
+      let card = await tx.knowledgeCard.findFirst({ where: { attachmentId }, orderBy: [{ createdAt: "desc" }, { id: "desc" }] });
+      if (prepared && !card) {
+        const execution = prepared.execution;
+        card = await saveCaptureResult({ projectId, rawText: prepared.rawText, sourceType: prepared.sourceType,
+          draft: execution.data, links: prepared.links, attachmentId, processing: captureProcessing(execution) }, tx);
+        await saveAgentRun({ projectId, runType: "CAPTURE", status: execution.status === "SUCCESS" ? "SUCCESS" : execution.status === "FALLBACK" ? "FALLBACK" : "FAILED",
+          provider: execution.provider, fallbackReason: execution.fallbackReason, durationMs: execution.durationMs,
+          trace: { pipeline: ["attachment_retry", "structure_capture", "keyword_retrieve", "atomic_save"], attachmentId,
+            cardType: execution.data.type, linkedCardIds: prepared.links.map(link => link.relatedCardId), keywordCount: execution.data.keywords.length,
+            prompt: execution.prompt, usage: execution.usage, usageUnknown: execution.usageUnknown, requestIdentity: execution.requestIdentity } }, tx);
+      }
+      if (status === "SUCCESS" && text) {
+        const revisionIndex = (current.revisions[0]?.revisionIndex ?? -1) + 1;
+        await tx.attachmentRevision.create({ data: { attachmentId, revisionIndex, text, source: "EXTRACTION_RETRY" } });
+        await tx.project.update({ where: { id: projectId }, data: { updatedAt: new Date() } });
+        await enqueueImpact(tx, projectId, `attachment-revision:${attachmentId}:${revisionIndex}`, [`attachment:${attachmentId}`]);
+      }
+      return { attachment: updated, card };
     });
-    return { attachment: failed, card: null };
+  }
+
+  // 已提取的原文可能仅在生成记忆时失败，重试直接复用，保留人工校对内容。
+  let extractedText = attachment.extractedText;
+  try {
+    if (!extractedText) {
+      const buffer = await readAttachmentFile(attachment.storageKey);
+      const fileType = inferAndValidateFileType(attachment.fileName, attachment.mimeType, buffer);
+      extractedText = fileType === "PDF" ? await extractPdfText(buffer) : isMetric ? new TextDecoder("utf-8", { fatal: true }).decode(buffer)
+        : await extractImageText(attachment.mimeType, buffer, () => reserveCloudCall(projectId));
+    }
+  } catch (error) {
+    return commitExtraction(attachment.extractedText, "FAILED", error instanceof Error ? error.message : "附件提取失败");
   }
 
   if (!extractedText) {
-    const pending = await db.attachment.update({
-      where: { id: attachment.id, project: { deletionRequestedAt: null } },
-      data: {
-        extractedText: null,
-        extractionStatus: "NEEDS_OCR",
-        extractionError: fileType === "PDF"
-          ? "PDF has no reliably extractable plain text; OCR is required"
-          : "Image OCR requires a configured vision provider",
-      },
-    });
-    return { attachment: pending, card: null };
+    return commitExtraction(null, "NEEDS_OCR", attachment.type === "PDF" ? "PDF 暂无可可靠提取的文字，需要 OCR" : "图片文字需要配置视觉识别服务");
   }
 
-  let card = attachment.cards[0] ?? null;
-  if (!card && fileType!=="CSV" && fileType!=="JSON") {
-    card = await processCapture(
-      projectId,
-      `【附件导入：${attachment.fileName}】\n${keepWithin(extractedText, ATTACHMENT_CAPTURE_LIMIT)}`,
-      fileType === "IMAGE" ? "图片附件" : "PDF文档",
-    );
-    await db.knowledgeCard.update({ where: { id: card.id }, data: { attachmentId: attachment.id } });
+  let prepared: PreparedCapture | undefined;
+  const vectorStore = new KeywordVectorStore();
+  if (!cards.length && !isMetric) {
+    const rawText = `【附件导入：${attachment.fileName}】\n${keepWithin(extractedText, ATTACHMENT_CAPTURE_LIMIT)}`;
+    const sourceType = attachment.type === "IMAGE" ? "图片附件" : "PDF文档";
+    const recentCards = await loadRecentCards(projectId);
+    const historyKeywords = [...new Set(recentCards.flatMap(card => card.keywords))].slice(0, 30);
+    const execution = await structureCaptureWithMeta({ project, rawText, historyKeywords });
+    prepared = { rawText, sourceType, execution, links: await vectorStore.search(execution.data, recentCards, 3) };
   }
-  const updated = await db.attachment.update({
-    where: { id: attachment.id, project: { deletionRequestedAt: null } },
-    data: { extractedText, extractionStatus: "SUCCESS", extractionError: null },
-  });
-  // 重试提取的文本同样进入修订链，保证历史可追溯
-  const revisionCount = await db.attachmentRevision.count({ where: { attachmentId: attachment.id } });
-  await db.attachmentRevision.create({
-    data: {
-      attachmentId: attachment.id,
-      revisionIndex: revisionCount,
-      text: extractedText,
-      source: "EXTRACTION_RETRY",
-    },
-  });
-  return { attachment: updated, card };
+  const result = await commitExtraction(extractedText, "SUCCESS", null, prepared);
+  if (prepared && result.card) {
+    try {
+      await vectorStore.index({ id: result.card.id, title: result.card.title, keywords: result.card.keywords as string[] });
+      if (isFeatureEnabled("SEMANTIC_MEMORY_ENABLED", false)) await ensureCardEmbedding(result.card);
+    } catch (error) {
+      console.warn("Attachment retry saved; memory indexing is pending", error);
+    }
+  }
+  await refreshProjectStateAfterMutation(projectId);
+  return result;
 }
 
 export async function correctAttachmentText(

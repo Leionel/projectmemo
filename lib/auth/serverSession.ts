@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { findValidSessionByToken } from "./session";
-import { SESSION_COOKIE } from "./sessionCookie";
+import { SESSION_COOKIE, decodeSessionCookie } from "./sessionCookie";
 import type { User } from "@/lib/generated/prisma/client";
 
 export { SESSION_COOKIE };
@@ -21,7 +21,9 @@ export async function getSessionUser(): Promise<User | null> {
     return null;
   }
 
-  const result = await findValidSessionByToken(decodeURIComponent(token));
+  const decodedToken = decodeSessionCookie(token);
+  if (!decodedToken) return null;
+  const result = await findValidSessionByToken(decodedToken);
   return result?.user ?? null;
 }
 

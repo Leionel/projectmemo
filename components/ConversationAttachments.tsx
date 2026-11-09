@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Paperclip, X } from "lucide-react";
 import styles from "./ConversationPanel.module.css";
 
@@ -26,32 +26,51 @@ export function useConversationAttachments({ conversationId, projectId, disabled
 }) {
   const input = useRef<HTMLInputElement>(null);
   const [choice, setChoice] = useState<Choice>(null), [busy, setBusy] = useState(false);
+  const [previousConversationId, setPreviousConversationId] = useState(conversationId);
+  if (previousConversationId !== conversationId) {
+    setPreviousConversationId(conversationId);
+    setChoice(null);
+    setBusy(false);
+  }
+  const generation = useRef(0);
+  useEffect(() => {
+    const activeGeneration = generation;
+    activeGeneration.current++;
+    return () => { activeGeneration.current++; };
+  }, [conversationId]);
   async function keepInConversation(file: File) {
+    if (disabled || busy) return;
+    const epoch = generation.current;
     setBusy(true);
     try {
       const { attachment } = await upload<{ attachment: ConversationAttachmentChip }>(`/api/conversations/${conversationId}/attachments`, file, projectId ? { projectId } : {});
+      if (epoch !== generation.current) return;
       if (!chips.some(c => c.id === attachment.id)) onChips([...chips, attachment]);
-    } catch (error) { onError(error instanceof Error ? error.message : "附件上传失败"); }
-    finally { setBusy(false); setChoice(null); }
+    } catch (error) { if (epoch === generation.current) onError(error instanceof Error ? error.message : "附件上传失败"); }
+    finally { if (epoch === generation.current) { setBusy(false); setChoice(null); } }
   }
   async function saveToProject(file: File) {
-    if (!projectId) return;
+    if (!projectId || disabled || busy) return;
+    const epoch = generation.current;
     setBusy(true);
-    try { await upload(`/api/projects/${projectId}/attachments`, file); onProjectSaved(file.name); }
-    catch (error) { onError(error instanceof Error ? error.message : "附件上传失败"); }
-    finally { setBusy(false); setChoice(null); }
+    try { await upload(`/api/projects/${projectId}/attachments`, file); if (epoch === generation.current) onProjectSaved(file.name); }
+    catch (error) { if (epoch === generation.current) onError(error instanceof Error ? error.message : "附件上传失败"); }
+    finally { if (epoch === generation.current) { setBusy(false); setChoice(null); } }
   }
   async function promote(chip: ConversationAttachmentChip) {
-    if (!projectId) return;
+    if (!projectId || disabled || busy) return;
+    const epoch = generation.current;
     setBusy(true);
     try {
       const response = await fetch(`/api/conversations/${conversationId}/attachments/${chip.id}/promote`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ projectId }) });
       if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error?.message ?? "转为项目资料失败");
+      if (epoch !== generation.current) return;
       onChips(chips.filter(c => c.id !== chip.id)); onProjectSaved(chip.fileName);
-    } catch (error) { onError(error instanceof Error ? error.message : "转为项目资料失败"); }
-    finally { setBusy(false); }
+    } catch (error) { if (epoch === generation.current) onError(error instanceof Error ? error.message : "转为项目资料失败"); }
+    finally { if (epoch === generation.current) setBusy(false); }
   }
   async function remove(chip: ConversationAttachmentChip) {
+    if (disabled || busy) return;
     onChips(chips.filter(c => c.id !== chip.id));
     await fetch(`/api/conversations/${conversationId}/attachments/${chip.id}`, { method: "DELETE" }).catch(() => undefined);
   }
@@ -64,18 +83,18 @@ export function useConversationAttachments({ conversationId, projectId, disabled
   const panel = <>
     {choice && <div role="dialog" aria-label="附件用途" className={styles.attachChoice}>
       <p>《{choice.file.name}》用于</p>
-      <button type="button" className="focus-ring" disabled={busy} onClick={() => void keepInConversation(choice.file)}><strong>仅用于本次讨论</strong><span>不进入项目记忆，可随时转为项目资料</span></button>
-      <button type="button" className="focus-ring" disabled={busy || !projectId} onClick={() => void saveToProject(choice.file)}><strong>加入项目记忆</strong><span>{projectId ? "保存为项目资料并生成待核对的记忆" : "先在下方选择一个项目"}</span></button>
+      <button type="button" className="focus-ring" disabled={disabled || busy} onClick={() => void keepInConversation(choice.file)}><strong>仅用于本次讨论</strong><span>不进入项目记忆，可随时转为项目资料</span></button>
+      <button type="button" className="focus-ring" disabled={disabled || busy || !projectId} onClick={() => void saveToProject(choice.file)}><strong>加入项目记忆</strong><span>{projectId ? "保存为项目资料并生成待核对的记忆" : "先在下方选择一个项目"}</span></button>
       <button type="button" className="workspace-link focus-ring" onClick={() => setChoice(null)}>取消</button>
     </div>}
     {chips.length > 0 && <ul className={styles.attachChips} aria-label="本轮附件">
       {chips.map(chip => <li key={chip.id}>
         <span className={styles.attachName}>{chip.fileName}</span>
         {chip.extractionStatus !== "SUCCESS" && <span className={styles.attachHint} title={chip.extractionError ?? undefined}>{chip.extractionError?.includes("未选择项目") ? "图片暂未识别文字" : "文字待提取"}</span>}
-        {projectId && <button type="button" className="workspace-link focus-ring" disabled={busy} onClick={() => void promote(chip)}>转为项目资料</button>}
-        <button type="button" className={styles.attachRemove + " focus-ring"} aria-label={"移除附件 " + chip.fileName} onClick={() => void remove(chip)}><X size={13} aria-hidden="true"/></button>
+        {projectId && <button type="button" className="workspace-link focus-ring" disabled={disabled || busy} onClick={() => void promote(chip)}>转为项目资料</button>}
+        <button type="button" className={styles.attachRemove + " focus-ring"} disabled={disabled || busy} aria-label={"移除附件 " + chip.fileName} onClick={() => void remove(chip)}><X size={13} aria-hidden="true"/></button>
       </li>)}
     </ul>}
   </>;
-  return { button, panel };
+  return { button, panel, busy };
 }

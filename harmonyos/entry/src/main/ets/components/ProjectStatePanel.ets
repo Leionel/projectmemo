@@ -45,7 +45,7 @@ export struct ProjectStatePanel {
   }
 
   private formatDay(value: string): string {
-    return value !== '' && value.length >= 10 ? value.substring(0, 10) : '未知';
+    return value !== '' && value.length >= 10 ? TextFormatters.shanghaiDate(value) : '未知';
   }
 
   private async loadState(): Promise<void> {

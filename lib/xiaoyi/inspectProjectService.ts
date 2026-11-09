@@ -2,7 +2,7 @@ import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { AgentRunStatus, AgentRunType } from "@/lib/generated/prisma/client";
 import { getMissingEvidenceTypes } from "@/lib/milestones/evidenceGap";
-import { finishExternalAgentRun, getProjectMetrics, listActions, listInterventions, reserveExternalAgentRun } from "@/lib/repositories/agent";
+import { finishExternalAgentRun, getProjectMetrics, listActions, listInterventions, reserveExternalAgentRun, ABANDONED_EXTERNAL_RUN_MS } from "@/lib/repositories/agent";
 import { getProjectDetail, requireProject } from "@/lib/repositories/projects";
 import { evaluateProjectContext } from "@/lib/services/agentContextService";
 import { listProjectMilestones } from "@/lib/services/milestoneService";
@@ -31,6 +31,7 @@ export async function inspectProjectFromXiaoyi(input: {
     runType: AgentRunType.EVALUATE,
     provider: XIAOYI_PROVIDER,
     externalRequestId: receiptId,
+    abandonAfterMs: ABANDONED_EXTERNAL_RUN_MS,
     trace: { source: "xiaoyi", provider: XIAOYI_PROVIDER, tool: "inspect_project", stage: "RECEIVED", requestId: input.requestId, refresh: input.payload.refresh },
   });
 

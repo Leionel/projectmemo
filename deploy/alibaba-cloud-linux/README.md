@@ -34,7 +34,7 @@
 
 `safe-update.sh` 要求机器上已有可运行版本、依赖、生成的 Prisma Client 和 `.next`，不能用于空机初始化。新机器先准备服务账号、Node.js 24、持久路径、环境文件、Web 和独立 Worker 的 systemd unit，以及 Nginx；核对实际路径后再配置首次构建与迁移。
 
-本目录的 `projectmemo.service` 是 Web unit 样例。现有机器保留实际 unit；本目录未提供 Worker unit 安装器，不要用样例覆盖现有服务。生产环境文件只在首次安装时从样例建立，后续更新保留原凭据并按需修改具体键。
+本目录的 `projectmemo.service` 是 Web unit 样例。现有机器保留实际 unit；`projectmemo-mission-worker.service` 是 Worker unit 样例；本目录未提供安装器，不要用样例覆盖现有服务。生产环境文件只在首次安装时从样例建立，后续更新保留原凭据并按需修改具体键。
 
 ## 更新发布（已部署机器）
 
@@ -201,7 +201,7 @@ sudo -u projectmemo APP_DIR=/opt/projectmemo/app \
 
 ```bash
 sudo install -m 644 /dev/stdin /etc/cron.d/projectmemo-backup <<'CRON'
-20 3 * * * projectmemo APP_DIR=/opt/projectmemo/app DB_FILE=/opt/projectmemo/data/projectmemo.db ATTACHMENT_DIR=/opt/projectmemo/storage BACKUP_ROOT=/opt/projectmemo/backups bash /opt/projectmemo/app/deploy/alibaba-cloud-linux/backup.sh >/dev/null 2>&1
+20 3 * * * projectmemo APP_DIR=/opt/projectmemo/app DB_FILE=/opt/projectmemo/data/projectmemo.db ATTACHMENT_DIR=/opt/projectmemo/storage BACKUP_ROOT=/opt/projectmemo/backups bash /opt/projectmemo/app/deploy/alibaba-cloud-linux/backup.sh 2>&1 | systemd-cat -t projectmemo-backup
 CRON
 ```
 
@@ -215,17 +215,18 @@ sudo -u projectmemo APP_DIR=/opt/projectmemo/app \
   '/opt/projectmemo/backups/<时间戳>'
 ```
 
-脚本会先对备份做 `integrity_check`，再还原副本，并打印用副本起验证实例的命令。
+脚本会先对备份做 `integrity_check`，核对数据库登记的附件都在备份里，再还原副本，并打印用副本起验证实例的命令。
 用副本确认「登录成功、项目列表可见、抽查一条记忆与一个附件能打开」，才算演练通过。
 
-覆盖线上数据是不可逆操作，必须同时给出两个参数，并且脚本会先自动给现有库做一份
+覆盖线上数据是不可逆操作，必须先停服务并同时给出两个参数，脚本会先自动给现有库和附件各做一份
 `pre-restore-*` 快照：
 
 ```bash
+sudo systemctl stop projectmemo-mission-worker projectmemo
 sudo -u projectmemo APP_DIR=/opt/projectmemo/app \
   bash /opt/projectmemo/app/deploy/alibaba-cloud-linux/restore-to-copy.sh \
   '/opt/projectmemo/backups/<时间戳>' --in-place --confirm
-sudo systemctl restart projectmemo
+sudo systemctl start projectmemo && sudo systemctl start projectmemo-mission-worker
 ```
 
 ## 账号邮件（注册、找回密码、委托等待提醒）
@@ -314,6 +315,7 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST https://project.luojiatutor.xyz
 | 已配置模型，界面仍显示演示模式 / 规则模式 | `curl https://project.luojiatutor.xyz/api/settings` | 返回 nginx 404 时，按“模型状态显示”一节更新 nginx |
 | 附件打不开 | `ls /opt/projectmemo/storage`、`ATTACHMENT_DIR` | 附件目录未挂载或发布时被覆盖；从最近备份还原该目录 |
 | 数据库损坏 | `node deploy/alibaba-cloud-linux/sqlite-tool.mjs verify <db>` | 保留损坏文件后从备份恢复，禁止直接删库重建 |
+| PDF 显示“缺少文字提取工具” | `command -v pdftotext` | `sudo dnf install -y poppler-utils`；在附件列表点重新提取 |
 | 磁盘写满 | `df -h /opt`、`du -sh /opt/projectmemo/backups` | 清理旧备份或调小 `KEEP`；先确认最近的备份仍完整 |
 
 ### 讨论附件迁移（2026-11 起）

@@ -1,0 +1,25 @@
+[Unit]
+Description=ProjectMemo Mission Worker
+After=network-online.target projectmemo.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=projectmemo
+Group=projectmemo
+WorkingDirectory=/opt/projectmemo/app
+EnvironmentFile=/etc/projectmemo/projectmemo.env
+ExecStart=/home/projectmemo/.nvm/versions/node/v24.22.0/bin/node /opt/projectmemo/app/node_modules/tsx/dist/cli.mjs scripts/mission-worker.ts
+Restart=always
+RestartSec=5
+TimeoutStopSec=90
+KillSignal=SIGTERM
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/opt/projectmemo/data /opt/projectmemo/storage -/opt/projectmemo/app/.runtime
+
+[Install]
+WantedBy=multi-user.target

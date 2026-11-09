@@ -1,3 +1,4 @@
+import { shanghaiDay } from "@/lib/time/shanghai";
 import { composeEffectiveMemory } from "@/lib/memory/digestService";
 import { claimControlState } from "@/lib/memory/claimEffective";
 import { assertTurnCurrent } from "@/lib/continuity/turnCoordination";
@@ -177,7 +178,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
     : await observeProjects(actor, directory, route.projectIds, route.query || input.message, input.exactRef);
   const checkpoint = record(record((await db.conversationTurn.findUniqueOrThrow({ where: { id: turnId } })).readManifestJson).initialObservation);
   if (checkpoint.observations) Object.assign(observations, checkpoint.observations);
-  else await mutateTurn(actor, id, turnId, manifest => ({ ...manifest, initialObservation: { observations, asOf: new Date().toISOString().slice(0, 10) } }));
+  else await mutateTurn(actor, id, turnId, manifest => ({ ...manifest, initialObservation: { observations, asOf: shanghaiDay() } }));
   const researchAllowed = grant.available && (grant.scope.enabled || userUrls(input.message, input.userProvidedUrls).length > 0 || !!input.priorWebSources?.length) && !input.constraints.some(c => /不联网|禁止联网|不要联网/.test(c));
   if (researchAllowed && input.priorWebSources?.length) {
     const prior = await reuseWebSources(actor, id, turnId, input.priorWebSources);
@@ -266,7 +267,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
     state.goalGaps = normalizeGoals(frame.data, scopeDirectory, observations);
     if (frame.data.researchCoverage && researchAllowed) {
       const coverage = researchCoverageSchema.parse({ ...frame.data.researchCoverage, schemaVersion: 1, questionHash: jsonHash(input.message), scopeRevision: grant.revision,
-        asOf: (checkpoint.asOf as string | undefined) ?? new Date().toISOString().slice(0, 10) });
+        asOf: (checkpoint.asOf as string | undefined) ?? shanghaiDay() });
       state.researchCoverage = bindResearchCoverage(coverage, observations.sources);
     }
     state.decision = investigationDecisionSchema.parse(frame.data.decision);

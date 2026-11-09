@@ -23,6 +23,7 @@ import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateSer
 
 const vectorStore = new KeywordVectorStore();
 const CAPTURE_API_PROVIDER = "capture-api";
+const CAPTURE_RESERVATION_STALE_MS = 5 * 60_000;
 
 type SavedCapture = Awaited<ReturnType<typeof saveCaptureResult>>;
 
@@ -152,6 +153,17 @@ interface CaptureRequestOptions {
   beforeSave?: (tx: Prisma.TransactionClient) => Promise<void>;
 }
 
+/**
+ * 预留回执只在业务事务里才转为终态，PARTIAL 超时说明原进程已退出。
+ * 用 confirmedAt 做接管 CAS；原进程若其实还活着，Capture 的唯一约束保证只落一条记录。
+ */
+async function takeOverAbandonedCaptureRun(run: { id: string; status: AgentRunStatus; createdAt: Date; confirmedAt: Date | null }) {
+  if (run.status !== AgentRunStatus.PARTIAL) return false;
+  if ((run.confirmedAt ?? run.createdAt).getTime() > Date.now() - CAPTURE_RESERVATION_STALE_MS) return false;
+  const taken = await db.agentRun.updateMany({ where: { id: run.id, status: AgentRunStatus.PARTIAL, confirmedAt: run.confirmedAt }, data: { confirmedAt: new Date() } });
+  return taken.count === 1;
+}
+
 async function waitForExistingCaptureRun(projectId: string, runId: string, requestHash: string) {
   for (let attempt = 0; attempt < 1200; attempt += 1) {
     const run = await db.agentRun.findFirst({ where: { id: runId, projectId } });
@@ -226,7 +238,9 @@ export async function processCaptureWithRequest(
     if (trace.requestHash && trace.requestHash !== payloadHash) {
       throw new AppError("IDEMPOTENCY_CONFLICT", "同一 requestId 已绑定其他记录内容，请保留原文或使用新的 requestId", 409);
     }
-    return waitForExistingCaptureRun(projectId, reservation.run.id, payloadHash);
+    if (!await takeOverAbandonedCaptureRun(reservation.run)) {
+      return waitForExistingCaptureRun(projectId, reservation.run.id, payloadHash);
+    }
   }
 
   const startedAt = Date.now();

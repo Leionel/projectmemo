@@ -205,7 +205,8 @@ export async function confirmConversationWork(actor: ConversationActor, id: stri
     let resultId = ref.id, receiptText = "已提交到原委托，尚未执行完成。";
     if (op === "complete_action") {
       const r = await commitActionResult(tx, cmd.prepared as PreparedActionResult, async () => { await assertProject(actor, ref.projectId, tx); });
-      resultId = r.updatedAction.id; receiptText = "行动已完成，复盘已保存：" + r.card?.id;
+      const reminders = await tx.actionReminder.count({ where: { projectId: ref.projectId, actionId: ref.id, userId: actor.userId, syncStatus: { not: "REVOKED" }, calendarEventId: { not: null }, reminderAt: { gt: new Date() } } });
+      resultId = r.updatedAction.id; receiptText = "行动已完成，复盘已保存：" + r.card?.id + (reminders ? "。设备上还有这条行动的未来日程，可在待办详情里撤销。" : "");
     } else if (op === "continuation") {
       const r = await confirmContinuation(actor.userId, ref.id, { ...cmd, requestId }, tx);
       receiptText = r.continued ? "材料已绑定原问题，原委托已就绪。" : "已保存核对，原委托仍在等待：" + r.reason;

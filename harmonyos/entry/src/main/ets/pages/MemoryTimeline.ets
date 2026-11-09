@@ -230,10 +230,7 @@ struct MemoryTimeline {
   }
 
   private formatDate(createdAt: string): string {
-    if (createdAt.length >= 10) {
-      return createdAt.substring(0, 10);
-    }
-    return createdAt;
+    return TextFormatters.shanghaiDate(createdAt);
   }
 
   private toggleExpand(cardId: string): void {
@@ -405,7 +402,7 @@ struct MemoryTimeline {
           .margin({ top: 2 })
 
           Row() {
-            Text(`确认于 ${relation.confirmedAt !== null && relation.confirmedAt.length >= 10 ? relation.confirmedAt.substring(0, 10) : '未知时间'}`)
+            Text(`确认于 ${relation.confirmedAt !== null && relation.confirmedAt.length >= 10 ? TextFormatters.shanghaiDate(relation.confirmedAt) : '未知时间'}`)
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.INK_TERTIARY)
             if (relation.reason !== '') {
@@ -427,7 +424,7 @@ struct MemoryTimeline {
         .borderRadius(PMRadius.SM)
         .margin({ top: PMSpacing.XS })
         .alignItems(HorizontalAlign.Start)
-        .accessibilityText(`决策演化：原决策${relation.relatedCard.title}，被${relation.currentCard.title}取代，确认时间${relation.confirmedAt !== null ? relation.confirmedAt.substring(0, 10) : '未知'}，原因${relation.reason}`)
+        .accessibilityText(`决策演化：原决策${relation.relatedCard.title}，被${relation.currentCard.title}取代，确认时间${relation.confirmedAt !== null ? TextFormatters.shanghaiDate(relation.confirmedAt) : '未知'}，原因${relation.reason}`)
       }, (relation: TemporalRelation) => relation.id)
 
       if (item.temporalReason !== null && item.temporalReason !== '') {

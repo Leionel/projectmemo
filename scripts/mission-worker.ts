@@ -39,9 +39,9 @@ try {
       mission: () => isFeatureEnabled("MISSION_ENABLED", false)
         ? runMissionSlice({ workerId,onClaim:()=>recordWorkerPresence({workerId,claim:true}) })
         : Promise.resolve(false),
-      onError: (name) => {
+      onError: (name, error) => {
         if (["PROJECT_CLEANUP", "INTAKE_CLEANUP", "IMPACT", "MATERIAL", "DELEGATION"].includes(name)) recordWorkerPresence({ workerId, failedScan: name });
-        console.error(`委托 Worker ${name} 本次处理失败，请核对功能开关、迁移和原任务记录`);
+        console.error(`委托 Worker ${name} 本次处理失败，请核对功能开关、迁移和原任务记录`, error);
       },
     });
 

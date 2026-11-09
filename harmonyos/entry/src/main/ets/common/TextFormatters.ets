@@ -4,6 +4,14 @@
  */
 
 export class TextFormatters {
+  /** 服务端时间是 UTC；按北京时间取日期，凌晨的记录不会显示成前一天。 */
+  static shanghaiDate(value: string): string {
+    if (value.length <= 10) return value;
+    const time = Date.parse(value);
+    if (Number.isNaN(time)) return value.substring(0, 10);
+    return new Date(time + 8 * 3600 * 1000).toISOString().substring(0, 10);
+  }
+
   /**
    * 判断一段文本是否明显包含历史编码/录入损坏。
    * 单个问号可能是正常标点，因此只拦截连续多个问号或 Unicode 替换字符。

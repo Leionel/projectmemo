@@ -49,9 +49,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
-    if (error instanceof Error && /empty|100MB|only PDF|valid PDF|supported image|does not match/i.test(error.message)) {
-      return apiError(new AppError("ATTACHMENT_INVALID", error.message, 400));
-    }
     return apiError(error);
   }
 }

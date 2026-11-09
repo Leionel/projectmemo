@@ -41,7 +41,15 @@ export async function saveFileToStorage(projectId: string, fileName: string, buf
     throw new Error("Invalid storage path");
   }
 
-  await fs.promises.writeFile(absolutePath, buffer);
+  // 先写同命名空间的临时文件再改名：磁盘写满或进程被杀时不会留下半截原件。
+  const temporaryPath = `${absolutePath}.tmp`;
+  try {
+    await fs.promises.writeFile(temporaryPath, buffer);
+    await fs.promises.rename(temporaryPath, absolutePath);
+  } catch (error) {
+    await fs.promises.rm(temporaryPath, { force: true }).catch(() => undefined);
+    throw error;
+  }
   return {
     storageKey: uniqueKey,
     absolutePath,

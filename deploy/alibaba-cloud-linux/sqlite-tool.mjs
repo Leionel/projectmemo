@@ -11,11 +11,12 @@
  *   node sqlite-tool.mjs backup <源库> <目标文件>
  *   node sqlite-tool.mjs verify <库文件>
  *   node sqlite-tool.mjs info   <库文件>
+ *   node sqlite-tool.mjs missing-files <库文件> <附件目录>
  */
 
 import { createRequire } from "node:module";
 import { existsSync, mkdirSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { basename, dirname, resolve } from "node:path";
 
 function fail(message) {
   process.stderr.write(`sqlite-tool: ${message}\n`);
@@ -108,6 +109,29 @@ if (command === "backup") {
   } finally {
     db.close();
   }
+} else if (command === "missing-files") {
+  const [file, storageDir] = args;
+  if (!file || !storageDir) fail("用法：missing-files <库文件> <附件目录>");
+  if (!existsSync(file)) fail(`库文件不存在：${file}`);
+
+  const db = new Database(file, { readonly: true, fileMustExist: true });
+  try {
+    const tables = db
+      .prepare("SELECT m.name AS name FROM sqlite_master m JOIN pragma_table_info(m.name) c ON c.name = 'storageKey' WHERE m.type = 'table'")
+      .all();
+    let missing = 0;
+    for (const { name } of tables) {
+      for (const row of db.prepare(`SELECT storageKey AS key FROM "${name}" WHERE storageKey IS NOT NULL AND storageKey <> ''`).all()) {
+        if (!existsSync(resolve(storageDir, basename(row.key)))) {
+          missing += 1;
+          process.stderr.write(`sqlite-tool: ${name} 缺少文件 ${basename(row.key)}\n`);
+        }
+      }
+    }
+    process.stdout.write(`${missing}\n`);
+  } finally {
+    db.close();
+  }
 } else {
-  fail("用法：sqlite-tool.mjs <backup|verify|info> ...");
+  fail("用法：sqlite-tool.mjs <backup|verify|info|missing-files> ...");
 }

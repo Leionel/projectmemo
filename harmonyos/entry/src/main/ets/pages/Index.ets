@@ -1795,7 +1795,7 @@ struct Index {
                       .fontColor(PMColors.RISK)
                       .margin({ left: PMSpacing.XS })
                   }
-                  Text(card.createdAt.length >= 10 ? card.createdAt.substring(0, 10) : card.createdAt)
+                  Text(TextFormatters.shanghaiDate(card.createdAt))
                     .fontSize(PMFontSize.CAPTION)
                     .fontColor(PMColors.INK_TERTIARY)
                 }
@@ -1834,7 +1834,7 @@ struct Index {
                         })
                     }
                   }
-                  Text(card.createdAt.length >= 10 ? card.createdAt.substring(0, 10) : card.createdAt)
+                  Text(TextFormatters.shanghaiDate(card.createdAt))
                     .fontSize(PMFontSize.CAPTION)
                     .fontColor(PMColors.INK_TERTIARY)
                 }

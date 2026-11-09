@@ -1,3 +1,4 @@
+import { shanghaiDay } from "@/lib/time/shanghai";
 import { reserveCloudCall } from "@/lib/auth/cloudQuota";
 import {AppError} from "@/lib/api";
 import type {Prisma} from "@/lib/generated/prisma/client";
@@ -104,7 +105,7 @@ function mockAnswer(input: {
   const writableCalendar = input.calendarConnections[0];
   const wantsCalendar = Boolean(writableCalendar) && /日程|日历|会议|约个|面谈/.test(question);
   if (writableCalendar && wantsCalendar) {
-    const day = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    const day = shanghaiDay(Date.now() + 86400000);
     proposedActions.push({ kind: "create_calendar_event", label: "创建飞书日程", title: "安排一次项目讨论",
       description: "确认后在已授权的飞书日历创建日程；创建后不会自动删除。",
       connectionId: writableCalendar.id, startAt: `${day}T02:00:00.000Z`, endAt: `${day}T02:30:00.000Z`,

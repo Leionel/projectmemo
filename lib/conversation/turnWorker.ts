@@ -5,12 +5,19 @@ import { newTurnLease, withTurnLease, heartbeatTurn } from "./turnRuntime";
 import { record } from "./repository";
 import { json } from "@/lib/mission/contracts";
 
+const TURN_SCAN_PAGE = 30;
+
 /** Schedules the original ConversationTurn executor; no second research task or business Runner. */
 export async function runConversationTurn(options: { onClaim?: () => void } = {}) {
   if (!isFeatureEnabled("FOCUS_ASYNC_ENABLED", isFeatureEnabled("FOCUS_WEB_ENABLED", false))) return false;
-  const pending = await db.conversationTurn.findMany({ where: { status: { in: ["OBSERVING", "GENERATING"] }, sessionId: { not: null },
-    OR: [{ leaseUntil: null }, { leaseUntil: { lt: new Date() } }] }, orderBy: { createdAt: "asc" }, take: 30, include: { conversation: true } });
-  const next = pending.find(t => record(t.readManifestJson).deferred === true);
+  // 同步 turn 崩溃后也会留在这些状态里；逐页向后找，遗留记录不能占满窗口饿死待执行的 turn。
+  let next;
+  for (let skip = 0; !next && skip < 3000; skip += TURN_SCAN_PAGE) {
+    const page = await db.conversationTurn.findMany({ where: { status: { in: ["OBSERVING", "GENERATING"] }, sessionId: { not: null },
+      OR: [{ leaseUntil: null }, { leaseUntil: { lt: new Date() } }] }, orderBy: { createdAt: "asc" }, skip, take: TURN_SCAN_PAGE, include: { conversation: true } });
+    next = page.find(t => record(t.readManifestJson).deferred === true);
+    if (page.length < TURN_SCAN_PAGE) break;
+  }
   if (!next) return false;
   const token = newTurnLease();
   const startedAt = new Date().toISOString(); let accumulated = 0;

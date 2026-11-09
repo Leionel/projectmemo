@@ -1,7 +1,7 @@
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { AppError } from "@/lib/api";
 import { AgentRunStatus, AgentRunType } from "@/lib/generated/prisma/client";
-import { createOrReuseAction, finishExternalAgentRun, reserveExternalAgentRun } from "@/lib/repositories/agent";
+import { createOrReuseAction, finishExternalAgentRun, reserveExternalAgentRun, ABANDONED_EXTERNAL_RUN_MS } from "@/lib/repositories/agent";
 import { requireProject } from "@/lib/repositories/projects";
 import { createActionResponseSchema, type CreateActionInput } from "@/lib/xiaoyi/contracts";
 import { externalRequestId, parseStoredResponse, safeXiaoyiError, throwStoredFailure, XIAOYI_PROVIDER } from "@/lib/xiaoyi/receipts";
@@ -77,6 +77,7 @@ export async function createActionFromXiaoyi(input: {
     runType: AgentRunType.ACTION,
     provider: XIAOYI_PROVIDER,
     externalRequestId: receiptId,
+    abandonAfterMs: ABANDONED_EXTERNAL_RUN_MS,
     trace: { source: "xiaoyi", provider: XIAOYI_PROVIDER, tool: "create_action", stage: "RECEIVED", requestId: input.requestId, confirmed },
   });
 

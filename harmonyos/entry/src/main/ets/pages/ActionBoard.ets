@@ -926,6 +926,9 @@ struct ActionBoard {
         } else if (outcome !== null && outcome.compensation.needed) {
           this.reminderNotice = outcome.compensation.message;
         }
+        if (response.reminderNotice !== null && response.reminderNotice !== undefined && response.reminderNotice !== '') {
+          this.reminderNotice = `${this.reminderNotice}${response.reminderNotice}`;
+        }
       } else {
         completed = await this.actionService.complete(this.projectId, actionId, trimmed);
       }
@@ -1001,7 +1004,7 @@ struct ActionBoard {
         }.width('100%').alignItems(HorizontalAlign.Start).padding(12).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(12).margin({ top: 10 })
       }
       if ((action.dueAt ?? '') !== '') {
-        Text(`截止：${(action.dueAt ?? '').substring(0, 10)}`).fontSize(12).fontColor(PMColors.INK_TERTIARY).margin({ top: 8 })
+        Text(`截止：${TextFormatters.shanghaiDate(action.dueAt ?? '')}`).fontSize(12).fontColor(PMColors.INK_TERTIARY).margin({ top: 8 })
       }
       if (action.sourceIntervention !== null && action.sourceIntervention !== undefined
         && action.sourceIntervention.title !== '') {

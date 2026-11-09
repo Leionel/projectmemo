@@ -356,10 +356,13 @@ export class ReminderService {
   }
 
   private static previewTime(iso: string): string {
-    if (iso.length < 16) {
+    const value = new Date(iso);
+    if (Number.isNaN(value.getTime())) {
       return iso;
     }
-    return `${iso.substring(0, 10)} ${iso.substring(11, 16)}`;
+    // 提醒写在设备日历上，这里和日历显示同一个本地时间，而不是 UTC 字符串。
+    const pad = (part: number): string => part < 10 ? `0${part}` : `${part}`;
+    return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())} ${pad(value.getHours())}:${pad(value.getMinutes())}`;
   }
 
   /**

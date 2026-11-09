@@ -307,16 +307,21 @@ function isUniqueConstraintError(error: unknown): error is { code: string } {
   return typeof error === "object" && error !== null && "code" in error && error.code === "P2002";
 }
 
+export const ABANDONED_EXTERNAL_RUN_MS = 5 * 60_000;
+
 export async function reserveExternalAgentRun(input: {
   projectId: string;
   runType: AgentRunType;
   provider: string;
   externalRequestId: string;
   trace: Record<string, unknown>;
+  /** 调用方无法安全接管时使用：预留超时视为原进程已退出，转为可读的失败回执。 */
+  abandonAfterMs?: number;
 }) {
+  const { abandonAfterMs, ...reservation } = input;
   try {
     const run = await saveAgentRun({
-      ...input,
+      ...reservation,
       status: AgentRunStatus.PARTIAL,
     });
     return { run, created: true };
@@ -331,6 +336,11 @@ export async function reserveExternalAgentRun(input: {
       },
     });
     if (!run) throw error;
+    if (abandonAfterMs && run.status === AgentRunStatus.PARTIAL && run.createdAt.getTime() < Date.now() - abandonAfterMs) {
+      const resultJson = { error: { code: "EXTERNAL_REQUEST_INTERRUPTED", message: "上次调用被中断，结果未知。请先核对项目记录，再使用新的 request_id 重试", status: 409 } };
+      await db.agentRun.updateMany({ where: { id: run.id, status: AgentRunStatus.PARTIAL }, data: { status: AgentRunStatus.FAILED, resultJson } });
+      return { run: { ...run, status: AgentRunStatus.FAILED, resultJson }, created: false };
+    }
     return { run, created: false };
   }
 }

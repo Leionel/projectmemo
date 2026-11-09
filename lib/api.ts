@@ -20,6 +20,16 @@ export function apiError(error: unknown) {
   if (error instanceof AppError) {
     return NextResponse.json({ error: { code: error.code, message: error.message, details: error.details } }, { status: error.status });
   }
+  const failure = error as { code?: unknown; message?: unknown } | null;
+  const detail = `${String(failure?.code ?? "")} ${String(failure?.message ?? "")}`;
+  if (/ENOSPC|SQLITE_FULL|database or disk is full/.test(detail)) {
+    console.error("Storage is full", error);
+    return NextResponse.json({ error: { code: "STORAGE_FULL", message: "服务器存储空间不足，本次内容未保存，请稍后重试" } }, { status: 507 });
+  }
+  if (/SQLITE_BUSY|database is locked/.test(detail)) {
+    console.error("Database is busy", error);
+    return NextResponse.json({ error: { code: "DATABASE_BUSY", message: "数据正在处理中，请稍后重试" } }, { status: 503 });
+  }
   console.error("Unhandled API error", error);
   return NextResponse.json({ error: { code: "INTERNAL_ERROR", message: "服务暂时不可用，请稍后重试" } }, { status: 500 });
 }

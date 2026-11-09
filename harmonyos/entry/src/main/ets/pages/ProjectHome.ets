@@ -1730,7 +1730,7 @@ struct ProjectHome {
     if (this.agentContext !== null) return this.agentContext.nextStep.reason;
     if (this.agentContextError !== '') return this.agentContextError;
     const kind = this.homeFocusKind();
-    if (kind === 'reminder') return this.homeDeadlineConflict() ? `历史提醒为「${this.getTopOpenIntervention()?.title ?? ''}」，当前截止日为 ${(this.project.deadline ?? '').substring(0, 10)}。请查看原提醒依据。` : this.getTopOpenIntervention()?.content ?? '';
+    if (kind === 'reminder') return this.homeDeadlineConflict() ? `历史提醒为「${this.getTopOpenIntervention()?.title ?? ''}」，当前截止日为 ${TextFormatters.shanghaiDate(this.project.deadline ?? '')}。请查看原提醒依据。` : this.getTopOpenIntervention()?.content ?? '';
     if (kind === 'mission') return this.homeMission?.activity ?? this.homeMission?.goal ?? '已有步骤与草稿会保留。';
     if (kind === 'deadline') return '核对剩余行动和项目目标，决定本次先推进什么。';
     if (kind === 'action') return this.getNextActionDescription();
@@ -2242,7 +2242,7 @@ struct ProjectHome {
       this.policySuggestions = res.suggestions;
       const suppressed = res.recentDecisions.filter((d) => d.decision === 'SUPPRESS').slice(0, 3);
       this.policyRecentSuppressions = suppressed.length === 0 ? '' :
-        `最近被抑制：${suppressed.map((d) => `${d.reasonCode}（${d.createdAt.substring(0, 10)}）`).join('、')}`;
+        `最近被抑制：${suppressed.map((d) => `${d.reasonCode}（${TextFormatters.shanghaiDate(d.createdAt)}）`).join('、')}`;
     } catch (_e) {
       this.policyFeedback = '提醒策略加载失败';
     }
@@ -2398,7 +2398,7 @@ struct ProjectHome {
     this.editGoal = this.project.goal;
     this.editDescription = this.project.description;
     this.editDeadline = this.project.deadline !== undefined && this.project.deadline !== null && this.project.deadline.length >= 10 ?
-      this.project.deadline.substring(0, 10) : '';
+      TextFormatters.shanghaiDate(this.project.deadline) : '';
     this.showSettingsDialog = true;
   }
 
@@ -2945,7 +2945,7 @@ struct ProjectHome {
             .fontColor(this.dashboard.deadline.kind === 'overdue' ? PMColors.RISK : PMColors.INK_PRIMARY)
             .margin({ top: 4, bottom: 2 })
           Text(this.project.deadline !== null && this.project.deadline !== undefined && this.project.deadline.length >= 10 ?
-            this.project.deadline.substring(0, 10) : '项目未绑定具体日期')
+            TextFormatters.shanghaiDate(this.project.deadline) : '项目未绑定具体日期')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_MUTED)
             .maxLines(1)
@@ -3282,7 +3282,7 @@ struct ProjectHome {
     for (let i = 0; i < this.project.cards.length; i++) {
       const card = this.project.cards[i];
       const time = Date.parse(card.createdAt);
-      const day = card.createdAt && card.createdAt.length >= 10 ? card.createdAt.substring(0, 10) : '';
+      const day = card.createdAt ? TextFormatters.shanghaiDate(card.createdAt) : '';
       list.push({
         id: card.id,
         kind: 'card',
@@ -3296,7 +3296,7 @@ struct ProjectHome {
       const action = doneActions[i];
       const rawDate = action.completedAt ?? action.updatedAt;
       const time = Date.parse(rawDate);
-      const day = rawDate && rawDate.length >= 10 ? rawDate.substring(0, 10) : '';
+      const day = rawDate ? TextFormatters.shanghaiDate(rawDate) : '';
       list.push({
         id: action.id,
         kind: 'action',
@@ -3308,7 +3308,7 @@ struct ProjectHome {
     for (let i = 0; i < this.artifacts.length; i++) {
       const art = this.artifacts[i];
       const time = Date.parse(art.createdAt);
-      const day = art.createdAt && art.createdAt.length >= 10 ? art.createdAt.substring(0, 10) : '';
+      const day = art.createdAt ? TextFormatters.shanghaiDate(art.createdAt) : '';
       list.push({
         id: art.artifactType,
         kind: 'artifact',
@@ -3506,7 +3506,7 @@ struct ProjectHome {
         Column() {
           Row() {
             Text(`已完成 · ${this.latestClosedLoopAction()!.completedAt !== undefined && this.latestClosedLoopAction()!.completedAt !== null && this.latestClosedLoopAction()!.completedAt!.length >= 10 ?
-              this.latestClosedLoopAction()!.completedAt!.substring(0, 10) : '近期'}`)
+              TextFormatters.shanghaiDate(this.latestClosedLoopAction()!.completedAt!) : '近期'}`)
               .fontSize(PMFontSize.CAPTION)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.SUCCESS)
@@ -4373,7 +4373,7 @@ if (this.attachmentSearchOpen) {
       ForEach(this.attachments.filter((a: Attachment) => a.fileName.toLowerCase().includes(this.attachmentSearch.trim().toLowerCase())), (item: Attachment) => {
         ListItem() {
           Column({ space: 10 }) {
-            PMListRow({ title: item.fileName, subtitle: attachmentStatus(item), meta: `${attachmentSize(item.size)} · ${(item.createdAt ?? '').substring(0, 10)} · 查看原件 ›`, onOpen: (): void => { this.openAttachment(item.id); } })
+            PMListRow({ title: item.fileName, subtitle: attachmentStatus(item), meta: `${attachmentSize(item.size)} · ${TextFormatters.shanghaiDate(item.createdAt ?? '')} · 查看原件 ›`, onOpen: (): void => { this.openAttachment(item.id); } })
             if (item.extractionStatus !== 'SUCCESS') {
               Row({ space: 10 }) {
                 Button(this.isRetryingAttachment && this.attachmentRetryId === item.id ? '提取中…' : '重试提取', { type: ButtonType.Normal })
@@ -4609,7 +4609,7 @@ if (this.attachmentSearchOpen) {
                       .fontColor(PMColors.RISK)
                       .margin({ left: PMSpacing.XS })
                   }
-                  Text(card.createdAt.length >= 10 ? card.createdAt.substring(0, 10) : card.createdAt)
+                  Text(TextFormatters.shanghaiDate(card.createdAt))
                     .fontSize(PMFontSize.CAPTION)
                     .fontColor(PMColors.INK_TERTIARY)
                 }
@@ -4978,7 +4978,7 @@ if (this.attachmentSearchOpen) {
         }.width('100%').alignItems(HorizontalAlign.Start).margin({ top: 8 })
       }
       if ((action.dueAt ?? '') !== '') {
-        Text(`截止：${(action.dueAt ?? '').substring(0, 10)}`).fontSize(12).fontColor(PMColors.INK_TERTIARY).margin({ top: 8 })
+        Text(`截止：${TextFormatters.shanghaiDate(action.dueAt ?? '')}`).fontSize(12).fontColor(PMColors.INK_TERTIARY).margin({ top: 8 })
       }
               if (action.sourceIntervention !== null && action.sourceIntervention !== undefined && action.sourceIntervention.title !== '') {
                 Text(`来源：${TextFormatters.readableText(action.sourceIntervention.title, '提醒来源无法读取')}`)
@@ -5688,7 +5688,7 @@ if (this.attachmentSearchOpen) {
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.WARNING)
               .margin({ top: PMSpacing.XS })
-            Text(`最后生成于 ${this.currentArtifact !== undefined && this.currentArtifact.createdAt.length >= 10 ? this.currentArtifact.createdAt.substring(0, 10) : '近期'}`)
+            Text(`最后生成于 ${this.currentArtifact !== undefined && this.currentArtifact.createdAt.length >= 10 ? TextFormatters.shanghaiDate(this.currentArtifact.createdAt) : '近期'}`)
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.INK_TERTIARY)
               .margin({ top: 2 })

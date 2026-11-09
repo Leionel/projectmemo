@@ -34,6 +34,8 @@ export interface UploadAttachmentInput {
 }
 /** 单份 PDF 保留的文字上限（字符）。 */
 const PDF_TEXT_LIMIT = 300_000;
+const ATTACHMENT_PENDING_STALE_MS = 10 * 60_000;
+const INTERRUPTED_EXTRACTION = { extractionStatus: "FAILED", extractionError: "上次处理被中断，原件已保存，可以重新提取" };
 /** 附件导入时送去结构化成卡片的上限：卡片只是摘要，全文留在附件上。 */
 const ATTACHMENT_CAPTURE_LIMIT = CAPTURE_MODEL_TEXT_LIMIT;
 
@@ -65,12 +67,14 @@ export async function extractPdfText(buffer: Buffer, maxChars = PDF_TEXT_LIMIT):
     child.stdin.on("error", () => {});
     child.on("error", (error) => {
       clearTimeout(timeout);
-      reject(new Error(`PDF extractor unavailable: ${error.message}`));
+      console.warn("PDF extractor unavailable", error);
+      reject(new Error("服务器缺少 PDF 文字提取工具，原件已保存，安装后可重新提取"));
     });
     child.on("close", (code) => {
       clearTimeout(timeout);
       if (code !== 0) {
-        reject(new Error(`PDF extraction failed: ${Buffer.concat(stderr).toString("utf8").trim().slice(0, 240) || `exit ${code}`}`));
+        console.warn("PDF extraction failed", Buffer.concat(stderr).toString("utf8").trim().slice(0, 240) || `exit ${code}`);
+        reject(new Error("PDF 文字提取失败，原件已保存，可以重新提取"));
         return;
       }
       const text = pagesFromBbox(Buffer.concat(stdout).toString("utf8")).join("\f").replace(/\u0000/g, "").trim();
@@ -144,17 +148,17 @@ export async function extractImageText(mimeType: string, buffer: Buffer, charge:
 
 export function inferAndValidateFileType(fileName: string, mimeType: string, buffer: Buffer): "IMAGE" | "PDF" | "CSV" | "JSON" {
   if (buffer.length === 0) {
-    throw new Error("Attachment is empty");
+    throw new AppError("ATTACHMENT_INVALID", "附件内容为空", 400);
   }
   if (buffer.length > 100 * 1024 * 1024) {
-    throw new Error("Attachment exceeds the 100MB limit");
+    throw new AppError("ATTACHMENT_TOO_LARGE", "附件不能超过 100MB", 400);
   }
 
   const lowerName = fileName.toLowerCase();
   const isPdf = mimeType === "application/pdf" || lowerName.endsWith(".pdf");
   if (isPdf) {
     if (buffer.subarray(0, 5).toString("ascii") !== "%PDF-") {
-      throw new Error("File content is not a valid PDF header");
+      throw new AppError("ATTACHMENT_INVALID", "文件内容不是有效的 PDF", 400);
     }
     return "PDF";
   }
@@ -168,7 +172,7 @@ export function inferAndValidateFileType(fileName: string, mimeType: string, buf
   }
   const isImage = mimeType.startsWith("image/") || /\.(png|jpe?g|webp|bmp|gif)$/i.test(fileName);
   if (!isImage) {
-    throw new Error("Only PDF and image attachments are supported");
+    throw new AppError("ATTACHMENT_INVALID", "目前只支持 PDF、图片、CSV 和 JSON 附件", 400);
   }
 
   const isPng = buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
@@ -179,9 +183,16 @@ export function inferAndValidateFileType(fileName: string, mimeType: string, buf
     && buffer.subarray(0, 4).toString("ascii") === "RIFF"
     && buffer.subarray(8, 12).toString("ascii") === "WEBP";
   if (!isPng && !isJpeg && !isGif && !isBmp && !isWebp) {
-    throw new Error("File content does not match a supported image format");
+    throw new AppError("ATTACHMENT_INVALID", "文件内容与支持的图片格式不符", 400);
   }
   return "IMAGE";
+}
+
+/** 步骤 3 与提取结果之间崩溃会留下 PENDING；改为可重试的失败，重复上传不再返回卡住的记录。 */
+async function settleInterruptedAttachment<T extends { id: string; extractionStatus: string; createdAt: Date }>(row: T) {
+  if (row.extractionStatus !== "PENDING" || row.createdAt.getTime() > Date.now() - ATTACHMENT_PENDING_STALE_MS) return row;
+  await db.attachment.updateMany({ where: { id: row.id, extractionStatus: "PENDING" }, data: INTERRUPTED_EXTRACTION });
+  return { ...row, ...INTERRUPTED_EXTRACTION };
 }
 
 export async function processAttachmentUpload(input: UploadAttachmentInput, dependencies: { extractPdf?: typeof extractPdfText;
@@ -206,7 +217,7 @@ export async function processAttachmentUpload(input: UploadAttachmentInput, depe
 
   if (existingAttachment) {
     return {
-      attachment: existingAttachment,
+      attachment: await settleInterruptedAttachment(existingAttachment),
       isDuplicate: true,
       card: null,
     };
@@ -247,12 +258,12 @@ export async function processAttachmentUpload(input: UploadAttachmentInput, depe
     if (!extractedText) {
       extractionStatus = "NEEDS_OCR";
       extractionError = fileType === "PDF"
-        ? "PDF has no reliably extractable plain text; configure a PDF extractor or OCR provider"
-        : "Image OCR requires a configured vision provider";
+        ? "PDF 暂无可可靠提取的文字，需要 OCR"
+        : "图片文字需要配置视觉识别服务";
     }
   } catch (err) {
     extractionStatus = "FAILED";
-    extractionError = err instanceof Error ? err.message : "Extraction failed";
+    extractionError = err instanceof Error ? err.message : "提取失败，原件已保存，可以重新提取";
     extractedText = "";
   }
 
@@ -319,6 +330,7 @@ export async function processAttachmentUpload(input: UploadAttachmentInput, depe
 }
 
 export async function listProjectAttachments(projectId: string) {
+  await db.attachment.updateMany({ where: { projectId, extractionStatus: "PENDING", createdAt: { lt: new Date(Date.now() - ATTACHMENT_PENDING_STALE_MS) } }, data: INTERRUPTED_EXTRACTION });
   return db.attachment.findMany({
     where: { projectId },
     orderBy: { createdAt: "desc" },

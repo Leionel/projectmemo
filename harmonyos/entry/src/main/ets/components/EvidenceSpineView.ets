@@ -110,7 +110,7 @@ export struct EvidenceSpineView {
       }
 
       if (this.evidence.evaluatedAt !== undefined && this.evidence.evaluatedAt !== null && this.evidence.evaluatedAt !== '') {
-        Text(`判断记录于 ${this.evidence.evaluatedAt.substring(0, 10)}；事实日期以各条原文为准。`)
+        Text(`判断记录于 ${TextFormatters.shanghaiDate(this.evidence.evaluatedAt)}；事实日期以各条原文为准。`)
           .fontSize(PMFontSize.CAPTION)
           .fontColor(PMColors.INK_SECONDARY)
           .margin({ bottom: PMSpacing.SM })

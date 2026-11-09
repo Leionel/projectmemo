@@ -50,6 +50,7 @@ export class ActionCreateResponse {
 export class ActionCompleteResponse {
   action: ActionItem = new ActionItem();
   reminderOutcome: ReminderCompletionOutcome | null = null;
+  reminderNotice: string | null = null;
 }
 
 // ---- F1 行动可行性 ----

@@ -1,0 +1,96 @@
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/documentReader.test.ts (8 tests | 2 failed) 954ms
+   × CT4 original Conversation investigates the real PDF and publishes a bound dual-client citation 314ms
+   × CT4 actual Poppler locates two physical PDF pages and records parser version 90ms
+stderr | tests/attachmentRetryBehavior.test.ts > B: attachment retry reuse / extraction states / concurrency > B3a2 PDF 附件：本地 pdftotext 提取成功 → SUCCESS+卡片
+PDF extraction failed pdftotext version 4.00
+Copyright 1996-2017 Glyph & Cog, LLC
+Usage: pdftotext [options] <PDF-file> [<text-file>]
+  -f <int>             : first page to convert
+  -l <int>             : last page to convert
+  -layout              : maint
+
+stderr | tests/attachmentRetryBehavior.test.ts > B: attachment retry reuse / extraction states / concurrency > B3b-2 PDF 无可用文字 → NEEDS_OCR 且给出原因
+PDF extraction failed pdftotext version 4.00
+Copyright 1996-2017 Glyph & Cog, LLC
+Usage: pdftotext [options] <PDF-file> [<text-file>]
+  -f <int>             : first page to convert
+  -l <int>             : last page to convert
+  -layout              : maint
+
+ ❯ tests/attachmentRetryBehavior.test.ts (12 tests | 2 failed) 477ms
+     × B3a2 PDF 附件：本地 pdftotext 提取成功 → SUCCESS+卡片 65ms
+     × B3b-2 PDF 无可用文字 → NEEDS_OCR 且给出原因 47ms
+stderr | tests/attachmentAtomicity.test.ts > B: attachment transaction atomicity (mid-transaction failure injection) > B6-A retry 提交中途失败 → 附件状态/Capture/卡片/关系/修订/AgentRun/ImpactJob 全部回滚
+PDF extraction failed pdftotext version 4.00
+Copyright 1996-2017 Glyph & Cog, LLC
+Usage: pdftotext [options] <PDF-file> [<text-file>]
+  -f <int>             : first page to convert
+  -l <int>             : last page to convert
+  -layout              : maint
+
+ ❯ tests/attachmentAtomicity.test.ts (2 tests | 1 failed) 303ms
+     × B6-A retry 提交中途失败 → 附件状态/Capture/卡片/关系/修订/AgentRun/ImpactJob 全部回滚 237ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/attachmentAtomicity.test.ts > B: attachment transaction atomicity (mid-transaction failure injection) > B6-A retry 提交中途失败 → 附件状态/Capture/卡片/关系/修订/AgentRun/ImpactJob 全部回滚
+AssertionError: expected null to be an instance of Error
+ ❯ tests/attachmentAtomicity.test.ts:222:21
+    220|     }
+    221|
+    222|     expect(failure).toBeInstanceOf(Error);
+       |                     ^
+    223|     // Prisma 把 SQLite 触发器的 RAISE(ABORT) 归一成约束错误：错误位置必须正好是
+    224|     // 注入点所在的 AttachmentRevision 插入，而不是测试 fixture 自身的问题。
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/attachmentRetryBehavior.test.ts > B: attachment retry reuse / extraction states / concurrency > B3a2 PDF 附件：本地 pdftotext 提取成功 → SUCCESS+卡片
+AssertionError: expected 'FAILED' to be 'SUCCESS' // Object.is equality
+
+Expected: "SUCCESS"
+Received: "FAILED"
+
+ ❯ tests/attachmentRetryBehavior.test.ts:384:48
+    382|     const result = await retryAttachmentExtraction(project.id, attachm…
+    383|
+    384|     expect(result.attachment.extractionStatus).toBe("SUCCESS");
+       |                                                ^
+    385|     expect(result.attachment.extractedText).toContain("Requirements 20…
+    386|     expect(result.attachment.extractedText).toContain("2026-11-15");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/attachmentRetryBehavior.test.ts > B: attachment retry reuse / extraction states / concurrency > B3b-2 PDF 无可用文字 → NEEDS_OCR 且给出原因
+AssertionError: expected 'FAILED' to be 'NEEDS_OCR' // Object.is equality
+
+Expected: "NEEDS_OCR"
+Received: "FAILED"
+
+ ❯ tests/attachmentRetryBehavior.test.ts:426:48
+    424|     const result = await retryAttachmentExtraction(project.id, attachm…
+    425|
+    426|     expect(result.attachment.extractionStatus).toBe("NEEDS_OCR");
+       |                                                ^
+    427|     expect(result.attachment.extractionError).toContain("PDF 暂无可可靠提取的文…
+    428|     expect(fetchMock).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/documentReader.test.ts > CT4 original Conversation investigates the real PDF and publishes a bound dual-client citation
+ FAIL  tests/documentReader.test.ts > CT4 actual Poppler locates two physical PDF pages and records parser version
+Error: 原文件无法可靠提取；加密、扫描件或损坏文件需要补充原文
+ ❯ ChildProcess.<anonymous> lib/documents/reader.ts:27:99
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+
+ Test Files  3 failed | 254 passed (257)
+      Tests  5 failed | 2012 passed (2017)
+   Start at  22:31:50
+   Duration  520.63s (transform 9.03s, setup 0ms, import 195.78s, tests 211.02s, environment 56.90s)
+

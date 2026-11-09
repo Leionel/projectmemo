@@ -1,0 +1,327 @@
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ × tests/auditRegression20261109.test.ts > 后台任务恢复 > A3 进程在 Capture 处理中被杀后，同 requestId 重试能接续而不是永远 409 38140ms
+   → 相同 requestId 的记录仍在处理中，请稍后按原 ID 重试
+ ✓ tests/auditRegression20261109.test.ts > 后台任务恢复 > A1 影响作业不能把外部写入中的步骤置废，否则未知结果不再核对 78ms
+ × tests/auditRegression20261109.test.ts > 后台任务恢复 > A5 遗留的非 deferred turn 不能占满窗口饿死 deferred turn 7ms
+   → 
+Invalid `db.conversation.create()` invocation in
+D:/Projects/hongmen/tests/auditRegression20261109.test.ts:105:48
+
+  102 it("A5 遗留的非 deferred turn 不能占满窗口饿死 deferred turn", async () => {
+  103   const { user } = await fixture();
+  104   const auth = await createSession(user.id);
+→ 105   const conversation = await db.conversation.create({
+          data: {
+            ownerUserId: "cmw9cqcx0000esg8oxp2a9zxo",
+            title: "饿死验证",
+        +   createRequestId: String
+          }
+        })
+
+Argument `createRequestId` is missing.
+ × tests/auditRegression20261109.test.ts > 账号与项目隔离 > B1 删除项目时清掉讨论附件在途/崩溃留下的孤儿文件 3ms
+   → 
+Invalid `db.conversation.create()` invocation in
+D:/Projects/hongmen/tests/auditRegression20261109.test.ts:122:48
+
+  119 it("B1 删除项目时清掉讨论附件在途/崩溃留下的孤儿文件", async () => {
+  120   const { user, project } = await fixture();
+  121   const auth = await createSession(user.id);
+→ 122   const conversation = await db.conversation.create({
+          data: {
+            ownerUserId: "cmw9cqcx7000isg8o8p6txm2k",
+            title: "孤儿文件",
+            homeProjectId: "cmw9cqcx8000jsg8o144vakmz",
+            projects: {
+              create: {
+                projectId: "cmw9cqcx8000jsg8o144vakmz"
+              }
+            },
+        +   createRequestId: String
+          }
+        })
+
+Argument `createRequestId` is missing.
+stdout | tests/auditRegression20261109.test.ts > 长时间和大数据 > D2 500 张卡片时确认事务内的上下文读取不超过事务预算
+[audit] readCopilotContext 500 cards: 301ms
+
+ × tests/auditRegression20261109.test.ts > 完整业务闭环 > C1 没有填写结果不能生成虚构的复盘卡 26ms
+   → promise resolved "{ …(21) }" instead of rejecting
+ × tests/auditRegression20261109.test.ts > 完整业务闭环 > C3 模板成果不能把已取代的事实写成当前事实 26ms
+   → expected '# 排查项目｜项目周报\n\n> 由忆程 ProjectMemo 基于 2…' not to contain '**旧方案使用关键词检索**'
+ ✓ tests/auditRegression20261109.test.ts > 长时间和大数据 > D2 500 张卡片时确认事务内的上下文读取不超过事务预算 522ms
+ × tests/auditRegression20261109.test.ts > 提醒与时间边界 > E6 截止日期按北京时间解释，不依赖服务器时区 7ms
+   → expected '2026-11-10T23:59:59.000Z' to be '2026-11-10T15:59:59.000Z' // Object.is equality
+ × tests/auditRegression20261109.test.ts > 部署与恢复能力 > F7 磁盘写满时不留下半截文件，并返回中文可操作错误 11ms
+   → expected [ Array(1) ] to deeply equal []
+ × tests/auditRegression20261109.test.ts > 部署与恢复能力 > F8 PDF 工具缺失时错误是简体中文且不暴露内部路径 22ms
+   → expected 'PDF extractor unavailable: spawn C:\U…' to match /[一-龥]/
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/auditRegression20261109.test.ts > 后台任务恢复 > A3 进程在 Capture 处理中被杀后，同 requestId 重试能接续而不是永远 409
+Error: 相同 requestId 的记录仍在处理中，请稍后按原 ID 重试
+ ❯ waitForExistingCaptureRun lib/services/captureService.ts:186:9
+    184|     await new Promise<void>((resolve) => setTimeout(resolve, 25));
+    185|   }
+    186|   throw new AppError("CAPTURE_IN_PROGRESS", "相同 requestId 的记录仍在处理中，请稍后…
+       |         ^
+    187| }
+    188|
+ ❯ tests/auditRegression20261109.test.ts:81:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'CAPTURE_IN_PROGRESS', status: 409, details: undefined }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  tests/auditRegression20261109.test.ts > 后台任务恢复 > A5 遗留的非 deferred turn 不能占满窗口饿死 deferred turn
+PrismaClientValidationError: 
+Invalid `db.conversation.create()` invocation in
+D:/Projects/hongmen/tests/auditRegression20261109.test.ts:105:48
+
+  102 it("A5 遗留的非 deferred turn 不能占满窗口饿死 deferred turn", async () => {
+  103   const { user } = await fixture();
+  104   const auth = await createSession(user.id);
+→ 105   const conversation = await db.conversation.create({
+          data: {
+            ownerUserId: "cmw9cqcx0000esg8oxp2a9zxo",
+            title: "饿死验证",
+        +   createRequestId: String
+          }
+        })
+
+Argument `createRequestId` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ tests/auditRegression20261109.test.ts:105:26
+    103|     const { user } = await fixture();
+    104|     const auth = await createSession(user.id);
+    105|     const conversation = await db.conversation.create({ data: { ownerU…
+       |                          ^
+    106|     const base = Date.now() - 3_600_000;
+    107|     for (let i = 0; i < 30; i++) await db.conversationTurn.create({ da…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { clientVersion: '7.8.0' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  tests/auditRegression20261109.test.ts > 账号与项目隔离 > B1 删除项目时清掉讨论附件在途/崩溃留下的孤儿文件
+PrismaClientValidationError: 
+Invalid `db.conversation.create()` invocation in
+D:/Projects/hongmen/tests/auditRegression20261109.test.ts:122:48
+
+  119 it("B1 删除项目时清掉讨论附件在途/崩溃留下的孤儿文件", async () => {
+  120   const { user, project } = await fixture();
+  121   const auth = await createSession(user.id);
+→ 122   const conversation = await db.conversation.create({
+          data: {
+            ownerUserId: "cmw9cqcx7000isg8o8p6txm2k",
+            title: "孤儿文件",
+            homeProjectId: "cmw9cqcx8000jsg8o144vakmz",
+            projects: {
+              create: {
+                projectId: "cmw9cqcx8000jsg8o144vakmz"
+              }
+            },
+        +   createRequestId: String
+          }
+        })
+
+Argument `createRequestId` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ tests/auditRegression20261109.test.ts:122:26
+    120|     const { user, project } = await fixture();
+    121|     const auth = await createSession(user.id);
+    122|     const conversation = await db.conversation.create({ data: { ownerU…
+       |                          ^
+    123|       projects: { create: { projectId: project.id } } } });
+    124|     const orphan = await saveFileToStorage("conversation-" + conversat…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { clientVersion: '7.8.0' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  tests/auditRegression20261109.test.ts > 完整业务闭环 > C1 没有填写结果不能生成虚构的复盘卡
+AssertionError: promise resolved "{ …(21) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "completedAt": 2026-11-09T14:23:45.656Z,
++   "createdAt": 2026-11-09T14:23:45.648Z,
++   "dedupeKey": null,
++   "dependencyVersion": 1,
++   "description": "",
++   "dueAt": null,
++   "estimatedMinutes": null,
++   "id": "cmw9cqcxc000psg8o7xb0hnfb",
++   "isSimulated": false,
++   "priority": 3,
++   "projectId": "cmw9cqcxb000nsg8o4040f7kl",
++   "resultCard": {
++     "archivedAt": null,
++     "attachmentId": null,
++     "captureId": "51c17c94-04d8-437c-ae2e-c8a3e7a1b58c",
++     "createdAt": 2026-11-09T14:23:45.655Z,
++     "id": "a9a95773-fc24-4c57-85ef-24756c3bdf31",
++     "importance": 3,
++     "keywords": [
++       "项目记录",
++     ],
++     "nextActions": [
++       "提炼本条记录中的关键决策",
++       "补充下一步可执行动作",
++     ],
++     "projectId": "cmw9cqcxb000nsg8o4040f7kl",
++     "relatedTasks": [],
++     "summary": "完成行动并记录结果",
++     "title": "完成行动并记录结果",
++     "type": "reflection",
++   },
++   "resultCardId": "a9a95773-fc24-4c57-85ef-24756c3bdf31",
++   "resultText": "完成行动并记录结果",
++   "run": {
++     "confirmedAt": null,
++     "conversationId": null,
++     "createdAt": 2026-11-09T14:23:45.665Z,
++     "durationMs": 14,
++     "externalRequestId": null,
++     "fallbackReason": null,
++     "id": "cmw9cqcxt000qsg8ojiclda10",
++     "projectId": "cmw9cqcxb000nsg8o4040f7kl",
++     "provider": "mock",
++     "resultJson": null,
++     "runType": "ACTION",
++     "status": "SUCCESS",
++     "trace": {
++       "actionId": "cmw9cqcxc000psg8o7xb0hnfb",
++       "linkedCardIds": [],
++       "resultCardId": "a9a95773-fc24-4c57-85ef-24756c3bdf31",
++       "rule": "completed_action_creates_reflection_card",
++     },
++     "turnId": null,
++   },
++   "sourceCardId": null,
++   "sourceInterventionId": null,
++   "stateRefreshPending": false,
++   "status": "DONE",
++   "title": "跑一次回归",
++   "updatedAt": 2026-11-09T14:23:45.656Z,
+  }
+
+ ❯ tests/auditRegression20261109.test.ts:136:81
+    134|     const { project } = await fixture();
+    135|     const action = await db.actionItem.create({ data: { projectId: pro…
+    136|     await expect(updateProjectAction(project.id, action.id, { status: …
+       |                                                                                 ^
+    137|     expect((await db.actionItem.findUniqueOrThrow({ where: { id: actio…
+    138|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  tests/auditRegression20261109.test.ts > 完整业务闭环 > C3 模板成果不能把已取代的事实写成当前事实
+AssertionError: expected '# 排查项目｜项目周报\n\n> 由忆程 ProjectMemo 基于 2…' not to contain '**旧方案使用关键词检索**'
+
+- Expected
++ Received
+
+- **旧方案使用关键词检索**
++ # 排查项目｜项目周报
++
++ > 由忆程 ProjectMemo 基于 2 张知识卡片生成
++
++ ## 本周目标
++ 验证恢复
++
++ ## 本周进展
++ - **旧方案使用关键词检索**：旧方案使用关键词检索
++ - **新方案改用混合检索**：新方案改用混合检索
++
++ ## 任务与材料
++ - 暂无新增任务。
++
++ ## 风险与问题
++ - 当前未记录显著风险。
++
++ ## 下周行动
++ 1. 继续沉淀项目记录并明确下一步。
+
+ ❯ tests/auditRegression20261109.test.ts:148:34
+    146|     const artifact = await generateArtifact(project.id, "weekly_report…
+    147|     expect(artifact.content).toContain("新方案改用混合检索");
+    148|     expect(artifact.content).not.toContain("**旧方案使用关键词检索**");
+       |                                  ^
+    149|   });
+    150| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  tests/auditRegression20261109.test.ts > 提醒与时间边界 > E6 截止日期按北京时间解释，不依赖服务器时区
+AssertionError: expected '2026-11-10T23:59:59.000Z' to be '2026-11-10T15:59:59.000Z' // Object.is equality
+
+Expected: "2026-11-10T15:59:59.000Z"
+Received: "2026-11-10T23:59:59.000Z"
+
+ ❯ tests/auditRegression20261109.test.ts:179:47
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  tests/auditRegression20261109.test.ts > 部署与恢复能力 > F7 磁盘写满时不留下半截文件，并返回中文可操作错误
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "cmw9cqddg00t4sg8ouq5hwtes_cfa3181c1ee3_1794234226233.pdf",
++ ]
+
+ ❯ tests/auditRegression20261109.test.ts:198:89
+    196|     await processAttachmentUpload({ projectId: project.id, fileName: "…
+    197|     expect(caught).toBeTruthy();
+    198|     expect(fs.readdirSync(getAttachmentStorageDir()).filter(name => !b…
+       |                                                                                         ^
+    199|     const response = apiError(caught);
+    200|     expect(response.status).toBe(507);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  tests/auditRegression20261109.test.ts > 部署与恢复能力 > F8 PDF 工具缺失时错误是简体中文且不暴露内部路径
+AssertionError: expected 'PDF extractor unavailable: spawn C:\U…' to match /[一-龥]/
+
+- Expected:
+/[一-龥]/
+
++ Received:
+"PDF extractor unavailable: spawn C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\projectmemo-audit-IOk5eK\\missing-pdftotext ENOENT"
+
+ ❯ tests/auditRegression20261109.test.ts:211:48
+    209|       const { attachment } = await processAttachmentUpload({ projectId…
+    210|       expect(attachment.extractionStatus).toBe("FAILED");
+    211|       expect(attachment.extractionError ?? "").toMatch(chinese);
+       |                                                ^
+    212|       expect(attachment.extractionError ?? "").not.toMatch(/ENOENT|spa…
+    213|     } finally {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 2 passed (10)
+   Start at  22:23:02
+   Duration  43.29s (transform 1.70s, setup 0ms, import 3.12s, tests 38.86s, environment 0ms)
+

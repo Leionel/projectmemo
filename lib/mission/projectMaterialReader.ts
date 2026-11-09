@@ -26,7 +26,7 @@ export async function readReviewMaterial(projectId: string, id: string, tx: Tx =
     const states = await getTemporalSearchStates(projectId, [card.id]);
     const text = (card.title + "\n" + card.summary).slice(0, 12000);
     return { source: { id, kind: "PROJECT", entityType: "CARD", revision: hash!, hash: hash!, text,
-      temporalState: states.get(card.id)?.state ?? "UNKNOWN", knowledgeClass: "PROJECT_OBSERVATION", observedAt: card.createdAt.toISOString() } as Source,
+      temporalState: states.get(card.id)?.topLevelState ?? "UNKNOWN", knowledgeClass: "PROJECT_OBSERVATION", observedAt: card.createdAt.toISOString() } as Source,
       title: card.title, readScope: "SUMMARY" as const, coverage: { loadedCharacters: text.length, totalCharacters: card.title.length + card.summary.length + 1, truncated: text.length < card.title.length + card.summary.length + 1, extractionStatus: "SUCCESS" } };
   }
   if (id.startsWith("artifact:")) {

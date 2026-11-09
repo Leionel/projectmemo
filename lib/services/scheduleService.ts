@@ -158,12 +158,21 @@ async function confirmedBlocksForUser(
     },
     select: { blocks: { select: { startAt: true, endAt: true, actionId: true, planId: true } } },
   });
-  return plans.flatMap((plan) => plan.blocks);
+  const blocks = plans.flatMap((plan) => plan.blocks);
+  if (blocks.length === 0) return blocks;
+  // 已完成或已取消的行动不再占用时间，否则这段时间永远排不进新行动。
+  const closed = await client.actionItem.findMany({
+    where: { id: { in: [...new Set(blocks.map((block) => block.actionId))] }, status: { in: ["DONE", "CANCELLED"] } },
+    select: { id: true },
+  });
+  const closedIds = new Set(closed.map((action) => action.id));
+  return blocks.filter((block) => !closedIds.has(block.actionId));
 }
 
 async function scheduledActionIdsForUser(userId: string): Promise<Set<string>> {
   const rows = await db.scheduleBlock.findMany({
-    where: { plan: { userId, status: "CONFIRMED" } },
+    // 只看还没结束的时段：错过了安排、行动仍未完成时必须能重新安排。
+    where: { plan: { userId, status: "CONFIRMED" }, endAt: { gt: new Date() } },
     select: { actionId: true },
   });
   return new Set(rows.map((row) => row.actionId));
@@ -481,6 +490,14 @@ export async function confirmSchedulePlan(projectId: string, planId: string, inp
     }
 
     const conflicting = await confirmedBlocksForUser(actor.userId, plan.rangeStart, plan.rangeEnd, plan.id, tx);
+    // 两份草稿都含同一行动时，后确认的一份不能再占一个时段；两份的日期范围可以完全不重叠，所以按行动查。
+    const repeated = await tx.scheduleBlock.findFirst({
+      where: { actionId: { in: blocks.map((block) => block.actionId) }, endAt: { gt: new Date() }, planId: { not: plan.id }, plan: { userId: actor.userId, status: "CONFIRMED" } },
+      select: { id: true },
+    });
+    if (repeated) {
+      throw new AppError("SCHEDULE_ACTION_CHANGED", "同一行动已在另一份已确认安排中，请重新预览", 409);
+    }
     for (const block of blocks) {
       const conflict = conflicting.find((item) => item.startAt < block.endAt && item.endAt > block.startAt);
       if (conflict) {

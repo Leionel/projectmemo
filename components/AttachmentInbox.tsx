@@ -137,7 +137,7 @@ export function AttachmentInbox({ projectId, enabled, onMaterialSaved }: { proje
       if (!response.ok) {
         const reason = readError(data, "附件上传失败");
         throw new Error((data as { error?: { code?: string } } | null)?.error?.code === "ATTACHMENT_INVALID"
-          ? `这个文件没有被接受：忆程支持 PDF、图片及开启实验功能后的 CSV/JSON 指标文件，并按文件内容校验类型（服务端原因：${reason}）`
+          ? `这个文件没有被接受：${reason}。忆程支持 PDF、图片，以及开启实验功能后的 CSV/JSON 指标文件。`
           : reason);
       }
       const attachment = data.attachment as Attachment;

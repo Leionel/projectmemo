@@ -58,6 +58,7 @@ import { apiError } from "@/lib/api";
 import { ABANDONED_EXTERNAL_RUN_MS, reserveExternalAgentRun } from "@/lib/repositories/agent";
 import { confirmSchedulePlan, previewSchedule } from "@/lib/services/scheduleService";
 import { shanghaiDay } from "@/lib/time/shanghai";
+import { discoverMaterialPointers } from "@/lib/conversation/toolAdapter";
 
 afterEach(() => vi.restoreAllMocks());
 afterAll(async () => {
@@ -204,6 +205,38 @@ describe("第二轮：外部调用与重复安排", () => {
   it("N5 北京时间日界", () => {
     expect(shanghaiDay(new Date("2026-11-09T16:30:00.000Z"))).toBe("2026-11-10");
     expect(shanghaiDay(new Date("2026-11-09T15:30:00.000Z"))).toBe("2026-11-09");
+  });
+});
+
+describe("第三轮：窗口与有效期", () => {
+  it("P1 行动很多时，讨论先拿到未完成的行动", async () => {
+    const { user, project } = await fixture();
+    for (let i = 0; i < 14; i++) await db.actionItem.create({ data: { projectId: project.id, title: `早期已完成 ${i}`, description: "", priority: 3, status: "DONE" } });
+    const open = await db.actionItem.create({ data: { projectId: project.id, title: "现在要做的事", description: "", priority: 3 } });
+    const pointers = await discoverMaterialPointers({ userId: user.id, sessionId: (await createSession(user.id)).session.id } as never, [project.id], []);
+    expect(pointers.map(pointer => pointer.sourceId)).toContain("action:" + open.id);
+  });
+
+  it("P2 被取代的记录不占成果窗口", async () => {
+    const { project } = await fixture();
+    const at = (index: number) => new Date(Date.now() - (100 - index) * 60_000);
+    const make = async (title: string, index: number) => db.knowledgeCard.update({ where: { id: (await card(project.id, title)).id }, data: { createdAt: at(index) } });
+    await make("最早的有效记录", 0);
+    const replaced = [];
+    for (let i = 0; i < 4; i++) replaced.push(await make(`旧结论 ${i}`, 1 + i));
+    for (let i = 0; i < 20; i++) {
+      const current = await make(`新记录 ${i}`, 10 + i);
+      if (i < 4) await db.cardRelation.create({ data: { currentCardId: current.id, relatedCardId: replaced[i].id, relationType: "SUPERSEDES", reason: "替换", score: 100,
+        confirmed: true, confirmedAt: new Date(), validFrom: new Date() } });
+    }
+    const artifact = await generateArtifact(project.id, "weekly_report");
+    expect(artifact.content).toContain("最早的有效记录");
+  });
+
+  it("P3 委托里创建待办的批准不再 10 分钟过期", () => {
+    const runner = fs.readFileSync(path.join(process.cwd(), "lib/mission/runner.ts"), "utf8");
+    expect(runner).toMatch(/INTERNAL_APPROVAL_TTL_MS=24\*60\*60\*1000/);
+    expect(runner).toMatch(/Date\.now\(\)\+INTERNAL_APPROVAL_TTL_MS\);const proposal=\{tool:"create_action"/);
   });
 });
 

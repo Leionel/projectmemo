@@ -13,7 +13,7 @@ test("fixed metric job uses its own approval and receipt; correction makes it hi
   await page.screenshot({path:testInfo.outputPath("metric-approval.png"),fullPage:true});
   const approvalReply=page.waitForResponse(r=>r.request().method()==="POST"&&r.url().includes("/approvals/"));
   await page.getByRole("button",{name:"批准固定核算",exact:true}).click();expect((await approvalReply).ok()).toBe(true);fixture("execute",f.projectId);
-  await expect(page.getByText("固定脚本核算已完成。",{exact:true})).toBeVisible({timeout:15000});
+  await expect(page.getByText("核算已完成。",{exact:true})).toBeVisible({timeout:15000});
   await expect(page.getByText(/同条件差值：-0.1/)).toBeVisible();
   await page.screenshot({path:testInfo.outputPath("metric-receipt.png"),fullPage:true});
   fixture("revoke",f.projectId);await page.reload();await page.getByText(/公开资料与获取记录（/).click();await expect(page.getByText(/论文元数据与摘要，未读取全文 · 来源已变化/)).toBeVisible();

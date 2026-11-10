@@ -48,7 +48,7 @@ export async function discoverMaterialPointers(actor: ConversationActor, project
       const revision = await sourceHash(projectId, sourceId);
       if (revision) pointers.push({ projectId, sourceId, revision, title: c.title + (sourceId.startsWith("attachment:") ? " · 原文件" : " · 原始记录") });
     }
-    const actions = await db.actionItem.findMany({ where: { projectId, isSimulated: false }, orderBy: { id: "asc" }, take: 12, select: { id: true, title: true } });
+    const actions = await currentActions(projectId, 12);
     // Unknown summary lineage must not cut off a fresh investigation of an accessible original.
     // Neutral metadata can locate the original without reusing the summary's claims or title.
     const originalCandidates = await db.knowledgeCard.findMany({ where: { projectId }, orderBy: { createdAt: "desc" }, take: 16, select: { captureId: true, attachmentId: true } });
@@ -66,6 +66,14 @@ export async function discoverMaterialPointers(actor: ConversationActor, project
   const allowedPointers = [];
   for (const p of pointers) if ((await sourceUse(actor.userId, p.projectId, p.sourceId, db, { conversationId: actor.conversationId, ...(actor.missionId ? { missionId: actor.missionId } : {}) })).state === "ALLOWED") allowedPointers.push(p);
   return [...new Map(allowedPointers.map(p => [p.projectId + "/" + p.sourceId, p])).values()].slice(0, 64);
+}
+
+/** 窗口有限时，未完成且最近动过的行动优先；有余量才补最近结束的。 */
+async function currentActions(projectId: string, take: number) {
+  const select = { id: true, title: true, status: true } as const, orderBy = [{ updatedAt: "desc" as const }, { id: "asc" as const }];
+  const open = await db.actionItem.findMany({ where: { projectId, isSimulated: false, status: { in: ["TODO", "DOING"] } }, orderBy, take, select });
+  if (open.length >= take) return open;
+  return [...open, ...await db.actionItem.findMany({ where: { projectId, isSimulated: false, status: { in: ["DONE", "CANCELLED"] } }, orderBy, take: take - open.length, select })];
 }
 
 /** Uses user/project readers directly; no synthetic mission actor and no write tool is exposed. */
@@ -110,7 +118,7 @@ export async function readWorkspaceTool(actor: ConversationActor, raw: z.infer<t
       const revision = await sourceHash(call.projectId, call.sourceId);
       if (revision !== call.revision) throw new AppError("SOURCE_CHANGED", "原项目已有修订，请重新定位", 409);
       const project = await db.project.findUniqueOrThrow({ where: { id: call.projectId }, select: { title: true, goal: true, deadline: true } });
-      const actions = await db.actionItem.findMany({ where: { projectId: call.projectId, isSimulated: false }, take: 8, orderBy: { id: "asc" }, select: { id: true, title: true, status: true } });
+      const actions = await currentActions(call.projectId, 8);
       for (let i = actions.length - 1; i >= 0; i--) if ((await sourceUse(actor.userId, call.projectId, "action:" + actions[i].id, db, { conversationId: actor.conversationId, ...(actor.missionProjectId === call.projectId ? { missionId: actor.missionId } : {}) })).state !== "ALLOWED") actions.splice(i, 1);
       data = { project, actions }; source(call.sourceId, revision!, project.title, JSON.stringify(data), "STRUCTURED", "CURRENT");
       coverage = { complete: false, description: "原项目目标与最多8项行动，不代表全部资料" };

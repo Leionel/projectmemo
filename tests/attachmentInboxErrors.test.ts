@@ -113,7 +113,7 @@ it("登录失效（401）时展示服务端“登录状态已失效”文案并�
   expect(alert.textContent).not.toContain("读取附件列表失败");
 });
 
-it("上传被服务端以 ATTACHMENT_INVALID 拒绝时给出专门中文说明与服务端原因", async () => {
+it("上传被服务端以 ATTACHMENT_INVALID 拒绝时给出专门中文说明与原因", async () => {
   handler = async (url, init) => {
     if (url === LIST_URL && (!init?.method || init.method === "GET")) return jsonResponse([]);
     if (url === LIST_URL && init?.method === "POST") {
@@ -132,7 +132,7 @@ it("上传被服务端以 ATTACHMENT_INVALID 拒绝时给出专门中文说明�
 
   const alert = await screen.findByRole("alert");
   expect(alert.textContent).toContain("这个文件没有被接受");
-  expect(alert.textContent).toContain("服务端原因：文件内容与扩展名不符");
+  expect(alert.textContent).toContain("文件内容与扩展名不符");
   expect(callsTo(LIST_URL, "POST")).toHaveLength(1);
 });
 

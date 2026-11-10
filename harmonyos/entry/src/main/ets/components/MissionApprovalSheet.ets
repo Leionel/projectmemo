@@ -20,7 +20,7 @@ export struct MissionApprovalSheet {
   calendarFields(payload:MissionCalendarPayload) {
     Column({space:4}) {
       Text(this.when(payload)).fontSize(13)
-      if(payload.description){Text('外发描述：'+payload.description).fontSize(13).copyOption(CopyOptions.LocalDevice)}
+      if(payload.description){Text('日程描述：'+payload.description).fontSize(13).copyOption(CopyOptions.LocalDevice)}
       if(payload.recurrence){Text('重复：'+payload.recurrence).fontSize(13)}
       ForEach(payload.attendees??[],(person:MissionCalendarAttendee)=>{Text('参与人：'+(person.email??person.openId??'未知')).fontSize(13)},(person:MissionCalendarAttendee)=>person.email??person.openId??'')
       ForEach(payload.attachments??[],(token:string)=>{Text('附件：'+token).fontSize(13).copyOption(CopyOptions.LocalDevice)},(token:string)=>token)
@@ -47,7 +47,7 @@ export struct MissionApprovalSheet {
         Text(this.approval.proposal.payload?.title ?? this.approval.proposal.args.title).fontSize(18)
         this.calendarFields(this.approval.proposal.payload??{})
         Text('账号：' + (this.approval.proposal.target?.accountName ?? this.approval.proposal.target?.accountEmail ?? '已连接账号') + '；日历：' + (this.approval.proposal.target?.calendarSummary ?? this.approval.proposal.target?.calendarId ?? '未知')).fontSize(13)
-        Text('写入前逐次核对授权与租约；回包丢失时只查询原效果，不自动再创建。').fontColor(PMColors.INK_SECONDARY).fontSize(13)
+        Text('写入前会再核对一次授权；结果不确定时只查询，不会重复创建。').fontColor(PMColors.INK_SECONDARY).fontSize(13)
       } else {
         Text(this.approval.proposal.args.title).fontSize(18)
         Text(this.approval.proposal.args.description ?? '')
@@ -64,12 +64,10 @@ export struct MissionApprovalSheet {
           Text('单位：' + (this.approval.proposal.args.job!.left.unit ?? '未知') + ' / ' + (this.approval.proposal.args.job!.right.unit ?? '未知')).fontSize(12)
           Text('时间窗口：' + (this.approval.proposal.args.job!.left.period ?? '未知') + ' / ' + (this.approval.proposal.args.job!.right.period ?? '未知')).fontSize(12)
           Text('指标方向：' + (this.approval.proposal.args.job!.left.direction ?? '未知') + ' / ' + (this.approval.proposal.args.job!.right.direction ?? '未知')).fontSize(12)
-          Text('镜像：' + this.approval.proposal.args.job!.image).fontSize(12).copyOption(CopyOptions.LocalDevice)
-          Text('固定脚本：' + this.approval.proposal.args.job!.scriptHash).fontSize(12).copyOption(CopyOptions.LocalDevice)
         }
       }
-      if(this.approval.proposal.tool==='create_calendar_event'||this.approval.proposal.tool==='create_calendar_events'){Text(this.approval.proposal.compensationPolicy==='RECHECK_THEN_DELETE_CREATED_EVENTS'?'批准包含上述创建、参与人添加和失败补偿删除；补偿前重新读取核对，发现变化、停止或撤权则保留待核对。不发送参与人通知。先读后删与飞书编辑不原子互斥，核对后发生的编辑仍可能被删除。':'本提案不包含自动删除许可。').fontColor(PMColors.INK_SECONDARY).fontSize(13)}
-      Text(this.approval.proposal.tool === 'verify_experiment_metrics' ? '批准后在无网、只读副本、非root容器中重算差值，CPU 0.5核 / 内存64MB / 最长8秒；不是训练或复现实验。' : this.approval.proposal.tool === 'create_calendar_event' ? '批准后只在上述账号与日历创建一条日程，并完成原对象回读；外部创建不等于现实目标达成。' : this.approval.proposal.tool === 'create_calendar_events' ? '批准后按顺序创建本批日程，按上述范围处理失败，保留部分结果与待核对回执。' : '批准后由服务端执行，并在步骤中返回行动回执。创建行动仍是待办，完成后需记录实际结果。').fontColor(PMColors.INK_SECONDARY)
+      if(this.approval.proposal.tool==='create_calendar_event'||this.approval.proposal.tool==='create_calendar_events'){Text(this.approval.proposal.compensationPolicy==='RECHECK_THEN_DELETE_CREATED_EVENTS'?'如果中途失败，会删除本次已创建的日程，期间你在飞书里对这些日程的修改也可能丢失。不发送参与人通知。':'失败时不会自动删除已创建的日程。').fontColor(PMColors.INK_SECONDARY).fontSize(13)}
+      Text(this.approval.proposal.tool === 'verify_experiment_metrics' ? '批准后只重算所选记录的差值，不联网；不是训练或复现实验。' : this.approval.proposal.tool === 'create_calendar_event' ? '批准后只在上述账号与日历创建一条日程。' : this.approval.proposal.tool === 'create_calendar_events' ? '批准后按顺序创建这批日程。' : '批准后会创建这条待办，完成后记得记录实际结果。').fontColor(PMColors.INK_SECONDARY)
       if (this.expired()) {
         Text('提案已过期，请返回委托更新依据并重新预览。').fontSize(13).fontColor(PMColors.WARNING)
           .padding({ left: 12, right: 12, top: 10, bottom: 10 }).borderRadius(13).backgroundColor(PMColors.WARNING_LIGHT).width('100%')

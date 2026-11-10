@@ -45,13 +45,18 @@ async function loadArtifactContext(projectId: string, episodeId?: string, userId
   const totalCards = await db.knowledgeCard.count({ where: { projectId, ...(scopedCardIds ? { id: { in: scopedCardIds } } : {}) } });
   const candidates = (await db.knowledgeCard.findMany({
     where: { projectId, ...(scopedCardIds ? { id: { in: scopedCardIds } } : {}) },
-    orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 24,
-  })).reverse();
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: scopedCardIds ? 24 : 96,
+  }));
   const rawCards = [] as typeof candidates;
   // 检查点是冻结的历史快照；实时成果不把已被取代的事实写成当前事实。
   const temporal = scopedCardIds ? new Map() : await getTemporalSearchStates(projectId, candidates.map(card => card.id));
   const superseded = candidates.filter(card => temporal.get(card.id)?.status === "SUPERSEDED").length;
-  for (const card of candidates) if (temporal.get(card.id)?.status !== "SUPERSEDED" && (!userId || (await sourceUse(userId, projectId, "card:" + card.id)).state === "ALLOWED")) rawCards.push(card);
+  // 多取一些再筛：被取代或不可用的记录不占窗口，最终仍是最近 24 条有效记录，按时间正序。
+  for (const card of candidates) {
+    if (rawCards.length >= 24) break;
+    if (temporal.get(card.id)?.status !== "SUPERSEDED" && (!userId || (await sourceUse(userId, projectId, "card:" + card.id)).state === "ALLOWED")) rawCards.push(card);
+  }
+  rawCards.reverse();
   if (!rawCards.length) throw new AppError("NO_KNOWLEDGE_CARDS", "请先输入至少一条项目记录，再生成成果", 400);
   const sources = await Promise.all(rawCards.map(async card => {
     const frozen = scopedSourceRefs?.find(ref => ref.cardId === card.id);

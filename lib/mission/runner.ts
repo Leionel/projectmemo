@@ -47,6 +47,8 @@ import { deploymentTools } from "./deploymentTools";
 import type { DeploymentTransport } from "@/lib/sensing/deploymentTransport";
 import { calendarWriteTools } from "./tools/calendarWriteTools";
 import { commitApprovedCalendarEvent, commitApprovedCalendarEvents } from "./calendarWriteService";
+/** 只写本项目数据的提案（创建待办）。外部写入仍是 10 分钟。 */
+const INTERNAL_APPROVAL_TTL_MS=24*60*60*1000;
 export type CalendarWriteDependencies = { fetcher?: typeof fetch };
 export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;browser?:BrowserDependencies;calendar?:CalendarDependencies;calendarWrite?:CalendarWriteDependencies;repository?:CiTransport;deployment?:DeploymentTransport;document?:DocumentExtractor;sandbox?:DockerCommand;academic?:typeof fetch;judge?:ClaimJudge;onClaim?:()=>void}={}){
  const m=await claimMission(options.workerId??randomUUID(),options.id);if(!m)return false;
@@ -236,7 +238,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    }
    if(step!.toolName==="propose_action"){
     phase="VERIFY";await validateSources(m.projectId,step!.readSetJson as unknown as Source[],tx,m.id);phase="APPROVAL";
-    const expiresAt=new Date(Date.now()+600000);const proposal={tool:"create_action",toolVersion:"1",args:step!.canonicalInputJson,ownerUserId:m.ownerUserId,projectId:m.projectId,planRevision:m.planRevision,contextVersion:m.contextVersion,constraintsVersion:current.constraintsVersion,readSet:step!.readSetJson,expiresAt:expiresAt.toISOString()};
+    const expiresAt=new Date(Date.now()+INTERNAL_APPROVAL_TTL_MS);const proposal={tool:"create_action",toolVersion:"1",args:step!.canonicalInputJson,ownerUserId:m.ownerUserId,projectId:m.projectId,planRevision:m.planRevision,contextVersion:m.contextVersion,constraintsVersion:current.constraintsVersion,readSet:step!.readSetJson,expiresAt:expiresAt.toISOString()};
     await tx.agentMissionApproval.create({data:{missionId:m.id,stepId:step!.id,proposalJson:json(proposal),proposalHash:jsonHash(proposal),expectedPlanRevision:m.planRevision,readSetJson:json(step!.readSetJson),expiresAt}});
     await tx.agentMissionStep.update({where:{id:step!.id},data:{status:"WAITING_APPROVAL",effectKey:`mission:${m.id}:step:${step!.id}`}});
     await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...current.planJson as object,automaticContinuation:null})}});

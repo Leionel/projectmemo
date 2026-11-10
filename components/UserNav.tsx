@@ -169,11 +169,11 @@ export function UserNav({ isMenuItem = false, liveLlm = false }: { isMenuItem?: 
               href="/settings/model"
               prefetch={false}
               onClick={() => setMenuOpen(false)}
-              className="focus-ring flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-[var(--ink-soft)] transition hover:bg-[var(--paper-strong)] hover:text-[var(--teal)]"
+              className="focus-ring flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-[var(--ink-soft)] transition hover:bg-[var(--paper-strong)] hover:text-[var(--teal-strong)]"
             >
               <ShieldCheck size={14} /> 模型与安全
             </Link>
-            <ThemeToggle isMenuItem />
+            <ThemeToggle isMenuItem compact />
             <button
               onClick={handleLogout}
               disabled={loggingOut}

@@ -22,7 +22,6 @@ export struct MissionWorkPacketView {
   @Prop readAtText: string = '';
   onPrimaryAction: (action: WorkPacketActionView) => void = (action: WorkPacketActionView): void => {};
   @State showBlockers: boolean = false;
-  @State showTechnical: boolean = false;
 
   private statusText(): string {
     const stopped = this.packet.stopped;
@@ -117,7 +116,7 @@ export struct MissionWorkPacketView {
       if (!this.hasPacket) {
         Text(legacyPacketNotice()).fontSize(PMFontSize.SECONDARY).lineHeight(19).fontColor(PMColors.INK_SECONDARY)
       } else if (!this.packet.contractCompatible) {
-        Text(`服务端工作摘要版本无法识别（${this.packet.contractVersion !== '' ? this.packet.contractVersion : '未提供合同版本'} / schema ${this.packet.schemaVersion ?? '未知'}）；请更新客户端。原委托详情仍可用，不据此推断成功或下一步。`)
+        Text('当前版本读不了这份工作摘要，请更新应用。委托详情仍可查看。')
           .fontSize(PMFontSize.SECONDARY).lineHeight(19).fontColor(PMColors.WARNING)
       } else {
         Row({ space: 8 }) {
@@ -166,13 +165,6 @@ export struct MissionWorkPacketView {
             }, (blocker: WorkPacketBlockerView) => blocker.kind + ':' + blocker.code)
           }
         }
-        Row({ space: 8 }) {
-          Text('技术细节').fontSize(12).fontColor(PMColors.INK_TERTIARY).layoutWeight(1)
-          Text(this.showTechnical ? '收起 ⌃' : '展开 ⌄').fontSize(12).fontColor(PMColors.BRAND)
-        }.width('100%').height(36).alignItems(VerticalAlign.Center)
-          .onClick(() => { this.showTechnical = !this.showTechnical; })
-          .accessibilityText(`技术细节，${this.showTechnical ? '收起' : '展开'}`)
-        if (this.showTechnical) { this.TechnicalDetails() }
       }
     }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.MD)
       .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD)

@@ -1018,7 +1018,7 @@ export function nextSummary(view: WorkPacketNextView): string {
     const labels: Record<string, string> = {
       'USER_INPUT': '等你补充资料', 'USER_APPROVAL': '等你审阅提案', 'USER_RECHECK': '等你重新核对',
       'SYSTEM_WORKER': '等待原委托执行', 'SYSTEM_SETTLEMENT': '等待在途结算', 'SYSTEM_OBSERVATION': '等待观察',
-      'SYSTEM_LEASE': '等待租约', 'SYSTEM_RECHECK': '等待服务端重查', 'BUDGET_RESET': '等待额度恢复', 'NONE': '当前没有下一步'
+      'SYSTEM_LEASE': '等待执行', 'SYSTEM_RECHECK': '等待重新核对', 'BUDGET_RESET': '等待额度恢复', 'NONE': '当前没有下一步'
     };
     parts.push(labels[view.waitingOn] ?? view.waitingOn);
   } else {
@@ -1046,7 +1046,7 @@ export function waitingOnLabel(raw: string): string {
   const labels: Record<string, string> = {
     'USER_INPUT': '等你补充资料', 'USER_APPROVAL': '等你决定', 'USER_RECHECK': '等你核对',
     'SYSTEM_WORKER': '后台处理中', 'SYSTEM_SETTLEMENT': '等待结算', 'SYSTEM_OBSERVATION': '等待观察',
-    'SYSTEM_LEASE': '等待执行租约', 'SYSTEM_RECHECK': '等待重新核对', 'BUDGET_RESET': '等待额度恢复', 'NONE': '没有待处理动作'
+    'SYSTEM_LEASE': '等待执行', 'SYSTEM_RECHECK': '等待重新核对', 'BUDGET_RESET': '等待额度恢复', 'NONE': '没有待处理动作'
   };
   return labels[raw] ?? '待核对';
 }
@@ -1054,7 +1054,7 @@ export function waitingOnLabel(raw: string): string {
 export function blockerLabel(kind: string): string {
   const labels: Record<string, string> = {
     'AUTHORITY': '权限', 'WORK_STATE': '工作状态', 'STOP_REQUEST': '停止请求', 'BUDGET': '预算', 'SOURCE': '来源',
-    'APPROVAL': '提案', 'QUESTION': '原问题', 'LEASE': '租约', 'UNKNOWN_EFFECT': '未结算效果',
+    'APPROVAL': '提案', 'QUESTION': '原问题', 'LEASE': '执行中', 'UNKNOWN_EFFECT': '未结算效果',
     'FAILURE': '失败', 'DELEGATION': '委托责任', 'TIME_BOUNDARY': '有效边界'
   };
   return labels[kind] ?? '其他阻断';

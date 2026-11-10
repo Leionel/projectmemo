@@ -325,7 +325,8 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
           onSources={() => setSourceMessageId(m.id)}
           onBasis={() => setBasisMessageId(basisMessageId === m.id ? "" : m.id)}
           onCorrect={() => setCorrectionMessageId(m.id)}
-          onAsk={() => setReply(m)}/>
+          onAsk={() => setReply(m)}
+          onEdit={m.role === "USER" && !m.restricted ? () => { setReply(null); pending.current = null; setText(m.content); requestAnimationFrame(() => { const box = document.querySelector<HTMLTextAreaElement>('textarea[aria-label="与忆程讨论项目"]'); box?.focus(); }); } : undefined}/>
         {basisMessageId === m.id && <PriorityBasisPanel priorities={m.priorities} projects={view.linkedProjects}/>}
         {memoryMessageId === m.id && m.memoryUse && <MemoryUsePanel items={m.memoryUse.items}/>}
         {m.role === "ASSISTANT" && !m.restricted && <ConversationResearchView message={m} conversationId={view!.id} version={view!.version} onError={setError} onContinue={value => { setReply(m); setText(value); }}/>}

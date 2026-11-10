@@ -2050,8 +2050,8 @@ struct Index {
   }
 
   private llmModeTag(): string {
-    if (this.llmMode === 'openai-compatible') return '在线 API';
-    return this.llmMode === 'mock' ? '规则模式' : '未读取';
+    if (this.llmMode === 'openai-compatible') return '在线模型';
+    return this.llmMode === 'mock' ? '演示模式' : '未读取';
   }
 
   private llmModeTagColor(): ResourceColor {
@@ -2069,9 +2069,9 @@ struct Index {
       return '暂未读取到服务端模型配置';
     }
     if (this.llmMode === 'openai-compatible') {
-      return this.hasApiKey ? '在线 API · 密钥已配置' : '在线 API · 未配置密钥';
+      return this.hasApiKey ? '在线模型 · 已连接' : '在线模型 · 未配置';
     }
-    return '规则模式 · 无需模型 API';
+    return '演示模式';
   }
 
   private dataSyncStateColor(): ResourceColor {
@@ -2240,8 +2240,8 @@ struct Index {
           .fontSize(PMFontSize.SECONDARY)
           .fontWeight(FontWeight.Medium)
           .fontColor(PMColors.INK_SECONDARY)
-        this.InfoSheetRow('运行模式', this.llmMode === 'openai-compatible' ? '在线 API（OpenAI-compatible）' :
-          (this.llmMode === 'mock' ? '规则模式（无需模型 API）' : '暂未读取'), PMColors.INK_PRIMARY)
+        this.InfoSheetRow('运行模式', this.llmMode === 'openai-compatible' ? '在线模型' :
+          (this.llmMode === 'mock' ? '演示模式' : '暂未读取'), PMColors.INK_PRIMARY)
 
         Text('配置好之后，能否正常运行以「模型与连接」里最近一次运行结果为准。')
           .fontSize(PMFontSize.CAPTION)

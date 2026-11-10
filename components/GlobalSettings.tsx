@@ -103,11 +103,11 @@ export function GlobalSettings({ isMenuItem = false, inline = false }: { isMenuI
   </div>;
 
   const safetyRules = <div className="rounded-lg border border-[var(--rule)] bg-[var(--paper-strong)] p-4">
-    <p className="text-sm font-bold text-[var(--ink)]">强制安全规则（服务端保证，不可在此关闭）</p>
+    <p className="text-sm font-bold text-[var(--ink)]">始终生效的规则</p>
     <ul className="mt-2 space-y-1.5 text-xs leading-6 text-[var(--ink-soft)]">
-      <li>· 关键决策需用户确认：Agent 只提出候选，行动创建、重要修改由你批准后才生效；</li>
-      <li>· 证据不足保留未知：UNKNOWN 不当作 False，来源存在不等于结论成立；</li>
-      <li>· 项目隔离与来源保留：跨项目数据互不可见，原始记录与历史版本不被覆盖。</li>
+      <li>· 重要操作需要你确认：创建行动、重要修改都在你批准后才生效；</li>
+      <li>· 证据不足时保留“未知”，有来源不等于结论成立；</li>
+      <li>· 项目之间数据互不可见，原始记录和历史版本不会被覆盖。</li>
     </ul>
   </div>;
 
@@ -117,7 +117,7 @@ export function GlobalSettings({ isMenuItem = false, inline = false }: { isMenuI
               ) : !editable ? (
                 <div className="space-y-4">
                   <div className="rounded-lg border border-[var(--rule)] bg-[var(--paper-strong)] p-5 text-sm leading-7 text-[var(--ink-soft)]">
-                    当前运行模式：<strong className="text-[var(--ink)]">{!loaded ? "暂未读取" : settings.llmMode === "openai-compatible" ? "真实模型（OpenAI-compatible）" : "演示模式"}</strong>{loaded && hasApiKey && "，已配置密钥"}。线上或非本机环境仅展示当前模型状态，请通过部署环境变量配置模型，不会在浏览器中读取或保存 API Key。
+                    当前模型：<strong className="text-[var(--ink)]">{!loaded ? "暂未读取" : settings.llmMode === "openai-compatible" ? "在线模型，已连接" : "演示模式"}</strong>。模型由服务端统一配置，这里不需要填写。
                   </div>
                   {executabilityNote}
                   {safetyRules}

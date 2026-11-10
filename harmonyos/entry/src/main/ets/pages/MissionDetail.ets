@@ -737,10 +737,6 @@ struct MissionDetail {
               .fontSize(13).fontColor(PMColors.INK_PRIMARY).lineHeight(20)
           }.width('100%').alignItems(HorizontalAlign.Start).padding(12).backgroundColor(PMColors.WARNING_LIGHT).borderRadius(12)
           }
-          if (!this.isBudgetPause() && (this.mission.error?.code || this.mission.error?.phase)) {
-            Text(`技术诊断：${this.mission.error?.code ?? ''}${this.mission.error?.phase ? ' · 发生阶段：' + missionErrorPhaseLabel(this.mission.error!.phase) : ''}`)
-              .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
-          }
           if (this.mission.status === 'PAUSED' && this.missionUiEnabled) {
             Button(this.isBudgetPause() ? '加额度并继续' : this.mission.error?.code === 'SOURCE_CHANGED' ? '重新对比方案' : '继续原委托', { type: ButtonType.Normal }).width('100%').height(48).borderRadius(PMRadius.BUTTON)
               .backgroundColor(PMColors.BRAND).fontColor(PMColors.SURFACE).fontSize(15).fontWeight(FontWeight.Medium)
@@ -809,14 +805,6 @@ struct MissionDetail {
       ForEach(step.result?.sources ?? [], (source: MissionSource) => {
         this.SourceRow(source)
       }, (source: MissionSource) => source.id)
-      if (MissionProgressPresentation.rawDiagnostic(step) !== '') {
-        Text(this.showRawStep === step.id ? '收起技术诊断 ⌃' : '技术诊断（原始 JSON，可复制） ⌄').fontSize(12).fontColor(PMColors.INK_TERTIARY)
-          .onClick(() => { this.showRawStep = this.showRawStep === step.id ? '' : step.id; })
-        if (this.showRawStep === step.id) {
-          Text(MissionProgressPresentation.rawDiagnostic(step)).fontSize(11).fontColor(PMColors.INK_TERTIARY)
-            .copyOption(CopyOptions.LocalDevice).maxLines(12).lineHeight(17)
-        }
-      }
     }.width('100%').alignItems(HorizontalAlign.Start).padding({ top: 10, bottom: 12, left: 12, right: 12 })
       .backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(10)
   }
@@ -997,7 +985,7 @@ struct MissionDetail {
             ForEach(this.adoption.sourceManifest, (source: MissionSource) => {
               Text(`${this.knowledge(source.knowledgeClass ?? source.kind)} · ${source.id}\n${(source.excerpts ?? []).join('\n')}`).fontSize(13)
             }, (source: MissionSource) => source.id)
-            Text('归入后可由后续任务检索。确认归入不表示所有结论已证实，项目事实仍按原确认流程管理。')
+            Text('归入后，后续任务可以检索到这份成果；其中的结论仍需按原流程确认。')
             Button('确认归入项目成果').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.adopt(); })
             Button('返回任务').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.adoption = null; })
           } else if (this.mission.id !== '') {

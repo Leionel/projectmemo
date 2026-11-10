@@ -90,7 +90,7 @@ export struct MissionReadbackView {
     if (item.facts.some((fact: WorkPacketMaterialFactView) => fact.kind === 'BOUND')) { return '已绑定原委托，尚未找到后续引用'; }
     if (item.facts.some((fact: WorkPacketMaterialFactView) => fact.kind === 'ASSOCIATED')) { return '已关联原问题，尚未接续'; }
     if (item.facts.some((fact: WorkPacketMaterialFactView) => fact.kind === 'CANDIDATE')) { return '候选资料，等待核对'; }
-    return '已保存，当前窗口未找到使用位置（不等于从未使用）';
+    return '已保存，暂未找到使用位置';
   }
   private materialTone(item: WorkPacketMaterialView): string {
     const use = item.currentUse;
@@ -240,7 +240,7 @@ export struct MissionReadbackView {
                   Text(item.note).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
                 }.width('100%').alignItems(HorizontalAlign.Start).padding(8)
               }, (item: ReadbackProgressClass) => item.key)
-              Text('这是原步骤、草稿核对、行动与回执的投影；工具成功或用户说完成都不等于现实目标已达成。')
+              Text('步骤执行成功不代表现实目标已经达成。')
                 .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
             }
           }
@@ -248,7 +248,6 @@ export struct MissionReadbackView {
             this.SummaryRow('本次用量', '', (): void => { this.showSection = this.showSection === 'usage' ? '' : 'usage'; }, this.showSection === 'usage')
             if (this.showSection === 'usage') {
               Text(this.data.resourceUsage.summary).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_PRIMARY)
-              Text(`已记录输入 ${this.data.resourceUsage.inputTokens ?? '待核对'} token · 输出 ${this.data.resourceUsage.outputTokens ?? '待核对'} token`).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
               Text(this.data.resourceUsage.coverageNote).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
               Text(this.data.resourceUsage.costNote).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_PRIMARY)
               if (this.data.callCoverage !== undefined) {
@@ -278,11 +277,11 @@ export struct MissionReadbackView {
               ForEach(this.shownMaterials(), (item: WorkPacketMaterialView) => {
                 this.MaterialRow(item)
               }, (item: WorkPacketMaterialView) => `${item.sourceId}:${item.sourceHash}`)
-              Text('仅展示直接来源与有限历史；当前许可、历史留痕与独立支持是不同事实，引用不表示结论已核验。')
+              Text('这里只列出直接来源；被引用不代表结论已核验。')
                 .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
             }
           } else if (this.delta.materialsPresent) {
-            Text('有界窗口未返回资料使用记录；不等于从未使用。').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+            Text('暂未找到资料使用记录。').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
           }
           if (this.data.sourceConversation !== null) {
             Text('返回来源对话 ›').fontSize(13).fontColor(PMColors.BRAND).height(40)

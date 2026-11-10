@@ -55,7 +55,7 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
         operation: "SET" as const, quote: input.message, timezone: "Asia/Shanghai", admission: "LITERAL" as const };
       const admission = admitDirective(command);
       if (["DIRECT_APPLIED", "NEEDS_CLARIFICATION"].includes(admission.status)) {
-        if (c.scope === "PROJECT" && c.homeProjectId !== ctProject) throw new AppError("DIRECTIVE_SCOPE_CHANGED", "Instruction scope changed", 409);
+        if (c.scope === "PROJECT" && c.homeProjectId !== ctProject) throw new AppError("DIRECTIVE_SCOPE_CHANGED", "指令的适用范围已变化，请在对应项目的讨论里重新说明", 409);
         directiveAdmission = admission;
         const admitted = await admitDirectiveInTx(actor, command, tx, { conversationId: id, requestId: input.requestId });
         if (c.activeTurnId && admitted.events.length) {

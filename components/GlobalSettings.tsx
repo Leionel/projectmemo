@@ -94,11 +94,11 @@ export function GlobalSettings({ isMenuItem = false, inline = false }: { isMenuI
 
   // 模型「已配置」与「实际可执行」是两件事；这里没有实时探测结果，就不显示任何健康结论。
   const executabilityNote = <div className="rounded-lg border border-[var(--rule)] bg-[var(--paper-strong)] p-4">
-    <p className="text-sm font-bold text-[var(--ink)]">可执行性说明</p>
+    <p className="text-sm font-bold text-[var(--ink)]">使用说明</p>
     <ul className="mt-2 space-y-1.5 text-xs leading-6 text-[var(--ink-soft)]">
-      <li>· 模型已配置不等于可执行：连接可达、协议校验、工具权限与本次运行成功是独立状态；</li>
-      <li>· 本页不显示实时健康结论；最近一次真实执行结果以各委托的运行记录与错误码为准；</li>
-      <li>· 模型或网络异常时，委托会暂停并保留已执行步骤，不会伪造完成。</li>
+      <li>· 填好配置不代表模型一定可用，以实际运行结果为准；</li>
+      <li>· 最近一次运行结果可以在对应委托里查看；</li>
+      <li>· 模型或网络异常时，委托会暂停并保留已完成的步骤。</li>
     </ul>
   </div>;
 
@@ -117,7 +117,7 @@ export function GlobalSettings({ isMenuItem = false, inline = false }: { isMenuI
               ) : !editable ? (
                 <div className="space-y-4">
                   <div className="rounded-lg border border-[var(--rule)] bg-[var(--paper-strong)] p-5 text-sm leading-7 text-[var(--ink-soft)]">
-                    当前运行模式：<strong className="text-[var(--ink)]">{!loaded ? "暂未读取" : settings.llmMode === "openai-compatible" ? "真实模型（OpenAI-compatible）" : "Mock 模式（离线）"}</strong>{loaded && hasApiKey && "，已配置密钥"}。线上或非本机环境仅展示当前模型状态，请通过部署环境变量配置模型，不会在浏览器中读取或保存 API Key。
+                    当前运行模式：<strong className="text-[var(--ink)]">{!loaded ? "暂未读取" : settings.llmMode === "openai-compatible" ? "真实模型（OpenAI-compatible）" : "演示模式"}</strong>{loaded && hasApiKey && "，已配置密钥"}。线上或非本机环境仅展示当前模型状态，请通过部署环境变量配置模型，不会在浏览器中读取或保存 API Key。
                   </div>
                   {executabilityNote}
                   {safetyRules}
@@ -130,11 +130,11 @@ export function GlobalSettings({ isMenuItem = false, inline = false }: { isMenuI
                         <div className="grid h-12 w-12 shrink-0 place-items-center rounded-md bg-[var(--teal-pale)] text-[var(--teal)] dark:bg-[rgba(0,210,143,0.15)]"><Cpu size={24} /></div>
                         <div>
                           <label htmlFor="llmMode" className="block text-base font-bold text-[var(--ink)]">运行模式</label>
-                          <p className="mt-0.5 text-xs text-[var(--ink-soft)]">Mock 模式完全离线；真实模型异常仍会自动回退 Mock。</p>
+                          <p className="mt-0.5 text-xs text-[var(--ink-soft)]">演示模式不调用模型；真实模型异常时会自动回到演示模式。</p>
                         </div>
                       </div>
                       <select id="llmMode" value={settings.llmMode} onChange={(event) => setSettings({ ...settings, llmMode: event.target.value as RuntimeSettings["llmMode"] })} className="focus-ring w-full rounded-md border border-[var(--rule)] bg-[var(--card-bg)] px-4 py-2.5 text-sm font-bold text-[var(--teal-strong)] outline-none sm:w-auto">
-                        <option value="mock">Mock 模式（离线演示）</option>
+                        <option value="mock">演示模式（不调用模型）</option>
                         <option value="openai-compatible">真实模型（OpenAI-compatible）</option>
                       </select>
                     </div>

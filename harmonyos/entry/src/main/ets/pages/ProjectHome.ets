@@ -1906,7 +1906,7 @@ struct ProjectHome {
       await this.interventionService.accept(this.projectId, this.actionConfirmIntervention.id, this.actionConfirmIndex);
       await this.notificationService.cancelInterventionNotification(this.actionConfirmIntervention.id, this.projectId);
       this.showActionConfirmSheet = false;
-      promptAction.showToast({ message: '已加入待办；创建不等于已排程或已完成' });
+      promptAction.showToast({ message: '已加入待办' });
       await this.loadAllData(true);
     } catch (e) {
       this.actionConfirmError = e instanceof ApiError ? e.message : '创建行动失败，请稍后重试';
@@ -5684,7 +5684,7 @@ if (this.attachmentSearchOpen) {
               .fontSize(PMFontSize.SECTION_TITLE)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.INK_PRIMARY)
-            Text('成果草稿 · 待人工复核；保存不代表已交付')
+            Text('成果草稿 · 待复核')
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.WARNING)
               .margin({ top: PMSpacing.XS })

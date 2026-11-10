@@ -2243,7 +2243,7 @@ struct Index {
         this.InfoSheetRow('运行模式', this.llmMode === 'openai-compatible' ? '在线 API（OpenAI-compatible）' :
           (this.llmMode === 'mock' ? '规则模式（无需模型 API）' : '暂未读取'), PMColors.INK_PRIMARY)
 
-        Text('配置成功不等于每次运行都成功；连通测试与最近一次真实运行结果在「模型与连接」中查看，各委托的运行记录以实际回执为准。')
+        Text('配置好之后，能否正常运行以「模型与连接」里最近一次运行结果为准。')
           .fontSize(PMFontSize.CAPTION)
           .fontColor(PMColors.INK_TERTIARY)
           .lineHeight(18)
@@ -2343,11 +2343,11 @@ struct Index {
         .borderRadius(PMRadius.SM)
 
         Column({ space: PMSpacing.SM }) {
-          Text('Agent 无权绕过服务端')
+          Text('重要操作先经你确认')
             .fontSize(PMFontSize.BODY)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.INK_PRIMARY)
-          Text('项目归属、审批、幂等与版本控制都在服务端强制执行，客户端界面只是入口。')
+          Text('创建待办、写入日历之前都会先给你看预览，确认后才执行。')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_SECONDARY)
             .lineHeight(18)

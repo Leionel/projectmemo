@@ -17,7 +17,8 @@ import { conversationModelSpec } from "./model";
 import { uiPlanV1 } from "./promptSpecs";
 import type { R4State } from "./investigationService";
 
-const expiryMs = 15 * 60 * 1000;
+// 只写本项目数据的提案；确认时仍逐项校验依据。外部日历提案的有效期在 calendarProposalService 单独设定。
+const expiryMs = 24 * 60 * 60 * 1000;
 const identity = (r: ExperienceEntityRef) => [r.kind, r.projectId, r.id].join(":");
 const sameRefs = (a: ExperienceEntityRef[], b: ExperienceEntityRef[]) => jsonHash(a.map(r => ({ ...r })).sort((x, y) => identity(x).localeCompare(identity(y)))) === jsonHash(b.map(r => ({ ...r })).sort((x, y) => identity(x).localeCompare(identity(y))));
 type ActionDraft = { projectId: string; title: string; description: string; priority: number };

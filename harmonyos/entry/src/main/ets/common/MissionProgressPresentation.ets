@@ -93,7 +93,7 @@ export class MissionProgressPresentation {
         const parsed: Object = JSON.parse(raw);
         if (typeof parsed === 'object' && parsed !== null) { record = parsed as Record<string, Object>; }
         else { return MissionProgressPresentation.cap(raw, 120); }
-      } catch { return MissionProgressPresentation.cap(raw, 120) + '（文本结果，完整内容见技术诊断）'; }
+      } catch { return MissionProgressPresentation.cap(raw, 120) + '…'; }
     } else if (typeof data === 'object') {
       try {
         const arr = data as Array<Object>;
@@ -123,8 +123,8 @@ export class MissionProgressPresentation {
         else if (typeof value === 'number') { fallback.push(key + ' ' + (value as number).toString()); }
         if (fallback.length >= 3) { break; }
       }
-    } catch { return '工具已执行；结果结构未识别，可在技术诊断中查看原文。'; }
-    return fallback.length > 0 ? fallback.join('；') : '工具已执行；结果结构未识别，可在技术诊断中查看原文。';
+    } catch { return '这一步已执行。'; }
+    return fallback.length > 0 ? fallback.join('；') : '这一步已执行。';
   }
 
   /** 来源的用户可读名称：不展示 project:/card:/action: 等内部 ID。 */

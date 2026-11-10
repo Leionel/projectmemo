@@ -34,10 +34,10 @@ export function CalendarEventApproval({ approval, busy, checkedAt, onDecision }:
     {events.map(item => <dl className={styles.completionFacts} key={item.index ?? item.marker}>
       <div><dt>日程 {(item.index ?? 0) + 1}</dt><dd>{item.payload?.title}</dd></div>
       <div><dt>时间</dt><dd>{when(item.payload ?? {})}</dd></div>
-      {item.payload?.description && <div><dt>外发描述</dt><dd className="whitespace-pre-wrap break-words">{item.payload.description}</dd></div>}
+      {item.payload?.description && <div><dt>日程描述</dt><dd className="whitespace-pre-wrap break-words">{item.payload.description}</dd></div>}
       {extras(item.payload ?? {}) && <div><dt>范围</dt><dd>{extras(item.payload ?? {})}</dd></div>}
     </dl>)}
-    <p className={styles.muted}>批准范围仅限上述账号、日历和完整批次 payload；修改任何字段都必须重新预览并批准。批准有效至：{new Date(approval.expiresAt).toLocaleString("zh-CN")}。</p>
+    <p className={styles.muted}>批准只对上面这一批内容有效，改动任何一项都需要重新预览。批准有效至：{new Date(approval.expiresAt).toLocaleString("zh-CN")}。</p>
     {expired && <p role="status">提案已过期，请更新依据并重新预览。</p>}
     <div className={styles.actions}>
       <button className={styles.primary} disabled={busy || checkedAt === 0 || expired} onClick={() => onDecision("APPROVED")}>批准创建本批日程</button>
@@ -55,9 +55,9 @@ export function CalendarEventApproval({ approval, busy, checkedAt, onDecision }:
       <div><dt>时间</dt><dd>{when(payload)}</dd></div>
       {extras(payload) && <div><dt>范围</dt><dd>{extras(payload)}</dd></div>}
     </dl>
-    {payload.description && <><p className={styles.muted}>外发描述（含服务端操作标记）</p><pre className="whitespace-pre-wrap break-words text-sm">{payload.description}</pre></>}
-    {marker && <p className={styles.muted}>效果核对标记：<code className="break-all">{marker}</code>。服务端同时使用飞书原生 idempotency_key；回包丢失时只查询原效果，不自动再创建，也不宣称 exactly-once。</p>}
-    <p className={styles.muted}>批准范围仅限上述账号、日历和完整 payload；修改任何字段都必须重新预览并批准。批准有效至：{new Date(approval.expiresAt).toLocaleString("zh-CN")}。</p>
+    {payload.description && <><p className={styles.muted}>日程描述</p><pre className="whitespace-pre-wrap break-words text-sm">{payload.description}</pre></>}
+    {marker && <p className={styles.muted}>结果不确定时只查询，不会重复创建。</p>}
+    <p className={styles.muted}>批准只对上面的内容有效，改动任何一项都需要重新预览。批准有效至：{new Date(approval.expiresAt).toLocaleString("zh-CN")}。</p>
     {expired && <p role="status">提案已过期，请更新依据并重新预览。</p>}
     <div className={styles.actions}>
       <button className={styles.primary} disabled={busy || checkedAt === 0 || expired} onClick={() => onDecision("APPROVED")}>批准创建日程</button>

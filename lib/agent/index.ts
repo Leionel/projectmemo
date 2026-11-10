@@ -35,7 +35,9 @@ export async function structureCaptureWithMeta(input: StructureCaptureInput): Pr
       };
     } catch (error) {
       const durationMs = Date.now() - startTime;
-      const reason = error instanceof Error ? error.message : "Unknown LLM structure error";
+      // 调用方适配：截断/无效输出在 llmAgent 里是 FAILED 状态，经 AppError.code 流到这里；
+      // 只保留中文 message 会把 MODEL_OUTPUT_TRUNCATED 一类失败原因弄丢。
+      const reason = error instanceof AppError ? error.code : error instanceof Error ? error.message : "Unknown LLM structure error";
       console.warn("LLM structure failed; falling back to deterministic mock agent:", reason);
       const fallbackDraft = createMockCard(input.rawText, input.preferredType);
       const metadata = error instanceof AppError ? (error.details as { modelAudit?: Pick<AgentExecutionResult<CardDraft>, "prompt" | "usage" | "usageUnknown" | "requestIdentity"> } | undefined)?.modelAudit : undefined;

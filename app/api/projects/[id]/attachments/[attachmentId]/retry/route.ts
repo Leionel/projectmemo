@@ -1,6 +1,9 @@
 import { authorizeProjectAccess } from "@/lib/auth/guard";
 import { NextResponse } from "next/server";
 import { retryAttachmentExtraction } from "@/lib/services/attachmentService";
+import { apiError } from "@/lib/api";
+
+export const runtime = "nodejs";
 
 export async function POST(request: Request,
   { params }: { params: Promise<{ id: string; attachmentId: string }> },
@@ -11,7 +14,6 @@ export async function POST(request: Request,
     const result = await retryAttachmentExtraction(projectId, attachmentId);
     return NextResponse.json(result);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Attachment retry failed";
-    return NextResponse.json({ error: message }, { status: /not found/i.test(message) ? 404 : 500 });
+    return apiError(error);
   }
 }

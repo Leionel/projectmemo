@@ -18,6 +18,7 @@ import {
 } from "@/lib/types/episode";
 import { getTemporalSearchStates } from "@/lib/services/temporalLedgerService";
 import type { Prisma } from "@/lib/generated/prisma/client";
+import { episodeSummaryCompressionV1 } from "@/lib/agent/specialistPrompts";
 
 /** 单次检查点的来源上限；超出部分如实返回排除数量与原因，不静默截断 */
 const MAX_CARDS = 60;
@@ -471,45 +472,30 @@ interface SummaryCompressionResult {
 }
 
 /**
- * 模型只压缩段落语言，不接触 claim 与来源结构；输出必须与输入节一一对应，
- * 任何缺节、改节名或疑似新增事实都会回退模板，绝不把模型输出存为 PUBLISHED 事实。
+ * 模型只压缩段落语言；服务端校验节名、顺序、数字及原文引号中的内容。
  */
 async function compressEpisodeSummary(summary: EpisodeSummary, projectId: string): Promise<SummaryCompressionResult> {
   const base: SummaryCompressionResult = { summary, generationMode: "TEMPLATE", provider: null, fallbackReason: null };
   if (!isLlmConfigured()) return base;
   try {
-    const { chatJsonWithMeta } = await import("@/lib/agent/llmAgent");
+    const { chatPromptWithMeta } = await import("@/lib/agent/llmAgent");
     const input = summary.sections.map((section) => ({ section: section.section, text: section.text }));
-    const prompt = [
-      "你是项目阶段总结的文案编辑。下面是一个学生项目阶段检查点的分节段落。",
-      "任务：只改写每段的语言，使其更通顺简洁；禁止新增任何事实、数字或结论，禁止删掉具体数字和记录标题，禁止改变段落含义。",
-      "输出 JSON：{\"sections\":[{\"section\":\"<与输入相同的节名>\",\"text\":\"<改写后的段落>\"}]}，节数、节名与顺序必须与输入完全一致。",
-      "输入：",
-      JSON.stringify({ sections: input }),
-    ].join("\n");
-    const result = await chatJsonWithMeta(prompt, (value: unknown) => {
-      const parsed = value as { sections?: Array<{ section?: string; text?: string }> };
-      if (!Array.isArray(parsed.sections) || parsed.sections.length !== input.length) {
-        throw new Error("压缩输出的节数与输入不一致");
-      }
-      const byKey = new Map<string, string>(input.map((section) => [section.section, section.text]));
-      const compressed = parsed.sections.map((section) => {
-        const key = String(section.section ?? "");
-        const text = String(section.text ?? "");
-        const original = byKey.get(key);
-        if (!original || text.length === 0) throw new Error("压缩输出缺少有效段落");
-        // 保守防漂移：原文中的数字（估时/数量/日期片段）必须保留
-        const numbersOriginal = original.match(/\d+/g) ?? [];
-        for (const number of numbersOriginal) {
-          if (!text.includes(number)) throw new Error(`压缩输出丢失数字 ${number}`);
-        }
-        return { section: key as EpisodeSection, text };
-      });
-      return compressed;
-    }, projectId);
-    if (result.status !== "SUCCESS") return base;
+    const result = await chatPromptWithMeta(episodeSummaryCompressionV1, { sections: input }, projectId);
+    if (result.status === "FAILED") throw new AppError(result.fallbackReason ?? "MODEL_OUTPUT_INVALID", "阶段总结压缩未完成", 503);
+    const parsed = episodeSummaryCompressionV1.outputSchema.parse(JSON.parse(result.data));
+    if (parsed.sections.length !== input.length) throw new Error("压缩输出的节数与输入不一致");
+    const compressed = parsed.sections.map((section, index) => {
+      const original = input[index];
+      if (section.section !== original.section) throw new Error("压缩输出的节名或顺序与输入不一致");
+      const numbersOriginal = original.text.match(/[-+]?\d+(?:[.,]\d+)*(?:[eE][-+]?\d+)?/g) ?? [];
+      const numbersCompressed = section.text.match(/[-+]?\d+(?:[.,]\d+)*(?:[eE][-+]?\d+)?/g) ?? [];
+      if (JSON.stringify(numbersOriginal) !== JSON.stringify(numbersCompressed)) throw new Error("压缩输出改变了原始数字");
+      const quotedTitles = original.text.match(/「[^」]+」/g) ?? [];
+      if (quotedTitles.some(title => !section.text.includes(title))) throw new Error("压缩输出丢失了原文引用的标题或内容");
+      return section;
+    });
     return {
-      summary: { schemaVersion: summary.schemaVersion, goals: summary.goals, sections: result.data },
+      summary: { schemaVersion: summary.schemaVersion, goals: summary.goals, sections: compressed },
       generationMode: "MODEL",
       provider: result.provider,
       fallbackReason: null,
@@ -519,7 +505,14 @@ async function compressEpisodeSummary(summary: EpisodeSummary, projectId: string
       summary,
       generationMode: "MODEL_FALLBACK_TEMPLATE",
       provider: null,
-      fallbackReason: error instanceof Error ? error.message.slice(0, 240) : "llm_error",
+      // 模型失败码（如 MODEL_OUTPUT_TRUNCATED）比包装后的中文提示更能定位问题；
+      // 服务端校验失败仍保留可读的中文原因。
+      fallbackReason:
+        error instanceof AppError
+          ? error.code
+          : error instanceof Error
+            ? error.message.slice(0, 240)
+            : "llm_error",
     };
   }
 }

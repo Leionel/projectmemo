@@ -1,3 +1,4 @@
+import { endOfShanghaiDay } from "@/lib/time/shanghai";
 import { AppError } from "@/lib/api";
 import { db } from "@/lib/db";
 import { pickSupersedeCard } from "@/lib/services/changeImpactService";
@@ -503,7 +504,7 @@ export async function confirmMeetingChanges(projectId: string, input: MeetingCon
       if (change.kind === "DEADLINE_CHANGE" && change.deadlineISO) {
         await tx.project.update({
           where: { id: projectId },
-          data: { deadline: new Date(`${change.deadlineISO}T00:00:00Z`) },
+          data: { deadline: endOfShanghaiDay(change.deadlineISO) },
         });
         applied.push({
           changeId: change.changeId,

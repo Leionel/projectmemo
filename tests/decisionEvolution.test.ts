@@ -1076,7 +1076,209 @@ it("影响补偿保留原等待问题；撤销支持环后不再把它当作当�
  expect((await db.agentMission.findUniqueOrThrow({where:{id:f.m.id}})).status).toBe("WAITING_INPUT");expect((await currentGoalQuestion(f.actor,f.p.id)).question?.questionId).toBe(q.id);
 });
 it("模型只能补充定性取舍，沿用原在线模式、许可及预算；确定性计算不能被模型改写",async()=>{
- const llm=await import("@/lib/agent/llmAgent");const mocked=vi.spyOn(llm,"chatJsonWithMeta").mockResolvedValue({data:{verify:"先确认设备条件的适用范围。",deliver:"草稿先留出待核对段落。"},provider:"TEST_FIXTURE",status:"SUCCESS",fallbackReason:null,durationMs:1});const oldMode=process.env.LLM_MODE;process.env.LLM_MODE="openai-compatible";
+ const llm=await import("@/lib/agent/llmAgent");
+ const mocked=vi.spyOn(llm,"chatPromptWithMeta").mockResolvedValue({data:JSON.stringify({verify:"先确认设备条件的适用范围。",deliver:"草稿先留出待核对段落。"}),provider:"TEST_FIXTURE",status:"SUCCESS",fallbackReason:null,durationMs:1,prompt:{id:"decision.scenario_tradeoff.v1",version:"1.0.0",purpose:"DYNAMIC_PLAN",outputSchemaVersion:1},usage:{inputTokens:1,outputTokens:1},usageUnknown:false,requestIdentity:null});const oldMode=process.env.LLM_MODE;process.env.LLM_MODE="openai-compatible";
  try{const f=await fixture();await expect(scenarios(f,{requestModelAdvice:true})).rejects.toMatchObject({code:"MODEL_ADVICE_UNAVAILABLE"});expect(mocked).not.toHaveBeenCalled();await db.agentMission.update({where:{id:f.m.id},data:{constraintsJson:{...(await db.agentMission.findUniqueOrThrow({where:{id:f.m.id}})).constraintsJson as object,llmContextApproved:true}}});const p=await scenarios(f,{requestModelAdvice:true});expect(p.scenarios[1].minutes).toBe(15);expect(p.scenarios[2].minutes).toBe(30);expect(p.scenarios[1]).toHaveProperty("modelProvider","TEST_FIXTURE");expect((await db.agentMission.findUniqueOrThrow({where:{id:f.m.id}})).budgetUsedJson).toMatchObject({models:1,reservedOutputTokens:2048,unknownCalls:1});}
  finally{mocked.mockRestore();process.env.LLM_MODE=oldMode;}
+});
+
+// ---------------------------------------------------------------
+// decision.scenario_tradeoff.v1：模型比较的采用与失败审计
+// ---------------------------------------------------------------
+const SCENARIO_TRADEOFF_LLM_ENV = {
+  LLM_MODE: "openai-compatible",
+  LLM_PROVIDER: "",
+  LLM_API_KEY: "unit-fixture-not-a-key",
+  LLM_BASE_URL: "http://mock.local/v1",
+  LLM_MODEL_NAME: "mock",
+} as const;
+
+async function withScenarioLlmEnv<T>(run: () => Promise<T>): Promise<T> {
+  const names = ["LLM_MODE", "LLM_PROVIDER", "LLM_API_KEY", "LLM_BASE_URL", "LLM_MODEL_NAME"];
+  const previous = new Map(names.map((name) => [name, process.env[name]]));
+  Object.assign(process.env, SCENARIO_TRADEOFF_LLM_ENV);
+  try {
+    return await run();
+  } finally {
+    for (const [name, value] of previous) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
+  }
+}
+
+async function approveModelContext(f: Awaited<ReturnType<typeof fixture>>) {
+  const mission = await db.agentMission.findUniqueOrThrow({ where: { id: f.m.id } });
+  await db.agentMission.update({
+    where: { id: f.m.id },
+    data: {
+      constraintsJson: {
+        ...(mission.constraintsJson as object),
+        llmContextApproved: true,
+      },
+    },
+  });
+}
+
+function scenarioModelResponse(payload: { verify: string; deliver: string }, options: {
+  finishReason?: "stop" | "length";
+  content?: string;
+} = {}) {
+  return new Response(
+    JSON.stringify({
+      id: "chatcmpl-scenario-1",
+      usage: { prompt_tokens: 11, completion_tokens: 7 },
+      choices: [{ finish_reason: options.finishReason ?? "stop", message: { content: options.content ?? JSON.stringify(payload) } }],
+    }),
+    { status: 200, headers: { "Content-Type": "application/json" } },
+  );
+}
+
+interface ScenarioTrace {
+  purpose?: string;
+  proposalId?: string;
+  prompt?: { id: string; version: string; purpose: string; outputSchemaVersion: number };
+  usage?: { inputTokens: number | null; outputTokens: number | null };
+  usageUnknown?: boolean;
+  requestIdentity?: string | null;
+}
+
+async function latestScenarioRun(projectId: string, proposalId: string, status: "SUCCESS" | "FAILED") {
+  const runs = await db.agentRun.findMany({
+    where: { projectId, runType: "EVALUATE", status },
+    orderBy: { createdAt: "desc" },
+  });
+  return runs.find((run) => (run.trace as ScenarioTrace).proposalId === proposalId);
+}
+
+describe.sequential("decision.scenario_tradeoff.v1 模型比较审计", () => {
+  it("合法取舍写入 modelTradeoff/modelProvider，AgentRun trace 保留 prompt/usage/requestIdentity", async () => {
+    const f = await fixture();
+    await approveModelContext(f);
+    const verifyTradeoff = "先核对设备条件的适用范围，再决定验证顺序。";
+    const deliverTradeoff = "先把仍可用的材料整理成最小草稿，未核对的结论留空。";
+    const calls: Array<{ url: string; body: { messages: Array<{ role: string; content: string }> } }> = [];
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      calls.push({ url: String(input), body: JSON.parse(String(init?.body ?? "{}")) });
+      return scenarioModelResponse({ verify: verifyTradeoff, deliver: deliverTradeoff });
+    }));
+    try {
+      const proposal = await withScenarioLlmEnv(() => scenarios(f, { requestModelAdvice: true }));
+
+      expect(proposal.status).toBe("READY");
+      expect(proposal.scenarios[0]).not.toHaveProperty("modelTradeoff");
+      expect(proposal.scenarios[1]).toHaveProperty("modelTradeoff", verifyTradeoff);
+      expect(proposal.scenarios[1]).toHaveProperty("modelProvider", "llm:openai-compatible:mock");
+      expect(proposal.scenarios[2]).toHaveProperty("modelTradeoff", deliverTradeoff);
+      expect(proposal.scenarios[2]).toHaveProperty("modelProvider", "llm:openai-compatible:mock");
+      // 确定性估算没有被模型改写。
+      expect(proposal.scenarios[1].minutes).toBe(15);
+      expect(proposal.scenarios[2].minutes).toBe(30);
+
+      const stored = await db.decisionScenarioProposal.findUniqueOrThrow({ where: { id: proposal.id } });
+      expect(stored.status).toBe("READY");
+      const storedScenarios = stored.scenariosJson as Array<{ key: string; modelTradeoff?: string }>;
+      expect(storedScenarios.find((item) => item.key === "VERIFY_FIRST")?.modelTradeoff).toBe(verifyTradeoff);
+      expect(storedScenarios.find((item) => item.key === "DELIVER_FIRST")?.modelTradeoff).toBe(deliverTradeoff);
+
+      // 请求隔离：system 只含服务端策略，冻结方案在 UNTRUSTED_DATA 数据信封里。
+      expect(calls).toHaveLength(1);
+      expect(calls[0].url).toBe("http://mock.local/v1/chat/completions");
+      const messages = calls[0].body.messages;
+      expect(messages).toHaveLength(2);
+      expect(messages[0].role).toBe("system");
+      expect(messages[0].content).toContain("decision.scenario_tradeoff.v1");
+      expect(messages[0].content).not.toContain("整理阶段汇报");
+      expect(messages[1].role).toBe("user");
+      const envelope = JSON.parse(messages[1].content) as { kind: string; data: { base: unknown; scenarios: unknown[] } };
+      expect(envelope.kind).toBe("UNTRUSTED_DATA");
+      expect(envelope.data.base).toBeTruthy();
+      expect(envelope.data.scenarios).toHaveLength(3);
+      expect(messages[1].content).not.toContain("decision.scenario_tradeoff.v1");
+
+      // 成功审计：prompt 版本、usage、usageUnknown、requestIdentity 全部落库。
+      const run = await latestScenarioRun(f.p.id, proposal.id, "SUCCESS");
+      expect(run).toBeTruthy();
+      expect(run!.provider).toBe("llm:openai-compatible:mock");
+      expect(run!.status).toBe("SUCCESS");
+      const trace = run!.trace as ScenarioTrace;
+      expect(trace.purpose).toBe("DECISION_QUALITATIVE_ONLY");
+      expect(trace.prompt).toEqual({ id: "decision.scenario_tradeoff.v1", version: "1.0.0", purpose: "DYNAMIC_PLAN", outputSchemaVersion: 1 });
+      expect(trace.usage).toEqual({ inputTokens: 11, outputTokens: 7 });
+      expect(trace.usageUnknown).toBe(false);
+      expect(trace.requestIdentity).toBe("chatcmpl-scenario-1");
+      expect(run!.resultJson).toEqual({ verify: verifyTradeoff, deliver: deliverTradeoff });
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("finish_reason=length 即使 content 是完整 JSON 也不采用；proposal/AgentRun FAILED 且保留调用元数据", async () => {
+    const f = await fixture();
+    await approveModelContext(f);
+    vi.stubGlobal("fetch", vi.fn(async () => scenarioModelResponse(
+      { verify: "截断的取舍不应采用。", deliver: "截断的取舍不应采用。" },
+      { finishReason: "length" },
+    )));
+    try {
+      const error = await withScenarioLlmEnv(() => scenarios(f, { requestModelAdvice: true }).then(() => null, (reason: unknown) => reason));
+      expect(error).toMatchObject({ code: "MODEL_OUTPUT_TRUNCATED", status: 503 });
+
+      const proposal = await db.decisionScenarioProposal.findFirstOrThrow({
+        where: { missionId: f.m.id },
+        orderBy: { createdAt: "desc" },
+      });
+      expect(proposal.status).toBe("FAILED");
+      const storedScenarios = proposal.scenariosJson as Array<{ key: string; modelTradeoff?: string }>;
+      expect(storedScenarios).toHaveLength(3);
+      expect(storedScenarios.every((item) => item.modelTradeoff === undefined)).toBe(true);
+
+      const run = await latestScenarioRun(f.p.id, proposal.id, "FAILED");
+      expect(run).toBeTruthy();
+      expect(run!.fallbackReason).toBe("MODEL_OUTPUT_TRUNCATED");
+      expect(run!.provider).toBe("llm:openai-compatible:mock");
+      const trace = run!.trace as ScenarioTrace;
+      expect(trace.prompt).toEqual({ id: "decision.scenario_tradeoff.v1", version: "1.0.0", purpose: "DYNAMIC_PLAN", outputSchemaVersion: 1 });
+      expect(trace.usage).toEqual({ inputTokens: 11, outputTokens: 7 });
+      expect(trace.usageUnknown).toBe(false);
+      expect(trace.requestIdentity).toBe("chatcmpl-scenario-1");
+      // 失败审计不采用被截断的模型文本。
+      expect(run!.resultJson).toBeNull();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("模型返回无效 JSON 时不采用：503 MODEL_OUTPUT_INVALID，proposal/AgentRun FAILED 且 trace 保留调用元数据", async () => {
+    const f = await fixture();
+    await approveModelContext(f);
+    vi.stubGlobal("fetch", vi.fn(async () => scenarioModelResponse(
+      { verify: "无效", deliver: "无效" },
+      { content: "这不是 JSON" },
+    )));
+    try {
+      const error = await withScenarioLlmEnv(() => scenarios(f, { requestModelAdvice: true }).then(() => null, (reason: unknown) => reason));
+      expect(error).toMatchObject({ code: "MODEL_OUTPUT_INVALID", status: 503 });
+
+      const proposal = await db.decisionScenarioProposal.findFirstOrThrow({
+        where: { missionId: f.m.id },
+        orderBy: { createdAt: "desc" },
+      });
+      expect(proposal.status).toBe("FAILED");
+      const storedScenarios = proposal.scenariosJson as Array<{ modelTradeoff?: string }>;
+      expect(storedScenarios.every((item) => item.modelTradeoff === undefined)).toBe(true);
+
+      const run = await latestScenarioRun(f.p.id, proposal.id, "FAILED");
+      expect(run).toBeTruthy();
+      expect(run!.fallbackReason).toBe("MODEL_OUTPUT_INVALID");
+      expect(run!.provider).toBe("llm:openai-compatible:mock");
+      const trace = run!.trace as ScenarioTrace;
+      expect(trace.prompt?.id).toBe("decision.scenario_tradeoff.v1");
+      expect(trace.usage).toEqual({ inputTokens: 11, outputTokens: 7 });
+      expect(trace.usageUnknown).toBe(false);
+      expect(trace.requestIdentity).toBe("chatcmpl-scenario-1");
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
 });

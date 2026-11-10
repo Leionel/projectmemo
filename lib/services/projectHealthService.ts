@@ -1,3 +1,4 @@
+import { shanghaiDay } from "@/lib/time/shanghai";
 /**
  * 项目体检：只读、确定性的「检查项目当前问题」。
  *
@@ -361,7 +362,7 @@ const actionDetector: Detector = async ({ projectId, now, findings }) => {
         objectType: "action",
         objectId: action.id,
         title: `待办「${action.title}」已逾期`,
-        explanation: `计划截止时间是 ${action.dueAt.toISOString().slice(0, 10)}，现在仍是${action.status === "DOING" ? "进行中" : "未开始"}。`,
+        explanation: `计划截止时间是 ${shanghaiDay(action.dueAt)}，现在仍是${action.status === "DOING" ? "进行中" : "未开始"}。`,
         observedAt: action.dueAt.toISOString(),
         suggestedAction: "调整截止时间，或先完成它",
         suggestedTarget: { kind: "action", id: action.id, fallback: "action_board" },

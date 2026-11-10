@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { AlertTriangle, Archive, Eye, LoaderCircle, Pencil, Save, ShieldCheck, Trash2, X } from "lucide-react";
 import { knowledgeTypeLabels, knowledgeTypes, getKnowledgeTypeColor, type KnowledgeTypeValue } from "@/lib/types";
-import { knowledgeCardDraftSchema } from "@/lib/validation/schemas";
+import { knowledgeCardUpdateSchema } from "@/lib/validation/schemas";
 import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
 
 type EditableCard = {
@@ -37,6 +37,7 @@ export function CardEditor({ card, onArchived }: { card: EditableCard; onArchive
   const router = useRouter();
   const { id: projectId } = useParams<{ id: string }>();
   const [panel, setPanel] = useState<Panel>(null);
+  const [editingCard, setEditingCard] = useState(card);
   const [title, setTitle] = useState(card.title);
   const [summary, setSummary] = useState(card.summary);
   const [type, setType] = useState(card.type as KnowledgeTypeValue);
@@ -51,6 +52,16 @@ export function CardEditor({ card, onArchived }: { card: EditableCard; onArchive
   const [notice, setNotice] = useState("");
 
   function open(next: Exclude<Panel, null>) {
+    if (next === "edit" && panel !== "edit") {
+      setEditingCard(card);
+      setTitle(card.title);
+      setSummary(card.summary);
+      setType(card.type as KnowledgeTypeValue);
+      setImportance(card.importance);
+      setKeywordText(stringList(card.keywords).join("，"));
+      setTaskText(stringList(card.relatedTasks).join("\n"));
+      setActionText(stringList(card.nextActions).join("\n"));
+    }
     setPanel((current) => current === next ? null : next);
     setConfirmDelete(false);
     setError("");
@@ -69,7 +80,18 @@ export function CardEditor({ card, onArchived }: { card: EditableCard; onArchive
       relatedTasks: lines(taskText),
       nextActions: lines(actionText),
     };
-    const result = knowledgeCardDraftSchema.safeParse(payload);
+    const original = {
+      title: editingCard.title, summary: editingCard.summary, type: editingCard.type, importance: editingCard.importance,
+      keywords: stringList(editingCard.keywords), relatedTasks: stringList(editingCard.relatedTasks), nextActions: stringList(editingCard.nextActions),
+    };
+    const changes = Object.fromEntries(Object.entries(payload).filter(([field, value]) => {
+      return JSON.stringify(value) !== JSON.stringify(original[field as keyof typeof original]);
+    }));
+    if (Object.keys(changes).length === 0) {
+      setPanel(null);
+      return;
+    }
+    const result = knowledgeCardUpdateSchema.safeParse(changes);
     if (!result.success) {
       const issue = result.error.issues[0];
       const labels: Record<string, string> = { title: "标题", summary: "摘要", type: "类型", importance: "重要性", keywords: "关键词", relatedTasks: "关联任务", nextActions: "下一步建议" };
@@ -139,6 +161,7 @@ export function CardEditor({ card, onArchived }: { card: EditableCard; onArchive
       router.refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "操作失败，请稍后重试");
+    } finally {
       setBusy(null);
     }
   }
@@ -153,6 +176,8 @@ export function CardEditor({ card, onArchived }: { card: EditableCard; onArchive
         : <span className="flex flex-wrap items-center gap-2 rounded-lg bg-[var(--paper-strong)] px-2.5 py-1.5 text-xs font-bold text-[var(--ink-soft)]">归档后离开列表，可在「已归档记忆」恢复<button type="button" onClick={() => void lifecycle("ARCHIVE")} disabled={busy !== null} className="focus-ring rounded-md bg-[var(--navy)] px-2 py-1 text-xs font-bold text-white disabled:opacity-50">{busy === "lifecycle" ? "归档中…" : "确认归档"}</button><button type="button" onClick={() => setConfirmArchive(false)} disabled={busy !== null} className="focus-ring rounded-md px-2 py-1 text-xs font-bold text-[var(--muted)]">取消</button></span>}
       <span role="status" aria-live="polite" className="ml-auto text-xs font-bold text-[var(--teal-strong)]">{notice}</span>
     </div>
+
+    {error && <p role="alert" className="mt-4 rounded-lg bg-[var(--brick-pale)] px-3 py-2 text-sm font-semibold text-[var(--brick)]">{error}</p>}
 
     {panel === "source" && <section aria-label="碎片原文" className="mt-3 rounded-md border border-[var(--rule)] bg-[var(--paper-strong)] p-4">
       <div className="flex items-center justify-between gap-3"><p className="text-xs font-black uppercase tracking-wider text-[var(--muted)]">Agent 处理前的原始记录</p>{card.capture.sourceType && <span className="paper-tab px-2 py-1 text-xs text-[var(--ink-soft)]">{card.capture.sourceType}</span>}</div>
@@ -171,7 +196,6 @@ export function CardEditor({ card, onArchived }: { card: EditableCard; onArchive
         <label><span className="text-xs font-bold text-[var(--ink-soft)]">下一步建议（1–6 项）</span><textarea value={actionText} onChange={(event) => setActionText(event.target.value)} rows={4} className="focus-ring editorial-input mt-1.5 w-full resize-y px-3 py-2.5 text-sm leading-6" /></label>
       </div>
 
-      {error && <p role="alert" className="mt-4 rounded-lg bg-[var(--brick-pale)] px-3 py-2 text-sm font-semibold text-[var(--brick)]">{error}</p>}
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t archive-rule pt-4">
         {!confirmDelete ? <button type="button" onClick={() => setConfirmDelete(true)} disabled={busy !== null} className="focus-ring inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-bold text-[var(--brick)] transition hover:bg-[var(--brick-pale)] disabled:opacity-50"><Trash2 size={15} /> 删除这条记录</button> : <div className="flex flex-wrap items-center gap-2 rounded-lg bg-[var(--brick-pale)] px-3 py-2"><AlertTriangle size={15} className="text-[var(--brick)]" /><span className="text-xs font-bold text-[var(--brick)]">会同时删除原始碎片，确定吗？</span><button type="button" onClick={remove} disabled={busy !== null} className="focus-ring rounded-md bg-[var(--brick)] px-2.5 py-1.5 text-xs font-bold text-white disabled:opacity-50">{busy === "delete" ? "删除中…" : "确认删除"}</button><button type="button" onClick={() => setConfirmDelete(false)} disabled={busy !== null} className="focus-ring rounded-md px-2 py-1.5 text-xs font-bold text-[var(--ink-soft)] hover:bg-[var(--paper-strong)]">取消</button></div>}
         <div className="ml-auto flex gap-2"><button type="button" onClick={() => setPanel(null)} disabled={busy !== null} className="focus-ring editorial-button-secondary">取消</button><button type="button" onClick={save} disabled={busy !== null} className="focus-ring editorial-button">{busy === "save" ? <LoaderCircle className="animate-spin" size={16} /> : <Save size={16} />}{busy === "save" ? "保存中…" : "保存纠正"}</button></div>

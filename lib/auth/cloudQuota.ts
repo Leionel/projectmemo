@@ -1,3 +1,4 @@
+import { shanghaiDay } from "@/lib/time/shanghai";
 import { assertTurnCurrent } from "@/lib/continuity/turnCoordination";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
@@ -56,7 +57,7 @@ export async function reserveIntakeCloudCall(billing: IntakeBilling): Promise<vo
     if (account) {
       if (!account.emailVerifiedAt || account.dailyCloudLimit <= 0)
         throw new AppError("CLOUD_ACCESS_DISABLED", "当前账号未开通云模型额度，可先保存材料", 403);
-      const day = new Date().toISOString().slice(0, 10);
+      const day = shanghaiDay();
       await tx.accountCloudUsage.upsert({ where: { userId_day: { userId: billing.userId, day } }, create: { userId: billing.userId, day, used: 0 }, update: {} });
       const consumed = await tx.accountCloudUsage.updateMany({
         where: { userId: billing.userId, day, used: { lt: account.dailyCloudLimit } }, data: { used: { increment: 1 } },
@@ -102,7 +103,7 @@ export async function reserveReviewCloudCall(billing: ReviewBilling): Promise<vo
     const account = await tx.accountSecurity.findUnique({ where: { userId: billing.userId } });
     if (account) {
       if (!account.emailVerifiedAt || account.dailyCloudLimit <= 0) throw new AppError("CLOUD_ACCESS_DISABLED", "当前账号未开通云模型额度", 403);
-      const day = new Date().toISOString().slice(0, 10);
+      const day = shanghaiDay();
       await tx.accountCloudUsage.upsert({ where: { userId_day: { userId: billing.userId, day } }, create: { userId: billing.userId, day, used: 0 }, update: {} });
       const consumed = await tx.accountCloudUsage.updateMany({ where: { userId: billing.userId, day, used: { lt: account.dailyCloudLimit } }, data: { used: { increment: 1 } } });
       if (!consumed.count) throw new AppError("CLOUD_QUOTA_EXHAUSTED", "今日云模型调用额度已用完", 429);
@@ -148,7 +149,7 @@ export async function reserveWorkspaceCloudCall(billing: WorkspaceBilling): Prom
     if (account) {
       if (!account.emailVerifiedAt || account.dailyCloudLimit <= 0)
         throw new AppError("CLOUD_ACCESS_DISABLED", "当前账号未开通云模型额度", 403);
-      const day = new Date().toISOString().slice(0, 10);
+      const day = shanghaiDay();
       await tx.accountCloudUsage.upsert({ where: { userId_day: { userId: billing.userId, day } },
         create: { userId: billing.userId, day, used: 0 }, update: {} });
       const consumed = await tx.accountCloudUsage.updateMany({
@@ -231,7 +232,7 @@ export async function settleWorkspaceCloudCall(billing: WorkspaceBilling, result
  */
 export async function reserveCloudCall(projectId?: string): Promise<void> {
   if (!projectId) return; // Existing trusted CLI/provider probes do not act for a project.
-  const day = new Date().toISOString().slice(0, 10);
+  const day = shanghaiDay();
   await db.$transaction(async (tx) => {
   const project = await tx.project.findUnique({ where: { id: projectId }, select: { deletionRequestedAt: true } });
   if (!project || project.deletionRequestedAt) throw new AppError("PROJECT_NOT_FOUND", "项目已不可用，未继续派发云请求", 404);

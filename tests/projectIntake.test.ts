@@ -203,7 +203,7 @@ describe("S1-A 项目前材料与确认建项", () => {
 
     // 额度用尽：仍然不发请求。
     await db.accountSecurity.update({ where: { userId: user.id }, data: { dailyCloudLimit: 2 } });
-    await db.accountCloudUsage.create({ data: { userId: user.id, day: new Date().toISOString().slice(0, 10), used: 2 } });
+    await db.accountCloudUsage.create({ data: { userId: user.id, day: new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Shanghai" }).format(new Date()), used: 2 } });
     await expect(understandIntake(actor, draftId, { requestId: "u3", processingConsent: true },
       { runModel: fakeModel(understandingOf(materialId), calls) })).rejects.toMatchObject({ code: "CLOUD_QUOTA_EXHAUSTED" });
     expect(calls.count).toBe(0);

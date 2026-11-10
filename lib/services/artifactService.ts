@@ -12,6 +12,7 @@ import type { EpisodeSourceRef } from "@/lib/types/episode";
 import { artifactContentSchema } from "@/lib/validation/schemas";
 import { readReviewMaterial } from "@/lib/mission/projectMaterialReader";
 import { artifactCoverageV2 } from "@/lib/agent/specialistPrompts";
+import { getTemporalSearchStates } from "@/lib/services/temporalLedgerService";
 
 async function loadArtifactContext(projectId: string, episodeId?: string, userId?: string) {
   const project = await requireProject(projectId);
@@ -47,7 +48,10 @@ async function loadArtifactContext(projectId: string, episodeId?: string, userId
     orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 24,
   })).reverse();
   const rawCards = [] as typeof candidates;
-  for (const card of candidates) if (!userId || (await sourceUse(userId, projectId, "card:" + card.id)).state === "ALLOWED") rawCards.push(card);
+  // 检查点是冻结的历史快照；实时成果不把已被取代的事实写成当前事实。
+  const temporal = scopedCardIds ? new Map() : await getTemporalSearchStates(projectId, candidates.map(card => card.id));
+  const superseded = candidates.filter(card => temporal.get(card.id)?.status === "SUPERSEDED").length;
+  for (const card of candidates) if (temporal.get(card.id)?.status !== "SUPERSEDED" && (!userId || (await sourceUse(userId, projectId, "card:" + card.id)).state === "ALLOWED")) rawCards.push(card);
   if (!rawCards.length) throw new AppError("NO_KNOWLEDGE_CARDS", "请先输入至少一条项目记录，再生成成果", 400);
   const sources = await Promise.all(rawCards.map(async card => {
     const frozen = scopedSourceRefs?.find(ref => ref.cardId === card.id);
@@ -64,7 +68,7 @@ async function loadArtifactContext(projectId: string, episodeId?: string, userId
     episodeTag,
     cards: rawCards.map((card) => { const frozen = scopedSourceRefs?.find(ref => ref.cardId === card.id); return { ...cardToDraft(card), id: card.id,
       ...(frozen ? { title: frozen.titleSnapshot, summary: frozen.summarySnapshot, keywords: [], relatedTasks: [], nextActions: [] } : {}) }; }),
-    sources, coverage: { loadedCards: rawCards.length, totalCards: scopedCardIds?.length ?? totalCards, complete: false,
+    sources, coverage: { loadedCards: rawCards.length, totalCards: scopedCardIds?.length ?? totalCards, complete: false, supersededExcluded: superseded,
       policy: episodeTag ? "FROZEN_EPISODE_SUMMARIES" : "LATEST_24_CARDS_WITH_BOUNDED_SOURCE_EXCERPTS" },
     // 生成时的证据引用快照：固化 cardId、观察时间与当时摘要，供事后逐句回溯审计
     sourceRefs: scopedSourceRefs?.filter(ref => rawCards.some(card => card.id === ref.cardId)) ?? rawCards.map((card) => ({
@@ -113,7 +117,8 @@ export async function prepareArtifactGeneration(projectId: string, artifactType:
         data: mock.content,
         provider: "mock-fallback",
         status: "FALLBACK",
-        fallbackReason: error instanceof Error ? error.message.slice(0, 240) : "llm_error",
+        // 审计保留模型失败原因（如 MODEL_OUTPUT_TRUNCATED），中文 message 只用于提示。
+        fallbackReason: error instanceof AppError ? error.code : error instanceof Error ? error.message.slice(0, 240) : "llm_error",
         durationMs: Date.now() - startedAt,
       };
     }

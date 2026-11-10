@@ -1,3 +1,4 @@
+import { shanghaiDay } from "@/lib/time/shanghai";
 import { db } from "@/lib/db";
 import { getChatProviderConfig } from "@/lib/config/provider";
 
@@ -9,7 +10,7 @@ export async function cloudCapability(userId: string) {
   const account = await db.accountSecurity.findUnique({ where: { userId } });
   if (!account) return { ...base, available: true, reason: "CONFIGURED_LEGACY_ACCOUNT" };
   if (!account.emailVerifiedAt || account.dailyCloudLimit <= 0) return { ...base, available: false, reason: "ACCOUNT_NOT_ELIGIBLE", remainingToday: 0 };
-  const usage = await db.accountCloudUsage.findUnique({ where: { userId_day: { userId, day: new Date().toISOString().slice(0, 10) } } });
+  const usage = await db.accountCloudUsage.findUnique({ where: { userId_day: { userId, day: shanghaiDay() } } });
   const remainingToday = Math.max(0, account.dailyCloudLimit - (usage?.used ?? 0));
   return { ...base, remainingToday, available: remainingToday > 0, reason: remainingToday > 0 ? "CONFIGURED" : "DAILY_QUOTA_EXHAUSTED" };
 }

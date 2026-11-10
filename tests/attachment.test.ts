@@ -81,7 +81,7 @@ describe("S05: Project Inbox Attachment Upload and Memory Ingestion", () => {
         fileName: "payload.exe",
         mimeType: "application/octet-stream",
         buffer: Buffer.from("MZ-not-an-allowed-attachment"),
-      })).rejects.toThrow("Only PDF and image attachments are supported");
+      })).rejects.toThrow("目前只支持 PDF、图片、CSV 和 JSON 附件");
     } finally {
       await db.project.delete({ where: { id: testProject.id } });
     }

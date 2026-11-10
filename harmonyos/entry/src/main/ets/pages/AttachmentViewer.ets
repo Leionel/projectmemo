@@ -1,3 +1,4 @@
+import { TextFormatters } from '../common/TextFormatters';
 import router from '@ohos.router';
 import pasteboard from '@ohos.pasteboard';
 import promptAction from '@ohos.promptAction';
@@ -150,7 +151,7 @@ struct AttachmentViewer {
               if (this.draftId === '') { PMStatusPill({ label: attachmentStatus(this.item) }) }
               Text(this.item.fileName).fontSize(20).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
               if (this.physicalPage > 0) { Text('引用定位：原件物理第 ' + this.physicalPage.toString() + ' 页').fontSize(13).fontColor(PMColors.INK_SECONDARY) }
-              Text(this.draftId !== '' ? attachmentSize(this.item.size) : `${attachmentSize(this.item.size)} · ${(this.item.createdAt ?? '').substring(0, 10)}`).fontSize(12).fontColor(PMColors.INK_TERTIARY)
+              Text(this.draftId !== '' ? attachmentSize(this.item.size) : `${attachmentSize(this.item.size)} · ${TextFormatters.shanghaiDate(this.item.createdAt ?? '')}`).fontSize(12).fontColor(PMColors.INK_TERTIARY)
             }.width('100%').alignItems(HorizontalAlign.Start)
             if (this.originalError !== '') {
               Text(this.originalError).width('100%').fontSize(14).fontColor(PMColors.RISK)

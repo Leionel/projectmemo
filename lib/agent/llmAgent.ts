@@ -59,26 +59,32 @@ export async function chatWithLLMWithMeta(prompt: string | ModelMessage[], proje
   if (!payload || typeof payload !== "object") return rejectReceived("MODEL_RESPONSE_INVALID", "云模型返回格式异常，原请求不会自动重发");
   const tokenValue = (n: number | undefined) => typeof n === "number" && Number.isSafeInteger(n) && n >= 0 ? n : null;
   const usage = { inputTokens: tokenValue(payload.usage?.prompt_tokens), outputTokens: tokenValue(payload.usage?.completion_tokens) };
-  const content = payload.choices?.[0]?.message?.content, finishReason = payload.choices?.[0]?.finish_reason ?? null;
-  const failure = finishReason === "length" ? "MODEL_OUTPUT_TRUNCATED" : finishReason === "content_filter" ? "MODEL_OUTPUT_FILTERED" : !content?.trim() ? "MODEL_EMPTY_RESPONSE" : null;
+  const rawContent = payload.choices?.[0]?.message?.content;
+  const content = typeof rawContent === "string" ? rawContent.trim() : "";
+  const finishReason = payload.choices?.[0]?.finish_reason ?? null;
+  const failure = finishReason === "length" ? "MODEL_OUTPUT_TRUNCATED"
+    : finishReason === "content_filter" ? "MODEL_OUTPUT_FILTERED"
+      : (finishReason !== null && finishReason !== "stop") || (rawContent != null && typeof rawContent !== "string") ? "MODEL_RESPONSE_INVALID"
+        : !content ? "MODEL_EMPTY_RESPONSE" : null;
   const result: AgentExecutionResult<string> = {
-    data: content?.trim() ?? "",
+    data: content,
     provider: `llm:${provider}:${model}`,
-    status: failure && (workspace || review || intake) ? "FAILED" : "SUCCESS",
+    status: failure ? "FAILED" : "SUCCESS",
     fallbackReason: failure,
     finishReason,
     durationMs: Date.now() - startedAt,
-    requestIdentity: payload.id ?? null,
+    requestIdentity: typeof payload.id === "string" ? payload.id : null,
     usage,
     usageUnknown: usage.inputTokens === null || usage.outputTokens === null,
   };
   if (billing) await settleWorkspaceCloudCall(billing, result);
-  if (!content && !workspace && !review && !intake) throw new Error("LLM returned empty content");
   return result;
 }
 
 export async function chatWithLLM(prompt: string, projectId?: string) {
-  return (await chatWithLLMWithMeta(prompt, projectId)).data;
+  const result = await chatWithLLMWithMeta(prompt, projectId);
+  if (result.status === "FAILED") throw new AppError(result.fallbackReason ?? "MODEL_OUTPUT_INVALID", "模型回复未完成，请核对原状态后重试", 503);
+  return result.data;
 }
 
 /** One versioned task, one original provider/quota call. Parsing stays with the existing consumer. */
@@ -112,7 +118,9 @@ export async function generateArtifactWithLLM(input: {
   artifactType: ArtifactTypeValue;
   cards: CardDraft[];
 }) {
-  return (await generateArtifactWithLLMWithMeta(input)).data;
+  const result = await generateArtifactWithLLMWithMeta(input);
+  if (result.status === "FAILED") throw new AppError(result.fallbackReason ?? "MODEL_OUTPUT_INVALID", "成果草稿生成未完成，请核对原状态后重试", 503);
+  return result.data;
 }
 
 export async function generateArtifactWithLLMWithMeta(input: {
@@ -130,7 +138,8 @@ export async function chatJson<T>(prompt: string, parse: (value: unknown) => T, 
 }
 
 export async function chatJsonWithMeta<T>(prompt: string, parse: (value: unknown) => T, projectId?: string) {
-  const result = await chatWithLLMWithMeta(prompt, projectId);
+  const result = await chatWithLLMWithMeta(prompt, projectId, undefined, undefined, { outputTokens: 2048, jsonOutput: true });
+  if (result.status === "FAILED") throw new AppError(result.fallbackReason ?? "MODEL_OUTPUT_INVALID", "模型回复未完成，请核对原状态后重试", 503);
   return {
     ...result,
     data: parse(JSON.parse(result.data)),

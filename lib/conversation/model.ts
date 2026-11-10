@@ -28,7 +28,7 @@ export const answerSchema = z.object({
 export async function conversationModel<T>(actor: ConversationActor, turnId: string, purpose: "ROUTE" | "ANSWER", prompt: string, schema: z.ZodType<T>) {
   await assertSession(actor);
   // Conservative character ceiling (including JSON and CJK); no hidden compaction call.
-  if (prompt.length > 18000) throw new Error("CONTEXT_LIMIT");
+  if (prompt.length > 18000) throw new AppError("CONTEXT_LIMIT", "本轮资料超出分析容量，请减少附件或缩小问题后重试", 409);
   const result = await chatWithLLMWithMeta(prompt, undefined, { userId: actor.userId, sessionId: actor.sessionId, turnId, purpose });
   if (result.status === "FAILED") throw new AppError(result.fallbackReason ?? "MODEL_OUTPUT_INVALID", "云端回答不完整，请读取原状态后重新提问", 409);
   return { data: schema.parse(JSON.parse(result.data)), provider: result.provider };

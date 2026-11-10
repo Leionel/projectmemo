@@ -10,6 +10,11 @@ export const SESSION_COOKIE = "pm_session";
 
 export const SESSION_MAX_AGE_SECONDS = 7 * 24 * 3600;
 
+export function decodeSessionCookie(value: string): string {
+  try { return decodeURIComponent(value); }
+  catch { return ""; }
+}
+
 function secureAttribute(): string {
   return process.env.NODE_ENV === "production" ? "; Secure" : "";
 }

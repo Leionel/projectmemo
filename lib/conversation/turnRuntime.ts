@@ -1,3 +1,4 @@
+import { shanghaiDay } from "@/lib/time/shanghai";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
@@ -73,7 +74,7 @@ export async function turnOperation<T>(actor: ConversationActor, conversationId:
       const account = await tx.accountSecurity.findUnique({ where: { userId: actor.userId } });
       if (account) {
         if (!account.emailVerifiedAt || account.dailyCloudLimit <= 0) throw new AppError("CLOUD_ACCESS_DISABLED", "当前账号未开通云端额度", 403);
-        const day = new Date().toISOString().slice(0, 10);
+        const day = shanghaiDay();
         await tx.accountCloudUsage.upsert({ where: { userId_day: { userId: actor.userId, day } }, create: { userId: actor.userId, day, used: 0 }, update: {} });
         if (!(await tx.accountCloudUsage.updateMany({ where: { userId: actor.userId, day, used: { lt: account.dailyCloudLimit } }, data: { used: { increment: 1 } } })).count)
           throw new AppError("CLOUD_QUOTA_EXHAUSTED", "今日云端调用额度已用完", 429);

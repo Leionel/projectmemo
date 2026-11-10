@@ -3,7 +3,7 @@ import { AgentRunStatus, AgentRunType } from "@/lib/generated/prisma/client";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { searchProjectCards } from "@/lib/memory/hybridSearch";
 import type { KnowledgeTypeValue } from "@/lib/types";
-import { finishExternalAgentRun, reserveExternalAgentRun } from "@/lib/repositories/agent";
+import { finishExternalAgentRun, reserveExternalAgentRun, ABANDONED_EXTERNAL_RUN_MS } from "@/lib/repositories/agent";
 import { requireProject } from "@/lib/repositories/projects";
 import {
   queryMemoryResponseSchema,
@@ -25,6 +25,7 @@ export async function queryMemoryFromXiaoyi(input: {
     runType: AgentRunType.CHAT,
     provider: XIAOYI_PROVIDER,
     externalRequestId: receiptId,
+    abandonAfterMs: ABANDONED_EXTERNAL_RUN_MS,
     trace: { source: "xiaoyi", provider: XIAOYI_PROVIDER, tool: "query_memory", stage: "RECEIVED", requestId: input.requestId },
   });
 

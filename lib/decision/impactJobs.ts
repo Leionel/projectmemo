@@ -76,10 +76,24 @@ export async function consumeImpactJobs(limit = 5) {
               where: { missionId: id, status: { in: ["PENDING", "APPROVED"] } },
               data: { status: "EXPIRED" },
             });
-            await tx.agentMissionStep.updateMany({
+            // 已派发的外部写入结果可能未知；置废后 Runner 不再核对，后续重新提案会造成重复日程。
+            const open = await tx.agentMissionStep.findMany({
               where: {
                 missionId: id,
                 status: { in: ["READY", "RUNNING", "WAITING_APPROVAL"] },
+              },
+              select: { id: true, protocolJson: true, approval: { select: { status: true } } },
+            });
+            await tx.agentMissionStep.updateMany({
+              where: {
+                id: {
+                  in: open
+                    .filter((step) => {
+                      const protocol = step.protocolJson as { externalEffect?: unknown; sandboxJob?: unknown } | null;
+                      return step.approval?.status !== "DISPATCHING" && !protocol?.externalEffect && !protocol?.sandboxJob;
+                    })
+                    .map((step) => step.id),
+                },
               },
               data: { status: "OBSOLETE" },
             });

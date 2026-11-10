@@ -1,3 +1,4 @@
+import { TextFormatters } from '../common/TextFormatters';
 import { alertError } from '../common/ErrorAlert';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMotion } from '../common/DesignTokens';
 import { ArtifactAuditResponse, ArtifactAuditRecheckItem, ArtifactClaimAuditItem, ArtifactGenerationRef } from '../models/Artifact';
@@ -23,7 +24,7 @@ export struct ClaimAuditorDrawer {
   }
 
   private formatDay(value: string): string {
-    return value !== '' && value.length >= 10 ? value.substring(0, 10) : '未知';
+    return value !== '' && value.length >= 10 ? TextFormatters.shanghaiDate(value) : '未知';
   }
 
   private async loadAudit(): Promise<void> {

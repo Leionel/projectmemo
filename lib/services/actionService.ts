@@ -114,35 +114,44 @@ export async function completeProjectAction(projectId: string, actionId: string,
   if (action.status === "DONE" && action.resultCardId && !action.isSimulated) return { ...action,
     resultCard: await db.knowledgeCard.findUnique({ where: { id: action.resultCardId } }), stateRefreshPending: false };
   const prepared = await prepareActionResult(projectId, actionId, resultText);
-  const result = await db.$transaction(tx => commitActionResult(tx, prepared));
+  const result = await db.$transaction(async tx => {
+    const committed = await commitActionResult(tx, prepared);
+    if (committed.alreadyDone) return { ...committed, run: null };
+    const run = await saveAgentRun({
+      projectId,
+      runType: AgentRunType.ACTION,
+      status: AgentRunStatus.SUCCESS,
+      provider: process.env.LLM_MODE === "openai-compatible" && process.env.LLM_API_KEY ? "agent+rules" : "mock",
+      trace: {
+        actionId,
+        resultCardId: committed.card?.id ?? null,
+        linkedCardIds: prepared.links.map((link) => link.relatedCardId),
+        rule: "completed_action_creates_reflection_card",
+      },
+      durationMs: Date.now() - startedAt,
+    }, tx);
+    return { ...committed, run };
+  });
   if (result.alreadyDone) {
     return { ...result.updatedAction, resultCard: result.card, stateRefreshPending: false };
   }
   const stateRefreshPending = await refreshProjectStateAfterMutation(projectId);
-  await refreshExperiencesForProject(projectId);
-  if (result.card) {
-    await vectorStore.index({ id: result.card.id, title: result.card.title, keywords: result.card.keywords as string[] });
+  // 完成回执已提交，派生索引失败只记录，不能把已完成的请求变成 500。
+  try {
+    await refreshExperiencesForProject(projectId);
+    if (result.card) {
+      await vectorStore.index({ id: result.card.id, title: result.card.title, keywords: result.card.keywords as string[] });
+    }
+  } catch (error) {
+    console.warn("Derived indexes are pending after action completion", error);
   }
-  const run = await saveAgentRun({
-    projectId,
-    runType: AgentRunType.ACTION,
-    status: AgentRunStatus.SUCCESS,
-    provider: process.env.LLM_MODE === "openai-compatible" && process.env.LLM_API_KEY ? "agent+rules" : "mock",
-    trace: {
-      actionId,
-      resultCardId: result.card?.id ?? null,
-      linkedCardIds: prepared.links.map((link) => link.relatedCardId),
-      rule: "completed_action_creates_reflection_card",
-    },
-    durationMs: Date.now() - startedAt,
-  });
-  return { ...result.updatedAction, resultCard: result.card, run, stateRefreshPending };
+  return { ...result.updatedAction, resultCard: result.card, run: result.run, stateRefreshPending };
 }
 
 export async function updateProjectAction(projectId: string, actionId: string, input: Parameters<typeof updateAction>[2]) {
   if (input.status === "DONE") {
     const existing = await findAction(projectId, actionId);
-    return completeProjectAction(projectId, actionId, input.resultText ?? existing.resultText ?? "完成行动并记录结果");
+    return completeProjectAction(projectId, actionId, input.resultText ?? existing.resultText ?? "");
   }
   return updateAction(projectId, actionId, input);
 }

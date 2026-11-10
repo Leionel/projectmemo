@@ -12,6 +12,7 @@ import type { ActionItemData } from "@/lib/types";
 import { actionStatusLabels } from "@/lib/types";
 import { emitWorkspaceChange, subscribeWorkspaceChange } from "@/lib/client/workspaceEvents";
 import { getDeviceKey } from "@/lib/client/deviceKey";
+import { endOfShanghaiDay, shanghaiDay } from "@/lib/time/shanghai";
 import { sortActions, type ActionSortMode } from "@/lib/projectDashboard";
 
 type ActionView = "active" | "completed" | "all";
@@ -25,14 +26,12 @@ const sortOptions: Array<{ value: ActionSortMode; label: string }> = [
 ];
 
 function dueDateToIso(value: string) {
-  return value ? new Date(`${value}T23:59:59`).toISOString() : null;
+  return value ? endOfShanghaiDay(value).toISOString() : null;
 }
 
 function dateInputValue(value?: string | null) {
   if (!value) return "";
-  const date = new Date(value);
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
-  return local.toISOString().slice(0, 10);
+  return shanghaiDay(new Date(value));
 }
 
 /** 次级操作菜单项：选中后关闭「更多」下拉，再执行原操作。 */
@@ -130,7 +129,7 @@ export function ActionBoard({ projectId, initialActions, reminderEnabled = false
       const data = await response.json().catch(() => null);
       if (!response.ok) throw new Error(data?.error?.message ?? "更新行动失败");
       setActions((old) => old.map((item) => item.id === action.id ? { ...item, ...data.action } : item));
-      setMessage(success);
+      setMessage([success, data.reminderNotice, data.reminderOutcome?.compensation?.needed || data.reminderOutcome?.recorded === false ? data.reminderOutcome?.compensation?.message : null].filter(Boolean).join(""));
       setEditFor(null); setEditDraft(null); setCancelFor(null); setCompletionPrompt(null);
       notify(["actions", "metrics"]);
     } catch (error) {
@@ -202,6 +201,7 @@ export function ActionBoard({ projectId, initialActions, reminderEnabled = false
       } else {
         setMessage("行动已完成并移入历史，结果已沉淀为阶段复盘卡片。");
       }
+      if (data.reminderNotice) setMessage((current) => `${current}${data.reminderNotice}`);
       notify(["actions", "cards", "interventions", "metrics"]);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "完成行动失败");
@@ -235,7 +235,7 @@ export function ActionBoard({ projectId, initialActions, reminderEnabled = false
     </div>
 
     <div className="mt-4 border-b border-[var(--rule)] pb-4">
-      <div className="flex gap-2"><input aria-label="新增行动标题" value={title} onChange={(event) => setTitle(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void create(); }} disabled={busy === "create"} className="focus-ring editorial-input min-w-0 flex-1 px-3 py-2.5 text-sm" placeholder="新增一个可执行行动，例如：补齐演示脚本" /><button type="button" onClick={() => void create()} disabled={busy === "create" || title.trim().length < 2} className="focus-ring editorial-button-secondary disabled:opacity-50">{busy === "create" ? <LoaderCircle size={16} className="animate-spin" /> : <Plus size={16} />}新增行动</button></div>
+      <div className="flex gap-2"><input aria-label="新增行动标题" value={title} onChange={(event) => setTitle(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.nativeEvent.isComposing) void create(); }} disabled={busy === "create"} className="focus-ring editorial-input min-w-0 flex-1 px-3 py-2.5 text-sm" placeholder="新增一个可执行行动，例如：补齐演示脚本" /><button type="button" onClick={() => void create()} disabled={busy === "create" || title.trim().length < 2} className="focus-ring editorial-button-secondary disabled:opacity-50">{busy === "create" ? <LoaderCircle size={16} className="animate-spin" /> : <Plus size={16} />}新增行动</button></div>
       <details className="mt-2"><summary className="focus-ring w-fit cursor-pointer list-none rounded-lg px-1 py-1 text-xs font-bold text-[var(--teal-strong)]"><ChevronDown size={13} className="mr-1 inline" />补充优先级、截止时间和说明</summary><div className="mt-3 grid gap-3 sm:grid-cols-2"><label className="text-xs font-bold text-[var(--ink-soft)]">优先级<select aria-label="新行动优先级" value={priority} onChange={(event) => setPriority(Number(event.target.value))} className="focus-ring editorial-input mt-1.5 w-full px-3 py-2 text-sm">{[1,2,3,4,5].map((value) => <option key={value} value={value}>{value} / 5</option>)}</select></label><label className="text-xs font-bold text-[var(--ink-soft)]">截止日期<input aria-label="新行动截止日期" type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} className="focus-ring editorial-input mt-1.5 w-full px-3 py-2 text-sm" /></label><label className="text-xs font-bold text-[var(--ink-soft)] sm:col-span-2">补充说明<textarea aria-label="新行动说明" value={description} onChange={(event) => setDescription(event.target.value)} maxLength={500} rows={2} className="focus-ring editorial-input mt-1.5 w-full resize-y px-3 py-2 text-sm" /></label></div></details>
     </div>
 
@@ -308,7 +308,7 @@ function ActionCard(props: ActionCardProps) {
       {completed && action.resultCardId && <div className="mt-3.5"><Link className="focus-ring inline-flex items-center gap-1.5 rounded-lg bg-[var(--teal-pale)] px-3.5 py-2 text-xs font-bold text-[var(--teal-strong)] transition hover:bg-[var(--teal)] hover:text-white" href={projectHref(action.projectId, `#card-${action.resultCardId}`)}>查看结果复盘卡<ArrowRight size={14} aria-hidden="true" /></Link></div>}
       {!completed && !cancelled && feasibilityFor === action.id && <ActionFeasibilityPanel projectId={action.projectId} action={action} otherActions={props.allActions} onActionCreated={props.onDependencyChanged} />}
       {!completed && !cancelled && reminderFor === action.id && <ActionReminderPanel projectId={action.projectId} actionId={action.id} onClose={() => props.onToggleReminder(action.id)} />}
-      {cancelFor === action.id && <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg bg-[var(--brick-pale)] px-3 py-2 text-xs"><span className="font-bold text-[var(--brick)]">确定取消这项行动？</span><button type="button" onClick={() => void props.onPatch(action, { status: "CANCELLED" }, "行动已取消，可在“全部”中查看。") } disabled={busy === action.id} className="focus-ring rounded-md bg-[var(--brick)] px-2 py-1 font-bold text-white">确认取消行动</button><button type="button" onClick={() => props.onSetCancelFor(null)} className="focus-ring rounded-md px-2 py-1 font-bold">返回</button></div>}
+      {cancelFor === action.id && <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg bg-[var(--brick-pale)] px-3 py-2 text-xs"><span className="font-bold text-[var(--brick)]">确定取消这项行动？</span><button type="button" onClick={() => void props.onPatch(action, { status: "CANCELLED", deviceKey: getDeviceKey() }, "行动已取消，可在“全部”中查看。") } disabled={busy === action.id} className="focus-ring rounded-md bg-[var(--brick)] px-2 py-1 font-bold text-white">确认取消行动</button><button type="button" onClick={() => props.onSetCancelFor(null)} className="focus-ring rounded-md px-2 py-1 font-bold">返回</button></div>}
       {editFor === action.id && editDraft && <div className="mt-3 rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3"><div className="grid gap-3 sm:grid-cols-2"><label className="text-xs font-bold text-[var(--ink-soft)] sm:col-span-2">标题<input value={editDraft.title} onChange={(event) => props.onSetEditDraft({ ...editDraft, title: event.target.value })} maxLength={160} className="focus-ring editorial-input mt-1 w-full px-3 py-2 text-sm" /></label><label className="text-xs font-bold text-[var(--ink-soft)]">优先级<select value={editDraft.priority} onChange={(event) => props.onSetEditDraft({ ...editDraft, priority: Number(event.target.value) })} className="focus-ring editorial-input mt-1 w-full px-3 py-2 text-sm">{[1,2,3,4,5].map((value) => <option key={value} value={value}>{value} / 5</option>)}</select></label><label className="text-xs font-bold text-[var(--ink-soft)]">截止日期<input type="date" value={editDraft.dueDate} onChange={(event) => props.onSetEditDraft({ ...editDraft, dueDate: event.target.value })} className="focus-ring editorial-input mt-1 w-full px-3 py-2 text-sm" /></label><label className="text-xs font-bold text-[var(--ink-soft)] sm:col-span-2">说明<textarea value={editDraft.description} onChange={(event) => props.onSetEditDraft({ ...editDraft, description: event.target.value })} maxLength={500} rows={2} className="focus-ring editorial-input mt-1 w-full resize-y px-3 py-2 text-sm" /></label></div><div className="mt-3 flex justify-end gap-2"><button type="button" onClick={props.onCloseEdit} className="focus-ring editorial-button-secondary text-xs"><X size={14} />取消</button><button type="button" onClick={() => void props.onPatch(action, { title: editDraft.title.trim(), description: editDraft.description.trim() || null, priority: editDraft.priority, dueAt: dueDateToIso(editDraft.dueDate) }, "行动信息已更新。") } disabled={busy === action.id || editDraft.title.trim().length < 2} className="focus-ring editorial-button text-xs">{busy === action.id ? <LoaderCircle size={14} className="animate-spin" /> : <Check size={14} />}保存</button></div></div>}
       {resultFor === action.id && <div className="mt-3 rounded-md border border-[var(--teal)]/30 bg-[var(--card-bg)] p-3"><label htmlFor={`result-${action.id}`} className="text-xs font-black text-[var(--navy)]">完成结果（会生成复盘卡）</label><textarea id={`result-${action.id}`} value={resultText} onChange={(event) => props.onSetResultText(event.target.value)} rows={3} maxLength={2000} className="focus-ring editorial-input mt-2 w-full p-2.5 text-sm" placeholder="写下完成了什么、验证结果和仍需跟进的地方" />
         {completionPrompt?.actionId === action.id && <fieldset className="mt-2 rounded-lg bg-[var(--amber)]/10 p-2.5">

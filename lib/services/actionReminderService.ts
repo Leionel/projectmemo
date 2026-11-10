@@ -308,20 +308,20 @@ async function findReminderById(projectId: string, reminderId: string, actor: Re
 
 /** 批量排程已经把这条行动写进设备日历时，单待办视图必须看到同一个事实 */
 async function loadConfirmedPlanBlock(projectId: string, actionId: string, userId: string) {
-  return db.scheduleBlock.findFirst({
-    where: { actionId, plan: { projectId, userId, status: "CONFIRMED" } },
-    orderBy: { startAt: "asc" },
-    select: {
-      id: true,
-      planId: true,
-      startAt: true,
-      endAt: true,
-      calendarId: true,
-      calendarEventId: true,
-      calendarSyncStatus: true,
-      calendarError: true,
-    },
-  });
+  const select = {
+    id: true,
+    planId: true,
+    startAt: true,
+    endAt: true,
+    calendarId: true,
+    calendarEventId: true,
+    calendarSyncStatus: true,
+    calendarError: true,
+  } as const;
+  const where = { actionId, plan: { projectId, userId, status: "CONFIRMED" } };
+  // 重复安排时优先看还没结束的时段，已过去的时段不能遮住未来日程。
+  return await db.scheduleBlock.findFirst({ where: { ...where, endAt: { gt: new Date() } }, orderBy: { startAt: "asc" }, select })
+    ?? await db.scheduleBlock.findFirst({ where, orderBy: { startAt: "asc" }, select });
 }
 
 function deleteOperation(
@@ -1265,15 +1265,20 @@ export async function applyReminderDispositionOnCompletion(
     const hasFutureEvent = isOutstandingDeviceStatus(row.syncStatus) &&
       row.calendarEventId !== null &&
       row.reminderAt.getTime() > now.getTime();
-    const updated = await db.actionReminder.update({
-      where: { id: row.id },
+    // 还没写进设备的提醒也要撤销：否则迟到的同步回执会把已结束待办的日程登记成有效。
+    const notYetWritten = row.calendarEventId === null && row.syncStatus !== "REVOKED";
+    const revoke = hasFutureEvent || notYetWritten;
+    const changed = await db.actionReminder.updateMany({
+      where: { id: row.id, revision: row.revision },
       data: {
         completionChoice: "REMOVE",
-        syncStatus: hasFutureEvent ? "REVOKED" : row.syncStatus,
-        revokedAt: hasFutureEvent ? now : row.revokedAt,
-        revision: row.revision + 1,
+        syncStatus: revoke ? "REVOKED" : row.syncStatus,
+        revokedAt: revoke ? now : row.revokedAt,
+        revision: { increment: 1 },
       },
     });
+    if (changed.count === 0) throw new AppError("REMINDER_REVISION_CHANGED", "提醒刚被其他操作修改", 409);
+    const updated = await db.actionReminder.findUniqueOrThrow({ where: { id: row.id } });
     return {
       recorded: true,
       disposition: "REMOVE",

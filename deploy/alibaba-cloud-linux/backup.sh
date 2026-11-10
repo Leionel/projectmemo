@@ -51,6 +51,16 @@ fi
 
 mkdir -p "$DEST" || fail "无法在 $BACKUP_ROOT 下创建快照目录 $DEST"
 
+# 中途失败（常见原因是磁盘写满）不留半成品，否则失败越多占用越大，也可能被误认成可恢复备份。
+BACKUP_FINISHED=0
+cleanup_partial() {
+  if [ "$BACKUP_FINISHED" -ne 1 ]; then
+    printf '[backup] 错误：备份未完成，已删除半成品 %s。先检查 df -h %s\n' "$DEST" "$BACKUP_ROOT" >&2
+    rm -rf "$DEST"
+  fi
+}
+trap cleanup_partial EXIT
+
 # ---- 1. 数据库在线备份 ----
 log "备份数据库 $DB_FILE → $DEST/projectmemo.db"
 APP_DIR="$APP_DIR" node "$TOOL" backup "$DB_FILE" "$DEST/projectmemo.db"
@@ -59,7 +69,7 @@ APP_DIR="$APP_DIR" node "$TOOL" backup "$DB_FILE" "$DEST/projectmemo.db"
 BACKUP_COUNTS="$(APP_DIR="$APP_DIR" node "$TOOL" info "$DEST/projectmemo.db")"
 log "备份库数据量：$BACKUP_COUNTS"
 
-# ---- 3. 附件目录 ----
+# ---- 3. 附件目录（在数据库之后复制：备份期间新增的文件多一份无害，库里记录的文件不会缺）----
 ATTACHMENT_FILES=0
 if [ -d "$ATTACHMENT_DIR" ]; then
   log "备份附件目录 $ATTACHMENT_DIR → $DEST/storage"
@@ -97,12 +107,15 @@ DB_BYTES="$(stat -c%s "$DEST/projectmemo.db")"
 # ---- 5. 只保留最近 KEEP 份 ----
 if [ "$KEEP" -gt 0 ]; then
   # 按时间倒序，跳过前 KEEP 个，其余删除。备份目录名是 UTC 时间戳，排序即时间序。
-  ls -1dt "$BACKUP_ROOT"/*/ 2>/dev/null | tail -n "+$((KEEP + 1))" | while read -r old; do
+  # 只计入本脚本产出的完整快照；web-update-* 与 manual-* 由发布流程管理，不参与轮转。
+  find "$BACKUP_ROOT" -mindepth 1 -maxdepth 1 -type d -name '[0-9]*T[0-9]*Z' -exec test -f '{}/manifest.txt' ';' -print \
+    | sort -r | tail -n "+$((KEEP + 1))" | while read -r old; do
     log "清理过期备份 $old"
     rm -rf "$old"
   done
 fi
 
+BACKUP_FINISHED=1
 log "完成：$DEST"
 log "数据库 sha256=$DB_SHA，附件文件数=$ATTACHMENT_FILES"
 cat "$DEST/manifest.txt"

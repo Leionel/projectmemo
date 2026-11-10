@@ -9,6 +9,8 @@ import type { ConversationActor } from "@/lib/types/conversation";
 /** 每次讨论最多保留的附件数；只读给模型的文字也按条截断，避免一份文件挤掉讨论上下文。 */
 export const CONVERSATION_ATTACHMENT_LIMIT = 10;
 const TURN_TEXT_LIMIT = 6000;
+/** 模型提示上限 18000 字，附件之外还有目录、对话和来源；多份长附件按份数均分。 */
+const TURN_TOTAL_TEXT_LIMIT = 9000;
 
 const publicShape = { id: true, conversationId: true, type: true, fileName: true, mimeType: true, size: true,
   extractionStatus: true, extractionError: true, createdAt: true } as const;
@@ -81,11 +83,12 @@ export async function promoteConversationAttachment(actor: ConversationActor, co
 }
 
 /** 本轮讨论引用的附件文字：只取本讨论的附件，按条截断；没有可读文字的附件只给文件名与状态。 */
-export async function conversationAttachmentContext(conversationId: string, ownerUserId: string, ids: string[]) {
+export async function conversationAttachmentContext(conversationId: string, ownerUserId: string, ids: string[], totalLimit = TURN_TOTAL_TEXT_LIMIT) {
   if (!ids.length) return { text: "", names: [] as string[] };
   const rows = await db.conversationAttachment.findMany({ where: { id: { in: ids }, conversationId, ownerUserId }, orderBy: { createdAt: "asc" } });
+  const perFile = Math.min(TURN_TEXT_LIMIT, Math.floor(totalLimit / Math.max(rows.length, 1)));
   const text = rows.map(row => row.extractedText
-    ? `【本次讨论附件《${row.fileName}》提取文字${row.extractedText.length > TURN_TEXT_LIMIT ? "（已截断）" : ""}】\n${row.extractedText.slice(0, TURN_TEXT_LIMIT)}`
+    ? `【本次讨论附件《${row.fileName}》提取文字${row.extractedText.length > perFile ? "（已截断）" : ""}】\n${row.extractedText.slice(0, perFile)}`
     : `【本次讨论附件《${row.fileName}》】文字暂未提取（${row.extractionError ?? "未知原因"}），不能据此下结论。`).join("\n\n");
   return { text, names: rows.map(row => row.fileName) };
 }

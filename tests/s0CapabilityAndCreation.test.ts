@@ -26,7 +26,7 @@ it("能力查询不调用模型：缺 key、规则模式和配额耗尽均不可
   expect(await cloudCapability(user.id)).toMatchObject({ available: false, reason: "NOT_CONFIGURED" });
   vi.stubEnv("LLM_API_KEY", "synthetic-not-a-real-key");
   await db.accountSecurity.create({ data: { userId: user.id, email: "synthetic@example.invalid", emailVerifiedAt: new Date(), dailyCloudLimit: 1 } });
-  await db.accountCloudUsage.create({ data: { userId: user.id, day: new Date().toISOString().slice(0, 10), used: 1 } });
+  await db.accountCloudUsage.create({ data: { userId: user.id, day: new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Shanghai" }).format(new Date()), used: 1 } });
   expect(await cloudCapability(user.id)).toMatchObject({ available: false, reason: "DAILY_QUOTA_EXHAUSTED", remainingToday: 0 });
   expect(network).not.toHaveBeenCalled();
   network.mockRestore();

@@ -95,6 +95,17 @@ export default function apiContractTest() {
       expect(isSuccessCode('GET', 404)).assertFalse();
       expect(isSuccessCode('POST', 422)).assertFalse();
       expect(isSuccessCode('PATCH', 500)).assertFalse();
+      // 401 是登录失效，不是成功；由 ApiClient.handleResponseError 转 UNAUTHORIZED。
+      expect(isSuccessCode('POST', 401)).assertFalse();
+      expect(isSuccessCode('GET', 401)).assertFalse();
+    });
+
+    // POST/PATCH 的 202 仅表示已受理；DELETE 的 202 同样是受理而非 200。
+    it('success_202_is_accepted_not_200', 0, () => {
+      expect(isSuccessCode('POST', 202)).assertTrue();
+      expect(isSuccessCode('PATCH', 202)).assertTrue();
+      expect(isSuccessCode('DELETE', 202)).assertTrue();
+      expect(isSuccessCode('GET', 202)).assertFalse();
     });
 
     // 删除项目成功返回 204 无正文：不能按 JSON 成功解析，必须走 isNoContent。
@@ -147,6 +158,21 @@ export default function apiContractTest() {
       const err = parseApiError('{"foo":"bar"}', 500);
       expect(err.code).assertEqual('HTTP_ERROR');
       expect(err.message).assertEqual('HTTP 500');
+    });
+
+    // 401 登录失效：客户端必须保留服务端中文说明，并由 ApiClient 触发 SessionStore 清理。
+    it('classify_http_error_401_is_unauthorized', 0, () => {
+      expect(classifyHttpError(401)).assertEqual('UNAUTHORIZED');
+      expect(classifyHttpError(403)).assertEqual('FORBIDDEN');
+      expect(classifyHttpError(500)).assertEqual('SERVER_ERROR');
+    });
+
+    it('parse_api_error_401_login_expired', 0, () => {
+      const body = '{"error":{"code":"UNAUTHORIZED","message":"登录状态已失效，请重新登录"}}';
+      const err = parseApiError(body, 401);
+      expect(err.code).assertEqual('UNAUTHORIZED');
+      expect(err.message).assertEqual('登录状态已失效，请重新登录');
+      expect(err.status).assertEqual(401);
     });
 
     // --- 状态枚举与后端一致 ---

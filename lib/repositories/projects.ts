@@ -1,3 +1,4 @@
+import { endOfShanghaiDay } from "@/lib/time/shanghai";
 import { db } from "@/lib/db";
 import type { ProjectCreateInput, ProjectUpdateInput } from "@/lib/validation/schemas";
 import type { ProjectScenario } from "@/lib/generated/prisma/client";
@@ -57,7 +58,7 @@ export async function createProject(input: ProjectCreateInput) {
       description: input.description,
       goal: input.goal,
       scenario: input.scenario as ProjectScenario,
-      deadline: input.deadline ? new Date(`${input.deadline}T23:59:59`) : null,
+      deadline: input.deadline ? endOfShanghaiDay(input.deadline) : null,
     },
   });
 }
@@ -92,7 +93,7 @@ export async function createOwnedProjectInTx(tx: import("@/lib/generated/prisma/
     return { project, replayed: true };
   }
   const project = await tx.project.create({ data: { ...fields, scenario: fields.scenario as ProjectScenario,
-    deadline: fields.deadline ? new Date(`${fields.deadline}T23:59:59`) : null,
+    deadline: fields.deadline ? endOfShanghaiDay(fields.deadline) : null,
     memberships: { create: { userId, role: "OWNER" } } } });
   await tx.agentRun.create({ data: { provider, externalRequestId, runType: "ACTION", status: "SUCCESS",
     trace: { ownerId: userId, payloadHash: hash, ...(options.hashExtra ? { intakeHash: jsonHash(options.hashExtra) } : {}), ...options.traceExtra },
@@ -114,7 +115,7 @@ export async function updateProject(projectId: string, input: ProjectUpdateInput
       ...(input.goal !== undefined ? { goal: input.goal } : {}),
       ...(input.scenario !== undefined ? { scenario: input.scenario as ProjectScenario } : {}),
       ...(input.deadline !== undefined
-        ? { deadline: input.deadline ? new Date(`${input.deadline}T23:59:59`) : null }
+        ? { deadline: input.deadline ? endOfShanghaiDay(input.deadline) : null }
         : {}),
     },
   });

@@ -263,7 +263,7 @@ async function executeTurnGeneration(actor: ConversationActor, id: string, turn:
           longTermGoal: p.preference.longTermGoal.slice(0, 80), notes: p.preference.notes.slice(0, 80) } : null }));
       const r = await conversationModel(actor, turn.id, "ROUTE", focusSystemPrompt +
         "\n按问题选择至多3个项目，intent=ANSWER/CLARIFY/PROPOSE_ACTION/OPEN_MISSION；query≤256字。返回 {intent,projectIds,query}。\n" +
-        JSON.stringify({ message: input.message, ...(attachmentContext.text ? { conversationAttachments: attachmentContext.text } : {}), focus: focused, frozenRefs, pinnedConstraints: pinned, directory: compact,
+        JSON.stringify({ message: input.message, ...(attachmentContext.text ? { conversationAttachments: attachmentContext.text.slice(0, 1500) } : {}), focus: focused, frozenRefs, pinnedConstraints: pinned, directory: compact,
           coverage: directory.coverage }), routeSchema);
       route = r.data; provider = r.provider;
       const allowed = new Set(directory.summaries.map(p => p.id));
@@ -286,10 +286,10 @@ async function executeTurnGeneration(actor: ConversationActor, id: string, turn:
     else if (modelEnabled) {
       const responseHistory = await readConversation(actor, id);
       await validateReadSources(actor, observations.sources);
-      const r = r4 ? { data: r4.modelAnswer!, provider: r4.provider } : await conversationModel(actor, turn.id, "ANSWER", focusSystemPrompt +
+      const answerPrompt = (attachments: string) => focusSystemPrompt +
         "\n返回 {advice,recommendedProjectId,observations:[{sourceId,quote}],priorities:[{projectId,tradeoff}],action:null或{projectId,title,description,priority}}。" +
         "仅 intent=PROPOSE_ACTION 可以提出 action。未知字段不补造。\n" +
-        JSON.stringify({ message: input.message, ...(attachmentContext.text ? { conversationAttachments: attachmentContext.text } : {}), intent: route.intent, focus: focused, pinnedConstraints: pinned,
+        JSON.stringify({ message: input.message, ...(attachments ? { conversationAttachments: attachments } : {}), intent: route.intent, focus: focused, pinnedConstraints: pinned,
           recentDialogue: responseHistory.messages.filter(m => !m.restricted).slice(-6).map(m => ({ role: m.role, text: m.content.slice(0, 400), refs: m.refs.slice(0, 4) })),
           projects: directory.summaries.filter(p => route.projectIds.includes(p.id)).map(p => ({
             id: p.id, title: p.title, goal: p.goal.slice(0, 300), priority: p.priority,
@@ -298,7 +298,14 @@ async function executeTurnGeneration(actor: ConversationActor, id: string, turn:
             const file = fileGuides.find(file => file.sourceId === source.id);
             return { ...source, citationNumber: index + 1, file: file ? { title: file.title, kind: file.kind, readScope: file.readScope } : null };
           }),
-          coverage: directory.coverage }), answerSchema);
+          coverage: directory.coverage });
+      // 来源和对话优先于附件正文：容量不够时逐步收窄每份附件，而不是整轮失败。
+      let attachmentText = attachmentContext.text, prompt = r4 ? "" : answerPrompt(attachmentText);
+      for (let limit = 6000; !r4 && prompt.length > 18000 && attachmentText && limit >= 750; limit = Math.floor(limit / 2)) {
+        attachmentText = (await conversationAttachmentContext(id, actor.userId, input.attachmentIds ?? [], limit)).text;
+        prompt = answerPrompt(attachmentText);
+      }
+      const r = r4 ? { data: r4.modelAnswer!, provider: r4.provider } : await conversationModel(actor, turn.id, "ANSWER", prompt, answerSchema);
       modelAnswer = r.data; provider = r.provider; advice = r.data.advice;
       if (r.data.recommendedProjectId && route.projectIds.includes(r.data.recommendedProjectId)) focused = r.data.recommendedProjectId;
       // 只丢对不上的引文；一条都对不上才退回。正文引用了被丢来源时由下面的角标检查退回。

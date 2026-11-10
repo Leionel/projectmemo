@@ -31,7 +31,7 @@ const revisionSourceLabels: Record<string, string> = {
   MANUAL_CORRECTION: "人工校对",
 };
 
-/** 附件路由的错误体是 { error: string }，与其他路由的 { error: { message } } 不同 */
+/** 兼容旧版字符串错误和统一的结构化错误响应。 */
 function readError(data: unknown, fallback: string) {
   const error = (data as { error?: unknown } | null)?.error;
   if (typeof error === "string" && error) return error;

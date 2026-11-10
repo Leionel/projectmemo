@@ -39,6 +39,13 @@ APP_DIR="$APP_DIR" node "$TOOL" verify "$BACKUP_DIR/projectmemo.db" >/dev/null
 BACKUP_COUNTS="$(APP_DIR="$APP_DIR" node "$TOOL" info "$BACKUP_DIR/projectmemo.db")"
 log "备份数据量：$BACKUP_COUNTS"
 
+# ---- 库里登记的附件必须都在备份里，否则恢复后原件打不开 ----
+if [ -d "$BACKUP_DIR/storage" ]; then
+  MISSING_FILES="$(APP_DIR="$APP_DIR" node "$TOOL" missing-files "$BACKUP_DIR/projectmemo.db" "$BACKUP_DIR/storage")"
+  [ "$MISSING_FILES" = "0" ] || fail "备份不完整：数据库登记的 $MISSING_FILES 个附件在备份里找不到"
+  log "附件核对通过"
+fi
+
 SHIFT_TARGET="${2:-}"
 IN_PLACE=0
 if [ "$SHIFT_TARGET" = "--in-place" ]; then
@@ -47,12 +54,25 @@ if [ "$SHIFT_TARGET" = "--in-place" ]; then
 fi
 
 if [ "$IN_PLACE" -eq 1 ]; then
+  # 服务运行中覆盖库文件会让已打开的连接继续写旧 inode，并和删除的 WAL 拼出不一致状态。
+  if command -v systemctl >/dev/null 2>&1; then
+    for unit in projectmemo projectmemo-mission-worker; do
+      if systemctl is-active --quiet "$unit"; then
+        fail "服务 $unit 仍在运行。先执行：systemctl stop projectmemo-mission-worker projectmemo"
+      fi
+    done
+  fi
   log "警告：即将用备份覆盖线上数据"
   if [ -f "$LIVE_DB" ]; then
     SNAPSHOT="$BACKUP_ROOT/pre-restore-$(date -u +%Y%m%dT%H%M%SZ).db"
     mkdir -p "$(dirname "$SNAPSHOT")"
     log "覆盖前先给现有库做快照：$SNAPSHOT"
     APP_DIR="$APP_DIR" node "$TOOL" backup "$LIVE_DB" "$SNAPSHOT" >/dev/null
+  fi
+  if [ -d "$LIVE_ATTACHMENT_DIR" ]; then
+    STORAGE_SNAPSHOT="$BACKUP_ROOT/pre-restore-storage-$(date -u +%Y%m%dT%H%M%SZ)"
+    log "覆盖前保留现有附件：$STORAGE_SNAPSHOT"
+    cp -a "$LIVE_ATTACHMENT_DIR" "$STORAGE_SNAPSHOT"
   fi
 
   mkdir -p "$(dirname "$LIVE_DB")"
@@ -62,12 +82,14 @@ if [ "$IN_PLACE" -eq 1 ]; then
 
   if [ -d "$BACKUP_DIR/storage" ]; then
     log "还原附件目录 → $LIVE_ATTACHMENT_DIR"
+    # 先清空再复制：备份之后新增的文件在恢复后的库里没有记录，留着就是孤儿私有内容。
     mkdir -p "$LIVE_ATTACHMENT_DIR"
+    find "$LIVE_ATTACHMENT_DIR" -mindepth 1 -delete
     cp -a "$BACKUP_DIR/storage/." "$LIVE_ATTACHMENT_DIR/"
   fi
 
   APP_DIR="$APP_DIR" node "$TOOL" verify "$LIVE_DB" >/dev/null
-  log "线上数据已按备份还原，请重启服务并重新走一遍登录与主流程"
+  log "线上数据已按备份还原。先启动 Web 再启动 Worker：systemctl start projectmemo && systemctl start projectmemo-mission-worker，然后重新走一遍登录与主流程"
   exit 0
 fi
 

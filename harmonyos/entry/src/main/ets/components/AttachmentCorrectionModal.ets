@@ -1,3 +1,4 @@
+import { TextFormatters } from '../common/TextFormatters';
 import { alertError } from '../common/ErrorAlert';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion } from '../common/DesignTokens';
 import { Attachment } from '../models/Attachment';
@@ -206,7 +207,7 @@ export struct AttachmentCorrectionModal {
                       .fontSize(PMFontSize.CAPTION)
                       .fontWeight(FontWeight.Medium)
                       .fontColor(PMColors.INK_SECONDARY)
-                    Text(item.createdAt.length >= 10 ? item.createdAt.substring(0, 10) : item.createdAt)
+                    Text(TextFormatters.shanghaiDate(item.createdAt))
                       .fontSize(PMFontSize.CAPTION)
                       .fontColor(PMColors.INK_TERTIARY)
                   }

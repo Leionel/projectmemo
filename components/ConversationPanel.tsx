@@ -94,6 +94,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
     if (epoch === generation.current) {
       setView(v);
       if (loadedId.current !== id) {
+        setAttachmentChips([]);
         if (!selection) setText(readConversationDraft(id + ":composer").answer);
         setTarget(selection?.projectId ?? v.focusProjectId ?? projectId ?? ""); loadedId.current = id;
         requestAnimationFrame(() => { if (epoch === generation.current && messageRegion.current) { nearBottomRef.current = true; messageRegion.current.scrollTop = messageRegion.current.scrollHeight; } });
@@ -148,7 +149,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
     return()=>{window.removeEventListener("focus",refresh);clearTimeout(timer);};
   },[view?.id,view?.continuity?.nextBoundary,load]); // eslint-disable-line react-hooks/exhaustive-deps
   async function create() {
-    if (busyRef.current) return;
+    if (busyRef.current || attachments.busy) return;
     const epoch = ++generation.current;
     setBusy(true); setError("");
     try {
@@ -163,7 +164,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
     finally { if (epoch === generation.current) setBusy(false); }
   }
   async function ask(e: React.FormEvent) {
-    e.preventDefault(); if (!view || !analysisReady || !text.trim() || busyRef.current) return;
+    e.preventDefault(); if (!view || !analysisReady || !text.trim() || busyRef.current || attachments.busy) return;
     const epoch = generation.current, currentText = text.trim();
     const intentKey = JSON.stringify({ text: currentText, target, replyId: reply?.id, entityId: selection?.id, cloud, investigationMode, attachments: attachmentChips.map(c => c.id) });
     if (!pending.current || pending.current.text !== intentKey) pending.current = { text: intentKey, id: crypto.randomUUID(),
@@ -255,10 +256,11 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
     } catch (e) { if (epoch === generation.current) setError(e instanceof Error ? e.message : "历史暂不可读"); }
     finally { if (epoch === generation.current) setBusy(false); }
   }
-  const working = busy || !!view?.activeTurn;
-  const attachments = useConversationAttachments({ conversationId: view?.id ?? "", projectId: target || view?.homeProjectId || "", disabled: working || !view, chips: attachmentChips,
+  const turnWorking = busy || !!view?.activeTurn;
+  const attachments = useConversationAttachments({ conversationId: view?.id ?? "", projectId: target || view?.homeProjectId || "", disabled: turnWorking || !view, chips: attachmentChips,
     onChips: chips => { setAttachmentChips(chips); pending.current = null; }, onError: setError,
     onProjectSaved: name => setText(t => (t ? t + "\n" : "") + "我刚把《" + name + "》加入了项目资料，") });
+  const working = turnWorking || attachments.busy;
   return <section className={styles.panel} aria-label="问忆程">
     <header className={styles.header}><div className={styles.agentTitle}><span className={styles.agentMark} aria-hidden="true"><Sparkles size={19}/></span><div><h2>与忆程协作</h2><p>{view?.scope === "PROJECT" ? "项目讨论" : "项目记忆 · 对话与接续"}</p></div></div><div className={styles.historyControls}>
       <button type="button" className={styles.historyButton + " focus-ring"} aria-haspopup="dialog" aria-expanded={historyOpen} disabled={working}
@@ -273,7 +275,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
         {list.filter(c => !historyFilter.trim() || c.title.includes(historyFilter.trim())).map(c => <button type="button" key={c.id}
           className={styles.historyRow + (view?.id === c.id ? " " + styles.historyRowCurrent : "") + " focus-ring"} aria-current={view?.id === c.id ? "true" : undefined}
           onClick={() => {
-            if (busyRef.current || c.id === view?.id) { setHistoryOpen(false); return; }
+            if (busyRef.current || attachments.busy || c.id === view?.id) { setHistoryOpen(false); return; }
             const epoch = ++generation.current; setBusy(true); setReply(null); setWorkRef(null); pending.current = null; setHistoryOpen(false);
             void load(c.id, epoch).catch(err => { if (epoch === generation.current) setError(err.message); })
               .finally(() => { if (epoch === generation.current) setBusy(false); });
@@ -340,7 +342,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
           }}/>
       </article>)}
       {view && workRef && <ConversationWorkCard key={view.id + workRef.kind + workRef.id} conversation={view} workRef={workRef} onChange={v => { setView(v); onUpdated?.(); }} onClose={() => setWorkRef(null)}/>}
-      {working && <AgentRunThread progress={view?.activeTurn?.progress} onStop={!view ? undefined : () => { const epoch = generation.current; void api<{ conversation: ConversationView }>(`/api/conversations/${view.id}/turns/${view.activeTurn!.id}/stop`, "POST", {}).then(r => { if (epoch === generation.current) setView(r.conversation); }).catch(e => { if (epoch === generation.current) setError(e.message); }); }}/>}
+      {turnWorking && <AgentRunThread progress={view?.activeTurn?.progress} onStop={!view?.activeTurn ? undefined : () => { const epoch = generation.current; void api<{ conversation: ConversationView }>(`/api/conversations/${view.id}/turns/${view.activeTurn!.id}/stop`, "POST", {}).then(r => { if (epoch === generation.current) setView(r.conversation); }).catch(e => { if (epoch === generation.current) setError(e.message); }); }}/>}
     </div>
     {error && <p role="alert" className={styles.error}>{error} {view && <button className="workspace-link focus-ring" onClick={() => void load(view.id, generation.current).catch(e => setError(e.message))}>读取原状态</button>}</p>}
     {view && target && calendarWriteAvailable && <div className={styles.calendarBar}>

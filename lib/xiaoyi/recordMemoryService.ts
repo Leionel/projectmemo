@@ -1,6 +1,6 @@
 import { AppError } from "@/lib/api";
 import { AgentRunStatus, AgentRunType } from "@/lib/generated/prisma/client";
-import { finishExternalAgentRun, reserveExternalAgentRun } from "@/lib/repositories/agent";
+import { finishExternalAgentRun, reserveExternalAgentRun, ABANDONED_EXTERNAL_RUN_MS } from "@/lib/repositories/agent";
 import { requireProject } from "@/lib/repositories/projects";
 import { captureRequestPayloadHash, processCapture } from "@/lib/services/captureService";
 import { recordMemoryResponseSchema, type RecordMemoryInput, type RecordMemoryResponse } from "@/lib/xiaoyi/contracts";
@@ -32,6 +32,7 @@ export async function recordMemoryFromXiaoyi(input: {
     runType: AgentRunType.CAPTURE,
     provider: XIAOYI_PROVIDER,
     externalRequestId: input.requestId,
+    abandonAfterMs: ABANDONED_EXTERNAL_RUN_MS,
       trace: {
         source: "xiaoyi",
         provider: XIAOYI_PROVIDER,

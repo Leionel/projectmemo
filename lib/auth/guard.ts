@@ -1,6 +1,7 @@
 import { AppError } from "@/lib/api";
 import { findValidSessionByToken } from "./session";
 import { db } from "@/lib/db";
+import { decodeSessionCookie } from "./sessionCookie";
 import type { AuthSession, Project, User } from "@/lib/generated/prisma/client";
 
 export interface AuthenticatedContext {
@@ -29,11 +30,11 @@ export function readBearerToken(request: Request): string {
     for (const cookie of cookies) {
       if (cookie.startsWith("pm_session=")) {
         const val = cookie.substring("pm_session=".length).trim();
-        if (val) return decodeURIComponent(val);
+        if (val) return decodeSessionCookie(val);
       }
       if (cookie.startsWith("session_token=")) {
         const val = cookie.substring("session_token=".length).trim();
-        if (val) return decodeURIComponent(val);
+        if (val) return decodeSessionCookie(val);
       }
     }
   }

@@ -21,6 +21,8 @@ function conversation(id: string): ConversationView {
 const attachment = { id: "attachment-first", fileName: "实验.pdf", extractionStatus: "SUCCESS", extractionError: null };
 let finishUpload: (() => void) | undefined;
 let delayUpload = false;
+let rejectRemoval = false;
+let turnRequests: unknown[] = [];
 const fetchMock = vi.fn(async (url: string, options?: RequestInit): Promise<Response> => {
   if (url === "/api/conversations/capabilities") return Response.json({ cloudAvailable: false });
   if (url === "/api/conversations") {
@@ -31,6 +33,13 @@ const fetchMock = vi.fn(async (url: string, options?: RequestInit): Promise<Resp
     if (delayUpload) await new Promise<void>(resolve => { finishUpload = resolve; });
     return Response.json({ attachment });
   }
+  if (url.endsWith("/attachments/" + attachment.id)) return rejectRemoval
+    ? Response.json({ error: { message: "附件移除失败，请重试" } }, { status: 503 })
+    : Response.json({ deleted: true });
+  if (url.endsWith("/turns")) {
+    turnRequests.push(JSON.parse(String(options?.body)));
+    return Response.json({ status: "OBSERVING", conversation: conversation("first") });
+  }
   if (url === "/api/conversations/first") return Response.json(conversation("first"));
   if (url === "/api/conversations/second") return Response.json(conversation("second"));
   throw new Error("未预期的测试请求 " + url);
@@ -39,6 +48,8 @@ const fetchMock = vi.fn(async (url: string, options?: RequestInit): Promise<Resp
 beforeEach(() => {
   delayUpload = false;
   finishUpload = undefined;
+  rejectRemoval = false;
+  turnRequests = [];
   fetchMock.mockClear();
   vi.stubGlobal("fetch", fetchMock);
   vi.stubGlobal("IntersectionObserver", class { observe() {} disconnect() {} });
@@ -84,4 +95,30 @@ it("新建讨论时清除上一次尚未提交的附件", async () => {
   fireEvent.click(screen.getByRole("button", { name: "新讨论" }));
   await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/conversations/second", expect.anything()));
   await waitFor(() => expect(screen.queryByRole("list", { name: "本轮附件" })).toBeNull());
+});
+
+it("移除失败保留附件并显示错误，允许重试", async () => {
+  await chooseAttachment();
+  fireEvent.click(screen.getByRole("button", { name: /仅用于本次讨论/ }));
+  await screen.findByRole("list", { name: "本轮附件" });
+  rejectRemoval = true;
+  fireEvent.click(screen.getByRole("button", { name: "移除附件 实验.pdf" }));
+  await screen.findByText(/附件移除失败，请重试/);
+  expect(screen.getByRole("list", { name: "本轮附件" })).toBeTruthy();
+  rejectRemoval = false;
+  fireEvent.click(screen.getByRole("button", { name: "移除附件 实验.pdf" }));
+  await waitFor(() => expect(screen.queryByRole("list", { name: "本轮附件" })).toBeNull());
+});
+
+it("后台已接收的问题清空输入，下一次相同问题使用新的请求编号", async () => {
+  const rendered = await chooseAttachment();
+  fireEvent.click(screen.getByRole("button", { name: "取消" }));
+  const field = rendered.container.querySelector("textarea")!;
+  fireEvent.change(field, { target: { value: "检查项目进展" } });
+  fireEvent.click(screen.getByRole("button", { name: "发送" }));
+  await waitFor(() => expect(field.value).toBe(""));
+  fireEvent.change(field, { target: { value: "检查项目进展" } });
+  fireEvent.click(screen.getByRole("button", { name: "发送" }));
+  await waitFor(() => expect(turnRequests).toHaveLength(2));
+  expect((turnRequests[0] as { requestId: string }).requestId).not.toBe((turnRequests[1] as { requestId: string }).requestId);
 });

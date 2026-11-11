@@ -32,7 +32,7 @@ export async function saveFileToStorage(projectId: string, fileName: string, buf
   const sha256 = computeFileSha256(buffer);
   const cleanName = sanitizeFileName(fileName);
   const ext = path.extname(cleanName) || ".bin";
-  const uniqueKey = `${projectId}_${sha256.slice(0, 12)}_${Date.now()}${ext}`;
+  const uniqueKey = `${projectId}_${sha256.slice(0, 12)}_${crypto.randomUUID()}${ext}`;
   const absolutePath = path.join(storageDir, uniqueKey);
 
   // 防止路径穿越

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useListFlip } from "./motionHooks";
-import { ArrowRight, CalendarClock, CalendarDays, Check, ChevronDown, Circle, LoaderCircle, MoreHorizontal, Pause, Pencil, Play, Plus, SlidersHorizontal, Star, X } from "lucide-react";
+import { ArrowRight, CalendarDays, Check, ChevronDown, Circle, LoaderCircle, MoreHorizontal, Pause, Play, Plus, SlidersHorizontal, Star, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { projectHref } from "@/lib/projectNavigation";
@@ -66,14 +66,22 @@ export function ActionBoard({ projectId, initialActions, reminderEnabled = false
   const [reminderFor, setReminderFor] = useState<string | null>(null);
   /** 完成前的提醒处置询问：有未来设备日历日程时才会出现 */
   const [completionPrompt, setCompletionPrompt] = useState<{ actionId: string; question: string; options: Array<{ value: string; label: string }>; disposition: "KEEP" | "REMOVE" } | null>(null);
+  const completionRequest = useRef(0);
 
-  useEffect(() => subscribeWorkspaceChange(projectId, ["actions"], () => {
-    void fetch(`/api/projects/${projectId}/actions`).then(async (response) => {
-      if (!response.ok) return;
-      const data = await response.json().catch(() => null);
-      if (data?.actions) setActions(data.actions);
+  useEffect(() => {
+    let active = true;
+    let latest = 0;
+    const requests = completionRequest;
+    const unsubscribe = subscribeWorkspaceChange(projectId, ["actions"], () => {
+      const request = ++latest;
+      void fetch(`/api/projects/${projectId}/actions`).then(async (response) => {
+        if (!response.ok) return;
+        const data = await response.json().catch(() => null);
+        if (active && request === latest && Array.isArray(data?.actions)) setActions(data.actions);
+      }).catch(() => { /* 保留当前列表，下一次变更通知会重新读取。 */ });
     });
-  }), [projectId]);
+    return () => { active = false; requests.current++; unsubscribe(); };
+  }, [projectId]);
 
   useEffect(() => {
     const locate = () => { if (window.location.hash.startsWith('#action-')) { setView('all'); setTimeout(() => document.getElementById(window.location.hash.slice(1))?.scrollIntoView({block:'center'}), 50); } };
@@ -130,7 +138,7 @@ export function ActionBoard({ projectId, initialActions, reminderEnabled = false
       if (!response.ok) throw new Error(data?.error?.message ?? "更新行动失败");
       setActions((old) => old.map((item) => item.id === action.id ? { ...item, ...data.action } : item));
       setMessage([success, data.reminderNotice, data.reminderOutcome?.compensation?.needed || data.reminderOutcome?.recorded === false ? data.reminderOutcome?.compensation?.message : null].filter(Boolean).join(""));
-      setEditFor(null); setEditDraft(null); setCancelFor(null); setCompletionPrompt(null);
+      setEditFor(null); setEditDraft(null); setCancelFor(null); closeResult();
       notify(["actions", "metrics"]);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "更新行动失败");
@@ -144,10 +152,9 @@ export function ActionBoard({ projectId, initialActions, reminderEnabled = false
    * 在同一区域先询问「保留还是移除」，不另开弹窗。
    */
   async function openResult(action: ActionItemData) {
+    const request = ++completionRequest.current;
     if (resultFor === action.id) {
-      setResultFor(null);
-      setResultText("");
-      setCompletionPrompt(null);
+      closeResult();
       return;
     }
     setResultFor(action.id);
@@ -160,7 +167,7 @@ export function ActionBoard({ projectId, initialActions, reminderEnabled = false
       if (!response.ok) return;
       const data = await response.json().catch(() => null);
       const prompt = data?.state?.completionPrompt;
-      if (prompt?.required) {
+      if (request === completionRequest.current && prompt?.required) {
         setCompletionPrompt({
           actionId: action.id,
           question: prompt.question,
@@ -171,6 +178,13 @@ export function ActionBoard({ projectId, initialActions, reminderEnabled = false
     } catch {
       // 读取提醒状态失败不阻塞完成流程：仍可正常填写回执
     }
+  }
+
+  function closeResult() {
+    completionRequest.current++;
+    setResultFor(null);
+    setResultText("");
+    setCompletionPrompt(null);
   }
 
   async function complete(action: ActionItemData) {
@@ -190,7 +204,7 @@ export function ActionBoard({ projectId, initialActions, reminderEnabled = false
       const data = await response.json().catch(() => null);
       if (!response.ok) throw new Error(data?.error?.message ?? "完成行动失败");
       setActions((old) => old.map((item) => item.id === action.id ? { ...item, ...data.action, status: "DONE" } : item));
-      setResultFor(null); setResultText(""); setCompletionPrompt(null); setFeasibilityFor(null); setReminderFor(null);
+      closeResult(); setFeasibilityFor(null); setReminderFor(null);
       const outcome = data.reminderOutcome;
       if (outcome?.compensation?.needed) {
         setMessage(`行动已完成并移入历史，结果已沉淀为阶段复盘卡片。提醒方面：${outcome.compensation.message}`);
@@ -214,7 +228,7 @@ export function ActionBoard({ projectId, initialActions, reminderEnabled = false
     setEditFor(action.id);
     setEditDraft({ title: action.title, description: action.description ?? "", priority: action.priority, dueDate: dateInputValue(action.dueAt) });
     setCancelFor(null);
-    setResultFor(null);
+    closeResult();
   }
 
   const views: Array<{ value: ActionView; label: string; count: number }> = [
@@ -240,7 +254,7 @@ export function ActionBoard({ projectId, initialActions, reminderEnabled = false
     </div>
 
     {message && <p role="status" className="mt-3 rounded-lg bg-[var(--teal-pale)] px-3 py-2 text-xs font-semibold text-[var(--teal-strong)]">{message}</p>}
-    <div ref={listRef} className="mt-4 space-y-3">{visibleActions.length ? visibleActions.map((action) => <div key={action.id} data-flip-key={action.id}><ActionCard action={action} now={now} busy={busy} resultFor={resultFor} resultText={resultText} editFor={editFor} editDraft={editDraft} cancelFor={cancelFor} allActions={projectActions} feasibilityFor={feasibilityFor} reminderFor={reminderFor} reminderEnabled={reminderEnabled} onToggleFeasibility={(id) => setFeasibilityFor((current) => current === id ? null : id)} onToggleReminder={(id) => setReminderFor((current) => current === id ? null : id)} onDependencyChanged={() => notify(["actions", "metrics"])} onSetResultFor={setResultFor} onSetResultText={setResultText} onBeginEdit={beginEdit} onSetEditDraft={setEditDraft} onCloseEdit={() => { setEditFor(null); setEditDraft(null); }} onSetCancelFor={setCancelFor} onPatch={patchAction} onComplete={complete} onOpenResult={openResult} completionPrompt={completionPrompt} onSetCompletionDisposition={(value) => setCompletionPrompt((previous) => previous ? { ...previous, disposition: value } : previous)} /></div>) : <EmptyState view={view} hasActions={projectActions.length > 0} onShowActive={() => setView("active")} />}</div>
+    <div ref={listRef} className="mt-4 space-y-3">{visibleActions.length ? visibleActions.map((action) => <div key={action.id} data-flip-key={action.id}><ActionCard action={action} now={now} busy={busy} resultFor={resultFor} resultText={resultText} editFor={editFor} editDraft={editDraft} cancelFor={cancelFor} allActions={projectActions} feasibilityFor={feasibilityFor} reminderFor={reminderFor} reminderEnabled={reminderEnabled} onToggleFeasibility={(id) => setFeasibilityFor((current) => current === id ? null : id)} onToggleReminder={(id) => setReminderFor((current) => current === id ? null : id)} onDependencyChanged={() => notify(["actions", "metrics"])} onSetResultFor={closeResult} onSetResultText={setResultText} onBeginEdit={beginEdit} onSetEditDraft={setEditDraft} onCloseEdit={() => { setEditFor(null); setEditDraft(null); }} onSetCancelFor={setCancelFor} onPatch={patchAction} onComplete={complete} onOpenResult={openResult} completionPrompt={completionPrompt} onSetCompletionDisposition={(value) => setCompletionPrompt((previous) => previous ? { ...previous, disposition: value } : previous)} /></div>) : <EmptyState view={view} hasActions={projectActions.length > 0} onShowActive={() => setView("active")} />}</div>
     {view === "active" && recentDone.length > 0 && <section aria-labelledby="actions-recent-done" className="mt-6 border-t border-[var(--rule)] pt-4">
       <h3 id="actions-recent-done" className="text-sm font-bold text-[var(--ink)]">最近完成</h3>
       <ul className="mt-2 divide-y divide-[var(--rule)]">{recentDone.map(action => <li key={action.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2.5 text-sm">
@@ -288,21 +302,23 @@ function ActionCard(props: ActionCardProps) {
   const due = action.dueAt ? new Date(action.dueAt) : null;
   const overdue = Boolean(due && due.getTime() < now.getTime() && !completed && !cancelled);
   return <article id={`action-${action.id}`} tabIndex={-1} className={"rounded-xl border p-4 sm:p-5 shadow-xs transition hover:shadow-sm " + (completed ? "border-[var(--teal)]/30 bg-[var(--teal-pale)]" : cancelled ? "border-[var(--rule)] bg-[var(--paper-strong)] opacity-75" : overdue ? "border-[var(--brick)]/35 bg-[var(--brick-pale)]/35" : "border-[var(--rule)] bg-[var(--card-bg)]")}>
-    <div className="flex items-start gap-3.5"><span className="mt-1 text-[var(--teal-strong)]">{completed ? <Check size={18} /> : <Circle size={18} />}</span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center justify-between gap-2"><h3 className={"text-base font-bold text-[var(--navy)] " + (completed ? "line-through opacity-70" : "")}>{action.title}</h3><span className="text-xs font-bold text-[var(--muted)]">{actionStatusLabels[action.status]}</span></div>{action.description && <p className="mt-1.5 text-sm leading-6 text-[var(--ink-soft)]">{action.description}</p>}<div className="mt-2.5 flex flex-wrap gap-2 text-xs font-bold text-[var(--muted)]"><span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-soft)]"><Star size={13} className="text-[var(--amber)]" />优先级 {action.priority}/5</span>{due && <span className={"inline-flex items-center gap-1.5 rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] px-2.5 py-1 text-xs font-semibold " + (overdue ? "text-[var(--brick)] border-[var(--brick)]/30" : "text-[var(--ink-soft)]")}><CalendarDays size={13} />{due.toLocaleDateString("zh-CN")} {overdue ? "已逾期" : "截止"}</span>}</div>{action.resultText && <p className="mt-2.5 rounded-lg bg-[var(--card-bg)] p-3 text-xs leading-6 text-[var(--ink-soft)] border border-[var(--rule)]"><span className="font-bold text-[var(--navy)]">回执：</span>{action.resultText}</p>}
-      {!completed && !cancelled && editFor !== action.id && <div className="mt-3.5 flex flex-wrap items-center gap-2.5">
+    <div className="flex items-start gap-3.5"><span className="mt-1 hidden text-[var(--teal-strong)] sm:block">{completed ? <Check size={18} /> : <Circle size={18} />}</span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center justify-between gap-2"><h3 className={"text-base font-bold text-[var(--navy)] " + (completed ? "line-through opacity-70" : "")}>{action.title}</h3><span className="text-xs font-bold text-[var(--muted)]">{actionStatusLabels[action.status]}</span></div>{action.description && <p className="mt-1.5 text-sm leading-6 text-[var(--ink-soft)]">{action.description}</p>}<div className="mt-2.5 flex flex-wrap gap-2 text-xs font-bold text-[var(--muted)]"><span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-soft)]"><Star size={13} className="text-[var(--amber)]" />优先级 {action.priority}/5</span>{due && <span className={"inline-flex items-center gap-1.5 rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] px-2.5 py-1 text-xs font-semibold " + (overdue ? "text-[var(--brick)] border-[var(--brick)]/30" : "text-[var(--ink-soft)]")}><CalendarDays size={13} />{due.toLocaleDateString("zh-CN")} {overdue ? "已逾期" : "截止"}</span>}</div>{action.resultText && <p className="mt-2.5 rounded-lg bg-[var(--card-bg)] p-3 text-xs leading-6 text-[var(--ink-soft)] border border-[var(--rule)]"><span className="font-bold text-[var(--navy)]">回执：</span>{action.resultText}</p>}
+      {!completed && !cancelled && editFor !== action.id && <div className="mt-3.5 space-y-1">
         {action.status === "TODO"
-          ? <button type="button" onClick={() => void props.onPatch(action, { status: "DOING" }, "行动已开始。")} disabled={Boolean(busy)} className="focus-ring inline-flex items-center gap-1.5 rounded-lg bg-[var(--teal)] px-3.5 py-2 text-xs font-bold text-white transition hover:bg-[var(--teal-strong)] disabled:opacity-60"><Play size={14} />开始行动</button>
-          : <button type="button" onClick={() => props.onOpenResult(action)} disabled={Boolean(busy)} className="focus-ring inline-flex items-center gap-1.5 rounded-lg bg-[var(--teal)] px-3.5 py-2 text-xs font-bold text-white transition hover:bg-[var(--teal-strong)] disabled:opacity-60"><Check size={14} />完成并写回执</button>}
-        <details className="relative" data-action-menu>
-          <summary className="focus-ring flex cursor-pointer list-none items-center gap-1 rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] px-3 py-2 text-xs font-bold text-[var(--ink-soft)] hover:border-[var(--rule-strong)]">更多<MoreHorizontal size={14} aria-hidden="true" /></summary>
+          ? <button type="button" onClick={() => void props.onPatch(action, { status: "DOING" }, "行动已开始。")} disabled={Boolean(busy)} className="focus-ring inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg bg-[var(--teal)] px-3.5 py-2 text-xs font-bold text-white transition hover:bg-[var(--teal-strong)] disabled:opacity-60"><Play size={14} />开始行动</button>
+          : <button type="button" onClick={() => props.onOpenResult(action)} disabled={Boolean(busy)} className="focus-ring inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg bg-[var(--teal)] px-3.5 py-2 text-xs font-bold text-white transition hover:bg-[var(--teal-strong)] disabled:opacity-60"><Check size={14} />完成并写回执</button>}
+        <div className="flex flex-wrap items-center gap-1" role="group" aria-label="行动其他操作">
+        {reminderEnabled && <button type="button" aria-label="设置日历提醒" aria-expanded={reminderFor === action.id} disabled={Boolean(busy)} onClick={() => props.onToggleReminder(action.id)} className="focus-ring inline-flex min-h-11 items-center rounded-md px-2.5 text-xs font-semibold text-[var(--ink-soft)] hover:bg-[var(--paper)]">日历提醒</button>}
+        <button type="button" aria-label="编辑行动" disabled={Boolean(busy)} onClick={() => props.onBeginEdit(action)} className="focus-ring inline-flex min-h-11 items-center rounded-md px-2.5 text-xs font-semibold text-[var(--ink-soft)] hover:bg-[var(--paper)]">编辑</button>
+        <button type="button" aria-label="取消行动" disabled={Boolean(busy)} onClick={() => props.onSetCancelFor(cancelFor === action.id ? null : action.id)} className="focus-ring inline-flex min-h-11 items-center rounded-md px-2.5 text-xs font-semibold text-[var(--ink-soft)] hover:bg-[var(--paper)]">不再需要</button>
+        <details className="relative w-11 shrink-0" data-action-menu>
+          <summary aria-label="更多行动操作" title="更多行动操作" className="focus-ring flex min-h-11 w-11 cursor-pointer list-none items-center justify-center rounded-md text-[var(--ink-soft)] hover:bg-[var(--paper)]"><MoreHorizontal size={16} aria-hidden="true" /></summary>
           <div className="absolute right-0 z-20 mt-1 w-52 rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] p-1.5 shadow-[var(--shadow-md)]">
             <MenuButton icon={<SlidersHorizontal size={14} />} label="看看能否安排" expanded={feasibilityFor === action.id} onClick={() => { closeActionMenu(action.id); props.onToggleFeasibility(action.id); }} />
-            {reminderEnabled && <MenuButton icon={<CalendarClock size={14} />} label={reminderFor === action.id ? "收起提醒设置" : "设置日历提醒"} expanded={reminderFor === action.id} onClick={() => { closeActionMenu(action.id); props.onToggleReminder(action.id); }} />}
-            <MenuButton icon={<Pencil size={14} />} label="编辑行动" onClick={() => { closeActionMenu(action.id); props.onBeginEdit(action); }} />
             {action.status === "DOING" && <MenuButton icon={<Pause size={14} />} label="退回待处理" onClick={() => { closeActionMenu(action.id); void props.onPatch(action, { status: "TODO" }, "行动已退回待处理。"); }} />}
-            <MenuButton icon={<X size={14} />} label="取消行动" danger onClick={() => { closeActionMenu(action.id); props.onSetCancelFor(cancelFor === action.id ? null : action.id); }} />
           </div>
         </details>
+        </div>
       </div>}
       {completed && !action.resultCardId && !action.isSimulated && <p className="mt-3 text-xs text-[var(--muted)]">已完成 · 尚无结果复盘</p>}
       {completed && action.resultCardId && <div className="mt-3.5"><Link className="focus-ring inline-flex items-center gap-1.5 rounded-lg bg-[var(--teal-pale)] px-3.5 py-2 text-xs font-bold text-[var(--teal-strong)] transition hover:bg-[var(--teal)] hover:text-white" href={projectHref(action.projectId, `#card-${action.resultCardId}`)}>查看结果复盘卡<ArrowRight size={14} aria-hidden="true" /></Link></div>}

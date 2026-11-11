@@ -64,7 +64,7 @@ export struct ConversationAnswer {
           const file = this.guide(part); if (file) { openConversationFile(file, this.conversationId); }
         })
       })
-    }.fontSize(16).lineHeight(26).constraintSize({ maxWidth: '100%' })
+    }.constraintSize({ maxWidth: '100%' })
       .textAlign(this.rightAligned ? TextAlign.End : TextAlign.Start).copyOption(CopyOptions.LocalDevice)
   }
 }

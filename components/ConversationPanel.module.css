@@ -180,7 +180,7 @@
 }
 .composer { position:relative; margin:.5rem .625rem .625rem; padding:.75rem .75rem .5rem; border:1px solid var(--rule); border-radius:22px; background:var(--paper); }
 .composer .inputLabel { padding:0 .15rem; border:0; box-shadow:none; }
-.composer textarea { min-height:3.55rem; max-height:8.25rem; overflow-y:auto; resize:none; background:transparent; font-size:.9375rem; }
+.composer textarea { min-height:3.55rem; max-height:8.25rem; overflow-y:auto; resize:none; background:transparent; font-size:1rem; }
 .composerFooter { display:flex; align-items:center; gap:.625rem; margin-top:.5rem; }
 .composerFooter > :global(*) { min-width:0; }
 .composerContext { display:flex; flex-wrap:wrap; align-items:center; gap:.125rem .875rem; margin-bottom:.375rem; padding-bottom:.375rem; border-bottom:1px solid var(--rule); font-size:.75rem; }

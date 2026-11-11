@@ -90,6 +90,7 @@ test("两端共用的消息操作保留图标语义，Web 行动主次操作在�
     await page.setViewportSize({ width, height: 900 });
     const tools = sources.locator("..").getByRole("button");
     expect(await panel.getByText(question, { exact: true }).evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBe(16);
+    expect(await input.evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBe(16);
     for (const button of await tools.all()) {
       await expect(button.locator("svg")).toHaveCount(1);
       expect(await button.locator("svg").evaluate(element => element.getBoundingClientRect().width)).toBeLessThanOrEqual(16);

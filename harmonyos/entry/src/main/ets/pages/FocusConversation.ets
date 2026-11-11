@@ -775,7 +775,7 @@ struct FocusConversation {
                 }.padding({ left: 12, right: 12, top: 10 })
               }.scrollable(ScrollDirection.Horizontal).scrollBar(BarState.Off).width('100%')
             }
-            TextArea({ text: this.text, placeholder: '聊聊下一步…' }).constraintSize({ minHeight: 48, maxHeight: 136 }).fontSize(15).fontColor(PMColors.INK_PRIMARY).backgroundColor(Color.Transparent).padding({ left: 15, right: 15, top: 14, bottom: 4 })
+            TextArea({ text: this.text, placeholder: '聊聊下一步…' }).constraintSize({ minHeight: 48, maxHeight: 136 }).fontColor(PMColors.INK_PRIMARY).backgroundColor(Color.Transparent).padding({ left: 15, right: 15, top: 14, bottom: 4 })
               .id('conversation-composer')
               .enabled(!this.busy).onChange((v: string) => { this.text = v; this.saveComposer(); })
             Row({ space: 8 }) {

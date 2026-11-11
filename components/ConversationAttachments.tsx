@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Paperclip, X } from "lucide-react";
 import styles from "./ConversationPanel.module.css";
+import { CONVERSATION_TURN_ATTACHMENT_LIMIT } from "@/lib/types/conversation";
 
 export type ConversationAttachmentChip = { id: string; fileName: string; extractionStatus: string; extractionError: string | null };
 type Choice = { file: File } | null;
@@ -40,6 +41,10 @@ export function useConversationAttachments({ conversationId, projectId, disabled
   }, [conversationId]);
   async function keepInConversation(file: File) {
     if (disabled || busy) return;
+    if (chips.length >= CONVERSATION_TURN_ATTACHMENT_LIMIT) {
+      onError(`每次最多附加 ${CONVERSATION_TURN_ATTACHMENT_LIMIT} 个文件，请先移除一个附件`);
+      return;
+    }
     const epoch = generation.current;
     setBusy(true);
     try {
@@ -71,8 +76,15 @@ export function useConversationAttachments({ conversationId, projectId, disabled
   }
   async function remove(chip: ConversationAttachmentChip) {
     if (disabled || busy) return;
-    onChips(chips.filter(c => c.id !== chip.id));
-    await fetch(`/api/conversations/${conversationId}/attachments/${chip.id}`, { method: "DELETE" }).catch(() => undefined);
+    const epoch = generation.current;
+    setBusy(true);
+    try {
+      const response = await fetch(`/api/conversations/${conversationId}/attachments/${chip.id}`, { method: "DELETE" });
+      if (!response.ok && response.status !== 404) throw new Error((await response.json().catch(() => null))?.error?.message ?? "移除附件失败，请重试");
+      if (epoch === generation.current) onChips(chips.filter(c => c.id !== chip.id));
+    } catch (error) {
+      if (epoch === generation.current) onError(error instanceof Error ? error.message : "移除附件失败，请重试");
+    } finally { if (epoch === generation.current) setBusy(false); }
   }
   // 回形针放在输入框底栏左侧；用途选择和本轮附件仍显示在输入框上方。
   const button = <>
@@ -83,7 +95,7 @@ export function useConversationAttachments({ conversationId, projectId, disabled
   const panel = <>
     {choice && <div role="dialog" aria-label="附件用途" className={styles.attachChoice}>
       <p>《{choice.file.name}》用于</p>
-      <button type="button" className="focus-ring" disabled={disabled || busy} onClick={() => void keepInConversation(choice.file)}><strong>仅用于本次讨论</strong><span>不进入项目记忆，可随时转为项目资料</span></button>
+      <button type="button" className="focus-ring" disabled={disabled || busy || chips.length >= CONVERSATION_TURN_ATTACHMENT_LIMIT} onClick={() => void keepInConversation(choice.file)}><strong>仅用于本次讨论</strong><span>{chips.length >= CONVERSATION_TURN_ATTACHMENT_LIMIT ? `每次最多附加 ${CONVERSATION_TURN_ATTACHMENT_LIMIT} 个文件，请先移除一个附件` : "不进入项目记忆，可随时转为项目资料"}</span></button>
       <button type="button" className="focus-ring" disabled={disabled || busy || !projectId} onClick={() => void saveToProject(choice.file)}><strong>加入项目记忆</strong><span>{projectId ? "保存为项目资料并生成待核对的记忆" : "先在下方选择一个项目"}</span></button>
       <button type="button" className="workspace-link focus-ring" onClick={() => setChoice(null)}>取消</button>
     </div>}

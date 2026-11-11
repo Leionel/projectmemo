@@ -45,6 +45,60 @@ test("跨项目讨论未选项目时图片不调用识别并说明原因；只�
   await expect(uploadConversationAttachment(f.actor, f.c.id, { fileName: "a.txt", mimeType: "text/plain", buffer: Buffer.from("hello") })).rejects.toThrow();
 });
 
+test("附件数达到上限时，重复上传仍复用原附件", async () => {
+  const f = await fixture("WORKSPACE");
+  const first = await uploadConversationAttachment(f.actor, f.c.id, { fileName: "原图.png", mimeType: "image/png", buffer: png });
+  for (let index = 1; index < 10; index++) await db.conversationAttachment.create({ data: {
+    conversationId: f.c.id, ownerUserId: f.u.id, type: "IMAGE", fileName: `${index}.png`, mimeType: "image/png",
+    storageKey: `synthetic-${index}`, size: 1, sha256: `synthetic-${index}`, extractionStatus: "NEEDS_OCR",
+  } });
+  const repeated = await uploadConversationAttachment(f.actor, f.c.id, { fileName: "原图副本.png", mimeType: "image/png", buffer: png });
+  expect(repeated).toMatchObject({ isDuplicate: true, attachment: { id: first.attachment.id } });
+});
+
+test("相同毫秒并发上传同一附件只保留一份可读取的原件", async () => {
+  const f = await fixture("WORKSPACE");
+  vi.spyOn(Date, "now").mockReturnValue(Date.now());
+  try {
+    const results = await Promise.all(Array.from({ length: 3 }, () => uploadConversationAttachment(f.actor, f.c.id,
+      { fileName: "并发.png", mimeType: "image/png", buffer: png })));
+    expect(new Set(results.map(result => result.attachment.id)).size).toBe(1);
+    const saved = await db.conversationAttachment.findUniqueOrThrow({ where: { id: results[0].attachment.id } });
+    const { readAttachmentFile } = await import("@/lib/storage/attachmentStorage");
+    expect(await readAttachmentFile(saved.storageKey)).toEqual(png);
+  } finally { vi.restoreAllMocks(); }
+});
+
+test("并发新增附件不能突破讨论数量上限", async () => {
+  const f = await fixture("WORKSPACE");
+  for (let index = 0; index < 9; index++) await db.conversationAttachment.create({ data: {
+    conversationId: f.c.id, ownerUserId: f.u.id, type: "IMAGE", fileName: `${index}.png`, mimeType: "image/png",
+    storageKey: `synthetic-limit-${index}`, size: 1, sha256: `synthetic-limit-${index}`, extractionStatus: "NEEDS_OCR",
+  } });
+  const results = await Promise.allSettled([1, 2].map(index => uploadConversationAttachment(f.actor, f.c.id, {
+    fileName: `${index}.png`, mimeType: "image/png", buffer: Buffer.concat([png, Buffer.from([index])]),
+  })));
+  expect(results.filter(result => result.status === "fulfilled")).toHaveLength(1);
+  const rejected = results.find(result => result.status === "rejected") as PromiseRejectedResult;
+  expect(rejected.reason).toMatchObject({ code: "CONVERSATION_ATTACHMENT_LIMIT" });
+  expect(await db.conversationAttachment.count({ where: { conversationId: f.c.id } })).toBe(10);
+});
+
+test("附件处理期间撤销会话，迟到结果不能保存且原件得到清理", async () => {
+  const f = await fixture("PROJECT");
+  const service = await import("@/lib/services/attachmentService");
+  const extract = vi.spyOn(service, "extractImageText").mockImplementationOnce(async () => {
+    await db.authSession.update({ where: { id: f.actor.sessionId }, data: { revokedAt: new Date() } });
+    return "已经提取到的合成文字";
+  });
+  try {
+    await expect(uploadConversationAttachment(f.actor, f.c.id, { fileName: "撤销.png", mimeType: "image/png", buffer: png }))
+      .rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    expect(await db.conversationAttachment.count({ where: { conversationId: f.c.id } })).toBe(0);
+    expect(fs.readdirSync(storage).filter(name => name.startsWith("conversation-" + f.c.id + "_"))).toHaveLength(0);
+  } finally { extract.mockRestore(); }
+});
+
 test("本轮附件文字只给模型；保存的用户消息只追加文件名；已移除的附件不能再引用", async () => {
   const f = await fixture("PROJECT");
   const { attachment } = await uploadConversationAttachment(f.actor, f.c.id, { fileName: "白板.png", mimeType: "image/png", buffer: png });
@@ -70,6 +124,31 @@ test("转为项目资料后进入项目附件并移除讨论副本", async () =>
   expect(promoted.attachment.projectId).toBe(f.p.id);
   expect(await listProjectAttachments(f.p.id)).toHaveLength(1);
   expect(await listConversationAttachments(f.actor, f.c.id)).toHaveLength(0);
+});
+
+test("并发转为项目资料时复用同一份资料，不把已成功保存报为失败", async () => {
+  const f = await fixture("PROJECT");
+  const { attachment } = await uploadConversationAttachment(f.actor, f.c.id, { fileName: "并发转存.png", mimeType: "image/png", buffer: png });
+  const results = await Promise.all([1, 2].map(() => promoteConversationAttachment(f.actor, f.c.id, attachment.id, f.p.id)));
+  expect(new Set(results.map(result => result.attachment.id)).size).toBe(1);
+  expect(await db.attachment.count({ where: { projectId: f.p.id } })).toBe(1);
+});
+
+test("转存读取原件期间撤销会话，不能再写入项目资料", async () => {
+  const f = await fixture("PROJECT");
+  const { attachment } = await uploadConversationAttachment(f.actor, f.c.id, { fileName: "撤销转存.png", mimeType: "image/png", buffer: png });
+  const storage = await import("@/lib/storage/attachmentStorage");
+  const original = storage.readAttachmentFile;
+  const read = vi.spyOn(storage, "readAttachmentFile").mockImplementationOnce(async key => {
+    const buffer = await original(key);
+    await db.authSession.update({ where: { id: f.actor.sessionId }, data: { revokedAt: new Date() } });
+    return buffer;
+  });
+  try {
+    await expect(promoteConversationAttachment(f.actor, f.c.id, attachment.id, f.p.id)).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    expect(await db.attachment.count({ where: { projectId: f.p.id } })).toBe(0);
+    expect(await db.conversationAttachment.count({ where: { id: attachment.id } })).toBe(1);
+  } finally { read.mockRestore(); }
 });
 
 test("删除项目时只属于该项目的讨论附件原件进入清理清单，记录随讨论删除", async () => {

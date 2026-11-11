@@ -5023,22 +5023,6 @@ if (this.attachmentSearchOpen) {
                 .margin({ top: PMSpacing.SM })
               }
 
-              // 单待办日历提醒只有一套实现（ActionReminderBlock + ReminderService），
-              // 项目页与行动安排页共用同一服务契约与状态文案；ActionItem.dueAt 是截止时间，不作为设备日历写入回执。
-              if (this.reminderAvailable && this.actionReminderCardId === action.id) {
-                ActionReminderBlock({
-                  projectId: this.projectId,
-                  actionId: action.id,
-                  actionTitle: action.title,
-                  reminderEnabled: this.reminderAvailable,
-                  onClose: () => {
-                    this.actionReminderCardId = '';
-                  },
-                  onChanged: () => {
-                    this.loadAllData(true);
-                  }
-                })
-              }
               if (action.status === 'TODO' || action.status === 'DOING') {
                 Column({ space: PMSpacing.SM }) {
                   // 主操作按状态唯一：TODO 先开始；DOING 直接完成。开始不是完成的先决条件。
@@ -5068,31 +5052,38 @@ if (this.attachmentSearchOpen) {
                       .accessibilityText('填写完成回执')
                       .onClick(() => { this.openCompleteDialog(action.id); })
                   }
-                  Row({ space: PMSpacing.MD }) {
+                  Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.Start }) {
                     if (action.status === 'TODO') {
-                      Text('直接填写完成回执').fontSize(13).fontColor(PMColors.INK_SECONDARY).height(40)
+                      Button('直接回执', { type: ButtonType.Normal }).fontSize(13).fontColor(PMColors.INK_SECONDARY)
+                        .height(44).padding({ left: 12, right: 12 }).backgroundColor(Color.Transparent).borderRadius(PMRadius.SM)
                         .accessibilityText('不开始行动，直接填写完成回执')
                         .onClick(() => { this.openCompleteDialog(action.id); })
                     }
                     if (this.reminderAvailable) {
-                      Blank()
-                      Text(this.actionReminderCardId === action.id ? '收起提醒设置 ⌃' : '日历提醒').fontSize(13)
-                        .fontColor(PMColors.INK_SECONDARY).height(40)
+                      Button(this.actionReminderCardId === action.id ? '收起提醒' : '日历提醒', { type: ButtonType.Normal }).fontSize(13)
+                        .fontColor(PMColors.INK_SECONDARY).height(44).padding({ left: 12, right: 12 })
+                        .backgroundColor(Color.Transparent).borderRadius(PMRadius.SM)
                         .accessibilityDescription('打开这条待办的日历提醒设置')
                         .onClick(() => {
                           this.actionReminderCardId = this.actionReminderCardId === action.id ? '' : action.id;
                         })
                     }
-                  }.width('100%')
-                  if (!action.isSimulated && this.editingActionId !== action.id && this.confirmCancelActionId !== action.id) {
-                    Row({ space: PMSpacing.MD }) {
-                      Text('编辑').fontSize(13).fontColor(PMColors.INK_SECONDARY).height(40)
+                    if (!action.isSimulated && this.editingActionId !== action.id && this.confirmCancelActionId !== action.id) {
+                      Button('编辑', { type: ButtonType.Normal }).fontSize(13).fontColor(PMColors.INK_SECONDARY)
+                        .height(44).padding({ left: 12, right: 12 }).backgroundColor(Color.Transparent).borderRadius(PMRadius.SM)
                         .accessibilityText('编辑行动标题与预期结果')
                         .onClick(() => { this.beginEditAction(action); })
-                      Text('不再需要').fontSize(13).fontColor(PMColors.INK_SECONDARY).height(40)
+                      Button('不再需要', { type: ButtonType.Normal }).fontSize(13).fontColor(PMColors.INK_SECONDARY)
+                        .height(44).padding({ left: 12, right: 12 }).backgroundColor(Color.Transparent).borderRadius(PMRadius.SM)
                         .accessibilityText('取消这项行动')
                         .onClick(() => { this.editingActionId = ''; this.actionEditError = ''; this.confirmCancelActionId = action.id; })
-                    }.width('100%')
+                    }
+                  }.width('100%')
+                  if (this.reminderAvailable && this.actionReminderCardId === action.id) {
+                    ActionReminderBlock({ projectId: this.projectId, actionId: action.id, actionTitle: action.title,
+                      reminderEnabled: this.reminderAvailable,
+                      onClose: () => { this.actionReminderCardId = ''; },
+                      onChanged: () => { this.loadAllData(true); } })
                   }
                   if (this.editingActionId === action.id) {
                     Column({ space: PMSpacing.SM }) {

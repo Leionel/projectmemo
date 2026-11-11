@@ -12,7 +12,7 @@ struct AgentRichText {
         Span(s.text).fontWeight(s.kind === 'strong' ? FontWeight.Bold : FontWeight.Normal)
           .fontStyle(s.kind === 'emphasis' ? FontStyle.Italic : FontStyle.Normal).fontFamily(s.kind === 'code' ? 'monospace' : 'HarmonyOS Sans')
       })
-    }.fontSize(16).lineHeight(27).fontColor(PMColors.INK_PRIMARY).width('100%').copyOption(CopyOptions.InApp)
+    }.fontColor(PMColors.INK_PRIMARY).width('100%').copyOption(CopyOptions.InApp)
   }
   build() {
     Column({ space: 10 }) {
@@ -33,7 +33,7 @@ struct AgentRichText {
               ForEach(node.rows ?? [], (row: string[]) => { Row() { ForEach(row, (s: string) => { Text(s).fontSize(14).lineHeight(22).fontColor(PMColors.INK_SECONDARY).width(160).padding(10) }) }.alignItems(VerticalAlign.Top) })
             }
           }.scrollable(ScrollDirection.Horizontal).width('100%').accessibilityText('回答中的对照表，可横向滚动')
-        } else { Text(node.text ?? '').fontSize(16).fontColor(PMColors.INK_PRIMARY) }
+        } else { Text(node.text ?? '').fontColor(PMColors.INK_PRIMARY) }
       })
     }.alignItems(HorizontalAlign.Start).width('100%')
   }
@@ -88,7 +88,7 @@ struct AgentSemanticBlock {
       } else if (this.block.semanticType === 'approval' || this.block.semanticType === 'receipt') {
         Column({ space: 10 }) {
           Text(agentStateLabel(this.block.state ?? 'UNKNOWN')).fontSize(13).fontWeight(this.isPendingApproval() ? FontWeight.Medium : FontWeight.Normal).fontColor(this.isPendingApproval() ? PMColors.WARNING : this.block.state === 'SUCCEEDED' || this.block.state === 'COMMITTED' ? PMColors.BRAND : this.block.state === 'FAILED' ? PMColors.RISK : PMColors.INK_SECONDARY)
-          Text(this.block.fallbackText.split('\n')[0]).fontSize(16).lineHeight(26).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+          Text(this.block.fallbackText.split('\n')[0]).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
           if (this.block.fallbackText.includes('\n')) { Text(this.block.fallbackText.split('\n').slice(1).join('\n')).fontSize(14).lineHeight(23).fontColor(PMColors.INK_SECONDARY) }
           if (this.block.semanticType === 'receipt') { Text(receiptDetail(this.block.state ?? 'UNKNOWN', this.block.verification ?? 'NOT_CHECKED')).fontSize(13).lineHeight(22).fontColor(PMColors.INK_SECONDARY) }
           this.Controls()
@@ -104,9 +104,9 @@ struct AgentSemanticBlock {
           this.Controls()
         }
       } else if (this.block.semanticType === 'question') {
-        Text(this.block.question ?? this.block.fallbackText).fontSize(16).lineHeight(27).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+        Text(this.block.question ?? this.block.fallbackText).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
         ForEach(this.block.choices ?? [], (c: ExperienceChoice) => { Button(c.label, { type: ButtonType.Normal }).constraintSize({ minHeight: 44 }).fontSize(14).fontColor(PMColors.BRAND).backgroundColor(PMColors.SURFACE_SUBTLE).enabled(!this.busy).onClick(() => { this.answer = c.label; this.save(); }) })
-        TextArea({ text: this.answer, placeholder: '补充关键条件，接着讨论…' }).height(100).fontSize(16).maxLength(3000).backgroundColor(PMColors.SURFACE_SUBTLE).fontColor(PMColors.INK_PRIMARY).enabled(!this.busy && this.actions.some((a: AllowedAction) => a.enabled)).accessibilityText(this.block.question ?? '补充条件').onChange((value: string) => { this.answer = value; this.save(); })
+        TextArea({ text: this.answer, placeholder: '补充关键条件，接着讨论…' }).height(100).maxLength(3000).backgroundColor(PMColors.SURFACE_SUBTLE).fontColor(PMColors.INK_PRIMARY).enabled(!this.busy && this.actions.some((a: AllowedAction) => a.enabled)).accessibilityText(this.block.question ?? '补充条件').onChange((value: string) => { this.answer = value; this.save(); })
         this.Controls()
       } else if (this.block.semanticType === 'comparison') {
         Text('下一步的取舍').fontSize(17).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
@@ -119,11 +119,11 @@ struct AgentSemanticBlock {
       } else if (this.block.semanticType === 'change') {
         Text(this.block.disposition === 'KEEP_PLAN' ? '保留当前计划' : this.block.fallbackText).fontSize(17).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
         Text(this.block.goalQuote ?? '').fontSize(13).lineHeight(22).fontColor(PMColors.INK_TERTIARY)
-        Text(this.block.relevance ?? this.block.fallbackText).fontSize(16).lineHeight(27).fontColor(PMColors.INK_PRIMARY)
+        Text(this.block.relevance ?? this.block.fallbackText).fontColor(PMColors.INK_PRIMARY)
         ForEach(this.block.unknowns ?? [], (s: string) => { Text(s).fontSize(14).lineHeight(23).fontColor(PMColors.INK_SECONDARY) }); this.Controls()
       } else if (this.block.semanticType === 'timeline') {
         ForEach(this.block.events ?? [], (e: ExperienceTimelineEvent) => { Column({ space: 4 }) { Text(e.occurredAt.slice(0, 10)).fontSize(12).fontColor(PMColors.INK_TERTIARY); Text(e.summary).fontSize(15).lineHeight(25).fontColor(PMColors.INK_PRIMARY) }.alignItems(HorizontalAlign.Start).width('100%') }, (e: ExperienceTimelineEvent) => e.ref.id)
-      } else { Text(this.block.fallbackText).fontSize(16).lineHeight(27).fontColor(PMColors.INK_PRIMARY) }
+      } else { Text(this.block.fallbackText).fontColor(PMColors.INK_PRIMARY) }
     }.width('100%').alignItems(HorizontalAlign.Start).id('agent-block-' + this.block.blockKey).accessibilityGroup(this.block.semanticType === 'receipt')
   }
 }

@@ -17,6 +17,7 @@ import { photoAccessHelper } from '@kit.MediaLibraryKit';
 import { picker } from '@kit.CoreFileKit';
 import { copyPickedFile, pickedFileName, removePickedCopy } from '../common/PickedFile';
 import { common } from '@kit.AbilityKit';
+import { KeyboardAvoidMode } from '@kit.ArkUI';
 import { missionStatusLabel } from '../common/MissionContract';
 import { ConversationPresentation } from '../common/ConversationPresentation';
 import { PMAppBar } from '../components/PMAppBar';
@@ -27,6 +28,7 @@ import { ConversationWorkRef } from '../models/ConversationWork';
 import { ConversationWorkPanel } from '../components/ConversationWorkPanel';
 import { ConversationAnchorPanel } from '../components/ConversationAnchorPanel';
 import { ConversationFileGuides, ConversationAnswer } from '../components/ConversationFileGuides';
+import { ConversationToolButton } from '../components/ConversationToolButton';
 import { AgentMessageBlocks } from '../components/AgentMessageBlocks';
 import { AllowedAction, HydratedBlock } from '../models/AgentExperience';
 import { ConversationUIActionInput, ConversationReadStep, ConversationMemoryUseItem } from '../models/Conversation';
@@ -85,11 +87,13 @@ struct FocusConversation {
   private confirmationKeys: Map<string, string> = new Map<string, string>();
   private uiKeys: Map<string, ConversationUIActionInput> = new Map<string, ConversationUIActionInput>();
   private progressTimer: number = -1;
+  private previousKeyboardMode: KeyboardAvoidMode = KeyboardAvoidMode.OFFSET;
+  private keyboardModeApplied: boolean = false;
   private expired: () => void = (): void => { this.expireSession(); };
   private clearConversationState(message: string): void {
     this.generation++;
     this.view = new ConversationView(); this.workRef = null; this.pending = null; this.sessions = [];
-    this.text = ''; this.busy = false; this.analysisReady = false; this.error = message;
+    this.text = ''; this.busy = false; this.attachBusy = false; this.attachmentChips = []; this.analysisReady = false; this.error = message;
     this.target = ''; this.originProjectId = ''; this.entity = undefined; this.replyId = '';
     this.correctionMessageId = ''; this.correctionProjects = []; this.expandedRefs = '';
   }
@@ -100,8 +104,10 @@ struct FocusConversation {
     if (this.pageVisible) { router.replaceUrl({ url: 'pages/LoginPage' }); }
   }
   aboutToAppear(): void { SessionStore.onSessionExpired(this.expired); this.initialize(); this.progressTimer = setInterval(() => { this.pollProgress(); }, 1500); }
-  aboutToDisappear(): void { this.saveComposer(); ConversationDraftStore.flush(); this.generation++; if (this.progressTimer >= 0) { clearInterval(this.progressTimer); } SessionStore.offSessionExpired(this.expired); }
+  aboutToDisappear(): void { this.restoreKeyboardMode(); this.saveComposer(); ConversationDraftStore.flush(); this.generation++; if (this.progressTimer >= 0) { clearInterval(this.progressTimer); } SessionStore.offSessionExpired(this.expired); }
   onPageShow(): void {
+    if (!this.keyboardModeApplied) { this.previousKeyboardMode = this.getUIContext().getKeyboardAvoidMode(); this.keyboardModeApplied = true; }
+    this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
     this.pageVisible = true;
     const params = router.getParams() as Record<string, string>;
     const createFlag = params?.['createConversation'] ?? '';
@@ -113,9 +119,14 @@ struct FocusConversation {
     }
     if (this.view.id !== '' && !this.busy) { this.refresh(); }
   }
-  onPageHide(): void { this.pageVisible = false; this.saveComposer(); ConversationDraftStore.flush(); }
+  onPageHide(): void { this.restoreKeyboardMode(); this.pageVisible = false; this.saveComposer(); ConversationDraftStore.flush(); }
+  private restoreKeyboardMode(): void {
+    if (!this.keyboardModeApplied) { return; }
+    this.getUIContext().setKeyboardAvoidMode(this.previousKeyboardMode);
+    this.keyboardModeApplied = false;
+  }
   private openHistory(): void {
-    if (this.busy) { return; }
+    if (this.busy || this.attachBusy) { return; }
     this.saveComposer(); ConversationDraftStore.flush();
     router.pushUrl({ url: 'pages/ConversationHistory', params: { conversationId: this.view.id, projectId: this.originProjectId } });
   }
@@ -175,7 +186,7 @@ struct FocusConversation {
     }
   }
   private async create(project: boolean = false): Promise<void> {
-    if (this.busy) { return; }
+    if (this.busy || this.attachBusy) { return; }
     const epoch = ++this.generation; this.busy = true; this.error = '';
     try {
       const input = new ConversationCreateInput(); input.requestId = util.generateRandomUUID();
@@ -183,7 +194,7 @@ struct FocusConversation {
       const c = await this.service.create(input);
       const view = await this.service.read(c.id);
       if (epoch !== this.generation) { return; }
-      this.view = view; this.text = ''; this.pending = null; this.replyId = ''; this.workRef = null;
+      this.view = view; this.text = ''; this.pending = null; this.replyId = ''; this.workRef = null; this.attachmentChips = [];
       const sessions = (await this.service.list()).conversations;
       if (epoch === this.generation) { this.sessions = sessions; }
     } catch (e) { if (epoch === this.generation) { this.fail(e); } }
@@ -197,16 +208,17 @@ struct FocusConversation {
     finally { if (owned && epoch === this.generation) { this.busy = false; } }
   }
   private async selectDiscussion(id: string): Promise<void> {
-    if (this.busy) { return; }
+    if (this.busy || this.attachBusy) { return; }
     this.saveComposer();
     const epoch = ++this.generation; this.busy = true; this.pending = null; this.replyId = ''; this.workRef = null; this.error = ''; this.nearBottom = true; this.lastScrollY = 0;
-    try { const view = await this.service.read(id); if (epoch === this.generation) { this.view = view; this.target = view.focusProjectId ?? ''; this.restoreComposer(); } }
+    try { const view = await this.service.read(id); if (epoch === this.generation) { this.view = view; this.target = view.focusProjectId ?? ''; this.attachmentChips = []; this.restoreComposer(); } }
     catch (e) { if (epoch === this.generation) { this.fail(e); } }
     finally { if (epoch === this.generation) { this.busy = false; } }
   }
   private attachProjectId(): string { return this.target !== '' ? this.target : (this.view.homeProjectId ?? ''); }
   private async pickAttachment(): Promise<void> {
-    if (this.attachBusy || this.view.id === '') { return; }
+    if (this.busy || this.attachBusy || this.view.id === '') { return; }
+    const epoch = this.generation, conversationId = this.view.id, projectId = this.attachProjectId();
     let uri = '', name = '', mime = '';
     try {
       const source = await promptAction.showActionMenu({ title: '添加附件', buttons: [{ text: '从相册选图片', color: '#0A7EA4' }, { text: '选择 PDF', color: '#0A7EA4' }] });
@@ -222,42 +234,57 @@ struct FocusConversation {
         uri = uris[0]; name = pickedFileName(uris[0], `discussion-${Date.now()}.pdf`); mime = 'application/pdf';
       }
     } catch (_e) { return; }
-    const projectId = this.attachProjectId();
+    if (epoch !== this.generation || conversationId !== this.view.id) { return; }
     let use = 0;
     try {
       use = (await promptAction.showActionMenu({ title: '这个附件用于', buttons: projectId !== ''
         ? [{ text: '仅用于本次讨论', color: '#0A7EA4' }, { text: '加入项目记忆', color: '#0A7EA4' }]
         : [{ text: '仅用于本次讨论', color: '#0A7EA4' }] })).index;
     } catch (_e) { return; }
+    if (epoch !== this.generation || conversationId !== this.view.id) { return; }
+    if (use === 0 && this.attachmentChips.length >= 5) { this.error = '每次最多附加 5 个文件，请先移除一个附件'; return; }
     this.attachBusy = true; this.error = '';
     let localPath = '';
     try {
       localPath = copyPickedFile((getContext(this) as common.UIAbilityContext).cacheDir, uri);
       if (use === 0) {
-        const reply = await this.attachmentService.upload(this.view.id, localPath, name, mime, projectId);
+        const reply = await this.attachmentService.upload(conversationId, localPath, name, mime, projectId);
+        if (epoch !== this.generation) { return; }
         if (!this.attachmentChips.some((c: ConversationAttachmentChip) => c.id === reply.attachment.id)) { this.attachmentChips = [...this.attachmentChips, reply.attachment]; }
         this.pending = null;
       } else {
         await this.projectAttachmentService.upload(projectId, localPath, name, mime);
+        if (epoch !== this.generation) { return; }
         this.text = (this.text !== '' ? this.text + '\n' : '') + '我刚把一份资料加入了项目记忆，'; this.saveComposer();
       }
-    } catch (e) { this.fail(e); }
-    finally { removePickedCopy(uri, localPath); this.attachBusy = false; }
+    } catch (e) { if (epoch === this.generation) { this.fail(e); } }
+    finally { removePickedCopy(uri, localPath); if (epoch === this.generation) { this.attachBusy = false; } }
   }
   private async promoteAttachment(chip: ConversationAttachmentChip): Promise<void> {
     const projectId = this.attachProjectId();
-    if (projectId === '' || this.attachBusy) { return; }
+    if (projectId === '' || this.busy || this.attachBusy) { return; }
+    const epoch = this.generation;
     this.attachBusy = true;
-    try { await this.attachmentService.promote(this.view.id, chip.id, projectId); this.attachmentChips = this.attachmentChips.filter((c: ConversationAttachmentChip) => c.id !== chip.id); this.pending = null; }
-    catch (e) { this.fail(e); }
-    finally { this.attachBusy = false; }
+    try { await this.attachmentService.promote(this.view.id, chip.id, projectId); if (epoch === this.generation) { this.attachmentChips = this.attachmentChips.filter((c: ConversationAttachmentChip) => c.id !== chip.id); this.pending = null; } }
+    catch (e) { if (epoch === this.generation) { this.fail(e); } }
+    finally { if (epoch === this.generation) { this.attachBusy = false; } }
   }
-  private removeAttachment(chip: ConversationAttachmentChip): void {
-    this.attachmentChips = this.attachmentChips.filter((c: ConversationAttachmentChip) => c.id !== chip.id); this.pending = null;
-    this.attachmentService.remove(this.view.id, chip.id).catch(() => undefined);
+  private async removeAttachment(chip: ConversationAttachmentChip): Promise<void> {
+    if (this.busy || this.attachBusy) { return; }
+    const epoch = this.generation;
+    this.attachBusy = true;
+    try {
+      await this.attachmentService.remove(this.view.id, chip.id);
+      if (epoch === this.generation) { this.attachmentChips = this.attachmentChips.filter((c: ConversationAttachmentChip) => c.id !== chip.id); this.pending = null; }
+    } catch (e) {
+      if (epoch === this.generation) {
+        if (e instanceof ApiError && e.code === 'ATTACHMENT_NOT_FOUND') { this.attachmentChips = this.attachmentChips.filter((c: ConversationAttachmentChip) => c.id !== chip.id); this.pending = null; }
+        else { this.fail(e); }
+      }
+    } finally { if (epoch === this.generation) { this.attachBusy = false; } }
   }
   private async ask(): Promise<void> {
-    if (this.busy || !this.analysisReady || this.text.trim() === '' || this.view.id === '') { return; }
+    if (this.busy || this.attachBusy || !this.analysisReady || this.text.trim() === '' || this.view.id === '') { return; }
     const epoch = this.generation; this.busy = true; this.error = '';
     if (this.pending === null || this.pending.message !== this.text.trim()) {
       const input = new ConversationTurnInput(); input.requestId = util.generateRandomUUID(); input.expectedVersion = this.view.version; input.expectedContinuitySeq = this.view.continuity?.seq;
@@ -275,7 +302,7 @@ struct FocusConversation {
       this.view = reply.conversation; this.target = this.view.focusProjectId ?? '';
       this.sessions = this.sessions.map((item: ConversationListItem): ConversationListItem => item.id === this.view.id ? { id: item.id, title: this.view.title, scope: item.scope, homeProjectId: item.homeProjectId, updatedAt: item.updatedAt } : item);
       this.nearBottom = true; setTimeout(() => { if (epoch === this.generation) { this.messageScroller.scrollEdge(Edge.Bottom); } }, 50);
-      if (reply.status === 'ANSWERED' || reply.status === 'NEEDS_CLARIFICATION' || reply.status === 'CANCELLED') { this.text = ''; this.saveComposer(); this.pending = null; this.replyId = ''; this.attachmentChips = []; }
+      if (reply.status !== 'UNKNOWN' && reply.status !== 'FAILED') { this.text = ''; this.saveComposer(); this.pending = null; this.replyId = ''; this.attachmentChips = []; }
       else { this.error = ''; if (['FAILED', 'UNKNOWN'].includes(reply.status)) { this.pending = null; } }
     } catch (e) { if (epoch === this.generation) { this.fail(e); await this.refresh(); } }
     finally { if (epoch === this.generation) { this.busy = this.view.activeTurn !== null; } }
@@ -491,37 +518,38 @@ struct FocusConversation {
   }
   @Builder
   private MessageTools($$: AgentMessageInput) {
-    Flex({ wrap: FlexWrap.Wrap, alignItems: ItemAlign.Center }) {
+    Flex({ wrap: FlexWrap.Wrap, alignItems: ItemAlign.Center, justifyContent: $$.message.role === 'USER' ? FlexAlign.End : FlexAlign.Start }) {
       ConversationFileGuides({ files: $$.message.fileGuides ?? [], sources: $$.message.sources, conversationId: this.view.id })
+      if ($$.message.role === 'USER' && !$$.message.restricted) {
+        ConversationToolButton({ icon: $r('sys.symbol.pencil_line'), label: '编辑消息', disabled: this.busy || this.attachBusy,
+          onAction: () => { this.replyId = ''; this.pending = null; this.text = $$.message.content; this.saveComposer();
+            this.getUIContext().getFocusController().requestFocus('conversation-composer'); } })
+      }
       if ($$.message.role === 'ASSISTANT' && !$$.message.restricted && $$.message.priorities.length > 0) {
-        Button('判断依据', { type: ButtonType.Normal }).constraintSize({ minHeight: 40 }).fontSize(13)
-          .fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).borderRadius(8).padding({ left: 8, right: 8 })
-          .accessibilityText('判断依据').onClick(() => { this.basisExpanded = this.basisExpanded === $$.message.id ? '' : $$.message.id; })
+        ConversationToolButton({ icon: $r('sys.symbol.list_bullet_square'), label: '判断依据', selected: this.basisExpanded === $$.message.id,
+          onAction: () => { this.basisExpanded = this.basisExpanded === $$.message.id ? '' : $$.message.id; } })
       }
       if ($$.message.role === 'ASSISTANT' && !$$.message.restricted && this.memoryItems($$.message).length > 0) {
-        Button('记忆 ' + this.memoryItems($$.message).length, { type: ButtonType.Normal }).constraintSize({ minHeight: 40 }).fontSize(13)
-          .fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).borderRadius(8).padding({ left: 8, right: 8 })
-          .accessibilityText('本轮提供参考的记忆').onClick(() => { this.memoryExpanded = this.memoryExpanded === $$.message.id ? '' : $$.message.id; })
+        ConversationToolButton({ icon: $r('sys.symbol.book'), label: '本轮参考记忆', count: this.memoryItems($$.message).length,
+          selected: this.memoryExpanded === $$.message.id,
+          onAction: () => { this.memoryExpanded = this.memoryExpanded === $$.message.id ? '' : $$.message.id; } })
       }
       if ($$.message.role === 'ASSISTANT' && !$$.message.restricted && this.correctionTarget($$.message) !== '') {
-        Button('纠正', { type: ButtonType.Normal }).constraintSize({ minHeight: 40 }).fontSize(13)
-          .fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).borderRadius(8).padding({ left: 8, right: 8 })
-          .accessibilityText('纠正这条回答的理解').onClick(() => {
+        ConversationToolButton({ icon: $r('sys.symbol.square_and_pencil'), label: '纠正理解', onAction: () => {
             this.correctionMessageId = $$.message.id;
             this.correctionProjects = this.observedProjects($$.message);
             this.agentSheetMode = 'correction'; this.agentSheetOpen = true;
-          })
+          } })
       }
       if ($$.message.role === 'ASSISTANT' && !$$.message.restricted) {
-        Button('追问', { type: ButtonType.Normal }).constraintSize({ minHeight: 40 }).fontSize(13)
-          .fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).borderRadius(8).padding({ left: 8, right: 8 })
-          .onClick(() => { this.replyId = $$.message.id; this.text = '为什么这样建议？'; this.saveComposer(); })
+        ConversationToolButton({ icon: $r('sys.symbol.arrowshape_turn_up_left'), label: '继续追问', disabled: this.busy || this.attachBusy,
+          onAction: () => { this.replyId = $$.message.id; this.text = '为什么这样建议？'; this.saveComposer(); } })
       }
     }.width('100%')
   }
   @Builder
   private Message($$: AgentMessageInput) {
-    Column({ space: 10 }) {
+    Column({ space: $$.message.role === 'USER' ? 0 : 4 }) {
       if ($$.message.role === 'ASSISTANT') {
         Row({ space: 8 }) {
           Text('忆').fontSize(13).fontWeight(FontWeight.Medium).fontColor(PMColors.BRAND).width(26).height(26).textAlign(TextAlign.Center).backgroundColor(PMColors.BRAND_LIGHT).borderRadius(8)
@@ -657,7 +685,7 @@ struct FocusConversation {
     Column() {
       PMAppBar({ title: '与忆程协作', subtitle: this.headerSubtitle(), showBack: true, rightActionText: this.view.messages.length > 0 ? '新讨论' : '', showRightIcon: true, rightIconLabel: '历史讨论', onRightAction: (): void => { this.openHistory(); }, onRightTextAction: (): void => { if (!this.busy) { this.create(); } } })
       Scroll(this.messageScroller) {
-        Column({ space: 20 }) {
+        Column({ space: 16 }) {
           if (this.view.id !== '') {
             ForEach([this.view.id], (id: string) => {
               ConversationAnchorPanel({ conversationId: id, revision: this.view.version, busy: $busy, visible: this.pageVisible, suspended: this.workRef !== null,
@@ -739,15 +767,16 @@ struct FocusConversation {
                     Row({ space: 6 }) {
                       Text(chip.fileName).fontSize(12).fontColor(PMColors.INK_PRIMARY).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).constraintSize({ maxWidth: 140 })
                       if (chip.extractionStatus !== 'SUCCESS') { Text((chip.extractionError ?? '').includes('未选择项目') ? '暂未识别' : '待提取').fontSize(11).fontColor(PMColors.WARNING) }
-                      if (this.attachProjectId() !== '') { Text('转为项目资料').fontSize(12).fontColor(PMColors.BRAND).height(32).onClick(() => { this.promoteAttachment(chip); }) }
-                      Text('×').fontSize(16).fontColor(PMColors.INK_TERTIARY).width(28).height(32).textAlign(TextAlign.Center)
+                      if (this.attachProjectId() !== '') { Text('转为项目资料').fontSize(12).fontColor(PMColors.BRAND).height(44).enabled(!this.busy && !this.attachBusy).onClick(() => { this.promoteAttachment(chip); }) }
+                      Text('×').fontSize(16).fontColor(PMColors.INK_TERTIARY).width(44).height(44).textAlign(TextAlign.Center).enabled(!this.busy && !this.attachBusy)
                         .accessibilityText('移除附件 ' + chip.fileName).onClick(() => { this.removeAttachment(chip); })
                     }.padding({ left: 10, right: 2 }).borderRadius(999).backgroundColor(PMColors.SURFACE_SUBTLE)
                   }, (chip: ConversationAttachmentChip) => chip.id)
                 }.padding({ left: 12, right: 12, top: 10 })
               }.scrollable(ScrollDirection.Horizontal).scrollBar(BarState.Off).width('100%')
             }
-            TextArea({ text: this.text, placeholder: '聊聊下一步…' }).constraintSize({ minHeight: 48, maxHeight: 136 }).fontSize(15).fontColor(PMColors.INK_PRIMARY).backgroundColor(Color.Transparent).padding({ left: 15, right: 15, top: 14, bottom: 4 })
+            TextArea({ text: this.text, placeholder: '聊聊下一步…' }).constraintSize({ minHeight: 48, maxHeight: 136 }).fontColor(PMColors.INK_PRIMARY).backgroundColor(Color.Transparent).padding({ left: 15, right: 15, top: 14, bottom: 4 })
+              .id('conversation-composer')
               .enabled(!this.busy).onChange((v: string) => { this.text = v; this.saveComposer(); })
             Row({ space: 8 }) {
               Button({ type: ButtonType.Normal }) { SymbolGlyph($r('sys.symbol.paperclip')).fontSize(20).fontColor([PMColors.INK_SECONDARY]) }
@@ -775,7 +804,7 @@ struct FocusConversation {
                   }.width(22).height(22)
                 }
               }.height(38).width(38).accessibilityText('发送').backgroundColor(PMColors.BRAND)
-                .enabled(!this.busy && this.analysisReady && this.text.trim() !== '').onClick(() => { this.ask(); })
+                .enabled(!this.busy && !this.attachBusy && this.analysisReady && this.text.trim() !== '').onClick(() => { this.ask(); })
             }.width('100%').padding({ left: 12, right: 10, bottom: 8 })
           }.width('100%').backgroundColor(PMColors.SURFACE).border({ width: 1, color: PMColors.BORDER }).borderRadius(20).clip(true)
         }.width('100%').padding({ left: 12, right: 12, top: 8, bottom: 10 }).backgroundColor(PMColors.BACKGROUND)

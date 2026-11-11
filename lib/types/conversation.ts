@@ -4,6 +4,7 @@ import type { ExternalSourceMeta, ResearchCoverage } from "./conversationResearc
 export type ConversationChangeNotice = { anchorId: string; revisionKey: string; eventId: string; missionId: string; goalQuote: string; changeKind: "SOURCE_ARRIVED" };
 
 const id = z.string().min(1).max(160);
+export const CONVERSATION_TURN_ATTACHMENT_LIMIT = 5;
 export const conversationEntrySchema = z.object({
   kind: z.enum(["INTERVENTION", "GOAL_QUESTION", "IMPACT", "SOURCE_OBSERVATION"]),
   projectId: id, id, revision: z.string().max(160).optional(),
@@ -22,7 +23,7 @@ export const conversationTurnSchema = z.object({
   llmContextApproved: z.boolean().default(false),
   investigationMode: z.enum(["QUICK", "STANDARD", "DEEP"]).optional(),
   /** 本轮引用的“仅用于对话”附件；只在发给模型的内容里附上提取文字。 */
-  attachmentIds: z.array(id).max(5).optional(),
+  attachmentIds: z.array(id).max(CONVERSATION_TURN_ATTACHMENT_LIMIT).optional(),
 }).strict();
 export const conversationConfirmSchema = z.object({
   requestId: id, proposalHash: z.string().regex(/^[a-f0-9]{64}$/),

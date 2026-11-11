@@ -181,7 +181,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       setList(rows => rows.map(row => row.id === result.conversation.id ? { ...row, title: result.conversation.title } : row));
       setTarget(result.conversation.focusProjectId ?? "");
       requestAnimationFrame(() => { if (epoch === generation.current && messageRegion.current) { nearBottomRef.current = true; messageRegion.current.scrollTop = messageRegion.current.scrollHeight; } });
-      if (["ANSWERED", "NEEDS_CLARIFICATION", "CANCELLED"].includes(result.status)) { setText(""); setReply(null); setAttachmentChips([]); pending.current = null; }
+      if (!["UNKNOWN", "FAILED"].includes(result.status)) { setText(""); setReply(null); setAttachmentChips([]); pending.current = null; }
       else { setError(""); if (["UNKNOWN", "FAILED"].includes(result.status)) pending.current = null; }
     } catch (e) {
       if (epoch !== generation.current) return;

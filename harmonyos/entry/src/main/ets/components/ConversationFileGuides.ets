@@ -2,6 +2,7 @@ import { researchReadLevelLabel } from '../common/ResearchPresentation';
 import router from '@ohos.router';
 import { ConversationFileGuide, ConversationSource } from '../models/Conversation';
 import { PMColors } from '../common/DesignTokens';
+import { ConversationToolButton } from './ConversationToolButton';
 
 export function openConversationFile(file: ConversationFileGuide, conversationId: string): void {
   if (file.missing) { return; }
@@ -63,7 +64,7 @@ export struct ConversationAnswer {
           const file = this.guide(part); if (file) { openConversationFile(file, this.conversationId); }
         })
       })
-    }.fontSize(15).lineHeight(24).constraintSize({ maxWidth: '100%' })
+    }.constraintSize({ maxWidth: '100%' })
       .textAlign(this.rightAligned ? TextAlign.End : TextAlign.Start).copyOption(CopyOptions.LocalDevice)
   }
 }
@@ -161,11 +162,8 @@ export struct ConversationFileGuides {
   build() {
     Column() {
       if (this.files.length > 0 || this.sources.length > 0) {
-        Button('资料 ' + this.count(), { type: ButtonType.Normal })
-          .constraintSize({ minHeight: 40 }).fontSize(13).fontColor(PMColors.INK_SECONDARY)
-          .backgroundColor(Color.Transparent).borderRadius(8).padding({ left: 8, right: 8 })
-          .accessibilityText('资料 ' + this.count() + '，查看本次回答的资料')
-          .onClick(() => { this.sheetOpen = true; })
+        ConversationToolButton({ icon: $r('sys.symbol.doc_text_on_doc_text'), label: '查看引用资料', count: this.count(),
+          onAction: () => { this.sheetOpen = true; } })
       }
     }
     .bindSheet($$this.sheetOpen, this.SheetBody(), {

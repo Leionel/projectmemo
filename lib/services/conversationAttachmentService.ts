@@ -1,9 +1,9 @@
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { reserveCloudCall } from "@/lib/auth/cloudQuota";
-import { assertProject, ownedConversation } from "@/lib/conversation/repository";
+import { assertProject, lockConversation, ownedConversation } from "@/lib/conversation/repository";
 import { extractImageText, extractPdfText, inferAndValidateFileType, processAttachmentUpload } from "@/lib/services/attachmentService";
-import { deleteAttachmentFile, readAttachmentFile, saveFileToStorage } from "@/lib/storage/attachmentStorage";
+import { computeFileSha256, deleteAttachmentFile, readAttachmentFile, saveFileToStorage } from "@/lib/storage/attachmentStorage";
 import type { ConversationActor } from "@/lib/types/conversation";
 
 /** 每次讨论最多保留的附件数；只读给模型的文字也按条截断，避免一份文件挤掉讨论上下文。 */
@@ -25,13 +25,14 @@ export async function uploadConversationAttachment(actor: ConversationActor, con
   // 图片识别要计入某个项目的云调用额度：项目讨论用所属项目，跨项目讨论用当前选中的项目；都没有时不识别。
   const quotaProjectId = conversation.homeProjectId ?? input.projectId ?? null;
   if (!conversation.homeProjectId && input.projectId) await assertProject(actor, input.projectId);
-  const count = await db.conversationAttachment.count({ where: { conversationId } });
-  if (count >= CONVERSATION_ATTACHMENT_LIMIT) throw new AppError("CONVERSATION_ATTACHMENT_LIMIT", `每次讨论最多保留 ${CONVERSATION_ATTACHMENT_LIMIT} 个附件`, 409);
   const type = inferAndValidateFileType(input.fileName, input.mimeType, input.buffer);
   if (type !== "PDF" && type !== "IMAGE") throw new AppError("ATTACHMENT_TYPE_UNSUPPORTED", "讨论附件只支持 PDF 和图片", 422);
+  const sha256 = computeFileSha256(input.buffer);
+  const duplicate = await db.conversationAttachment.findFirst({ where: { conversationId, sha256 }, select: publicShape });
+  if (duplicate) return { attachment: duplicate, isDuplicate: true };
+  const count = await db.conversationAttachment.count({ where: { conversationId } });
+  if (count >= CONVERSATION_ATTACHMENT_LIMIT) throw new AppError("CONVERSATION_ATTACHMENT_LIMIT", `每次讨论最多保留 ${CONVERSATION_ATTACHMENT_LIMIT} 个附件`, 409);
   const stored = await saveFileToStorage("conversation-" + conversationId, input.fileName, input.buffer);
-  const duplicate = await db.conversationAttachment.findFirst({ where: { conversationId, sha256: stored.sha256 }, select: publicShape });
-  if (duplicate) { await deleteAttachmentFile(stored.storageKey).catch(() => undefined); return { attachment: duplicate, isDuplicate: true }; }
   let extractedText = "", extractionStatus = "SUCCESS", extractionError: string | null = null;
   try {
     if (type === "PDF") extractedText = await extractPdfText(input.buffer) ?? "";
@@ -44,10 +45,21 @@ export async function uploadConversationAttachment(actor: ConversationActor, con
     extractionStatus = "FAILED"; extractionError = error instanceof Error ? error.message : "提取失败";
   }
   try {
-    const attachment = await db.conversationAttachment.create({ data: { conversationId, ownerUserId: actor.userId, type,
-      storageKey: stored.storageKey, fileName: input.fileName, mimeType: input.mimeType, size: stored.size, sha256: stored.sha256,
-      extractedText: extractedText || null, extractionStatus, extractionError }, select: publicShape });
-    return { attachment, isDuplicate: false };
+    const result = await db.$transaction(async tx => {
+      await lockConversation(tx, conversationId);
+      await ownedConversation(actor, conversationId, tx);
+      if (quotaProjectId) await assertProject(actor, quotaProjectId, tx);
+      const existing = await tx.conversationAttachment.findFirst({ where: { conversationId, sha256 }, select: publicShape });
+      if (existing) return { attachment: existing, isDuplicate: true };
+      const currentCount = await tx.conversationAttachment.count({ where: { conversationId } });
+      if (currentCount >= CONVERSATION_ATTACHMENT_LIMIT) throw new AppError("CONVERSATION_ATTACHMENT_LIMIT", `每次讨论最多保留 ${CONVERSATION_ATTACHMENT_LIMIT} 个附件`, 409);
+      const attachment = await tx.conversationAttachment.create({ data: { conversationId, ownerUserId: actor.userId, type,
+        storageKey: stored.storageKey, fileName: input.fileName, mimeType: input.mimeType, size: stored.size, sha256,
+        extractedText: extractedText || null, extractionStatus, extractionError }, select: publicShape });
+      return { attachment, isDuplicate: false };
+    });
+    if (result.isDuplicate) await deleteAttachmentFile(stored.storageKey).catch(() => undefined);
+    return result;
   } catch (error) { await deleteAttachmentFile(stored.storageKey).catch(() => undefined); throw error; }
 }
 
@@ -65,7 +77,7 @@ async function ownedAttachment(actor: ConversationActor, conversationId: string,
 
 export async function deleteConversationAttachment(actor: ConversationActor, conversationId: string, attachmentId: string) {
   const row = await ownedAttachment(actor, conversationId, attachmentId);
-  await db.conversationAttachment.delete({ where: { id: row.id } });
+  await db.conversationAttachment.deleteMany({ where: { id: row.id, conversationId, ownerUserId: actor.userId } });
   await deleteAttachmentFile(row.storageKey).catch(() => undefined);
   return { deleted: true };
 }
@@ -76,8 +88,9 @@ export async function promoteConversationAttachment(actor: ConversationActor, co
   await assertProject(actor, projectId);
   const buffer = await readAttachmentFile(row.storageKey);
   const result = await processAttachmentUpload({ projectId, fileName: row.fileName, mimeType: row.mimeType, buffer },
-    row.extractedText !== null ? { extractedText: row.extractedText } : {});
-  await db.conversationAttachment.delete({ where: { id: row.id } });
+    { ...(row.extractedText !== null ? { extractedText: row.extractedText } : {}),
+      beforeWrite: async tx => { await ownedConversation(actor, conversationId, tx); await assertProject(actor, projectId, tx); } });
+  await db.conversationAttachment.deleteMany({ where: { id: row.id, conversationId, ownerUserId: actor.userId } });
   await deleteAttachmentFile(row.storageKey).catch(() => undefined);
   return { attachment: result.attachment, isDuplicate: result.isDuplicate, cardId: result.card?.id ?? null };
 }

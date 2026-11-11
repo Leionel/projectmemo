@@ -1,4 +1,4 @@
-.blocks { position:relative; display:grid; gap:1.15rem; min-width:0; font-size:.96875rem; line-height:1.8; color:var(--ink); }
+.blocks { position:relative; display:grid; gap:1.15rem; min-width:0; font-size:1rem; line-height:1.65; color:var(--ink); }
 .blocks h3,.blocks h4 { font-size:1rem; font-weight:600; line-height:1.65; }
 .blocks h4 { font-size:.9375rem; }
 .prose { overflow-wrap:anywhere; min-width:0; }
@@ -79,8 +79,8 @@
 .choices button strong { font-size:.875rem; font-weight:600; }
 .choices button span,.choices button small { font-size:.8125rem; color:var(--ink-soft); margin-top:.25rem; }
 .question { display:grid; gap:.65rem; }
-.question label { font-weight:600; font-size:.9375rem; }
-.question textarea { width:100%; min-height:6rem; padding:.7rem; border:1px solid var(--rule-strong); border-radius:10px; background:var(--card-bg); color:var(--ink); resize:vertical; font:inherit; font-size:.9375rem; }
+.question label { font-weight:600; font-size:1rem; }
+.question textarea { width:100%; min-height:6rem; padding:.7rem; border:1px solid var(--rule-strong); border-radius:10px; background:var(--card-bg); color:var(--ink); resize:vertical; font:inherit; font-size:1rem; }
 .question > button { justify-self:start; }
 .change { padding-left:.85rem; border-left:2px solid var(--teal); }
 .change p { font-size:.875rem; color:var(--ink-soft); }
@@ -89,4 +89,4 @@
 .timeline p { font-size:.875rem; }
 @keyframes blockSettle { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
 @media(prefers-reduced-motion:reduce) { .approval[data-state="PENDING"],.receipt[data-state="SUCCEEDED"] .receiptMark,.change { animation:none; } .blocks [data-tether-line] path { animation:none; stroke-dashoffset:0; } }
-@media(max-width:500px) { .blocks { font-size:.9375rem; } .approval,.receipt { padding:.85rem; } .actions { gap:.4rem; } }
+@media(max-width:500px) { .approval,.receipt { padding:.85rem; } .actions { gap:.4rem; } }

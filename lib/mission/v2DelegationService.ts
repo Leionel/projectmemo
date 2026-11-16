@@ -2,7 +2,8 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
-import { jsonHash } from "./contracts";
+import { json, jsonHash } from "./contracts";
+import { record } from "@/lib/conversation/repository";
 import { assertOwner, event, type Tx } from "./repository";
 import { createMissionInTx, editContinuationPolicy } from "./missionService";
 import { boundedInvestigationPolicySchema } from "@/lib/types/mission";
@@ -80,52 +81,94 @@ export type V2DelegationResult = {
   expiresAt: string; workbenchUrl: string; alreadyCreated: boolean;
 };
 
+type V2DelegationReceipt = {
+  schemaVersion: 1; requestId: string; projectId: string; ownerUserId: string;
+  goalHash: string; materialHash: string; previewHash: string; policyHash: string;
+  expiresAt: string; materialSourceId: string; confirmedAt: string;
+};
+
+function readReceipt(mission: { planJson: unknown }): V2DelegationReceipt | null {
+  const value = record(record(mission.planJson).v2DelegationReceipt);
+  return value.schemaVersion === 1 && typeof value.projectId === "string" ? value as unknown as V2DelegationReceipt : null;
+}
+
+function idempotentResult(mission: { id: string; projectId: string; planJson: unknown }, input: {
+  projectId: string; goal: string; materialText: string; previewHash: string; expiresAt: string; requestId: string;
+}): V2DelegationResult {
+  const receipt = readReceipt(mission);
+  const conflict = (reason: string) => new AppError("DELEGATION_IDEMPOTENCY_CONFLICT", reason, 409, { requestId: input.requestId });
+  if (!receipt) throw conflict("该请求编号已有原确认，但缺少可核对的绑定回执；请使用新的请求编号重新确认");
+  if (mission.projectId !== receipt.projectId || input.projectId !== receipt.projectId)
+    throw conflict("该请求编号已用于另一个项目的确认，不能换项目重放");
+  if (receipt.goalHash !== jsonHash(input.goal) || receipt.materialHash !== jsonHash(input.materialText)
+    || receipt.previewHash !== input.previewHash || receipt.expiresAt !== input.expiresAt)
+    throw conflict("该请求编号已用于内容不同的确认，不能更改目标、材料或许可重放");
+  return {
+    missionId: mission.id, projectId: mission.projectId, materialSourceId: receipt.materialSourceId,
+    policyHash: receipt.policyHash, expiresAt: receipt.expiresAt,
+    workbenchUrl: "/v2/workbench?missionId=" + mission.id, alreadyCreated: true,
+  };
+}
+
 export async function confirmV2Delegation(userId: string, projectId: string, raw: unknown): Promise<V2DelegationResult> {
   requireDelegationEntry();
   const body = confirmInput.parse(raw);
-  const expiresAtMs = Date.parse(body.expiresAt);
-  if (!Number.isFinite(expiresAtMs) || expiresAtMs <= Date.now() || expiresAtMs > Date.now() + 30 * 86400000)
-    throw new AppError("DELEGATION_PERIOD_CHANGED", "预览的跟进期限已失效，请重新预览", 409);
-  const canonical = canonicalPreview(projectId, body, body.expiresAt);
-  if (canonical.previewHash !== body.previewHash) throw new AppError("DELEGATION_PREVIEW_CHANGED", "预览内容已变化，请重新核对范围与期限", 409);
+  const goal = body.goal, materialText = body.materialText.replace(/\r\n/g, "\n").trim();
   const createRequestId = "v2-delegation:" + body.requestId;
   const materialRequestId = "v2-material:" + body.requestId;
-  return db.$transaction(async (tx: Tx) => {
-    await assertOwner(userId, projectId, tx);
-    const existing = await tx.agentMission.findUnique({ where: { ownerUserId_createRequestId: { ownerUserId: userId, createRequestId } } });
-    if (existing) {
-      const capture = await tx.capture.findUnique({ where: { projectId_requestId: { projectId, requestId: materialRequestId } } });
-      const policy = boundedInvestigationPolicySchema.parse(existing.continuationPolicyJson);
-      return {
-        missionId: existing.id, projectId, materialSourceId: capture ? "capture:" + capture.id : "",
-        policyHash: jsonHash(policy), expiresAt: policy.expiresAt,
-        workbenchUrl: "/v2/workbench?missionId=" + existing.id, alreadyCreated: true,
-      } satisfies V2DelegationResult;
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await db.$transaction(async (tx: Tx) => {
+        await assertOwner(userId, projectId, tx);
+        // Replay is decided against the persisted receipt before any period or preview revalidation:
+        // an identical retry must survive preview expiry and later policy edits.
+        const existing = await tx.agentMission.findUnique({ where: { ownerUserId_createRequestId: { ownerUserId: userId, createRequestId } } });
+        if (existing) return idempotentResult(existing, { projectId, goal, materialText, previewHash: body.previewHash, expiresAt: body.expiresAt, requestId: body.requestId });
+        const expiresAtMs = Date.parse(body.expiresAt);
+        if (!Number.isFinite(expiresAtMs) || expiresAtMs <= Date.now() || expiresAtMs > Date.now() + 30 * 86400000)
+          throw new AppError("DELEGATION_PERIOD_CHANGED", "预览的跟进期限已失效，请重新预览", 409);
+        const canonical = canonicalPreview(projectId, body, body.expiresAt);
+        if (canonical.previewHash !== body.previewHash)
+          throw new AppError("DELEGATION_PREVIEW_CHANGED", "预览内容已变化，请重新核对范围与期限", 409);
+        const capture = await tx.capture.upsert({
+          where: { projectId_requestId: { projectId, requestId: materialRequestId } },
+          create: { projectId, requestId: materialRequestId, requestHash: jsonHash(canonical.materialText), rawText: canonical.materialText, sourceType: "TEXT" },
+          update: {},
+        });
+        const created = await createMissionInTx(tx, userId, {
+          runtimeProtocolVersion: 2, projectId, requestId: createRequestId,
+          goal, successCriteria: ["DRAFT_EXISTS"], llmContextApproved: true,
+          missionConstraints: { executionBoundary: "READ_ANALYZE" },
+        });
+        const policyHash = jsonHash(canonical.policy);
+        const receipt: V2DelegationReceipt = {
+          schemaVersion: 1, requestId: body.requestId, projectId, ownerUserId: userId,
+          goalHash: jsonHash(goal), materialHash: jsonHash(materialText), previewHash: body.previewHash,
+          policyHash, expiresAt: canonical.policy.expiresAt, materialSourceId: "capture:" + capture.id,
+          confirmedAt: new Date().toISOString(),
+        };
+        const updated = await editContinuationPolicy(userId, created.id, {
+          requestId: "v2-delegation-policy:" + body.requestId, expectedVersion: created.version, policy: canonical.policy,
+        }, tx);
+        await tx.agentMission.update({ where: { id: updated.id }, data: { planJson: json({ ...record(updated.planJson), v2DelegationReceipt: receipt }) } });
+        await event(tx, updated.id, "V2_DELEGATION_CONFIRMED", {
+          receipt, previewHash: body.previewHash, materialSourceId: receipt.materialSourceId,
+          policyHash, expiresAt: receipt.expiresAt, grantsAuthority: false, deliveryCheckpointOnly: true,
+        }, { id: "v2-delegation:" + body.requestId, hash: body.previewHash });
+        return {
+          missionId: updated.id, projectId: updated.projectId, materialSourceId: receipt.materialSourceId,
+          policyHash, expiresAt: receipt.expiresAt, workbenchUrl: "/v2/workbench?missionId=" + updated.id, alreadyCreated: false,
+        } satisfies V2DelegationResult;
+      });
+    } catch (error) {
+      const code = String((error as { code?: string }).code ?? "");
+      if (attempt < 2 && ["P2002", "P1008", "P2034", "SQLITE_BUSY"].includes(code)) {
+        await new Promise(resolve => setTimeout(resolve, 25 * (attempt + 1)));
+        continue;
+      }
+      throw error;
     }
-    const capture = await tx.capture.upsert({
-      where: { projectId_requestId: { projectId, requestId: materialRequestId } },
-      create: { projectId, requestId: materialRequestId, requestHash: jsonHash(canonical.materialText), rawText: canonical.materialText, sourceType: "TEXT" },
-      update: {},
-    });
-    const created = await createMissionInTx(tx, userId, {
-      runtimeProtocolVersion: 2, projectId, requestId: createRequestId,
-      goal: body.goal, successCriteria: ["DRAFT_EXISTS"], llmContextApproved: true,
-      missionConstraints: { executionBoundary: "READ_ANALYZE" },
-    });
-    const updated = await editContinuationPolicy(userId, created.id, {
-      requestId: "v2-delegation-policy:" + body.requestId, expectedVersion: created.version, policy: canonical.policy,
-    }, tx);
-    await event(tx, created.id, "V2_DELEGATION_CONFIRMED", {
-      previewHash: body.previewHash, materialSourceId: "capture:" + capture.id,
-      policyHash: jsonHash(canonical.policy), expiresAt: canonical.policy.expiresAt,
-      grantsAuthority: false, deliveryCheckpointOnly: true,
-    }, { id: "v2-delegation:" + body.requestId, hash: body.previewHash });
-    return {
-      missionId: updated.id, projectId, materialSourceId: "capture:" + capture.id,
-      policyHash: jsonHash(canonical.policy), expiresAt: canonical.policy.expiresAt,
-      workbenchUrl: "/v2/workbench?missionId=" + updated.id, alreadyCreated: false,
-    } satisfies V2DelegationResult;
-  });
+  }
 }
 
 /** Read-only receipt projection for the project page after confirmation (no business state change). */

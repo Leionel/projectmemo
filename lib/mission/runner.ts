@@ -19,7 +19,7 @@ import { gapRequirementsSchema } from "./gaps";
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { enterObservationCheckpoint } from "./checkpoint";
-import { prepareSkillCursor, assertSkillTool, recordSkillResult } from "@/lib/skills/runtime";
+import { prepareSkillCursor, assertSkillTool, recordSkillResult, skillContext } from "@/lib/skills/runtime";
 import { AppError } from "@/lib/api";
 import { missionStrategyV2 } from "@/lib/agent/specialistPrompts";
 import { chooseNext, type DecisionProvider } from "./modelAdapter";
@@ -156,10 +156,15 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
      await event(tx,m.id,"CRITERIA_CHECKED",{...verification,phase:"VERIFY"});await release(tx,current,"SUCCEEDED");return null;
     }
     phase="TOOL";await assertSkillTool(tx,current,choice.tool);const tool=tools[choice.tool],args=toolArgs;assertAutomaticTool(current,choice.tool,tool.effects.businessWrite);assertToolConstraints(current.constraintsJson,choice.tool,args);
-    const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED",...((current.planJson as {impactGuard?:string}).impactGuard?{planRevision:current.planRevision}:{})},orderBy:{ordinal:"asc"}});const sources=sourcesFrom(history.map(s=>s.resultJson));const inputHash=toolInputHash(choice.tool,args,sources);
+    const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED",...((current.planJson as {impactGuard?:string}).impactGuard?{planRevision:current.planRevision}:{})},orderBy:{ordinal:"asc"}});const sources=sourcesFrom(history.map(s=>s.resultJson));
+    // The v2 evidence pack is the read set for the current method step; it only ever contains
+    // sources this Mission read (or validated project material seeded by the router).
+    const evidenceSources=(skillContext(current)?.evidencePack?.sources??[]) as Source[];
+    const readSet=[...new Map([...sources,...evidenceSources].map(s=>[s.id,s])).values()];
+    const inputHash=toolInputHash(choice.tool,args,readSet);
     if(history.slice(-2).length===2&&history.slice(-2).every(s=>s.inputHash===inputHash))throw new AppError("NO_PROGRESS","连续调用没有新信息，请调整目标或补充资料",409);
     phase="COMMIT";const last=await tx.agentMissionStep.aggregate({where:{missionId:m.id},_max:{ordinal:true}});
-    const created=await tx.agentMissionStep.create({data:{missionId:m.id,ordinal:(last._max.ordinal??0)+1,planRevision:m.planRevision,toolName:choice.tool,toolVersion:tools[choice.tool].version??"1",canonicalInputJson:json(args),inputHash,readSetJson:json(sources),agentRunId:run.id,providerCallId:decision.callId,protocolJson:{protocol:decision.protocol,schemaVersion:m.runtimeProtocolVersion??MISSION_PROTOCOL_SCHEMA_VERSION,sourceRevisionReadSet,cognitiveReadSet,experienceReadSet,personalMemoryReadSet}}});
+    const created=await tx.agentMissionStep.create({data:{missionId:m.id,ordinal:(last._max.ordinal??0)+1,planRevision:m.planRevision,toolName:choice.tool,toolVersion:tools[choice.tool].version??"1",canonicalInputJson:json(args),inputHash,readSetJson:json(readSet),agentRunId:run.id,providerCallId:decision.callId,protocolJson:{protocol:decision.protocol,schemaVersion:m.runtimeProtocolVersion??MISSION_PROTOCOL_SCHEMA_VERSION,sourceRevisionReadSet,cognitiveReadSet,experienceReadSet,personalMemoryReadSet}}});
     await event(tx,m.id,"TOOL_STARTED",{stepId:created.id,tool:choice.tool,summary:choice.summary,phase:"TOOL"});return created;
    });
    if(choice.experienceUse?.length){

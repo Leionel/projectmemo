@@ -13,7 +13,7 @@ import { createConversation } from "@/lib/conversation/service";
 import { submitConversationTurn } from "@/lib/conversation/turnService";
 import { effectiveContinuity, assertDirectiveEffect, submitDirective } from "@/lib/continuity/directiveService";
 import { readMissionWorkbench } from "@/lib/mission/workbenchService";
-import { routeSkillSequence } from "@/lib/skills/registry";
+import { planSkillSequence } from "@/lib/skills/router";
 import { workspaceDirectory } from "@/lib/services/workspaceContextService";
 import { fixtureSkillProvider } from "../scripts/fixtures/v2-provider";
 import type { Decision } from "@/lib/mission/contracts";
@@ -73,14 +73,16 @@ test.each(["独立开发版本", "客户交付项目", "科研实验汇报", "�
   expect((await missionDetail(f.u.id, f.m.id)).outputs).toHaveLength(2);
 });
 test("all four shipped Skills route, while creation cannot bypass the evidence gate", async () => {
-  expect(routeSkillSequence("制定计划并拆解")).toEqual(["project-planning", "deliverable-creation"]);
-  expect(routeSkillSequence("复盘失败原因")).toEqual(["project-review", "deliverable-creation"]);
-  expect(routeSkillSequence("核查并整理阶段稿")).toEqual(["evidence-research", "deliverable-creation"]);
+  expect(planSkillSequence("制定计划并拆解")).toEqual(["project-planning"]);
+  expect(planSkillSequence("复盘失败原因")).toEqual(["project-review"]);
+  expect(planSkillSequence("核查并整理阶段稿")).toEqual(["evidence-research", "deliverable-creation"]);
   const f = await fixture("门槛测试");
+  // "只做计划，报告不要动" must stay a planning request: the fixed R→D chain cannot force a rewrite.
+  await db.agentMission.update({ where: { id: f.m.id }, data: { goal: "这次只做计划，报告不要动" } });
   await runMissionSlice({ id: f.m.id, provider: async () => ({ choice: { kind: "tool", tool: "save_mission_output",
-    summary: "越过读取", args: { blocks: [{ blockId: "x", kind: "INFERENCE", text: "无来源稿", sourceIds: [] }] } },
+    summary: "越过计划改稿", args: { blocks: [{ blockId: "x", kind: "INFERENCE", text: "无来源稿", sourceIds: [] }] } },
     provider: "INJECTED_TEST", model: "fixture", protocol: "JSON_CHOICE", usage: { inputTokens: 1, outputTokens: 1 } }) });
-  expect((await missionDetail(f.u.id, f.m.id)).error).toMatchObject({ code: "SKILL_GATE_NOT_MET" });
+  expect((await missionDetail(f.u.id, f.m.id)).error).toMatchObject({ code: "SKILL_OUTPUT_RESTRICTED" });
   expect(await db.agentMissionOutput.count({ where: { missionId: f.m.id } })).toBe(0);
 });
 test("v2 user question does not auto-resolve when new material arrives; cancel never revives", async () => {

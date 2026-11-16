@@ -38,4 +38,11 @@
 - 浏览器已验：版本与证据切换、科研对照、三个成果相关玩法、离页后新资料生成第3版、自然改道生成第4版并回到await_event；模拟回包丢失后原请求重试不重复产稿；360px无横向溢出。browser/receipt.json与截图为注入模型合成数据证据。
 - 本地演示：npm.cmd exec tsx -- scripts/v2-local-demo.ts。仅127.0.0.1，自动建立新临时库，控制台入口4416、工作台4415；注入provider仅由独立CLI传入，产品API没有选择测试provider的开关。停止进程即停止演示，临时库保留以便核对。
 - 复验：npm.cmd exec tsx -- scripts/verify-v2-workbench.ts（先启动全新的演示）。验证脚本会新增合成资料、输入限制与有限目标，不操作个人项目。游戏目前是导师追问/引用辨认/手动分工入口，不含多人同步或游戏引擎。
-- 待验：真实模型连续改稿质量、真实用户持续使用与获客假设、完整64条Router实测、长时运行/断电恢复、真机/HAP、生产部署与干净声明依赖环境。当前摘要仍采用既有有界候选窗口，规模化观察队列的排序覆盖需后续压测。
+## 切片 B 回执：真实路由与 64 条评测执行器
+
+- 路由不再由 goal 关键词简单追加创作：先区分 ANSWER/CONTROL/CLARIFY/DENY 与 RUN，再按用户本次分句选择规划/研究/创作/复盘的有序序列；负向限制（不联网、不改稿、不研究、只做计划、只复盘、注意偏好、来源停用、外发需批准）先于方法执行提取。路由只收窄原权限（toolAuthority=UNCHANGED），不返回工具集、不新增来源/送云/业务写。
+- 持久化：SkillCursor 记录方法序列、阶段、方法版本摘要、证据包与确定性未知项；创作前必须有证据包；新资料唤醒后先重读受影响来源再改稿；“只做计划/只复盘”时 `save_mission_output` 被拒。证据状态按本 Mission 实际读过的内容计算，不按项目里存在材料推断。
+- 评测执行器：`scripts/eval-routes.ts` 把冻结 fixture 物化为隔离库真实 Project/Capture/Mission/Step/Output/Connection/Artifact，运行真实 Router、Runner、暂停/指令/注意力服务；工具 trace 来自真实 AgentMissionStep，checks 来自确定性断言与持久结果；不读取冻结 expected。命令：`npm.cmd exec tsx -- scripts/eval-routes.ts --out evidence/v2-first-loop/slice-b-routing`。
+- 结果：64/64 模式/主能力/序列一致，安全违规 0，关键失败 0（16 条安全反例全过）；54 案例真实派发 126 次，外部读/外部写/业务写 0。完整通过 39/64；25 条失败均为内容语义判据在注入模型下 `CHECK_NOT_PROVEN`，按要求判失败，未改 oracle、未采用模型自评。
+- 验证：4 文件 25 条测试通过；tsc 与 scoped eslint 通过；无新迁移、无真实模型、无付费调用。证据在 `evidence/v2-first-loop/slice-b-routing/`。
+- 待验：25 条内容语义判据需真实模型/人工审核；真实模型路由与质量评测待授权；HarmonyOS 未构建；V2 保持关闭。

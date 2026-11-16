@@ -1,0 +1,56 @@
+{
+  "slice": "A",
+  "generatedAt": "2026-11-16T12:05:00.000Z",
+  "branch": "codex/v2-first-loop",
+  "baseCommit": "84a2bf9",
+  "data": {
+    "database": "fresh isolated SQLite in OS temp dir, migrations replayed",
+    "journeys": ["developer", "freelancer", "research", "course"],
+    "syntheticMaterials": "created by this command; no personal project data"
+  },
+  "providers": {
+    "fixture": {
+      "command": "npm.cmd exec tsx -- scripts/eval-v2.ts --provider=fixture --out evidence/v2-first-loop/eval-v2/fixture",
+      "transport": "INJECTED_V2_JOURNEY（进程内确定性注入，不经 HTTP）",
+      "modelCalls": "均为测试 transport，无付费",
+      "exitCode": 0,
+      "protocol": "40/40",
+      "content": "24/24"
+    },
+    "mockHttp": {
+      "command": "npm.cmd exec tsx -- scripts/eval-v2.ts --provider=http --out evidence/v2-first-loop/eval-v2/http",
+      "transport": "本机 127.0.0.1 OpenAI-compatible mock + 真实 chooseNext HTTP/JSON 适配器",
+      "modelCalls": 64,
+      "tokensRecorded": 5760,
+      "exitCode": 0,
+      "protocol": "40/40",
+      "content": "24/24"
+    },
+    "live": {
+      "executed": false,
+      "reason": "用户尚未授权真实模型调用范围与上限；已有密钥不视为消费授权",
+      "command": "npm.cmd exec tsx -- scripts/eval-v2.ts --provider=live --confirm-paid --max-models=12 --max-tokens=60000",
+      "guard": "未带 --confirm-paid 或缺少 LLM_MODE/LLM_API_KEY/LLM_BASE_URL 时命令退出 2，不发起任何请求"
+    }
+  },
+  "checks": {
+    "tests": { "command": "npm.cmd test -- tests/v2FirstSlice.test.ts tests/v2MissionProtocol.test.ts tests/v2ModelProtocol.test.ts tests/skillRouter.test.ts tests/v2Journey.test.ts",
+      "files": 5, "tests": 27, "exitCode": 0, "log": "tests.log" },
+    "types": { "command": "npm.cmd exec tsc -- --noEmit", "exitCode": 0, "log": "tsc.log" },
+    "lint": { "command": "npm.cmd exec eslint -- lib/skills lib/evaluation scripts/eval-routes.ts scripts/eval-v2.ts tests/skillRouter.test.ts tests/v2Journey.test.ts tests/v2FirstSlice.test.ts", "exitCode": 0, "log": "eslint.log" }
+  },
+  "journeyEvidence": {
+    "sameMissionAcrossVersions": "3 个版本（revision 1/2/3），均由同一 Mission 产生并有 CHECKPOINT_REACHED",
+    "newMaterialWake": "既有 processInvestigationDelegations 扫描器唤醒，woken>=1，contextVersion 增加",
+    "restriction": "继续整理，但不要联网：Directive 先落库，外部读取被拒，之后无新增稿",
+    "redirect": "有限目标改道后同一 Mission 产出第 3 版，正文包含改道工作重点",
+    "ending": "pause/cancel 后不再派发，已交付版本保持可读",
+    "recorded": ["Mission/Output 版本", "来源指纹", "Skill 接力", "provider/model", "工具调用", "token 用量", "失败原因", "预算变化"]
+  },
+  "migration": { "newMigrations": 0 },
+  "remaining": [
+    "真实模型连续改稿质量：命令已建立但未授权执行；离线注入/模拟 HTTP 只证明执行器与管道，不证明写作质量",
+    "72 小时真实时钟、真机/HAP、生产滚动升级未验证",
+    "内容语义判据在真实模型下需人工抽检并与离线基线比较"
+  ]
+}

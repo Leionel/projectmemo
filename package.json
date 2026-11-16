@@ -32,7 +32,8 @@
     "auth:cloud-quota": "node --env-file-if-exists=.env --import tsx scripts/account-cloud-quota.ts",
     "mission:probe": "node --env-file-if-exists=.env --import tsx scripts/probe-mission-provider.ts",
     "mission:verify": "node --env-file-if-exists=.env --import tsx scripts/eval-missions.ts",
-    "eval:routes": "tsx scripts/eval-routes.ts"
+    "eval:routes": "tsx scripts/eval-routes.ts",
+    "eval:v2": "tsx scripts/eval-v2.ts"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "7.10.1",

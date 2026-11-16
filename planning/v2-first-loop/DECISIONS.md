@@ -46,3 +46,11 @@
 - 结果：64/64 模式/主能力/序列一致，安全违规 0，关键失败 0（16 条安全反例全过）；54 案例真实派发 126 次，外部读/外部写/业务写 0。完整通过 39/64；25 条失败均为内容语义判据在注入模型下 `CHECK_NOT_PROVEN`，按要求判失败，未改 oracle、未采用模型自评。
 - 验证：4 文件 25 条测试通过；tsc 与 scoped eslint 通过；无新迁移、无真实模型、无付费调用。证据在 `evidence/v2-first-loop/slice-b-routing/`。
 - 待验：25 条内容语义判据需真实模型/人工审核；真实模型路由与质量评测待授权；HarmonyOS 未构建；V2 保持关闭。
+
+## 切片 A 回执：四类合成项目的持续改稿评测
+
+- 新增 `scripts/eval-v2.ts`（`npm.cmd run eval:v2`）与 `lib/evaluation/journey*.ts`：开发发布/客户交付/科研汇报/学生课程四条旅程，均走真实 modelAdapter、Mission Runner、既有 Worker 扫描器、工具守卫与成果验收器；流程为初稿→新增材料唤醒→后台续稿→限制联网→有限目标改道→再次交付→暂停/取消。
+- 记录 Mission/Output 版本、来源指纹、Skill 接力、provider/model、真实工具调用、token 用量、失败原因与预算变化；协议正确性（40 项）与内容质量（24 项）分开报告。
+- provider：`fixture` 进程内注入已跑通 40/40+24/24；`http` 为 127.0.0.1 OpenAI-compatible mock，经真实 chooseNext HTTP/JSON 适配器跑通 40/40+24/24（64 次调用、5760 token，本地无付费）。`live` 命令已实现但未执行：缺 `--confirm-paid` 或密钥时退出 2，不发请求；待用户明确授权范围与上限后执行 `--provider=live --confirm-paid --max-models=12 --max-tokens=60000`。
+- 验证：5 文件 27 条测试、tsc、scoped eslint 通过；无新迁移。证据在 `evidence/v2-first-loop/eval-v2/`。
+- 未验：真实模型连续改稿质量与真实成本；72 小时时钟/断电/真机/HAP/生产滚动升级；内容语义判据的独立人工审核。

@@ -143,8 +143,9 @@ export function extractRestrictions(message: string): RoutingRestrictions {
   flags.sourceSuppression = /(?:停止|停用|不要|别|不再).{0,4}(?:使用|用|引用).{0,12}(?:旧|刚才|原来|之前|选中).{0,6}(?:资料|来源|文件|记录)/.test(message);
   flags.pause = /^(?:请|先)?(?:暂停|停下|先停)/.test(message.trim()) || /^(?:请|先)?停止(?!使用|引用|用)/.test(message.trim());
   flags.resume = /^(?:可以继续|继续吧|接着做|恢复工作)/.test(message.trim()) && !flags.noExternalRead && !flags.attentionOnly && !flags.sourceSuppression;
-  flags.externalApprovalRequired = /(?:把|将)?(?:草稿|稿件|报告|成果|文件|内容|清单|版本).{0,8}(?:直接)?(?:发|发送|发给|转发|交给|传给|分享给)/.test(message)
-    || /(?:发|发送|转发|交给|传给|分享给).{0,12}(?:老师|客户|同学|同事|对方|领导|群|邮箱|邮件|负责人)/.test(message);
+  flags.externalApprovalRequired = /(?:把|将)(?:这|那)?(?:份)?(?:草稿|稿件|报告|成果|文件|内容|清单|版本|说明).{0,8}(?:发给|发送给|转发给|交给|传给|分享给)/.test(message)
+    || /(?:发给|发送给|转发给|交给|传给|分享给).{0,12}(?:老师|客户|同学|同事|对方|领导|群|邮箱|邮件|负责人)/.test(message)
+    || /(?:直接|立即)?(?:发送|转发|外发)(?:这份|该|那)?(?:草稿|报告|成果|文件|版本)/.test(message);
   flags.crossScope = /(?:另一位|别的|其他|别人的|他人的|另一个|其他用户).{0,6}(?:用户|账号|人)?.{0,6}(?:项目|报告|资料|文件|委托)/.test(message)
     || /(?:读取|打开|查看|读取).{0,8}(?:他人|别人|其他用户).{0,6}(?:项目|报告|资料)/.test(message);
   flags.planNotExecution = true;

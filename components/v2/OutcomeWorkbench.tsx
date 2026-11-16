@@ -26,6 +26,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
   const [chosen, setChosen] = useState(""), [answer, setAnswer] = useState(""), [sprinting, setSprinting] = useState(false);
   const [sprintChecked, setSprintChecked] = useState(false);
   const [hasPending, setHasPending] = useState(false);
+  const [confirmingEnd, setConfirmingEnd] = useState(false);
   const pending = useRef<Pending | null>(null), conversationId = useRef<string | null>(null);
   useEffect(() => {
     if (!missionId) return;
@@ -75,6 +76,19 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
     } catch (e) { setError(e instanceof Error ? e.message : "提交未确认，请重试原请求"); }
     finally { setBusy(false); }
   }
+  async function control(action: "pause" | "cancel") {
+    if (!snapshot || busy) return;
+    setBusy(true); setError("");
+    try {
+      // Controls bind to the current persisted version, not the last poll snapshot.
+      const detail = await api("/api/missions/" + encodeURIComponent(snapshot.id));
+      const current = detail.mission ?? detail;
+      await api("/api/missions/" + encodeURIComponent(snapshot.id) + "/" + action, { requestId: crypto.randomUUID(), expectedVersion: current.version });
+      setConfirmingEnd(false); setNotice(action === "pause" ? "已收到暂停请求，后台不再派发新步骤。" : "已结束持续跟进；已交付版本与依据仍然保留。");
+      await refresh();
+    } catch (e) { setError(e instanceof Error ? e.message : "操作未确认，请重试"); }
+    finally { setBusy(false); }
+  }
   function switchSample(value: boolean) {
     setResearch(value); setSnapshot(workbenchFixture(1, value)); setSelectedRevision(null); setSourceKey(null);
     setChosen(""); setNotice(""); setAnswer(""); setSprintChecked(false); setSprinting(false);
@@ -93,7 +107,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
     <header className={styles.heading}><div><p>{snapshot.projectTitle}</p><h1>{snapshot.goal}</h1>
       <div className={styles.state} role="status"><span aria-hidden="true" className={styles.dot} />
         {phaseLabels[snapshot.phase] ?? snapshot.reason}</div></div>
-      {live ? <button className={styles.secondary} onClick={() => void refresh()}><RefreshCw size={15} aria-hidden="true" />重新读取</button> :
+      {live ? <div className={styles.controls}><button className={styles.secondary} onClick={() => void refresh()}><RefreshCw size={15} aria-hidden="true" />重新读取</button><button className={styles.secondary} disabled={busy || snapshot.status !== "READY" && snapshot.phase !== "WAITING_OBSERVATION"} onClick={() => void control("pause")}>暂停跟进</button><button className={styles.secondary} disabled={busy} onClick={() => void (confirmingEnd ? control("cancel") : setConfirmingEnd(true))}>{confirmingEnd ? "确认结束跟进" : "结束跟进"}</button></div> :
         <div className={styles.sampleChoices}><button aria-pressed={!research} onClick={() => switchSample(false)}>开发样例</button>
           <button aria-pressed={research} onClick={() => switchSample(true)}>科研对照</button></div>}
     </header>

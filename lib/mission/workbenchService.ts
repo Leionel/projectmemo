@@ -62,7 +62,7 @@ export async function readMissionWorkbench(userId: string, id: string): Promise<
       FAILURE: "当前步骤需核对" };
     const usage = record(m.budgetUsedJson);
     return { id, projectId: m.projectId, projectTitle: project.title, goal: m.goal,
-      workingObjective: continuity.workingObjective ?? m.goal, status: m.status, phase: state.phase, reason: state.reasonText,
+      workingObjective: continuity.workingObjective ?? m.goal, status: m.status, phase: state.phase, reason: state.reasonText, version: m.version,
       checkedAt: new Date().toISOString(), provider: run?.provider ?? "尚无模型调用",
       models: Number(usage.models ?? 0), tools: Number(usage.tools ?? 0), outputs, sources,
       events: events.filter(e => labels[e.type]).map(e => ({ id: e.id, label: labels[e.type], at: e.createdAt.toISOString() })) };

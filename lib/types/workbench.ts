@@ -8,7 +8,7 @@ export type WorkbenchOutput = {
 export type WorkbenchSource = { key: string; id: string; revision: string; hash: string; text: string; current: boolean; kind: string };
 export type WorkbenchSnapshot = {
   id: string; projectId: string; goal: string; projectTitle: string; workingObjective: string;
-  status: string; phase: string; reason: string; checkedAt: string; provider: string;
+  status: string; phase: string; reason: string; checkedAt: string; provider: string; version: number;
   models: number; tools: number; outputs: WorkbenchOutput[]; sources: WorkbenchSource[];
   events: Array<{ id: string; label: string; at: string }>;
 };

@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-11-16T12:43:17.466Z",
+  "entry": "normal project page -> v2 bounded delegation preview -> confirm -> workbench",
+  "missionId": "cmwj97qwy0003r48owply7zth",
+  "provider": "local openai-compatible loopback mock selected by environment",
+  "data": "temporary synthetic project",
+  "checks": [
+    "normal project page: import text material -> bounded delegation preview (scope, expiry, limits, excluded effects)",
+    "one confirmation created the real v2 Mission and first private version; evidence, process and provider are readable",
+    "new text material woke the same Mission; background worker produced version 2 with the new source",
+    "natural language redirect continued the same Mission; version 3 followed the new focus and returned to await_event",
+    "pause entry stays available on the real snapshot; pause stops further dispatch and keeps delivered versions",
+    "360px: no horizontal overflow"
+  ],
+  "errors": [],
+  "realModelValidated": false,
+  "realDeviceValidated": false
+}

@@ -133,9 +133,9 @@ export async function editMission(userId:string,id:string,kind:"constraints"|"re
   });
 }
 const policyEditSchema=z.object({requestId:z.string().min(1).max(128),expectedVersion:z.number().int().positive(),policy:continuationPolicySchema}).strict();
-export async function editContinuationPolicy(userId:string,id:string,raw:unknown){
+export async function editContinuationPolicy(userId:string,id:string,raw:unknown,transaction?:Prisma.TransactionClient){
  requireMissions();const body=policyEditSchema.parse(raw),hash=jsonHash(body);
- return db.$transaction(async tx=>{
+ const apply=async(tx:Prisma.TransactionClient)=>{
   await lock(tx,id);const m=await ownedMission(userId,id,tx);if(await commandReplay(tx,id,body.requestId,hash))return m;
   if(m.version!==body.expectedVersion||terminal.includes(m.status))throw new AppError("MISSION_CHANGED","委托已变化，请刷新",409);
   const active=!!(m.planJson as {automaticContinuation?:unknown}).automaticContinuation||!!boundedPolicy(m);
@@ -145,5 +145,6 @@ export async function editContinuationPolicy(userId:string,id:string,raw:unknown
   const status=active&&m.status==="READY"?"PAUSED":m.status==="WAITING_APPROVAL"?"READY":m.status;
   const updated=await tx.agentMission.update({where:{id},data:{continuationPolicyJson:json(body.policy),contextVersion:{increment:1},planRevision:{increment:1},version:{increment:1},status:delegation&&m.status==="WAITING_INPUT"?"READY":status,nextAttemptAt:null,pauseRequestedAt:active&&m.status==="RUNNING"?new Date():m.pauseRequestedAt,planJson:json({...m.planJson as object,automaticContinuation:null,delegation,...(status==="PAUSED"?{resumeStatus:"READY"}:{})})}});
   await event(tx,id,"CONTINUATION_POLICY_CHANGED",{policy:body.policy,source:"USER_CONFIRMED"},{id:`cmd:${body.requestId}`,hash});return updated;
- });
+ };
+ return transaction?apply(transaction):db.$transaction(apply);
 }

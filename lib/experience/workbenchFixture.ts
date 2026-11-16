@@ -17,7 +17,7 @@ export function workbenchFixture(revision = 1, research = false): WorkbenchSnaps
   return { id: "sample", projectId: "sample-project", projectTitle: research ? "实验阶段汇报 · 科研对照样例" : "下一版本准备 · 开发样例",
     goal: research ? "整理一份保留条件与未知的实验汇报" : "准备下一版本的交付说明", workingObjective: "核对当前材料，整理有依据的成果",
     status: "WAITING_INPUT", phase: "WAITING_OBSERVATION", reason: "草稿已备好，等待获准新资料", checkedAt: "2026-11-16T08:00:02Z",
-    provider: "交互样例 · 未运行模型", models: 0, tools: 0, outputs,
+    provider: "交互样例 · 未运行模型", version: 1, models: 0, tools: 0, outputs,
     sources: texts.slice(0, revision).map((text, i) => ({ key: "sample-" + i, id: "capture:sample-" + (i + 1), revision: String(i + 1),
       hash: "sample-fingerprint-" + i, text, current: true, kind: "PROJECT" })),
     events: [{ id: "sample-read", label: "样例：读取原项目记录", at: "2026-11-16T08:00:00Z" },

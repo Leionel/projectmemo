@@ -1,0 +1,13 @@
+.panel { display: grid; gap: 14px; padding: 18px 20px; border: 1px solid var(--line, #d8d4c8); border-radius: 12px; background: var(--paper, #fbfaf6); }
+.heading { display: flex; align-items: center; gap: 8px; color: var(--teal, #145c4e); }
+.heading h3 { margin: 0; font-size: 1rem; font-weight: 600; }
+.form { display: grid; gap: 12px; }
+.form label { display: grid; gap: 6px; font-size: .9rem; color: var(--ink, #202725); }
+.form input, .form textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--line, #d8d4c8); border-radius: 8px; background: var(--paper-strong, #fff); font: inherit; font-size: .95rem; color: inherit; }
+.form textarea { resize: vertical; min-height: 6rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.facts { display: grid; grid-template-columns: 5.5rem 1fr; gap: 6px 12px; margin: 0; font-size: .92rem; }
+.facts dt { color: var(--muted, #6b6f6b); }
+.facts dd { margin: 0; color: var(--ink, #202725); }
+.note { margin: 0; font-size: .85rem; color: var(--muted, #6b6f6b); }
+.error { margin: 0; color: #9b2c2c; font-size: .9rem; }

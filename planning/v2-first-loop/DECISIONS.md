@@ -54,3 +54,12 @@
 - provider：`fixture` 进程内注入已跑通 40/40+24/24；`http` 为 127.0.0.1 OpenAI-compatible mock，经真实 chooseNext HTTP/JSON 适配器跑通 40/40+24/24（64 次调用、5760 token，本地无付费）。`live` 命令已实现但未执行：缺 `--confirm-paid` 或密钥时退出 2，不发请求；待用户明确授权范围与上限后执行 `--provider=live --confirm-paid --max-models=12 --max-tokens=60000`。
 - 验证：5 文件 27 条测试、tsc、scoped eslint 通过；无新迁移。证据在 `evidence/v2-first-loop/eval-v2/`。
 - 未验：真实模型连续改稿质量与真实成本；72 小时时钟/断电/真机/HAP/生产滚动升级；内容语义判据的独立人工审核。
+
+## 切片 C 回执：闭环接入正常产品入口
+
+- 正常入口：项目页新增 `V2DelegationStarter`（仅 V2/持续许可/工作台三开关均开时渲染）。导入文本材料 → 只读预览有界范围（本项目资料、私有稿更新、有效期、模型/工具上限；明确排除联网、公开研究、业务写入、自动外发）→ 一次确认 → 跳转既有成果工作台。
+- 原子确认：`POST /api/projects/[id]/v2-delegation/confirm` 在同一事务创建材料 Capture、v2 Mission、BOUNDED_INVESTIGATION 许可与 `V2_DELEGATION_CONFIRMED` 回执；`requestId` 幂等；预览不写业务状态。`editContinuationPolicy` 支持传入原事务；确认接口不接受任何 provider 参数，测试模型只通过部署环境变量接入。
+- 工作台：沿用版本/差异/原始依据/过程事件；新增暂停与结束跟进，控制绑定当前持久 version（非轮询快照），暂停后不再派发且已交付版本保留。
+- 浏览器验收（本机 127.0.0.1 回环模型，全新临时库）：导入材料→预览→确认→第 1 版→新材料唤醒同一 Mission→第 2 版→自然改道→第 3 版回到 await_event→暂停生效→360px 无横向溢出，六项检查全过。证据 `evidence/v2-first-loop/slice-c-entry/`。
+- 验证：22 文件 185 条定向回归（上轮 19 文件 174 条 + 新增 3 文件 11 条）、tsc、scoped eslint、Next webpack 构建均通过；无新迁移、无真实模型付费调用。
+- 未验：真实模型完整托付质量、HarmonyOS/HAP、生产滚动升级与旧 Worker 混跑；V2 仍保持关闭。隔离演示 CLI 未改动。

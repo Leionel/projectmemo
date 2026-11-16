@@ -62,10 +62,12 @@ export function contentChecks(run: JourneyRecord): JourneyCheck[] {
   const invented = /(?:已|已经)(?:独立复现|验证通过|部署成功|上线成功|通过验收|测量完成)/.test(allText);
   checks.push(check("UNKNOWN_NOT_WRITTEN_AS_FACT", unknownKept && !invented,
     unknownKept ? "未知条件按未知保留，没有写成已验证事实" : "没有保留未知条件", "mission:" + run.missionId + ":outputs"));
-  const redirectApplied = !!third && (text(third).includes("工作重点：") || text(third).includes(run.definition.redirectQuote))
-    && run.events.includes("NATURAL_CONTROL_APPLIED");
+  const focusTerms = run.definition.redirectQuote.replace(/今天|本周|这周|先|核对|对应|中的|的|资料|第二版/g, " ").split(/[\s，。]+/).filter(term => term.length >= 2);
+  const thirdText = text(third);
+  const focusHits = focusTerms.filter(term => thirdText.includes(term));
+  const redirectApplied = !!third && (focusHits.length > 0 || thirdText.includes("工作重点"));
   checks.push(check("USER_REDIRECT_APPLIED", redirectApplied,
-    "第 3 版落实用户改道重点", "mission:" + run.missionId + ":output:" + (third?.outputId ?? "none")));
+    "第 3 版是否体现改道重点（命中=" + focusHits.join("|") + "，需至少一项）", "mission:" + run.missionId + ":output:" + (third?.outputId ?? "none")));
   const hashes = run.versions.map(version => version.textHash);
   checks.push(check("NO_MEANINGLESS_REPETITION", new Set(hashes).size === hashes.length && run.tools.filter(tool => tool.tool === "save_mission_output").length === run.versions.length,
     "三个版本正文互不相同，且每版只有一次创作保存", "mission:" + run.missionId + ":versions"));

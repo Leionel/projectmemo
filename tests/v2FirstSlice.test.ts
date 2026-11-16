@@ -14,6 +14,7 @@ import { submitConversationTurn } from "@/lib/conversation/turnService";
 import { effectiveContinuity, assertDirectiveEffect, submitDirective } from "@/lib/continuity/directiveService";
 import { readMissionWorkbench } from "@/lib/mission/workbenchService";
 import { planSkillSequence } from "@/lib/skills/router";
+import { json } from "@/lib/mission/contracts";
 import { workspaceDirectory } from "@/lib/services/workspaceContextService";
 import { fixtureSkillProvider } from "../scripts/fixtures/v2-provider";
 import type { Decision } from "@/lib/mission/contracts";
@@ -155,6 +156,34 @@ test.each(["responsibility", "literal"])("%s correction fences a late model resu
   expect((result.used as { models: number }).models).toBe(2);
 });
 
+test("a new responsibility cycle cannot checkpoint the previous version", async () => {
+  const f = await fixture("新周期"), first = await cycle(f);
+  expect(first.outputs).toHaveLength(1);
+  const row = await db.agentMission.findUniqueOrThrow({ where: { id: f.m.id } });
+  const plan = row.planJson as { skillCursor: Record<string, unknown> };
+  const cursor = { ...plan.skillCursor };
+  delete cursor.outputId;
+  await db.agentMission.update({ where: { id: f.m.id }, data: { contextVersion: { increment: 1 }, planRevision: { increment: 1 }, planJson: json({ ...plan, skillCursor: cursor }) } });
+  const context = JSON.parse(await buildContext(await db.agentMission.findUniqueOrThrow({ where: { id: f.m.id } }))) as { completionReadback: { canCheckpoint: boolean; reason?: string } };
+  expect(context.completionReadback).toMatchObject({ canCheckpoint: false, reason: "CURRENT_VERSION_REQUIRED" });
+});
+test("a method-gate rejection gets one guided retry with the repair hint", async () => {
+  const f = await fixture("门槛重试"), good = f.provider;
+  let first = true;
+  const provider = async (raw: string) => {
+    if (first) { first = false; return { choice: { kind: "tool" as const, tool: "save_mission_output", args: { blocks: [{ blockId: "x", kind: "INFERENCE" as const, text: "越过阶段", sourceIds: [] as string[] }] }, summary: "越过阶段" },
+      provider: "INJECTED_TEST", model: "fixture", protocol: "JSON_CHOICE", usage: { inputTokens: 1, outputTokens: 1 } }; }
+    return good(raw, {});
+  };
+  for (let index = 0; index < 8; index++) {
+    const row = await db.agentMission.findUniqueOrThrow({ where: { id: f.m.id } });
+    if (row.status !== "READY") break;
+    await runMissionSlice({ id: row.id, provider });
+  }
+  expect((await missionDetail(f.u.id, f.m.id)).status).toBe("WAITING_INPUT");
+  expect(await db.agentMissionOutput.count({ where: { missionId: f.m.id } })).toBe(1);
+  expect(await db.agentMissionEvent.count({ where: { missionId: f.m.id, type: "SKILL_REPAIR_REQUESTED" } })).toBe(1);
+});
 test("natural continue never revives a deliberately paused v2 Mission", async () => {
   const f = await fixture("暂停边界"), current = await cycle(f);
   await commandMission(f.u.id, f.m.id, "pause", { requestId: "pause", expectedVersion: current.version });

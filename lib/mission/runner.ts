@@ -52,7 +52,7 @@ import { commitApprovedCalendarEvent, commitApprovedCalendarEvents } from "./cal
 /** 只写本项目数据的提案（创建待办）。外部写入仍是 10 分钟。 */
 const INTERNAL_APPROVAL_TTL_MS=24*60*60*1000;
 export type CalendarWriteDependencies = { fetcher?: typeof fetch };
-export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;browser?:BrowserDependencies;calendar?:CalendarDependencies;calendarWrite?:CalendarWriteDependencies;repository?:CiTransport;deployment?:DeploymentTransport;document?:DocumentExtractor;sandbox?:DockerCommand;academic?:typeof fetch;judge?:ClaimJudge;onClaim?:()=>void}={}){
+export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;browser?:BrowserDependencies;calendar?:CalendarDependencies;calendarWrite?:CalendarWriteDependencies;repository?:CiTransport;deployment?:DeploymentTransport;document?:DocumentExtractor;sandbox?:DockerCommand;academic?:typeof fetch;judge?:ClaimJudge;onClaim?:()=>void;beforeDecision?:(context:string)=>void;onDecisionUsage?:(usage:Decision["usage"],provider:string)=>void}={}){
  const m=await claimMission(options.workerId??randomUUID(),options.id);if(!m)return false;
  options.onClaim?.();
  const lease:Lease={id:m.id,owner:m.leaseOwner!,epoch:m.leaseEpoch,contextVersion:m.contextVersion,planRevision:m.planRevision};
@@ -112,12 +112,15 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     await assertPersonalMemoryReadSet(m.ownerUserId,personalMemoryReadSet,tx);
     await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...record(live.planJson),personalMemoryReadSet})}});
    });
-   phase="DECISION";await reserve(lease,"models",undefined,decisionTokenLimit(m.lastErrorJson));const started=Date.now();
+   // Evaluation-only pre-dispatch guard: refuse a call that could exceed an authorized token window.
+    options.beforeDecision?.(context);
+    phase="DECISION";await reserve(lease,"models",undefined,decisionTokenLimit(m.lastErrorJson));const started=Date.now();
    const decision=await (async()=>{try{if(!options.provider)await reserveCloudCall(m.projectId);return await (options.provider??chooseNext)(context,tools);}catch(error){
     await settleFailed("models",started,error instanceof ModelProtocolError?error.metadata.usage:undefined);
     throw error;
    }})();
    await settleUsage(lease,"models",Date.now()-started,decision.usage);
+    options.onDecisionUsage?.(decision.usage,decision.provider);
    const parsedChoice=choiceSchemaFor(m.runtimeProtocolVersion).safeParse(decision.choice);
    if(!parsedChoice.success)throw new ModelProtocolError(protocolDiagnostic("INVALID_CHOICE",null,0,parsedChoice.error.issues.slice(0,8).map(issue=>({code:issue.code,path:issue.path.join(".")}))),decision);
    const choice=parsedChoice.data;
@@ -268,6 +271,15 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    if(current.leaseOwner!==lease.owner||current.leaseEpoch!==lease.epoch||current.status!=="RUNNING")return;
    const stop=!!current.cancelRequestedAt||!!current.pauseRequestedAt;
    const active=activeStepId?await tx.agentMissionStep.findUnique({where:{id:activeStepId}}):null;
+
+   // One guided retry when the method gate rejected the model's action (wrong stage / missing evidence).
+   const repairEvents=await tx.agentMissionEvent.findMany({where:{missionId:m.id,type:"SKILL_REPAIR_REQUESTED"},orderBy:{seq:"desc"},take:8});
+   const alreadyRepaired=repairEvents.some(e=>(e.payloadJson as {contextVersion?:number}).contextVersion===current.contextVersion);
+   if(!stop&&["SKILL_GATE_NOT_MET","SKILL_OUTPUT_REQUIRED","SKILL_TOOL_RESTRICTED"].includes(code)&&!alreadyRepaired){
+    await event(tx,m.id,"SKILL_REPAIR_REQUESTED",{code,contextVersion:current.contextVersion,phase,attempt:1});
+    await tx.agentMission.update({where:{id:m.id},data:{lastErrorJson:json({code,message:failure.message,phase:failure.phase,category:failure.category,recovery:{kind:"SKILL_REPAIR",automatic:true,message:"已保留资料与用量；下一次决策先读取本轮材料，再保存新版本。"}})}});
+    await release(tx,current,"READY");return;
+   }
    if(!stop&&code==="COGNITIVE_RECOORDINATE"&&(!active||["save_mission_output","propose_action","propose_metric_verification"].includes(active.toolName)&&!record(active.protocolJson).sandboxJob)){
     await obsoleteApprovals(tx,m.id);
     if(active)await tx.agentMissionStep.update({where:{id:active.id},data:{status:"OBSOLETE"}});

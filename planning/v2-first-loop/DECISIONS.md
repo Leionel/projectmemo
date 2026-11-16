@@ -63,3 +63,11 @@
 - 浏览器验收（本机 127.0.0.1 回环模型，全新临时库）：导入材料→预览→确认→第 1 版→新材料唤醒同一 Mission→第 2 版→自然改道→第 3 版回到 await_event→暂停生效→360px 无横向溢出，六项检查全过。证据 `evidence/v2-first-loop/slice-c-entry/`。
 - 验证：22 文件 185 条定向回归（上轮 19 文件 174 条 + 新增 3 文件 11 条）、tsc、scoped eslint、Next webpack 构建均通过；无新迁移、无真实模型付费调用。
 - 未验：真实模型完整托付质量、HarmonyOS/HAP、生产滚动升级与旧 Worker 混跑；V2 仍保持关闭。隔离演示 CLI 未改动。
+
+## 真实模型评测回执（用户授权后执行）
+
+- 授权：4 条合成旅程，每条 ≤12 次调用/≤60k tokens，合计 ≤48 次/≤240k tokens；模型 DeepSeek `deepseek-flash`，密钥仅经 `node --env-file` 从原工作树载入，未复制入证据。
+- 实际：31 次决策调用（未超）；预算账 327,567 tokens（输入 319,760/输出 11,807），**超出 token 上限 87,567**；余额 CNY 37.85→37.63（约 ¥0.22）。超限原因是评测派发前 token 守卫因 CRLF 补丁未匹配而未挂载，只有事后记录；发现后立即停止所有付费调用。
+- 结果：协议/持久化 34/40，内容 16/24。四条旅程均完成初稿→新材料→限制→改道/暂停的持久化；工具边界全私有。真实失败：developer 在续稿时越过证据门槛后停住；freelancer/course 改道后模型复用上一版 Output 被 `SKILL_OUTPUT_REQUIRED` 拒绝，未产出新版本；research 三版齐全但离线判据用字面“工作重点”误判改道。首稿过度依赖 inspect_project 概况而不是导入原文。
+- 修复（离线验证，未再付费）：runner 增加派发前预算钩子（守卫已有回归）；`completionReadback` 只对当前周期成果 canCheckpoint，新周期返回 `CURRENT_VERSION_REQUIRED`；门槛拒绝后一次受控重试并注入 `skillRepair` 提示；SKILL.md 要求导入材料必须 `read_project_material` 读原文、上下文变化后先保存新版本再 await；改道判据改为关键词命中。离线 fixture/http 仍 40/40+24/24；22 文件 188 条回归、tsc、lint 通过。
+- 待办：以上修复需真实模型小范围复验；已向用户提出新授权建议（developer+freelancer，≤8 次/条、合计 ≤16 次/≤40k tokens），未获新授权前不发起付费调用。完整回执见 `evidence/v2-first-loop/eval-v2/live/`。

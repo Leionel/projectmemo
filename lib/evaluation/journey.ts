@@ -68,11 +68,12 @@ async function createUser(label: string) {
   return db.user.create({ data: { username: "journey-" + label + "-" + randomUUID().slice(0, 8), displayName: label, passwordHash: "unused-journey" } });
 }
 
-async function runUntilSettled(missionId: string, provider?: DecisionProvider, maxSlices = 8) {
+type DecisionHooks = { beforeDecision?: (context: string) => void; onDecisionUsage?: (usage: { inputTokens: number | null; outputTokens: number | null }, provider: string) => void };
+async function runUntilSettled(missionId: string, provider?: DecisionProvider, hooks?: DecisionHooks, maxSlices = 8) {
   for (let index = 0; index < maxSlices; index++) {
     const row = await db.agentMission.findUniqueOrThrow({ where: { id: missionId } });
     if (row.status !== "READY") break;
-    await runMissionSlice(provider ? { id: missionId, provider } : { id: missionId });
+    await runMissionSlice({ id: missionId, ...(provider ? { provider } : {}), ...(hooks?.beforeDecision ? { beforeDecision: hooks.beforeDecision } : {}), ...(hooks?.onDecisionUsage ? { onDecisionUsage: hooks.onDecisionUsage } : {}) });
   }
   return db.agentMission.findUniqueOrThrow({ where: { id: missionId } });
 }
@@ -149,7 +150,7 @@ function journeyProvider(latestPointers: () => Promise<Array<{ sourceId: string;
   };
 }
 
-export async function runJourney(definition: JourneyDefinition, providerMode: "fixture" | "http" | "live", options: { tokenCeiling?: number; modelCeiling?: number } = {}): Promise<JourneyRecord> {
+export async function runJourney(definition: JourneyDefinition, providerMode: "fixture" | "http" | "live", options: { tokenCeiling?: number; modelCeiling?: number; beforeDecision?: (context: string) => void; onDecisionUsage?: (usage: { inputTokens: number | null; outputTokens: number | null }, provider: string) => void } = {}): Promise<JourneyRecord> {
   const tokenCeiling = options.tokenCeiling ?? 200000;
   const user = await createUser(definition.label);
   const project = await db.project.create({ data: { title: definition.projectTitle, description: "隔离合成项目，不含个人数据", goal: definition.goal, scenario: definition.scenario,
@@ -177,7 +178,8 @@ export async function runJourney(definition: JourneyDefinition, providerMode: "f
     return result;
   };
   const fixtureProvider = providerMode === "fixture" ? journeyProvider(pointers) : undefined;
-  const run = () => runUntilSettled(mission.id, fixtureProvider);
+  const hooks: DecisionHooks = { beforeDecision: options.beforeDecision, onDecisionUsage: options.onDecisionUsage };
+  const run = () => runUntilSettled(mission.id, fixtureProvider, hooks);
 
   // 1. First bounded draft.
   await run();
@@ -214,7 +216,7 @@ export async function runJourney(definition: JourneyDefinition, providerMode: "f
   let externalBlocked = false;
   try { assertDirectiveEffect(continuity, "EXTERNAL_READ"); } catch { externalBlocked = true; }
   const beforeRestrictionRun = await db.agentMissionOutput.count({ where: { missionId: mission.id } });
-  await runUntilSettled(mission.id, fixtureProvider, 3);
+  await runUntilSettled(mission.id, fixtureProvider, hooks, 3);
   record.control.restriction = { directiveIds: restrictionEvents.map(event => event.id), constraints: continuity.constraints,
     externalReadBlocked: externalBlocked, outputsUnchanged: (await db.agentMissionOutput.count({ where: { missionId: mission.id } })) === beforeRestrictionRun };
   await phase(record, "RESTRICTION_APPLIED", mission.id);
@@ -239,7 +241,7 @@ export async function runJourney(definition: JourneyDefinition, providerMode: "f
   const stepsBefore = await db.agentMissionStep.count({ where: { missionId: mission.id } });
   await db.agentMission.update({ where: { id: mission.id }, data: { nextAttemptAt: new Date(0) } });
   await processInvestigationDelegations(32);
-  await runUntilSettled(mission.id, fixtureProvider, 2);
+  await runUntilSettled(mission.id, fixtureProvider, hooks, 2);
   const stepsAfter = await db.agentMissionStep.count({ where: { missionId: mission.id } });
   record.control.ending = { action: definition.ending, status: afterControl.status, extraDispatch: stepsAfter > stepsBefore,
     outputCountAfter: await db.agentMissionOutput.count({ where: { missionId: mission.id } }) };

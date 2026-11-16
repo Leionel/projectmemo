@@ -19,7 +19,6 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import Database from "better-sqlite3";
-import { randomUUID } from "node:crypto";
 
 const args = process.argv.slice(2);
 const arg = (name: string): string | undefined => {
@@ -50,7 +49,7 @@ if (providerMode === "live") {
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "pm-v2-eval-"));
 const databaseFile = path.join(tempDir, "eval.db");
 Object.assign(process.env, {
-  DATABASE_URL: "file:" + databaseFile.replaceAll("\\", "/"), LLM_MODE: "mock",
+  DATABASE_URL: "file:" + databaseFile.replaceAll("\\", "/"), ...(providerMode === "live" ? {} : { LLM_MODE: "mock" }),
   MISSION_ENABLED: "true", MISSION_V2_ENABLED: "true", MISSION_INVESTIGATION_DELEGATION_ENABLED: "true",
   MISSION_WORKBENCH_ENABLED: "true", FOCUS_AGENT_ENABLED: "true", FOCUS_CONTINUITY_ENABLED: "true",
   MISSION_WAIT_EMAIL_ENABLED: "false",
@@ -65,6 +64,7 @@ bootstrap.close();
 
 const { db } = await import("@/lib/db");
 const { startMockModelServer } = await import("@/lib/evaluation/mockModelServer");
+const { AppError } = await import("@/lib/api");
 const { JOURNEYS, runJourney } = await import("@/lib/evaluation/journey");
 const { protocolChecks, contentChecks } = await import("@/lib/evaluation/journeyChecks");
 
@@ -84,12 +84,29 @@ if (!journeys.length) { console.error("没有匹配的合成项目：" + selecte
 fs.mkdirSync(outDir, { recursive: true });
 const started = Date.now();
 const records = [];
+const totalTokenCap = maxTokens * journeys.length;
+let spentTokens = 0, decisionCalls = 0;
+if (providerMode === "live") process.stdout.write("真实模型：" + (process.env.LLM_PROVIDER ?? "provider") + " / " + (process.env.LLM_MODEL_NAME ?? "model") + "；每条旅程 ≤" + maxModels + " 次调用、≤" + maxTokens + " tokens；总上限 ≤" + totalTokenCap + " tokens\n");
 for (const definition of journeys) {
   process.stdout.write("运行合成项目：" + definition.label + "（provider=" + providerMode + "）\n");
-  const record = await runJourney(definition, providerMode, { tokenCeiling: maxTokens, modelCeiling: maxModels });
+  let journeyTokens = 0;
+  const hooks = {
+    // Refuse the next dispatch when its worst-case context+output could exceed the authorized window.
+    beforeDecision: (context: string) => {
+      const estimate = Math.ceil(context.length / 2) + 1500;
+      if (estimate > maxTokens - journeyTokens || estimate > totalTokenCap - spentTokens)
+        throw new AppError("EVAL_TOKEN_BUDGET", "评测 token 预算已达授权上限，停止下一次派发", 409,
+          { journey: definition.id, journeyTokens, spentTokens, maxTokens, totalTokenCap });
+    },
+    onDecisionUsage: (usage: { inputTokens: number | null; outputTokens: number | null }) => {
+      const used = Number(usage.inputTokens ?? 0) + Number(usage.outputTokens ?? 0);
+      journeyTokens += used; spentTokens += used; decisionCalls += 1;
+    },
+  };
+  const record = await runJourney(definition, providerMode, { tokenCeiling: maxTokens, modelCeiling: maxModels, ...hooks });
   const protocol = protocolChecks(record);
   const content = contentChecks(record);
-  records.push({ definition, record, protocol, content });
+  records.push({ definition, record, protocol, content, journeyTokens });
   const summarize = (checks: Array<{ name: string; passed: boolean; detail: string }>) =>
     checks.map(check => (check.passed ? "PASS " : "FAIL ") + check.name + (check.passed ? "" : "：" + check.detail)).join("\n  ");
   process.stdout.write("  协议：" + protocol.filter(check => check.passed).length + "/" + protocol.length + "\n  " + summarize(protocol) + "\n");
@@ -108,10 +125,13 @@ const report = {
     phases: item.record.phases, tools: item.record.tools,
     modelRuns: item.record.modelRuns, wake: item.record.wake, control: item.record.control, failures: item.record.failures,
     budget: item.record.budget,
+    tokens: (item as { journeyTokens?: number }).journeyTokens ?? null,
   })),
   totals: { protocolPassed: allProtocol.filter(check => check.passed).length, protocolTotal: allProtocol.length,
     contentPassed: allContent.filter(check => check.passed).length, contentTotal: allContent.length },
-  tokensUsed: records.flatMap(item => item.record.modelRuns).reduce((total, run) => {
+  tokensUsed: spentTokens,
+  decisionCalls,
+  tracedTokens: records.flatMap(item => item.record.modelRuns).reduce((total, run) => {
     const usage = run.usage as { inputTokens?: number | null; outputTokens?: number | null } | null;
     return total + Number(usage?.inputTokens ?? 0) + Number(usage?.outputTokens ?? 0);
   }, 0),

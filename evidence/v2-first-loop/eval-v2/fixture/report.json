@@ -1,8 +1,8 @@
 {
   "provider": "fixture",
   "providerLabel": "INJECTED_V2_JOURNEY（离线注入，确定性）",
-  "generatedAt": "2026-11-16T12:05:26.452Z",
-  "durationMs": 2809,
+  "generatedAt": "2026-11-16T13:50:00.757Z",
+  "durationMs": 2122,
   "journeys": [
     {
       "id": "developer",
@@ -16,70 +16,70 @@
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "新资料由既有扫描器唤醒同一 Mission（woken=1）",
-            "evidenceRef": "mission:cmwj7vdt70004tc8o906mxplu:wake"
+            "evidenceRef": "mission:cmwjblvmr0004s48ov6riaxqw:wake"
           },
           {
             "name": "VERSION_CHAIN_WITH_CHECKPOINTS",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "版本 1,2,3 均有 CHECKPOINT_REACHED",
-            "evidenceRef": "mission:cmwj7vdt70004tc8o906mxplu:versions"
+            "evidenceRef": "mission:cmwjblvmr0004s48ov6riaxqw:versions"
           },
           {
             "name": "EVIDENCE_AND_TOOL_RECEIPTS",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "Skill 进入/交接与读取/创作步骤均有持久回执",
-            "evidenceRef": "mission:cmwj7vdt70004tc8o906mxplu:steps:6"
+            "evidenceRef": "mission:cmwjblvmr0004s48ov6riaxqw:steps:6"
           },
           {
             "name": "BUDGET_MONOTONIC_NO_RESET",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "模型/工具累计用量不重置：3→6→6→9→9 / 2→4→4→6→6",
-            "evidenceRef": "mission:cmwj7vdt70004tc8o906mxplu:budget"
+            "evidenceRef": "mission:cmwjblvmr0004s48ov6riaxqw:budget"
           },
           {
             "name": "RESTRICTION_BEFORE_DISPATCH",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "限制先落库并禁止外部读取，之后没有新增稿（ids=1，blocked=true，unchanged=true）",
-            "evidenceRef": "directive:ab32bb79-03c1-42ef-863b-ab31a6ece2d0"
+            "evidenceRef": "directive:070b1194-7ed9-4a93-a501-b0d73a3f1d8d"
           },
           {
             "name": "REDIRECT_SAME_MISSION",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "有限目标改道后同一 Mission 产出第 3 版",
-            "evidenceRef": "directive:62b9f830-f37e-4e93-84df-648170f0fe09"
+            "evidenceRef": "directive:db720195-c469-4f01-9028-3ce32b43e02e"
           },
           {
             "name": "ENDING_STOPS_DISPATCH",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "暂停/取消后不再派发（pause → PAUSED）",
-            "evidenceRef": "mission:cmwj7vdt70004tc8o906mxplu:ending"
+            "evidenceRef": "mission:cmwjblvmr0004s48ov6riaxqw:ending"
           },
           {
             "name": "NO_LEGACY_FINISH",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "持续委托没有用旧 finish 结束",
-            "evidenceRef": "mission:cmwj7vdt70004tc8o906mxplu:events"
+            "evidenceRef": "mission:cmwjblvmr0004s48ov6riaxqw:events"
           },
           {
             "name": "TOOL_BOUNDARY_PRIVATE_ONLY",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "工具只使用项目读取与私有稿：read_project_material,save_mission_output",
-            "evidenceRef": "mission:cmwj7vdt70004tc8o906mxplu:steps"
+            "evidenceRef": "mission:cmwjblvmr0004s48ov6riaxqw:steps"
           },
           {
             "name": "PROVIDER_RECORDED",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "模型 provider 与用量留痕：INJECTED_V2_JOURNEY",
-            "evidenceRef": "mission:cmwj7vdt70004tc8o906mxplu:runs"
+            "evidenceRef": "mission:cmwjblvmr0004s48ov6riaxqw:runs"
           }
         ]
       },
@@ -91,86 +91,542 @@
             "name": "NEW_MATERIAL_CHANGED_DRAFT",
             "passed": true,
             "judge": "DETERMINISTIC",
-            "detail": "新增材料进入第 2 版且正文变化（hash=1d70aac8→ddb86ed2；refs=capture:cmwj7vdsu0003tc8oci2y2ksb,capture:cmwj7vdzr000ttc8orv6gqd2k）",
-            "evidenceRef": "mission:cmwj7vdt70004tc8o906mxplu:output:cmwj7ve2x0018tc8ot0i60q8x"
+            "detail": "新增材料进入第 2 版且正文变化（hash=1d70aac8→ddb86ed2；refs=capture:cmwjblvmc0003s48o1i2j658p,capture:cmwjblvte000ts48oh4ez6qab）",
+            "evidenceRef": "mission:cmwjblvmr0004s48ov6riaxqw:output:cmwjblvwu0018s48o9qd3a1kc"
           },
           {
             "name": "OLD_EVIDENCE_RETAINED",
             "passed": true,
             "judge": "DETERMINISTIC",
-            "detail": "第 2 版仍保留旧依据：capture:cmwj7vdsu0003tc8oci2y2ksb,capture:cmwj7vdzr000ttc8orv6gqd2k",
-            "evidenceRef": "mission:cmwj7vdt70004tc8o906mxplu:output:cmwj7ve2x0018tc8ot0i60q8x"
+            "detail": "第 2 版仍保留旧依据：capture:cmwjblvmc0003s48o1i2j658p,capture:cmwjblvte000ts48oh4ez6qab",
+            "evidenceRef": "mission:cmwjblvmr0004s48ov6riaxqw:output:cmwjblvwu0018s48o9qd3a1kc"
           },
           {
             "name": "UNKNOWN_NOT_WRITTEN_AS_FACT",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "未知条件按未知保留，没有写成已验证事实",
-            "evidenceRef": "mission:cmwj7vdt70004tc8o906mxplu:outputs"
+            "evidenceRef": "mission:cmwjblvmr0004s48ov6riaxqw:outputs"
           },
           {
             "name": "USER_REDIRECT_APPLIED",
             "passed": true,
             "judge": "DETERMINISTIC",
-            "detail": "第 3 版落实用户改道重点",
-            "evidenceRef": "mission:cmwj7vdt70004tc8o906mxplu:output:cmwj7ve8b001xtc8otedqqt7p"
+            "detail": "第 3 版是否体现改道重点（命中=交付依据，需至少一项）",
+            "evidenceRef": "mission:cmwjblvmr0004s48ov6riaxqw:output:cmwjblw2c001xs48obt3c4h34"
           },
           {
             "name": "NO_MEANINGLESS_REPETITION",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "三个版本正文互不相同，且每版只有一次创作保存",
-            "evidenceRef": "mission:cmwj7vdt70004tc8o906mxplu:versions"
+            "evidenceRef": "mission:cmwjblvmr0004s48ov6riaxqw:versions"
           },
           {
             "name": "CITATIONS_RESOLVE",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "每版引用均落在该版来源清单内",
-            "evidenceRef": "mission:cmwj7vdt70004tc8o906mxplu:outputs"
+            "evidenceRef": "mission:cmwjblvmr0004s48ov6riaxqw:outputs"
           }
         ]
       },
-      "missionId": "cmwj7vdt70004tc8o906mxplu",
+      "missionId": "cmwjblvmr0004s48ov6riaxqw",
       "versions": [
         {
           "revision": 1,
-          "outputId": "cmwj7vdy9000ktc8o75qxorb0",
+          "outputId": "cmwjblvrx000ks48ouabc9879",
           "checkpointSeq": 16,
           "sourceRefs": [
             {
-              "id": "capture:cmwj7vdsu0003tc8oci2y2ksb",
+              "id": "capture:cmwjblvmc0003s48o1i2j658p",
               "hash": "16ce23fdf8c8a26c0748961d9bfa7eb9d347e9d438c15bf91aeae5131381c11b"
             }
           ]
         },
         {
           "revision": 2,
-          "outputId": "cmwj7ve2x0018tc8ot0i60q8x",
+          "outputId": "cmwjblvwu0018s48o9qd3a1kc",
           "checkpointSeq": 31,
           "sourceRefs": [
             {
-              "id": "capture:cmwj7vdsu0003tc8oci2y2ksb",
+              "id": "capture:cmwjblvmc0003s48o1i2j658p",
               "hash": "16ce23fdf8c8a26c0748961d9bfa7eb9d347e9d438c15bf91aeae5131381c11b"
             },
             {
-              "id": "capture:cmwj7vdzr000ttc8orv6gqd2k",
+              "id": "capture:cmwjblvte000ts48oh4ez6qab",
               "hash": "930015ae53422c8029ccb9a06a21912af9be816d900992bdebc8552e37d92c35"
             }
           ]
         },
         {
           "revision": 3,
-          "outputId": "cmwj7ve8b001xtc8otedqqt7p",
+          "outputId": "cmwjblw2c001xs48obt3c4h34",
           "checkpointSeq": 47,
           "sourceRefs": [
             {
-              "id": "capture:cmwj7vdsu0003tc8oci2y2ksb",
+              "id": "capture:cmwjblvmc0003s48o1i2j658p",
               "hash": "16ce23fdf8c8a26c0748961d9bfa7eb9d347e9d438c15bf91aeae5131381c11b"
             },
             {
-              "id": "capture:cmwj7vdzr000ttc8orv6gqd2k",
+              "id": "capture:cmwjblvte000ts48oh4ez6qab",
               "hash": "930015ae53422c8029ccb9a06a21912af9be816d900992bdebc8552e37d92c35"
+            }
+          ]
+        }
+      ],
+      "phases": [
+        {
+          "phase": "INITIAL_DRAFT",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 1,
+          "checkpointCount": 1,
+          "modelCalls": 3,
+          "toolCalls": 2,
+          "budgetUsed": {
+            "models": 3,
+            "tools": 2,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 3,
+            "reservedOutputTokens": 6000,
+            "inputTokens": 60,
+            "outputTokens": 30,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "NEW_MATERIAL_CONTINUATION",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 6,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 6,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 6,
+            "reservedOutputTokens": 12000,
+            "inputTokens": 120,
+            "outputTokens": 60,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "RESTRICTION_APPLIED",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 6,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 6,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 6,
+            "reservedOutputTokens": 12000,
+            "inputTokens": 120,
+            "outputTokens": 60,
+            "unknownCalls": 0
+          },
+          "lastError": {}
+        },
+        {
+          "phase": "REDIRECTED_DELIVERY",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 3,
+          "checkpointCount": 3,
+          "modelCalls": 9,
+          "toolCalls": 6,
+          "budgetUsed": {
+            "models": 9,
+            "tools": 6,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 8,
+            "reservedOutputTokens": 18000,
+            "inputTokens": 180,
+            "outputTokens": 90,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "ENDED",
+          "missionStatus": "PAUSED",
+          "outputCount": 3,
+          "checkpointCount": 3,
+          "modelCalls": 9,
+          "toolCalls": 6,
+          "budgetUsed": {
+            "models": 9,
+            "tools": 6,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 8,
+            "reservedOutputTokens": 18000,
+            "inputTokens": 180,
+            "outputTokens": 90,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        }
+      ],
+      "tools": [
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 1
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 2
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 3
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 4
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 5
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 6
+        }
+      ],
+      "modelRuns": [
+        {
+          "provider": "INJECTED_V2_JOURNEY",
+          "model": "deterministic-journey",
+          "usage": {
+            "inputTokens": 20,
+            "outputTokens": 10
+          }
+        },
+        {
+          "provider": "INJECTED_V2_JOURNEY",
+          "model": "deterministic-journey",
+          "usage": {
+            "inputTokens": 20,
+            "outputTokens": 10
+          }
+        },
+        {
+          "provider": "INJECTED_V2_JOURNEY",
+          "model": "deterministic-journey",
+          "usage": {
+            "inputTokens": 20,
+            "outputTokens": 10
+          }
+        },
+        {
+          "provider": "INJECTED_V2_JOURNEY",
+          "model": "deterministic-journey",
+          "usage": {
+            "inputTokens": 20,
+            "outputTokens": 10
+          }
+        },
+        {
+          "provider": "INJECTED_V2_JOURNEY",
+          "model": "deterministic-journey",
+          "usage": {
+            "inputTokens": 20,
+            "outputTokens": 10
+          }
+        },
+        {
+          "provider": "INJECTED_V2_JOURNEY",
+          "model": "deterministic-journey",
+          "usage": {
+            "inputTokens": 20,
+            "outputTokens": 10
+          }
+        },
+        {
+          "provider": "INJECTED_V2_JOURNEY",
+          "model": "deterministic-journey",
+          "usage": {
+            "inputTokens": 20,
+            "outputTokens": 10
+          }
+        },
+        {
+          "provider": "INJECTED_V2_JOURNEY",
+          "model": "deterministic-journey",
+          "usage": {
+            "inputTokens": 20,
+            "outputTokens": 10
+          }
+        },
+        {
+          "provider": "INJECTED_V2_JOURNEY",
+          "model": "deterministic-journey",
+          "usage": {
+            "inputTokens": 20,
+            "outputTokens": 10
+          }
+        }
+      ],
+      "wake": {
+        "woken": 1,
+        "sameMission": true,
+        "inputChanged": true
+      },
+      "control": {
+        "restriction": {
+          "directiveIds": [
+            "070b1194-7ed9-4a93-a501-b0d73a3f1d8d"
+          ],
+          "constraints": [
+            "继续整理，但不要联网"
+          ],
+          "externalReadBlocked": true,
+          "outputsUnchanged": true
+        },
+        "redirect": {
+          "directiveIds": [
+            "db720195-c469-4f01-9028-3ce32b43e02e"
+          ],
+          "workingObjective": "今天先核对第二版交付依据",
+          "outputCountAfter": 3
+        },
+        "ending": {
+          "action": "pause",
+          "status": "PAUSED",
+          "extraDispatch": false,
+          "outputCountAfter": 3
+        }
+      },
+      "failures": [],
+      "budget": {
+        "before": {},
+        "after": {
+          "models": 9,
+          "tools": 6,
+          "searches": 0,
+          "fetches": 0,
+          "browserRequests": 0,
+          "browserBytes": 0,
+          "calendarRequests": 0,
+          "externalWrites": 0,
+          "metadataRequests": 0,
+          "activeMs": 8,
+          "reservedOutputTokens": 18000,
+          "inputTokens": 180,
+          "outputTokens": 90,
+          "unknownCalls": 0
+        }
+      },
+      "tokens": 270
+    },
+    {
+      "id": "freelancer",
+      "label": "客户交付",
+      "protocol": {
+        "passed": 10,
+        "total": 10,
+        "checks": [
+          {
+            "name": "SAME_MISSION_CONTINUATION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "新资料由既有扫描器唤醒同一 Mission（woken=1）",
+            "evidenceRef": "mission:cmwjblw48002as48ohxd6gsdw:wake"
+          },
+          {
+            "name": "VERSION_CHAIN_WITH_CHECKPOINTS",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "版本 1,2,3 均有 CHECKPOINT_REACHED",
+            "evidenceRef": "mission:cmwjblw48002as48ohxd6gsdw:versions"
+          },
+          {
+            "name": "EVIDENCE_AND_TOOL_RECEIPTS",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "Skill 进入/交接与读取/创作步骤均有持久回执",
+            "evidenceRef": "mission:cmwjblw48002as48ohxd6gsdw:steps:6"
+          },
+          {
+            "name": "BUDGET_MONOTONIC_NO_RESET",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型/工具累计用量不重置：3→6→6→9→9 / 2→4→4→6→6",
+            "evidenceRef": "mission:cmwjblw48002as48ohxd6gsdw:budget"
+          },
+          {
+            "name": "RESTRICTION_BEFORE_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "限制先落库并禁止外部读取，之后没有新增稿（ids=1，blocked=true，unchanged=true）",
+            "evidenceRef": "directive:68225b79-658f-42fb-80a6-75e2ba5d34e4"
+          },
+          {
+            "name": "REDIRECT_SAME_MISSION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "有限目标改道后同一 Mission 产出第 3 版",
+            "evidenceRef": "directive:86bfa01e-bea9-49f3-a034-208256cfe714"
+          },
+          {
+            "name": "ENDING_STOPS_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "暂停/取消后不再派发（cancel → CANCELLED）",
+            "evidenceRef": "mission:cmwjblw48002as48ohxd6gsdw:ending"
+          },
+          {
+            "name": "NO_LEGACY_FINISH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "持续委托没有用旧 finish 结束",
+            "evidenceRef": "mission:cmwjblw48002as48ohxd6gsdw:events"
+          },
+          {
+            "name": "TOOL_BOUNDARY_PRIVATE_ONLY",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "工具只使用项目读取与私有稿：read_project_material,save_mission_output",
+            "evidenceRef": "mission:cmwjblw48002as48ohxd6gsdw:steps"
+          },
+          {
+            "name": "PROVIDER_RECORDED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型 provider 与用量留痕：INJECTED_V2_JOURNEY",
+            "evidenceRef": "mission:cmwjblw48002as48ohxd6gsdw:runs"
+          }
+        ]
+      },
+      "content": {
+        "passed": 6,
+        "total": 6,
+        "checks": [
+          {
+            "name": "NEW_MATERIAL_CHANGED_DRAFT",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "新增材料进入第 2 版且正文变化（hash=ec07c7c6→19a9c211；refs=capture:cmwjblw470029s48ouc7d7a3c,capture:cmwjblw7t002zs48oiyhwofew）",
+            "evidenceRef": "mission:cmwjblw48002as48ohxd6gsdw:output:cmwjblwag003es48ouu58vd93"
+          },
+          {
+            "name": "OLD_EVIDENCE_RETAINED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "第 2 版仍保留旧依据：capture:cmwjblw470029s48ouc7d7a3c,capture:cmwjblw7t002zs48oiyhwofew",
+            "evidenceRef": "mission:cmwjblw48002as48ohxd6gsdw:output:cmwjblwag003es48ouu58vd93"
+          },
+          {
+            "name": "UNKNOWN_NOT_WRITTEN_AS_FACT",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "未知条件按未知保留，没有写成已验证事实",
+            "evidenceRef": "mission:cmwjblw48002as48ohxd6gsdw:outputs"
+          },
+          {
+            "name": "USER_REDIRECT_APPLIED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "第 3 版是否体现改道重点（命中=客户反馈|交付说明，需至少一项）",
+            "evidenceRef": "mission:cmwjblw48002as48ohxd6gsdw:output:cmwjblwfm0043s48owx1n70en"
+          },
+          {
+            "name": "NO_MEANINGLESS_REPETITION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "三个版本正文互不相同，且每版只有一次创作保存",
+            "evidenceRef": "mission:cmwjblw48002as48ohxd6gsdw:versions"
+          },
+          {
+            "name": "CITATIONS_RESOLVE",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "每版引用均落在该版来源清单内",
+            "evidenceRef": "mission:cmwjblw48002as48ohxd6gsdw:outputs"
+          }
+        ]
+      },
+      "missionId": "cmwjblw48002as48ohxd6gsdw",
+      "versions": [
+        {
+          "revision": 1,
+          "outputId": "cmwjblw6q002qs48on9875a45",
+          "checkpointSeq": 16,
+          "sourceRefs": [
+            {
+              "id": "capture:cmwjblw470029s48ouc7d7a3c",
+              "hash": "b3c96bd354e9ac1ba3143649c07bc3b76b85cd0d6ff2dd773635906fbd5b6659"
+            }
+          ]
+        },
+        {
+          "revision": 2,
+          "outputId": "cmwjblwag003es48ouu58vd93",
+          "checkpointSeq": 31,
+          "sourceRefs": [
+            {
+              "id": "capture:cmwjblw470029s48ouc7d7a3c",
+              "hash": "b3c96bd354e9ac1ba3143649c07bc3b76b85cd0d6ff2dd773635906fbd5b6659"
+            },
+            {
+              "id": "capture:cmwjblw7t002zs48oiyhwofew",
+              "hash": "80449ba02507c88dfdd1cb0e5f32623356538b846f4e64a8809841463435fd49"
+            }
+          ]
+        },
+        {
+          "revision": 3,
+          "outputId": "cmwjblwfm0043s48owx1n70en",
+          "checkpointSeq": 47,
+          "sourceRefs": [
+            {
+              "id": "capture:cmwjblw470029s48ouc7d7a3c",
+              "hash": "b3c96bd354e9ac1ba3143649c07bc3b76b85cd0d6ff2dd773635906fbd5b6659"
+            },
+            {
+              "id": "capture:cmwjblw7t002zs48oiyhwofew",
+              "hash": "80449ba02507c88dfdd1cb0e5f32623356538b846f4e64a8809841463435fd49"
             }
           ]
         }
@@ -218,461 +674,6 @@
             "calendarRequests": 0,
             "externalWrites": 0,
             "metadataRequests": 0,
-            "activeMs": 5,
-            "reservedOutputTokens": 12000,
-            "inputTokens": 120,
-            "outputTokens": 60,
-            "unknownCalls": 0
-          },
-          "lastError": null
-        },
-        {
-          "phase": "RESTRICTION_APPLIED",
-          "missionStatus": "WAITING_INPUT",
-          "outputCount": 2,
-          "checkpointCount": 2,
-          "modelCalls": 6,
-          "toolCalls": 4,
-          "budgetUsed": {
-            "models": 6,
-            "tools": 4,
-            "searches": 0,
-            "fetches": 0,
-            "browserRequests": 0,
-            "browserBytes": 0,
-            "calendarRequests": 0,
-            "externalWrites": 0,
-            "metadataRequests": 0,
-            "activeMs": 5,
-            "reservedOutputTokens": 12000,
-            "inputTokens": 120,
-            "outputTokens": 60,
-            "unknownCalls": 0
-          },
-          "lastError": {}
-        },
-        {
-          "phase": "REDIRECTED_DELIVERY",
-          "missionStatus": "WAITING_INPUT",
-          "outputCount": 3,
-          "checkpointCount": 3,
-          "modelCalls": 9,
-          "toolCalls": 6,
-          "budgetUsed": {
-            "models": 9,
-            "tools": 6,
-            "searches": 0,
-            "fetches": 0,
-            "browserRequests": 0,
-            "browserBytes": 0,
-            "calendarRequests": 0,
-            "externalWrites": 0,
-            "metadataRequests": 0,
-            "activeMs": 7,
-            "reservedOutputTokens": 18000,
-            "inputTokens": 180,
-            "outputTokens": 90,
-            "unknownCalls": 0
-          },
-          "lastError": null
-        },
-        {
-          "phase": "ENDED",
-          "missionStatus": "PAUSED",
-          "outputCount": 3,
-          "checkpointCount": 3,
-          "modelCalls": 9,
-          "toolCalls": 6,
-          "budgetUsed": {
-            "models": 9,
-            "tools": 6,
-            "searches": 0,
-            "fetches": 0,
-            "browserRequests": 0,
-            "browserBytes": 0,
-            "calendarRequests": 0,
-            "externalWrites": 0,
-            "metadataRequests": 0,
-            "activeMs": 7,
-            "reservedOutputTokens": 18000,
-            "inputTokens": 180,
-            "outputTokens": 90,
-            "unknownCalls": 0
-          },
-          "lastError": null
-        }
-      ],
-      "tools": [
-        {
-          "tool": "read_project_material",
-          "status": "SUCCEEDED",
-          "ordinal": 1
-        },
-        {
-          "tool": "save_mission_output",
-          "status": "SUCCEEDED",
-          "ordinal": 2
-        },
-        {
-          "tool": "read_project_material",
-          "status": "SUCCEEDED",
-          "ordinal": 3
-        },
-        {
-          "tool": "save_mission_output",
-          "status": "SUCCEEDED",
-          "ordinal": 4
-        },
-        {
-          "tool": "read_project_material",
-          "status": "SUCCEEDED",
-          "ordinal": 5
-        },
-        {
-          "tool": "save_mission_output",
-          "status": "SUCCEEDED",
-          "ordinal": 6
-        }
-      ],
-      "modelRuns": [
-        {
-          "provider": "INJECTED_V2_JOURNEY",
-          "model": "deterministic-journey",
-          "usage": {
-            "inputTokens": 20,
-            "outputTokens": 10
-          }
-        },
-        {
-          "provider": "INJECTED_V2_JOURNEY",
-          "model": "deterministic-journey",
-          "usage": {
-            "inputTokens": 20,
-            "outputTokens": 10
-          }
-        },
-        {
-          "provider": "INJECTED_V2_JOURNEY",
-          "model": "deterministic-journey",
-          "usage": {
-            "inputTokens": 20,
-            "outputTokens": 10
-          }
-        },
-        {
-          "provider": "INJECTED_V2_JOURNEY",
-          "model": "deterministic-journey",
-          "usage": {
-            "inputTokens": 20,
-            "outputTokens": 10
-          }
-        },
-        {
-          "provider": "INJECTED_V2_JOURNEY",
-          "model": "deterministic-journey",
-          "usage": {
-            "inputTokens": 20,
-            "outputTokens": 10
-          }
-        },
-        {
-          "provider": "INJECTED_V2_JOURNEY",
-          "model": "deterministic-journey",
-          "usage": {
-            "inputTokens": 20,
-            "outputTokens": 10
-          }
-        },
-        {
-          "provider": "INJECTED_V2_JOURNEY",
-          "model": "deterministic-journey",
-          "usage": {
-            "inputTokens": 20,
-            "outputTokens": 10
-          }
-        },
-        {
-          "provider": "INJECTED_V2_JOURNEY",
-          "model": "deterministic-journey",
-          "usage": {
-            "inputTokens": 20,
-            "outputTokens": 10
-          }
-        },
-        {
-          "provider": "INJECTED_V2_JOURNEY",
-          "model": "deterministic-journey",
-          "usage": {
-            "inputTokens": 20,
-            "outputTokens": 10
-          }
-        }
-      ],
-      "wake": {
-        "woken": 1,
-        "sameMission": true,
-        "inputChanged": true
-      },
-      "control": {
-        "restriction": {
-          "directiveIds": [
-            "ab32bb79-03c1-42ef-863b-ab31a6ece2d0"
-          ],
-          "constraints": [
-            "继续整理，但不要联网"
-          ],
-          "externalReadBlocked": true,
-          "outputsUnchanged": true
-        },
-        "redirect": {
-          "directiveIds": [
-            "62b9f830-f37e-4e93-84df-648170f0fe09"
-          ],
-          "workingObjective": "今天先核对第二版交付依据",
-          "outputCountAfter": 3
-        },
-        "ending": {
-          "action": "pause",
-          "status": "PAUSED",
-          "extraDispatch": false,
-          "outputCountAfter": 3
-        }
-      },
-      "failures": [],
-      "budget": {
-        "before": {},
-        "after": {
-          "models": 9,
-          "tools": 6,
-          "searches": 0,
-          "fetches": 0,
-          "browserRequests": 0,
-          "browserBytes": 0,
-          "calendarRequests": 0,
-          "externalWrites": 0,
-          "metadataRequests": 0,
-          "activeMs": 7,
-          "reservedOutputTokens": 18000,
-          "inputTokens": 180,
-          "outputTokens": 90,
-          "unknownCalls": 0
-        }
-      }
-    },
-    {
-      "id": "freelancer",
-      "label": "客户交付",
-      "protocol": {
-        "passed": 10,
-        "total": 10,
-        "checks": [
-          {
-            "name": "SAME_MISSION_CONTINUATION",
-            "passed": true,
-            "judge": "DETERMINISTIC",
-            "detail": "新资料由既有扫描器唤醒同一 Mission（woken=1）",
-            "evidenceRef": "mission:cmwj7veaa002atc8oiip8az34:wake"
-          },
-          {
-            "name": "VERSION_CHAIN_WITH_CHECKPOINTS",
-            "passed": true,
-            "judge": "DETERMINISTIC",
-            "detail": "版本 1,2,3 均有 CHECKPOINT_REACHED",
-            "evidenceRef": "mission:cmwj7veaa002atc8oiip8az34:versions"
-          },
-          {
-            "name": "EVIDENCE_AND_TOOL_RECEIPTS",
-            "passed": true,
-            "judge": "DETERMINISTIC",
-            "detail": "Skill 进入/交接与读取/创作步骤均有持久回执",
-            "evidenceRef": "mission:cmwj7veaa002atc8oiip8az34:steps:6"
-          },
-          {
-            "name": "BUDGET_MONOTONIC_NO_RESET",
-            "passed": true,
-            "judge": "DETERMINISTIC",
-            "detail": "模型/工具累计用量不重置：3→6→6→9→9 / 2→4→4→6→6",
-            "evidenceRef": "mission:cmwj7veaa002atc8oiip8az34:budget"
-          },
-          {
-            "name": "RESTRICTION_BEFORE_DISPATCH",
-            "passed": true,
-            "judge": "DETERMINISTIC",
-            "detail": "限制先落库并禁止外部读取，之后没有新增稿（ids=1，blocked=true，unchanged=true）",
-            "evidenceRef": "directive:08662a9c-11a2-4657-95a1-85ff0e9efeb4"
-          },
-          {
-            "name": "REDIRECT_SAME_MISSION",
-            "passed": true,
-            "judge": "DETERMINISTIC",
-            "detail": "有限目标改道后同一 Mission 产出第 3 版",
-            "evidenceRef": "directive:b2561635-cbaa-48ef-9031-5ecd73bf8ac1"
-          },
-          {
-            "name": "ENDING_STOPS_DISPATCH",
-            "passed": true,
-            "judge": "DETERMINISTIC",
-            "detail": "暂停/取消后不再派发（cancel → CANCELLED）",
-            "evidenceRef": "mission:cmwj7veaa002atc8oiip8az34:ending"
-          },
-          {
-            "name": "NO_LEGACY_FINISH",
-            "passed": true,
-            "judge": "DETERMINISTIC",
-            "detail": "持续委托没有用旧 finish 结束",
-            "evidenceRef": "mission:cmwj7veaa002atc8oiip8az34:events"
-          },
-          {
-            "name": "TOOL_BOUNDARY_PRIVATE_ONLY",
-            "passed": true,
-            "judge": "DETERMINISTIC",
-            "detail": "工具只使用项目读取与私有稿：read_project_material,save_mission_output",
-            "evidenceRef": "mission:cmwj7veaa002atc8oiip8az34:steps"
-          },
-          {
-            "name": "PROVIDER_RECORDED",
-            "passed": true,
-            "judge": "DETERMINISTIC",
-            "detail": "模型 provider 与用量留痕：INJECTED_V2_JOURNEY",
-            "evidenceRef": "mission:cmwj7veaa002atc8oiip8az34:runs"
-          }
-        ]
-      },
-      "content": {
-        "passed": 6,
-        "total": 6,
-        "checks": [
-          {
-            "name": "NEW_MATERIAL_CHANGED_DRAFT",
-            "passed": true,
-            "judge": "DETERMINISTIC",
-            "detail": "新增材料进入第 2 版且正文变化（hash=ec07c7c6→19a9c211；refs=capture:cmwj7vea90029tc8oje69p9q7,capture:cmwj7vedk002ztc8olwazeeoa）",
-            "evidenceRef": "mission:cmwj7veaa002atc8oiip8az34:output:cmwj7veg8003etc8owdbgb1pe"
-          },
-          {
-            "name": "OLD_EVIDENCE_RETAINED",
-            "passed": true,
-            "judge": "DETERMINISTIC",
-            "detail": "第 2 版仍保留旧依据：capture:cmwj7vea90029tc8oje69p9q7,capture:cmwj7vedk002ztc8olwazeeoa",
-            "evidenceRef": "mission:cmwj7veaa002atc8oiip8az34:output:cmwj7veg8003etc8owdbgb1pe"
-          },
-          {
-            "name": "UNKNOWN_NOT_WRITTEN_AS_FACT",
-            "passed": true,
-            "judge": "DETERMINISTIC",
-            "detail": "未知条件按未知保留，没有写成已验证事实",
-            "evidenceRef": "mission:cmwj7veaa002atc8oiip8az34:outputs"
-          },
-          {
-            "name": "USER_REDIRECT_APPLIED",
-            "passed": true,
-            "judge": "DETERMINISTIC",
-            "detail": "第 3 版落实用户改道重点",
-            "evidenceRef": "mission:cmwj7veaa002atc8oiip8az34:output:cmwj7vekx0043tc8ov8ytg79m"
-          },
-          {
-            "name": "NO_MEANINGLESS_REPETITION",
-            "passed": true,
-            "judge": "DETERMINISTIC",
-            "detail": "三个版本正文互不相同，且每版只有一次创作保存",
-            "evidenceRef": "mission:cmwj7veaa002atc8oiip8az34:versions"
-          },
-          {
-            "name": "CITATIONS_RESOLVE",
-            "passed": true,
-            "judge": "DETERMINISTIC",
-            "detail": "每版引用均落在该版来源清单内",
-            "evidenceRef": "mission:cmwj7veaa002atc8oiip8az34:outputs"
-          }
-        ]
-      },
-      "missionId": "cmwj7veaa002atc8oiip8az34",
-      "versions": [
-        {
-          "revision": 1,
-          "outputId": "cmwj7vecj002qtc8o5d5y7qnc",
-          "checkpointSeq": 16,
-          "sourceRefs": [
-            {
-              "id": "capture:cmwj7vea90029tc8oje69p9q7",
-              "hash": "b3c96bd354e9ac1ba3143649c07bc3b76b85cd0d6ff2dd773635906fbd5b6659"
-            }
-          ]
-        },
-        {
-          "revision": 2,
-          "outputId": "cmwj7veg8003etc8owdbgb1pe",
-          "checkpointSeq": 31,
-          "sourceRefs": [
-            {
-              "id": "capture:cmwj7vea90029tc8oje69p9q7",
-              "hash": "b3c96bd354e9ac1ba3143649c07bc3b76b85cd0d6ff2dd773635906fbd5b6659"
-            },
-            {
-              "id": "capture:cmwj7vedk002ztc8olwazeeoa",
-              "hash": "80449ba02507c88dfdd1cb0e5f32623356538b846f4e64a8809841463435fd49"
-            }
-          ]
-        },
-        {
-          "revision": 3,
-          "outputId": "cmwj7vekx0043tc8ov8ytg79m",
-          "checkpointSeq": 47,
-          "sourceRefs": [
-            {
-              "id": "capture:cmwj7vea90029tc8oje69p9q7",
-              "hash": "b3c96bd354e9ac1ba3143649c07bc3b76b85cd0d6ff2dd773635906fbd5b6659"
-            },
-            {
-              "id": "capture:cmwj7vedk002ztc8olwazeeoa",
-              "hash": "80449ba02507c88dfdd1cb0e5f32623356538b846f4e64a8809841463435fd49"
-            }
-          ]
-        }
-      ],
-      "phases": [
-        {
-          "phase": "INITIAL_DRAFT",
-          "missionStatus": "WAITING_INPUT",
-          "outputCount": 1,
-          "checkpointCount": 1,
-          "modelCalls": 3,
-          "toolCalls": 2,
-          "budgetUsed": {
-            "models": 3,
-            "tools": 2,
-            "searches": 0,
-            "fetches": 0,
-            "browserRequests": 0,
-            "browserBytes": 0,
-            "calendarRequests": 0,
-            "externalWrites": 0,
-            "metadataRequests": 0,
-            "activeMs": 3,
-            "reservedOutputTokens": 6000,
-            "inputTokens": 60,
-            "outputTokens": 30,
-            "unknownCalls": 0
-          },
-          "lastError": null
-        },
-        {
-          "phase": "NEW_MATERIAL_CONTINUATION",
-          "missionStatus": "WAITING_INPUT",
-          "outputCount": 2,
-          "checkpointCount": 2,
-          "modelCalls": 6,
-          "toolCalls": 4,
-          "budgetUsed": {
-            "models": 6,
-            "tools": 4,
-            "searches": 0,
-            "fetches": 0,
-            "browserRequests": 0,
-            "browserBytes": 0,
-            "calendarRequests": 0,
-            "externalWrites": 0,
-            "metadataRequests": 0,
             "activeMs": 4,
             "reservedOutputTokens": 12000,
             "inputTokens": 120,
@@ -871,7 +872,7 @@
       "control": {
         "restriction": {
           "directiveIds": [
-            "08662a9c-11a2-4657-95a1-85ff0e9efeb4"
+            "68225b79-658f-42fb-80a6-75e2ba5d34e4"
           ],
           "constraints": [
             "继续整理，但不要联网"
@@ -881,7 +882,7 @@
         },
         "redirect": {
           "directiveIds": [
-            "b2561635-cbaa-48ef-9031-5ecd73bf8ac1"
+            "86bfa01e-bea9-49f3-a034-208256cfe714"
           ],
           "workingObjective": "今天先核对客户反馈对应的交付说明",
           "outputCountAfter": 3
@@ -912,7 +913,8 @@
           "outputTokens": 90,
           "unknownCalls": 0
         }
-      }
+      },
+      "tokens": 270
     },
     {
       "id": "research",
@@ -926,70 +928,70 @@
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "新资料由既有扫描器唤醒同一 Mission（woken=1）",
-            "evidenceRef": "mission:cmwj7vemi004gtc8ocg2610ah:wake"
+            "evidenceRef": "mission:cmwjblwhj004gs48og74aikvo:wake"
           },
           {
             "name": "VERSION_CHAIN_WITH_CHECKPOINTS",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "版本 1,2,3 均有 CHECKPOINT_REACHED",
-            "evidenceRef": "mission:cmwj7vemi004gtc8ocg2610ah:versions"
+            "evidenceRef": "mission:cmwjblwhj004gs48og74aikvo:versions"
           },
           {
             "name": "EVIDENCE_AND_TOOL_RECEIPTS",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "Skill 进入/交接与读取/创作步骤均有持久回执",
-            "evidenceRef": "mission:cmwj7vemi004gtc8ocg2610ah:steps:6"
+            "evidenceRef": "mission:cmwjblwhj004gs48og74aikvo:steps:6"
           },
           {
             "name": "BUDGET_MONOTONIC_NO_RESET",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "模型/工具累计用量不重置：3→6→6→9→9 / 2→4→4→6→6",
-            "evidenceRef": "mission:cmwj7vemi004gtc8ocg2610ah:budget"
+            "evidenceRef": "mission:cmwjblwhj004gs48og74aikvo:budget"
           },
           {
             "name": "RESTRICTION_BEFORE_DISPATCH",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "限制先落库并禁止外部读取，之后没有新增稿（ids=1，blocked=true，unchanged=true）",
-            "evidenceRef": "directive:39fced64-de6d-4603-b538-e7c5cf335b1b"
+            "evidenceRef": "directive:e7909392-dda9-4d02-8181-d1b855bcc019"
           },
           {
             "name": "REDIRECT_SAME_MISSION",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "有限目标改道后同一 Mission 产出第 3 版",
-            "evidenceRef": "directive:bce2bb9a-9ce8-4f33-b2d9-1288bfd240cc"
+            "evidenceRef": "directive:bcc47b4d-22e7-40ad-8564-cdc093dd22d0"
           },
           {
             "name": "ENDING_STOPS_DISPATCH",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "暂停/取消后不再派发（pause → PAUSED）",
-            "evidenceRef": "mission:cmwj7vemi004gtc8ocg2610ah:ending"
+            "evidenceRef": "mission:cmwjblwhj004gs48og74aikvo:ending"
           },
           {
             "name": "NO_LEGACY_FINISH",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "持续委托没有用旧 finish 结束",
-            "evidenceRef": "mission:cmwj7vemi004gtc8ocg2610ah:events"
+            "evidenceRef": "mission:cmwjblwhj004gs48og74aikvo:events"
           },
           {
             "name": "TOOL_BOUNDARY_PRIVATE_ONLY",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "工具只使用项目读取与私有稿：read_project_material,save_mission_output",
-            "evidenceRef": "mission:cmwj7vemi004gtc8ocg2610ah:steps"
+            "evidenceRef": "mission:cmwjblwhj004gs48og74aikvo:steps"
           },
           {
             "name": "PROVIDER_RECORDED",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "模型 provider 与用量留痕：INJECTED_V2_JOURNEY",
-            "evidenceRef": "mission:cmwj7vemi004gtc8ocg2610ah:runs"
+            "evidenceRef": "mission:cmwjblwhj004gs48og74aikvo:runs"
           }
         ]
       },
@@ -1001,85 +1003,85 @@
             "name": "NEW_MATERIAL_CHANGED_DRAFT",
             "passed": true,
             "judge": "DETERMINISTIC",
-            "detail": "新增材料进入第 2 版且正文变化（hash=35613f82→a35ed44c；refs=capture:cmwj7vemg004ftc8oz1iaqzlv,capture:cmwj7vepx0055tc8owvzbo31u）",
-            "evidenceRef": "mission:cmwj7vemi004gtc8ocg2610ah:output:cmwj7vesi005ktc8o2gh8ks06"
+            "detail": "新增材料进入第 2 版且正文变化（hash=35613f82→a35ed44c；refs=capture:cmwjblwhi004fs48ot8ftm3ai,capture:cmwjblwkv0055s48o1m9g4mlg）",
+            "evidenceRef": "mission:cmwjblwhj004gs48og74aikvo:output:cmwjblwnm005ks48one12mnlm"
           },
           {
             "name": "OLD_EVIDENCE_RETAINED",
             "passed": true,
             "judge": "DETERMINISTIC",
-            "detail": "第 2 版仍保留旧依据：capture:cmwj7vemg004ftc8oz1iaqzlv,capture:cmwj7vepx0055tc8owvzbo31u",
-            "evidenceRef": "mission:cmwj7vemi004gtc8ocg2610ah:output:cmwj7vesi005ktc8o2gh8ks06"
+            "detail": "第 2 版仍保留旧依据：capture:cmwjblwhi004fs48ot8ftm3ai,capture:cmwjblwkv0055s48o1m9g4mlg",
+            "evidenceRef": "mission:cmwjblwhj004gs48og74aikvo:output:cmwjblwnm005ks48one12mnlm"
           },
           {
             "name": "UNKNOWN_NOT_WRITTEN_AS_FACT",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "未知条件按未知保留，没有写成已验证事实",
-            "evidenceRef": "mission:cmwj7vemi004gtc8ocg2610ah:outputs"
+            "evidenceRef": "mission:cmwjblwhj004gs48og74aikvo:outputs"
           },
           {
             "name": "USER_REDIRECT_APPLIED",
             "passed": true,
             "judge": "DETERMINISTIC",
-            "detail": "第 3 版落实用户改道重点",
-            "evidenceRef": "mission:cmwj7vemi004gtc8ocg2610ah:output:cmwj7vex30069tc8o5a1dmrlc"
+            "detail": "第 3 版是否体现改道重点（命中=限制条件，需至少一项）",
+            "evidenceRef": "mission:cmwjblwhj004gs48og74aikvo:output:cmwjblws50069s48o1t5sx9xi"
           },
           {
             "name": "NO_MEANINGLESS_REPETITION",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "三个版本正文互不相同，且每版只有一次创作保存",
-            "evidenceRef": "mission:cmwj7vemi004gtc8ocg2610ah:versions"
+            "evidenceRef": "mission:cmwjblwhj004gs48og74aikvo:versions"
           },
           {
             "name": "CITATIONS_RESOLVE",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "每版引用均落在该版来源清单内",
-            "evidenceRef": "mission:cmwj7vemi004gtc8ocg2610ah:outputs"
+            "evidenceRef": "mission:cmwjblwhj004gs48og74aikvo:outputs"
           }
         ]
       },
-      "missionId": "cmwj7vemi004gtc8ocg2610ah",
+      "missionId": "cmwjblwhj004gs48og74aikvo",
       "versions": [
         {
           "revision": 1,
-          "outputId": "cmwj7veow004wtc8otqpoma7u",
+          "outputId": "cmwjblwjs004ws48olzng35ex",
           "checkpointSeq": 16,
           "sourceRefs": [
             {
-              "id": "capture:cmwj7vemg004ftc8oz1iaqzlv",
+              "id": "capture:cmwjblwhi004fs48ot8ftm3ai",
               "hash": "150e2355de9e68e390650e9b3dc6a5de446589a74f602b823b1f682097778037"
             }
           ]
         },
         {
           "revision": 2,
-          "outputId": "cmwj7vesi005ktc8o2gh8ks06",
+          "outputId": "cmwjblwnm005ks48one12mnlm",
           "checkpointSeq": 31,
           "sourceRefs": [
             {
-              "id": "capture:cmwj7vemg004ftc8oz1iaqzlv",
+              "id": "capture:cmwjblwhi004fs48ot8ftm3ai",
               "hash": "150e2355de9e68e390650e9b3dc6a5de446589a74f602b823b1f682097778037"
             },
             {
-              "id": "capture:cmwj7vepx0055tc8owvzbo31u",
+              "id": "capture:cmwjblwkv0055s48o1m9g4mlg",
               "hash": "cd64a1948baec9177a1e1f53560f056f6412958295b2d0da62db2731d2be00b9"
             }
           ]
         },
         {
           "revision": 3,
-          "outputId": "cmwj7vex30069tc8o5a1dmrlc",
+          "outputId": "cmwjblws50069s48o1t5sx9xi",
           "checkpointSeq": 47,
           "sourceRefs": [
             {
-              "id": "capture:cmwj7vemg004ftc8oz1iaqzlv",
+              "id": "capture:cmwjblwhi004fs48ot8ftm3ai",
               "hash": "150e2355de9e68e390650e9b3dc6a5de446589a74f602b823b1f682097778037"
             },
             {
-              "id": "capture:cmwj7vepx0055tc8owvzbo31u",
+              "id": "capture:cmwjblwkv0055s48o1m9g4mlg",
               "hash": "cd64a1948baec9177a1e1f53560f056f6412958295b2d0da62db2731d2be00b9"
             }
           ]
@@ -1103,7 +1105,7 @@
             "calendarRequests": 0,
             "externalWrites": 0,
             "metadataRequests": 0,
-            "activeMs": 4,
+            "activeMs": 2,
             "reservedOutputTokens": 6000,
             "inputTokens": 60,
             "outputTokens": 30,
@@ -1128,7 +1130,7 @@
             "calendarRequests": 0,
             "externalWrites": 0,
             "metadataRequests": 0,
-            "activeMs": 5,
+            "activeMs": 4,
             "reservedOutputTokens": 12000,
             "inputTokens": 120,
             "outputTokens": 60,
@@ -1153,7 +1155,7 @@
             "calendarRequests": 0,
             "externalWrites": 0,
             "metadataRequests": 0,
-            "activeMs": 5,
+            "activeMs": 4,
             "reservedOutputTokens": 12000,
             "inputTokens": 120,
             "outputTokens": 60,
@@ -1326,7 +1328,7 @@
       "control": {
         "restriction": {
           "directiveIds": [
-            "39fced64-de6d-4603-b538-e7c5cf335b1b"
+            "e7909392-dda9-4d02-8181-d1b855bcc019"
           ],
           "constraints": [
             "继续整理，但不要联网"
@@ -1336,7 +1338,7 @@
         },
         "redirect": {
           "directiveIds": [
-            "bce2bb9a-9ce8-4f33-b2d9-1288bfd240cc"
+            "bcc47b4d-22e7-40ad-8564-cdc093dd22d0"
           ],
           "workingObjective": "今天先核对第二版资料中的限制条件",
           "outputCountAfter": 3
@@ -1367,7 +1369,8 @@
           "outputTokens": 90,
           "unknownCalls": 0
         }
-      }
+      },
+      "tokens": 270
     },
     {
       "id": "course",
@@ -1381,70 +1384,70 @@
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "新资料由既有扫描器唤醒同一 Mission（woken=1）",
-            "evidenceRef": "mission:cmwj7veyr006mtc8otuua9iyt:wake"
+            "evidenceRef": "mission:cmwjblwtt006ms48o959z8yw3:wake"
           },
           {
             "name": "VERSION_CHAIN_WITH_CHECKPOINTS",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "版本 1,2,3 均有 CHECKPOINT_REACHED",
-            "evidenceRef": "mission:cmwj7veyr006mtc8otuua9iyt:versions"
+            "evidenceRef": "mission:cmwjblwtt006ms48o959z8yw3:versions"
           },
           {
             "name": "EVIDENCE_AND_TOOL_RECEIPTS",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "Skill 进入/交接与读取/创作步骤均有持久回执",
-            "evidenceRef": "mission:cmwj7veyr006mtc8otuua9iyt:steps:6"
+            "evidenceRef": "mission:cmwjblwtt006ms48o959z8yw3:steps:6"
           },
           {
             "name": "BUDGET_MONOTONIC_NO_RESET",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "模型/工具累计用量不重置：3→6→6→9→9 / 2→4→4→6→6",
-            "evidenceRef": "mission:cmwj7veyr006mtc8otuua9iyt:budget"
+            "evidenceRef": "mission:cmwjblwtt006ms48o959z8yw3:budget"
           },
           {
             "name": "RESTRICTION_BEFORE_DISPATCH",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "限制先落库并禁止外部读取，之后没有新增稿（ids=1，blocked=true，unchanged=true）",
-            "evidenceRef": "directive:c392bc98-85e8-4df5-a185-ab7ad2f2db29"
+            "evidenceRef": "directive:a5516564-7d56-4de6-b9ce-82034cc51d07"
           },
           {
             "name": "REDIRECT_SAME_MISSION",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "有限目标改道后同一 Mission 产出第 3 版",
-            "evidenceRef": "directive:922fb544-6ca8-4e5a-a0b3-ef80139196cc"
+            "evidenceRef": "directive:b42202a7-90a8-4346-ac85-23edc0f8a0f2"
           },
           {
             "name": "ENDING_STOPS_DISPATCH",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "暂停/取消后不再派发（cancel → CANCELLED）",
-            "evidenceRef": "mission:cmwj7veyr006mtc8otuua9iyt:ending"
+            "evidenceRef": "mission:cmwjblwtt006ms48o959z8yw3:ending"
           },
           {
             "name": "NO_LEGACY_FINISH",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "持续委托没有用旧 finish 结束",
-            "evidenceRef": "mission:cmwj7veyr006mtc8otuua9iyt:events"
+            "evidenceRef": "mission:cmwjblwtt006ms48o959z8yw3:events"
           },
           {
             "name": "TOOL_BOUNDARY_PRIVATE_ONLY",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "工具只使用项目读取与私有稿：read_project_material,save_mission_output",
-            "evidenceRef": "mission:cmwj7veyr006mtc8otuua9iyt:steps"
+            "evidenceRef": "mission:cmwjblwtt006ms48o959z8yw3:steps"
           },
           {
             "name": "PROVIDER_RECORDED",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "模型 provider 与用量留痕：INJECTED_V2_JOURNEY",
-            "evidenceRef": "mission:cmwj7veyr006mtc8otuua9iyt:runs"
+            "evidenceRef": "mission:cmwjblwtt006ms48o959z8yw3:runs"
           }
         ]
       },
@@ -1456,85 +1459,85 @@
             "name": "NEW_MATERIAL_CHANGED_DRAFT",
             "passed": true,
             "judge": "DETERMINISTIC",
-            "detail": "新增材料进入第 2 版且正文变化（hash=a7b2e847→db30ed09；refs=capture:cmwj7veyq006ltc8oyoesecrw,capture:cmwj7vf2t007btc8ojlmfac3s）",
-            "evidenceRef": "mission:cmwj7veyr006mtc8otuua9iyt:output:cmwj7vfb1007qtc8os1ewcqrf"
+            "detail": "新增材料进入第 2 版且正文变化（hash=a7b2e847→db30ed09；refs=capture:cmwjblwtr006ls48om56yl0ya,capture:cmwjblwxh007bs48opqu2m4wk）",
+            "evidenceRef": "mission:cmwjblwtt006ms48o959z8yw3:output:cmwjblx02007qs48oh1igsbth"
           },
           {
             "name": "OLD_EVIDENCE_RETAINED",
             "passed": true,
             "judge": "DETERMINISTIC",
-            "detail": "第 2 版仍保留旧依据：capture:cmwj7veyq006ltc8oyoesecrw,capture:cmwj7vf2t007btc8ojlmfac3s",
-            "evidenceRef": "mission:cmwj7veyr006mtc8otuua9iyt:output:cmwj7vfb1007qtc8os1ewcqrf"
+            "detail": "第 2 版仍保留旧依据：capture:cmwjblwtr006ls48om56yl0ya,capture:cmwjblwxh007bs48opqu2m4wk",
+            "evidenceRef": "mission:cmwjblwtt006ms48o959z8yw3:output:cmwjblx02007qs48oh1igsbth"
           },
           {
             "name": "UNKNOWN_NOT_WRITTEN_AS_FACT",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "未知条件按未知保留，没有写成已验证事实",
-            "evidenceRef": "mission:cmwj7veyr006mtc8otuua9iyt:outputs"
+            "evidenceRef": "mission:cmwjblwtt006ms48o959z8yw3:outputs"
           },
           {
             "name": "USER_REDIRECT_APPLIED",
             "passed": true,
             "judge": "DETERMINISTIC",
-            "detail": "第 3 版落实用户改道重点",
-            "evidenceRef": "mission:cmwj7veyr006mtc8otuua9iyt:output:cmwj7vfqp008ftc8ot3hsitxb"
+            "detail": "第 3 版是否体现改道重点（命中=课程要求|交付材料，需至少一项）",
+            "evidenceRef": "mission:cmwjblwtt006ms48o959z8yw3:output:cmwjblx4n008fs48ojjucg92e"
           },
           {
             "name": "NO_MEANINGLESS_REPETITION",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "三个版本正文互不相同，且每版只有一次创作保存",
-            "evidenceRef": "mission:cmwj7veyr006mtc8otuua9iyt:versions"
+            "evidenceRef": "mission:cmwjblwtt006ms48o959z8yw3:versions"
           },
           {
             "name": "CITATIONS_RESOLVE",
             "passed": true,
             "judge": "DETERMINISTIC",
             "detail": "每版引用均落在该版来源清单内",
-            "evidenceRef": "mission:cmwj7veyr006mtc8otuua9iyt:outputs"
+            "evidenceRef": "mission:cmwjblwtt006ms48o959z8yw3:outputs"
           }
         ]
       },
-      "missionId": "cmwj7veyr006mtc8otuua9iyt",
+      "missionId": "cmwjblwtt006ms48o959z8yw3",
       "versions": [
         {
           "revision": 1,
-          "outputId": "cmwj7vf130072tc8o5tak05ml",
+          "outputId": "cmwjblwwf0072s48o4m5lvvug",
           "checkpointSeq": 16,
           "sourceRefs": [
             {
-              "id": "capture:cmwj7veyq006ltc8oyoesecrw",
+              "id": "capture:cmwjblwtr006ls48om56yl0ya",
               "hash": "f9287e01469be73d817e78b5c580ec5677722ed7af3fbf7f81f3eb3a9d6b99e3"
             }
           ]
         },
         {
           "revision": 2,
-          "outputId": "cmwj7vfb1007qtc8os1ewcqrf",
+          "outputId": "cmwjblx02007qs48oh1igsbth",
           "checkpointSeq": 31,
           "sourceRefs": [
             {
-              "id": "capture:cmwj7veyq006ltc8oyoesecrw",
+              "id": "capture:cmwjblwtr006ls48om56yl0ya",
               "hash": "f9287e01469be73d817e78b5c580ec5677722ed7af3fbf7f81f3eb3a9d6b99e3"
             },
             {
-              "id": "capture:cmwj7vf2t007btc8ojlmfac3s",
+              "id": "capture:cmwjblwxh007bs48opqu2m4wk",
               "hash": "c3b186dff79d4ddbe66eb98f829eedc29bb0483eb2d9b6677423f7f5c6595606"
             }
           ]
         },
         {
           "revision": 3,
-          "outputId": "cmwj7vfqp008ftc8ot3hsitxb",
+          "outputId": "cmwjblx4n008fs48ojjucg92e",
           "checkpointSeq": 47,
           "sourceRefs": [
             {
-              "id": "capture:cmwj7veyq006ltc8oyoesecrw",
+              "id": "capture:cmwjblwtr006ls48om56yl0ya",
               "hash": "f9287e01469be73d817e78b5c580ec5677722ed7af3fbf7f81f3eb3a9d6b99e3"
             },
             {
-              "id": "capture:cmwj7vf2t007btc8ojlmfac3s",
+              "id": "capture:cmwjblwxh007bs48opqu2m4wk",
               "hash": "c3b186dff79d4ddbe66eb98f829eedc29bb0483eb2d9b6677423f7f5c6595606"
             }
           ]
@@ -1558,7 +1561,7 @@
             "calendarRequests": 0,
             "externalWrites": 0,
             "metadataRequests": 0,
-            "activeMs": 3,
+            "activeMs": 1,
             "reservedOutputTokens": 6000,
             "inputTokens": 60,
             "outputTokens": 30,
@@ -1583,7 +1586,7 @@
             "calendarRequests": 0,
             "externalWrites": 0,
             "metadataRequests": 0,
-            "activeMs": 10,
+            "activeMs": 3,
             "reservedOutputTokens": 12000,
             "inputTokens": 120,
             "outputTokens": 60,
@@ -1608,7 +1611,7 @@
             "calendarRequests": 0,
             "externalWrites": 0,
             "metadataRequests": 0,
-            "activeMs": 10,
+            "activeMs": 3,
             "reservedOutputTokens": 12000,
             "inputTokens": 120,
             "outputTokens": 60,
@@ -1633,7 +1636,7 @@
             "calendarRequests": 0,
             "externalWrites": 0,
             "metadataRequests": 0,
-            "activeMs": 15,
+            "activeMs": 4,
             "reservedOutputTokens": 18000,
             "inputTokens": 180,
             "outputTokens": 90,
@@ -1658,7 +1661,7 @@
             "calendarRequests": 0,
             "externalWrites": 0,
             "metadataRequests": 0,
-            "activeMs": 15,
+            "activeMs": 4,
             "reservedOutputTokens": 18000,
             "inputTokens": 180,
             "outputTokens": 90,
@@ -1781,7 +1784,7 @@
       "control": {
         "restriction": {
           "directiveIds": [
-            "c392bc98-85e8-4df5-a185-ab7ad2f2db29"
+            "a5516564-7d56-4de6-b9ce-82034cc51d07"
           ],
           "constraints": [
             "继续整理，但不要联网"
@@ -1791,7 +1794,7 @@
         },
         "redirect": {
           "directiveIds": [
-            "922fb544-6ca8-4e5a-a0b3-ef80139196cc"
+            "b42202a7-90a8-4346-ac85-23edc0f8a0f2"
           ],
           "workingObjective": "今天先核对课程要求对应的交付材料",
           "outputCountAfter": 3
@@ -1816,13 +1819,14 @@
           "calendarRequests": 0,
           "externalWrites": 0,
           "metadataRequests": 0,
-          "activeMs": 15,
+          "activeMs": 4,
           "reservedOutputTokens": 18000,
           "inputTokens": 180,
           "outputTokens": 90,
           "unknownCalls": 0
         }
-      }
+      },
+      "tokens": 270
     }
   ],
   "totals": {
@@ -1832,6 +1836,8 @@
     "contentTotal": 24
   },
   "tokensUsed": 1080,
+  "decisionCalls": 36,
+  "tracedTokens": 1080,
   "limits": {
     "maxModels": 40,
     "maxTokens": 60000

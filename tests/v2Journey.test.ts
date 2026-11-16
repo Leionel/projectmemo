@@ -22,6 +22,20 @@ test("continuous revision journey: first draft, new material, restriction, redir
   expect(contentChecks(record).filter(check => !check.passed)).toEqual([]);
 }, 120000);
 
+test("decision hooks record usage and refuse dispatch before an authorized token window is exceeded", async () => {
+  const { JOURNEYS, runJourney } = await import("@/lib/evaluation/journey");
+  const { AppError } = await import("@/lib/api");
+  const definition = JOURNEYS.find(journey => journey.id === "research")!;
+  let guardCalls = 0, usageCalls = 0, tokens = 0;
+  const record = await runJourney(definition, "fixture", { tokenCeiling: 200000, modelCeiling: 40,
+    beforeDecision: () => { guardCalls++; if (guardCalls > 2) throw new AppError("EVAL_TOKEN_BUDGET", "评测 token 预算已达授权上限，停止下一次派发", 409); },
+    onDecisionUsage: usage => { usageCalls++; tokens += Number(usage.inputTokens ?? 0) + Number(usage.outputTokens ?? 0); } });
+  expect(usageCalls).toBe(2);
+  expect(tokens).toBe(60);
+  expect(guardCalls).toBeGreaterThan(usageCalls);
+  expect(record.failures.length).toBeGreaterThan(0);
+}, 120000);
+
 test("pause and cancel end dispatch while delivered versions stay readable", async () => {
   const { JOURNEYS, runJourney } = await import("@/lib/evaluation/journey");
   const definition = JOURNEYS.find(journey => journey.id === "course")!;

@@ -1,0 +1,88 @@
+{
+  "provider": "live",
+  "executed": true,
+  "executedAt": "2026-11-16T21:39:00+08:00",
+  "model": "deepseek-flash",
+  "providerKind": "DeepSeek OpenAI-compatible",
+  "authorization": {
+    "journeys": 4,
+    "maxCallsPerJourney": 12,
+    "maxTokensPerJourney": 60000,
+    "maxTotalCalls": 48,
+    "maxTotalTokens": 240000,
+    "grantedBy": "用户口头授权（2026-11-16）"
+  },
+  "actual": {
+    "decisionCalls": 31,
+    "tokensFromBudgetLedger": 327567,
+    "inputTokens": 319760,
+    "outputTokens": 11807,
+    "tracedTokens": 288720,
+    "balanceBeforeCny": 37.85,
+    "balanceAfterCny": 37.63,
+    "estimatedCostCny": 0.22,
+    "callsWithinAuthorization": true,
+    "tokensWithinAuthorization": false,
+    "overageTokens": 87567,
+    "overageCause": "评测脚本派发前 token 守卫因 CRLF 补丁未匹配而未挂载；只有事后 TOKEN_CEILING_EXCEEDED 记录。",
+    "guardFixed": true,
+    "guardTest": "tests/v2Journey.test.ts: decision hooks record usage and refuse dispatch before an authorized token window is exceeded"
+  },
+  "results": {
+    "protocolPassed": 34,
+    "protocolTotal": 40,
+    "contentPassed": 16,
+    "contentTotal": 24,
+    "journeys": {
+      "developer": {
+        "versions": 1,
+        "failure": "SKILL_GATE_NOT_MET at new-material continuation"
+      },
+      "freelancer": {
+        "versions": 2,
+        "failure": "SKILL_OUTPUT_REQUIRED after redirect (model reused previous output)"
+      },
+      "research": {
+        "versions": 3,
+        "failure": "redirect content check used fixture-literal phrase; actual v3 addresses the focus"
+      },
+      "course": {
+        "versions": 2,
+        "failure": "SKILL_OUTPUT_REQUIRED after redirect (model reused previous output)"
+      }
+    },
+    "contentObservations": [
+      "new material changed version 2 and kept old evidence (freelancer/research/course)",
+      "unknown conditions were preserved, not written as facts",
+      "first draft relied on inspect_project overview instead of imported material (developer/course)",
+      "redirect did not produce a new version in 3 of 4 journeys"
+    ]
+  },
+  "fixesAfterRun": [
+    "runner beforeDecision/onDecisionUsage hooks + token guard active (offline tested)",
+    "completionReadback canCheckpoint only for current-cycle output; new cycle returns CURRENT_VERSION_REQUIRED",
+    "one guided retry for SKILL_GATE_NOT_MET/SKILL_OUTPUT_REQUIRED with skillRepair hint",
+    "SKILL.md: read imported material with read_project_material; after context change save new version before await_event",
+    "redirect content check recalibrated to focus-term overlap"
+  ],
+  "revalidation": {
+    "offlineFixture": "protocol 40/40, content 24/24",
+    "offlineHttp": "protocol 40/40, content 24/24",
+    "liveRerun": "NOT EXECUTED (token authorization exceeded; stopped paid calls)"
+  },
+  "recommendedNextAuthorization": {
+    "journeys": [
+      "developer",
+      "freelancer"
+    ],
+    "maxCallsPerJourney": 8,
+    "maxTokensTotal": 40000,
+    "command": "node --env-file=\"D:\\Projects\\hongmen\\.env\" --import tsx scripts/eval-v2.ts --provider=live --confirm-paid --max-models=8 --max-tokens=20000 --journeys=developer,freelancer"
+  },
+  "reportFiles": [
+    "report.json",
+    "journeys.jsonl",
+    "run.log",
+    "README.md"
+  ]
+}

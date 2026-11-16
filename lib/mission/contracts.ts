@@ -16,6 +16,7 @@ export const json = (value: unknown) => JSON.parse(JSON.stringify(value));
 export { constraintsSchema,researchScopeSchema } from "@/lib/types/mission";
 import { constraintsSchema,researchScopeSchema } from "@/lib/types/mission";
 export const createMissionSchema = z.object({
+  runtimeProtocolVersion: z.union([z.literal(1), z.literal(2)]).optional(),
   projectId: z.string().min(1), requestId: z.string().min(1).max(128), goal: z.string().trim().min(3).max(2000),
   successCriteria: z.array(successCriterionSchema).min(1).max(8).default(["DRAFT_EXISTS"]),
   missionConstraints: constraintsSchema.default(() => constraintsSchema.parse({})),
@@ -32,7 +33,11 @@ export const choiceSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("finish"), outputId: z.string().min(1), experienceUse: z.array(experienceUseSchema).max(3).optional() }).strict(),
 ]);
 export type Choice = z.infer<typeof choiceSchema>;
-export type Decision = { prompt?: { id: string; version: string; purpose: string; outputSchemaVersion: number }; choice: Choice; provider: string; model: string; usage: { inputTokens: number | null; outputTokens: number | null }; protocol: string; callId?: string; serialization?: { escapedControls: number; responseHash: string } };
+export const awaitEventChoiceSchema = z.object({ kind: z.literal("await_event"), outputId: z.string().min(1), reason: z.enum(["DELIVERABLE_READY", "NO_NEW_INFORMATION"]), subscriptionIds: z.array(z.string().min(1)).min(1).max(4), experienceUse: z.array(experienceUseSchema).max(3).optional() }).strict();
+export const choiceV2Schema = z.discriminatedUnion("kind", [...choiceSchema.options, awaitEventChoiceSchema]);
+export function choiceSchemaFor(version: number) { return version === 2 ? choiceV2Schema : choiceSchema; }
+export type RuntimeChoice = z.infer<typeof choiceV2Schema>;
+export type Decision = { prompt?: { id: string; version: string; purpose: string; outputSchemaVersion: number }; choice: RuntimeChoice; provider: string; model: string; usage: { inputTokens: number | null; outputTokens: number | null }; protocol: string; callId?: string; serialization?: { escapedControls: number; responseHash: string } };
 export type Source = { deployment?: import("@/lib/types/deployment").DeploymentSourceMeta; document?: import("@/lib/types/document").DocumentMeta; repository?: import("@/lib/types/repositoryCi").RepositorySourceMeta; browser?: import("@/lib/browser/contracts").BrowserSourceMeta; calendar?: import("@/lib/calendar/contracts").CalendarSourceMeta; id: string; kind: "PROJECT" | "EXTERNAL"; entityType: "PROJECT" | "CARD" | "ACTION" | "ARTIFACT" | "CAPTURE" | "ATTACHMENT" | "EXTERNAL_SOURCE"; revision: string; hash: string; identityKey?: string; knowledgeClass?: "PROJECT_OBSERVATION" | "EXTERNAL_REFERENCE" | "MIXED" | "INFERENCE"; observationScopes?:Array<{start:number;end:number;knowledgeClass:"PROJECT_OBSERVATION"|"EXTERNAL_REFERENCE"|"INFERENCE"}>; text: string; observedAt: string; temporalState?: "CURRENT" | "SUPERSEDED" | "CONTESTED" | "UNKNOWN"; assessment?: import("../evidence/assessment").EvidenceAssessment };
 export type ToolResult = { data: unknown; sources: Source[]; status?: "SUCCESS" | "PARTIAL"; coverage?: Record<string, unknown> };
 export type Actor = { userId: string; projectId: string; missionId: string };

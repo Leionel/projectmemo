@@ -74,8 +74,11 @@ export struct MissionPanel {
       { title: '已结束', statuses: ['SUCCEEDED', 'CANCELLED', 'OBSOLETE', 'SKIPPED'] },
     ];
   }
+  private groupMatches(item: MissionWorkspaceItem, statuses: string[]): boolean {
+    return item.workState?.phase === 'WAITING_OBSERVATION' ? statuses.includes('RUNNING') : statuses.includes(item.status);
+  }
   private groupItems(statuses: string[]): MissionWorkspaceItem[] {
-    const base = this.items.filter((item: MissionWorkspaceItem) => item.id !== this.excludedMissionId && statuses.includes(item.status));
+    const base = this.items.filter((item: MissionWorkspaceItem) => item.id !== this.excludedMissionId && this.groupMatches(item, statuses));
     const seen: string[] = [];
     return base.filter((item: MissionWorkspaceItem) => {
       if (item.status !== 'PAUSED' && item.status !== 'FAILED') return true;
@@ -85,7 +88,7 @@ export struct MissionPanel {
     }).slice(0, this.compact ? 2 : 4);
   }
   private groupCount(statuses: string[]): number {
-    return this.items.filter((item: MissionWorkspaceItem) => item.id !== this.excludedMissionId && statuses.includes(item.status)).length;
+    return this.items.filter((item: MissionWorkspaceItem) => item.id !== this.excludedMissionId && this.groupMatches(item, statuses)).length;
   }
   private actionLabel(item: MissionWorkspaceItem): string {
     if (item.workState?.actionLabel) { return item.workState.actionLabel; }

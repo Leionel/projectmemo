@@ -30,6 +30,7 @@ export class MissionPolicy { mode: string = 'MANUAL'; schemaVersion?: number; ex
 export interface MissionSourceCountCriterion { type: string; minimum: number; }
 export type MissionSuccessCriterion = string | MissionSourceCountCriterion;
 export class MissionCreate {
+  runtimeProtocolVersion?: number;
   successCriteria: string[] = ['DRAFT_EXISTS'];
   projectId: string = '';
   requestId: string = '';

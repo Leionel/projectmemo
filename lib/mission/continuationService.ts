@@ -20,7 +20,7 @@ function materialPreviewText(text:string){const record=parseMetricRecord(text);r
 function enabled(){requireMissions();if(!isFeatureEnabled("MISSION_EVENT_CONTINUATION_ENABLED",false))throw new AppError("CONTINUATION_DISABLED","材料接续尚未启用，可直接补充当前问题",503);}
 async function assess(userId:string,id:string,body:z.infer<typeof previewSchema>,tx:Tx){
   const m=await ownedMission(userId,id,tx),wait=m.waitStateJson as unknown as WaitState|null;
-  if(m.status!=="WAITING_INPUT"||wait?.questionId!==body.questionId||m.cancelRequestedAt||m.pauseRequestedAt)throw new AppError("INPUT_CHANGED","等待问题已变化，请刷新",409);
+  if(m.status!=="WAITING_INPUT"||(wait as unknown as {waitingFor?:string}|null)?.waitingFor==="OBSERVATION"||wait?.questionId!==body.questionId||m.cancelRequestedAt||m.pauseRequestedAt)throw new AppError("INPUT_CHANGED","等待问题已变化，请刷新",409);
   const requirements=gapRequirementsSchema.parse(wait.requirements??{}),sources:Source[]=[];
   const pointers = requirements.evidenceFitV1 ? [...body.sourcePointers].sort((a,b)=>a.id.localeCompare(b.id)) : body.sourcePointers;
   for(const pointer of pointers){const source=await readProjectMaterial(m.projectId,pointer.id,tx);if(!source||source.hash!==pointer.hash)throw new AppError("SOURCE_CHANGED","材料已变化或不可访问，请重新选择",409);await assertSourceUse(userId,m.projectId,pointer.id,tx,{missionId:id});sources.push(source);}

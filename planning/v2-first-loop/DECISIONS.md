@@ -10,3 +10,12 @@
 - 工期重估：原PR-01的4–6人日低估调用方审查；协议2–3、纵向集成4–5、回归联调1–2，合计7–10人日；可点击交互PoC另在原PoC-B预算中。按切片交付，不等待完整事件平台。
 - 已验证：64条冻结案例及评分器存在，--self-check通过；这只验证数据和评分器，不是router准确率。新实现、迁移、实模、真机结果按切片追加。
 - 交互采用：使用现有AgentMessageBlocks和领域API，先实现真实可点的成果/版本/证据/过程/改道；第三方聊天库不作为首片前置。
+
+## PR-01a 协议切片回执
+
+- 改动：新增显式runtimeProtocolVersion列（默认1），v2 Choice单独扩展await_event；checkpoint只接受当前有界许可内的订阅和经原verifier核对的Output；释放原槽，不写finishedAt。v2持续委托的finish不能自行结束责任。
+- 调用方：屏蔽观察等待的催答邮件、历史问题回退、材料补答与GoalQuestion；沿原WorkState区分观察/用户等待；鸿蒙原生分组按WorkState投影。Worker对v2用户问题不因材料变化自动解答；v1保持原自动接续语义。
+- 迁移：20261116093000_mission_runtime_protocol_v2，仅新增默认1列。隔离临时库空库重放、旧表增量测试通过；未触碰开发或生产库。
+- 验证：protocol-tests 4文件55条；compatibility-tests 5文件38条；model-protocol-tests 3文件13条；tsc --noEmit通过。全部注入/模拟HTTP，无真实模型或外部发送。
+- 环境：复用原本地依赖（Next16.2.11/Prisma7.8.0/Vitest4.1.10），与package.json声明版本存在既有差异；没有升级原node_modules。生成客户端仅写独立工作树。
+- 待验：真实模型质量、72小时真实时钟、真机/HAP、锁定声明依赖后的干净构建。研究→创作接力与可点击原型进入下一切片。

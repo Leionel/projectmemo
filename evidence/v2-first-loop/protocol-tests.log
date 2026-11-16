@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2MissionProtocol.test.ts tests/missionRuntime.test.ts tests/missionWaitNotice.test.ts tests/missionNativeContract.test.ts
+
+
+ RUN  v4.1.10 C:/Users/Administrator/.codex/worktrees/v2-first-loop/hongmen
+
+
+ Test Files  4 passed (4)
+      Tests  55 passed (55)
+   Start at  18:01:21
+   Duration  13.31s (transform 2.22s, setup 0ms, import 6.54s, tests 5.98s, environment 0ms)
+

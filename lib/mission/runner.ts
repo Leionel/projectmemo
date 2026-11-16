@@ -18,12 +18,13 @@ import { verifyMissionResult } from "./resultVerifier";
 import { gapRequirementsSchema } from "./gaps";
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
+import { enterObservationCheckpoint } from "./checkpoint";
 import { AppError } from "@/lib/api";
 import { missionStrategyV2 } from "@/lib/agent/specialistPrompts";
 import { chooseNext, type DecisionProvider } from "./modelAdapter";
 import { buildContext } from "./contextBuilder";
 import { assertPersonalMemoryReadSet } from "@/lib/memory/userMemoryPolicy";
-import { choiceSchema, json, jsonHash, MISSION_PROTOCOL_SCHEMA_VERSION, type Decision, type Source } from "./contracts";
+import { choiceSchemaFor, json, jsonHash, MISSION_PROTOCOL_SCHEMA_VERSION, type Decision, type Source } from "./contracts";
 import { event, lock, validateSources } from "./repository";
 import { claimMission, fenced, release, renew, reserve, settleUsage, type Lease } from "./runtimeStore";
 import { projectTools, sourcesFrom, toolInputHash, type ToolSet } from "./tools";
@@ -116,7 +117,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     throw error;
    }})();
    await settleUsage(lease,"models",Date.now()-started,decision.usage);
-   const parsedChoice=choiceSchema.safeParse(decision.choice);
+   const parsedChoice=choiceSchemaFor(m.runtimeProtocolVersion).safeParse(decision.choice);
    if(!parsedChoice.success)throw new ModelProtocolError(protocolDiagnostic("INVALID_CHOICE",null,0,parsedChoice.error.issues.slice(0,8).map(issue=>({code:issue.code,path:issue.path.join(".")}))),decision);
    const choice=parsedChoice.data;
    const injectedExperiences=new Map((built.experienceAdvisories??[]).map(a=>[a.id,a]));
@@ -145,7 +146,11 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
      const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED",...((current.planJson as {impactGuard?:string}).impactGuard?{planRevision:current.planRevision}:{})},orderBy:{ordinal:"asc"}});
      await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...current.planJson as object,automaticContinuation:null}),waitStateJson:json({waitingFor:"USER",questionId:q.id,gapId,question:choice.question,missing:choice.missing,requirements,evidencePremiseContext,startedAt:new Date().toISOString(),readSet:sourcesFrom(history.map(s=>s.resultJson))})}});await release(tx,current,"WAITING_INPUT");return null;
     }
+    if(choice.kind==="await_event"){
+     await enterObservationCheckpoint(tx,current,choice);return null;
+    }
     if(choice.kind==="finish"){
+     if(current.runtimeProtocolVersion===2&&boundedPolicy(current))throw new AppError("CONTINUOUS_CHECKPOINT_REQUIRED","持续成果准备好后应等待变化；结束责任需用户操作",409);
      phase="VERIFY";const verification=await verifyMissionResult(tx,current,choice.outputId);phase="COMMIT";
      await event(tx,m.id,"CRITERIA_CHECKED",{...verification,phase:"VERIFY"});await release(tx,current,"SUCCEEDED");return null;
     }
@@ -153,7 +158,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED",...((current.planJson as {impactGuard?:string}).impactGuard?{planRevision:current.planRevision}:{})},orderBy:{ordinal:"asc"}});const sources=sourcesFrom(history.map(s=>s.resultJson));const inputHash=toolInputHash(choice.tool,args,sources);
     if(history.slice(-2).length===2&&history.slice(-2).every(s=>s.inputHash===inputHash))throw new AppError("NO_PROGRESS","连续调用没有新信息，请调整目标或补充资料",409);
     phase="COMMIT";const last=await tx.agentMissionStep.aggregate({where:{missionId:m.id},_max:{ordinal:true}});
-    const created=await tx.agentMissionStep.create({data:{missionId:m.id,ordinal:(last._max.ordinal??0)+1,planRevision:m.planRevision,toolName:choice.tool,toolVersion:tools[choice.tool].version??"1",canonicalInputJson:json(args),inputHash,readSetJson:json(sources),agentRunId:run.id,providerCallId:decision.callId,protocolJson:{protocol:decision.protocol,schemaVersion:MISSION_PROTOCOL_SCHEMA_VERSION,sourceRevisionReadSet,cognitiveReadSet,experienceReadSet,personalMemoryReadSet}}});
+    const created=await tx.agentMissionStep.create({data:{missionId:m.id,ordinal:(last._max.ordinal??0)+1,planRevision:m.planRevision,toolName:choice.tool,toolVersion:tools[choice.tool].version??"1",canonicalInputJson:json(args),inputHash,readSetJson:json(sources),agentRunId:run.id,providerCallId:decision.callId,protocolJson:{protocol:decision.protocol,schemaVersion:m.runtimeProtocolVersion??MISSION_PROTOCOL_SCHEMA_VERSION,sourceRevisionReadSet,cognitiveReadSet,experienceReadSet,personalMemoryReadSet}}});
     await event(tx,m.id,"TOOL_STARTED",{stepId:created.id,tool:choice.tool,summary:choice.summary,phase:"TOOL"});return created;
    });
    if(choice.experienceUse?.length){

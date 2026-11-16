@@ -3,6 +3,7 @@ import { record } from "@/lib/conversation/repository";
 import {readDecisionSnapshot} from "@/lib/decision/snapshot";
 import { assertAutomaticPermission,validateAutomaticEvidence } from "./automaticPolicy";
 import { db } from "@/lib/db";
+import { isFeatureEnabled } from "@/lib/config/features";
 import { AppError } from "@/lib/api";
 import type { AgentMission } from "@/lib/generated/prisma/client";
 import { json, usageOf, defaultBudget } from "./contracts";
@@ -27,6 +28,7 @@ export async function fenced(tx:Tx,lease:Lease,checkContext=true){
  requireMissions();await lock(tx,lease.id);const m=await tx.agentMission.findUniqueOrThrow({where:{id:lease.id}});
  if(m.status!=="RUNNING"||m.leaseOwner!==lease.owner||m.leaseEpoch!==lease.epoch||!m.leaseUntil||m.leaseUntil<=new Date())throw new AppError("LEASE_LOST","执行租约已失效",409);
  await assertOwner(m.ownerUserId,m.projectId,tx);assertAutomaticPermission(m);
+ if(m.runtimeProtocolVersion===2&&!isFeatureEnabled("MISSION_V2_ENABLED",false))throw new AppError("MISSION_V2_DISABLED","持续成果试验已暂停，进度与用量保留",409);
  assertInvestigationDelegation(m);
  await validateDelegationConnections(m,tx);
  if(checkContext)await assertContinuityBinding(m.ownerUserId,{projectId:m.projectId,missionId:m.id},(m.planJson as {continuityBinding?:unknown}).continuityBinding,tx);

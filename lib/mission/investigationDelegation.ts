@@ -300,6 +300,9 @@ export async function processInvestigationDelegations(limit = 8) {
           return;
         }
 
+        // v2 user questions require an explicit answer; observations cannot resolve them.
+        if (m.runtimeProtocolVersion === 2 && record(m.waitStateJson).waitingFor !== "OBSERVATION") return;
+
         const input = await investigationInputHash(m, tx);
         if (input.truncated) {
           await hold("INPUT_COVERAGE_LIMIT");

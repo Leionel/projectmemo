@@ -19,8 +19,9 @@ const record = (value: unknown): Record<string, unknown> => value && typeof valu
 
 type WaitTarget = { key: string; kind: "QUESTION" | "APPROVAL"; id: string };
 
-async function waitTarget(mission: { id: string; status: string; waitStateJson: unknown }): Promise<WaitTarget | null> {
+export async function waitTarget(mission: { id: string; status: string; waitStateJson: unknown }): Promise<WaitTarget | null> {
   if (mission.status === "WAITING_INPUT") {
+    if (record(mission.waitStateJson).waitingFor === "OBSERVATION") return null;
     const questionId = String(record(mission.waitStateJson).questionId ?? "");
     if (questionId) return { key: `${mission.id}:question:${questionId}`, kind: "QUESTION", id: questionId };
     const latest = await db.agentMissionEvent.findFirst({ where: { missionId: mission.id, type: "QUESTION" }, orderBy: { seq: "desc" }, select: { id: true } });

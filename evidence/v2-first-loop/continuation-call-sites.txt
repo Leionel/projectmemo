@@ -1,0 +1,51 @@
+tests\continuityStages23.test.ts:10:import { processInvestigationDelegations } from "@/lib/mission/investigationDelegation";
+tests\continuityStages23.test.ts:65:  const poll=async()=>{vi.setSystemTime(Date.now()+6*60000);await processInvestigationDelegations();await runMissionSlice({id:f.m.id,provider:forbiddenModel,repository});await runMissionSlice({id:f.m.id,provider:forbiddenModel,repository});};
+tests\continuityStages23.test.ts:77:  const scans=await Promise.all([processInvestigationDelegations(),processInvestigationDelegations()]);expect(scans.reduce((n,s)=>n+s.woken,0)).toBe(1);
+tests\continuityStages23.test.ts:89:  const f=await delegatedRepo();vi.useFakeTimers({toFake:["Date"]});vi.setSystemTime(Date.parse(f.expiresAt)-30000);await processInvestigationDelegations();
+tests\continuityStages23.test.ts:131:  vi.useFakeTimers({toFake:["Date"]});vi.setSystemTime(Date.now()+6*60000);await processInvestigationDelegations();
+tests\continuityStages23.test.ts:164:  expect((await processInvestigationDelegations()).woken).toBe(0);
+tests\continuityStages23.test.ts:168:  expect((await processInvestigationDelegations()).woken).toBe(1);
+tests\continuityStages23.test.ts:172:  vi.setSystemTime(Date.parse(expiresAt)+1);await processInvestigationDelegations();
+scripts\e2e-mission-fixture.ts:31:  const{processMaterialContinuationBatch}=await import("../lib/mission/continuationService");await processMaterialContinuationBatch(100);
+scripts\mission-worker.ts:7:import { processMaterialContinuationBatch } from "../lib/mission/continuationService";
+scripts\mission-worker.ts:9:import { processInvestigationDelegations } from "../lib/mission/investigationDelegation";
+scripts\mission-worker.ts:10:import { processWaitNotices } from "../lib/mission/waitNotice";
+scripts\mission-worker.ts:34:        { name: "MATERIAL", run: () => scanned(()=>processMaterialContinuationBatch()) },
+scripts\mission-worker.ts:35:        { name: "DELEGATION", run: () => scanned(()=>processInvestigationDelegations()) },
+scripts\mission-worker.ts:36:        { name: "WAIT_NOTICE", run: () => processWaitNotices() },
+tests\deploymentRuntime.test.ts:8:import {processInvestigationDelegations} from "@/lib/mission/investigationDelegation";
+tests\deploymentRuntime.test.ts:63:  await processInvestigationDelegations();await runMissionSlice({id:m.id,deployment:transport,provider});await runMissionSlice({id:m.id,deployment:transport,provider});
+tests\deploymentRuntime.test.ts:66:  await processInvestigationDelegations();await runMissionSlice({id:m.id,deployment:transport,provider});await runMissionSlice({id:m.id,deployment:transport,provider});
+tests\missionAutomaticContinuation.test.ts:10:import {automaticallyContinueWaitingMissions,processMaterialContinuationBatch} from "@/lib/mission/continuationService";
+tests\missionAutomaticContinuation.test.ts:25: it("16个等待任务共享到达/接续批次，不被updatedAt双扫描饿死",async()=>{await db.agentMission.updateMany({where:{status:"WAITING_INPUT"},data:{status:"PAUSED"}});const ids:string[]=[];for(let i=0;i<16;i++){const{p,m}=await fixture();ids.push(m.id);await material(p.id);}for(let i=0;i<4;i++)await processMaterialContinuationBatch();expect(await db.agentMission.count({where:{id:{in:ids},status:"READY"}})).toBe(16);},30000);
+lib\mission\waitNotice.ts:46:export async function processWaitNotices(options: { limit?: number; now?: Date; send?: (mail: AccountMail) => Promise<void> } = {}) {
+tests\missionWaitNotice.test.ts:29:  const { processWaitNotices } = await import("@/lib/mission/waitNotice");
+tests\missionWaitNotice.test.ts:35:  expect((await processWaitNotices({ send })).sent).toBe(1);
+tests\missionWaitNotice.test.ts:40:  expect((await processWaitNotices({ send })).sent).toBe(0);
+tests\missionWaitNotice.test.ts:44:  expect((await processWaitNotices({ send })).sent).toBe(1);
+tests\missionWaitNotice.test.ts:51:  const { processWaitNotices } = await import("@/lib/mission/waitNotice");
+tests\missionWaitNotice.test.ts:59:  const first = await processWaitNotices({ send });
+tests\missionWaitNotice.test.ts:66:  await processWaitNotices({ send });
+tests\missionWaitNotice.test.ts:70:  expect(await processWaitNotices({ send })).toEqual({ checked: 0, sent: 0, failed: 0 });
+lib\mission\continuationService.ts:157:export async function processMaterialContinuationBatch(limit=8){const batch=await scanWaitingMaterialBatch(limit);return{signals:batch.signals,continued:await automaticallyContinueWaitingMissions(limit,batch.missionIds)};}
+lib\mission\investigationDelegation.ts:250:export async function processInvestigationDelegations(limit = 8) {
+tests\ux3CumulativeBudget.test.ts:13:import {processInvestigationDelegations} from "@/lib/mission/investigationDelegation";
+tests\ux3CumulativeBudget.test.ts:46:  await processInvestigationDelegations();
+tests\ux3BranchRuntime.test.ts:6:import { processInvestigationDelegations } from "@/lib/mission/investigationDelegation";
+tests\ux3BranchRuntime.test.ts:19:  await processInvestigationDelegations();return{user,p,c,m};
+tests\ux3ProactiveDiscovery.test.ts:6:import { processInvestigationDelegations, initializeDelegation } from "@/lib/mission/investigationDelegation";
+tests\ux3ProactiveDiscovery.test.ts:223:  // 运行 processInvestigationDelegations
+tests\ux3ProactiveDiscovery.test.ts:224:  const res = await processInvestigationDelegations(8);
+tests\ux3ProactiveDiscovery.test.ts:262:  // 再次运行 processInvestigationDelegations，应 hold 任务，绝不复活
+tests\ux3ProactiveDiscovery.test.ts:263:  const heldRes = await processInvestigationDelegations(8);
+tests\ux3ProactiveDiscovery.test.ts:357:  const noWakeRes = await processInvestigationDelegations(8);
+tests\ux3ProactiveDiscovery.test.ts:395:  // 再次运行 processInvestigationDelegations，由于 inputHash 包含了推测读集，检测到输入变化并唤醒！
+tests\ux3ProactiveDiscovery.test.ts:396:  const wakeRes = await processInvestigationDelegations(8);
+tests\ux3ResponsibilityRevision.test.ts:11:import { processInvestigationDelegations, validateDelegationConnections, initializeDelegation } from "@/lib/mission/investigationDelegation";
+tests\ux3ResponsibilityRevision.test.ts:684:  await processInvestigationDelegations(8);
+tests\ux3ResponsibilityRevision.test.ts:696:    await processInvestigationDelegations(8);
+tests\ux3ResponsibilityRevision.test.ts:798:  await processInvestigationDelegations(8);
+tests\ux3ThreeDayContinuity.test.ts:6:import { initializeDelegation, processInvestigationDelegations, investigationInputHash } from "@/lib/mission/investigationDelegation";
+tests\ux3ThreeDayContinuity.test.ts:186:  const quietPoll = await processInvestigationDelegations(8);
+tests\ux3ThreeDayContinuity.test.ts:219:  const quietPoll2 = await processInvestigationDelegations(8);
+tests\ux3ThreeDayContinuity.test.ts:245:  const wakeResult = await processInvestigationDelegations(8);

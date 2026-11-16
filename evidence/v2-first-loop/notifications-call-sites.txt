@@ -1,0 +1,123 @@
+tests\agentUxJourney.test.ts:21:  await db.agentMission.update({where:{id:observation.id},data:{waitStateJson:{waitingFor:"OBSERVATION",resolved:true},continuationPolicyJson:{mode:"BOUNDED_INVESTIGATION",expiresAt:new Date(Date.now()+86400000).toISOString()}}});
+tests\agentUxWorkState.test.ts:13:  const w=missionWorkState({...base,waitStateJson:{resolved:true,waitingFor:"OBSERVATION"},continuationPolicyJson:policy,events:[{id:"old",type:"QUESTION",payloadJson:{question:"旧问题"}}]},now);
+tests\agentUxWorkState.test.ts:18:  const w=missionWorkState({...base,waitStateJson:{questionId:"q",resolved:false},events:[{id:"q",type:"QUESTION",payloadJson:{question:"补目标设备日志"}}]},now);
+tests\agentUxWorkState.test.ts:22:  const m={...base,waitStateJson:{waitingFor:"OBSERVATION"},continuationPolicyJson:policy};
+tests\agentUxWorkState.test.ts:28:  const state=missionWorkState({...base,waitStateJson:{questionId:"private-question",question:"补目标设备结果",waitingFor:"USER",missing:"PRIVATE"},continuationPolicyJson:policy,events:[{id:"poll",type:"INVESTIGATION_NO_NEW_INFORMATION",payloadJson:{}}]},now);
+tests\agentUxWorkState.test.ts:45:  const workState=missionWorkState({...base,waitStateJson:{waitingFor:"OBSERVATION"},continuationPolicyJson:policy},now);
+tests\continuityStages23.test.ts:100:  await db.agentMission.update({where:{id:f.m.id},data:{constraintsJson:{llmContextApproved:true,deadline:"2026-10-30T08:30:00+08:00"},waitStateJson:{questionId:"private-critical",missing:"CRITICAL"}}});
+lib\conversation\workService.ts:69:    m.status === "WAITING_INPUT" && typeof record(m.waitStateJson).questionId === "string" ? listContinuationCandidates(actor.userId, m.id, { questionId: record(m.waitStateJson).questionId, includeExisting: "1" }) : { candidates: [] },
+lib\conversation\workService.ts:75:    question: q ? { id: q.id, text: String(record(q.payloadJson).question ?? "请补充原问题"), premise: premiseFor(m, m.waitStateJson as unknown as WaitState) } : null,
+app\projects\[id]\page.tsx:9:import {missionStatusLabels,type MissionWorkspaceSummary} from "@/lib/mission/presentation";
+app\projects\[id]\page.tsx:38: :kind==="mission"&&first?{eyebrow:missionStatusLabels[first.status],title:first.attention??first.goal,detail:first.attention?first.goal:first.activity??"步骤与草稿保留在原委托中。",href:missionHref,action:first.status==="WAITING_INPUT"?"补充委托资料":first.status==="WAITING_APPROVAL"?"审阅行动提案":"查看原因与进度"}
+app\projects\[id]\page.tsx:59:  {(waiting.length>0||reminders.length>0)&&<section className={styles.summary} aria-label="需要你处理"><div className={styles.summaryHeading}><h3>需要你处理</h3></div><ul className={styles.queue}>{waiting.map(m=><li key={m.id}><div className="min-w-0">{m.workState?<WorkStateBadges state={m.workState}/>:<small><span aria-hidden="true">● </span>{missionStatusLabels[m.status]}</small>}<strong>{m.attention??m.goal}</strong><p>{m.attention?m.goal:"查看原因后决定是否继续原委托。"}</p></div><Link href={`${base}/missions?mission=${encodeURIComponent(m.id)}`}>{m.status==="WAITING_INPUT"?"补充委托资料":m.status==="WAITING_APPROVAL"?"审阅行动提案":"查看暂停原因"}<ArrowRight size={14} aria-hidden="true"/></Link></li>)}{reminders.map(i=><li key={i.id}><div className="min-w-0"><small><span aria-hidden="true">● </span>提醒待处理</small><strong>{i.title}</strong><p>{readableProjectNotice(i.content)}</p></div><Link href={`${base}/actions#intervention-${i.id}`}>查看提醒依据<ArrowRight size={14} aria-hidden="true"/></Link></li>)}</ul></section>}
+app\projects\[id]\page.tsx:60:   {continuing.length>0&&<section className={styles.summary} aria-label="当前委托"><div className={styles.summaryHeading}><h3>继续委托</h3><Link href={`${base}/missions`}>查看全部</Link></div><ul>{continuing.map(m=><li key={m.id}><Link href={`${base}/missions?mission=${encodeURIComponent(m.id)}`}><strong>{m.goal}</strong>{m.workState?<p><WorkStateBadges state={m.workState}/></p>:<p>{missionStatusLabels[m.status]??"状态待确认"}</p>}{m.activity&&<p>{m.activity}{m.activityAt?` · ${new Date(m.activityAt).toLocaleString("zh-CN")}`:""}</p>}</Link></li>)}</ul></section>}
+scripts\final-c\seed-web-fixture.ts:310:      waitStateJson?: Record<string, unknown>;
+scripts\final-c\seed-web-fixture.ts:343:          ...(spec.waitStateJson ? { waitStateJson: json(spec.waitStateJson) } : {}),
+scripts\final-c\seed-web-fixture.ts:471:        waitStateJson: json({
+scripts\final-c\seed-web-fixture.ts:1143:        waitStateJson: json({
+scripts\final-c\seed-web-fixture.ts:1288:        waitStateJson: json({
+components\ConversationPanel.tsx:21:import { missionStatusLabels } from "@/lib/mission/presentation";
+components\ConversationPanel.tsx:42:const statusLabel = (status?: string | null) => status ? missionStatusLabels[status] ?? ({ TODO: "待办", DOING: "进行中", DONE: "已完成" } as Record<string, string>)[status] ?? status : "回执已保存";
+components\ConversationPanel.tsx:412:        <span className={styles.taskKind}>{r.kind === "MISSION" ? "长期委托" : "行动"}{r.status ? " · " + (missionStatusLabels[r.status] ?? r.status) : ""}</span>
+scripts\final-a\perf-readback.ts:519:  await db.agentMission.update({ where: { id: missionId }, data: { nextEventSeq: seq, waitStateJson: { questionId, waitingFor: "USER", startedAt: new Date(now - 2 * 60 * 60 * 1000).toISOString() } as Prisma.InputJsonValue } });
+scripts\final-a\lib\probeFixtures.ts:60:  waitStateJson?: Prisma.InputJsonValue;
+scripts\final-a\generate-samples.ts:102:      const mission = await createMissionRow(owner, { status: "WAITING_INPUT", waitStateJson: { questionId: "q-sample-user", question: "请补充同条件下的对照组指标", waitingFor: "USER", missing: "PRIVATE", resolved: false } });
+scripts\final-a\generate-samples.ts:116:      const mission = await createMissionRow(owner, { status: "WAITING_INPUT", planJson: { delegation: { lastObservedAt: observedAt.toISOString() } }, continuationPolicyJson: boundedPolicy(new Date(Date.now() + 3_600_000)), waitStateJson: { questionId: "q-sample-observation", resolved: true, waitingFor: "OBSERVATION" } });
+scripts\final-a\a1-contract-samples.ts:176:const stableState = workState({ status: "WAITING_INPUT", waitStateJson: { resolved: true, waitingFor: "OBSERVATION" }, continuationPolicyJson: { mode: "BOUNDED_INVESTIGATION", expiresAt: "2026-11-06T12:00:00.000Z" } }, NOW);
+scripts\final-a\a1-contract-samples.ts:177:const laterState = workState({ status: "WAITING_INPUT", waitStateJson: { resolved: true, waitingFor: "OBSERVATION" }, continuationPolicyJson: { mode: "BOUNDED_INVESTIGATION", expiresAt: "2026-11-06T12:00:00.000Z" } }, new Date("2026-11-03T04:00:00.000Z"));
+app\focus\page.tsx:10:import { missionStatusLabels } from "@/lib/mission/presentation";
+app\focus\page.tsx:63:  if(hero.context){const n=hero.context.nextStep;return {pill:hero.context.freshness!=="FRESH"?"部分摘要暂不可用":missionStatusLabels[item.status]??"当前下一步",pillAmber:n.priority<60,why:n.reason,action:n.actionLabel,href:n.href};}
+app\focus\page.tsx:67:      pill: missionStatusLabels[item.status],
+app\focus\page.tsx:106:  return <article className={styles.missionRow}><div className={styles.rowBody}><div className={styles.meta}><span className={waiting?"workspace-status":"workspace-status workspace-status-neutral"}>{missionStatusLabels[item.status]}</span><Link prefetch={false} className="focus-ring" href={`/projects/${item.projectId}`}>{item.projectTitle}</Link></div><h3>{item.title}</h3>{item.detail&&<blockquote className={styles.question}><span>{question?"忆程追问":approval?"待审阅提案":"当前原因"}</span><p>{item.detail}</p></blockquote>}{item.activity&&<p className={styles.activity}>{item.activity}{item.activityAt&&<> · <time dateTime={item.activityAt}>{new Date(item.activityAt).toLocaleString("zh-CN")}</time></>}</p>}</div><Link prefetch={false} className={`${question||approval?"editorial-button":"workspace-link"} ${styles.rowAction} focus-ring`} href={`/projects/${item.projectId}/missions?mission=${encodeURIComponent(item.id)}`}>{label}<ArrowRight size={14} aria-hidden="true"/></Link></article>;
+tests\finalAWorkStateContract.test.ts:233:    const first = state({ status: "WAITING_INPUT", planJson: delegation, waitStateJson: { waitingFor: "OBSERVATION" } }, now);
+tests\finalAWorkStateContract.test.ts:234:    const second = state({ status: "WAITING_INPUT", planJson: delegation, waitStateJson: { waitingFor: "OBSERVATION" } }, later);
+tests\finalAWorkStateContract.test.ts:276:      waitStateJson: null,
+tests\finalAWorkStateContract.test.ts:297:    const mission = { status: "WAITING_INPUT", waitStateJson: { waitingFor: "OBSERVATION" }, continuationPolicyJson: policy };
+lib\conversation\anchorService.ts:120:  const wait = record(m.waitStateJson);
+lib\conversation\anchorService.ts:240:        const m = await ownedMission(actor.userId, a.missionId, tx), questionId = String(record(m.waitStateJson).questionId ?? "impact:" + m.id);
+lib\conversation\anchorService.ts:265:        const p = record(e.payloadJson), pointer = record(p.sourcePointer), wait = record(m.waitStateJson);
+tests\finalARequiresGuards.test.ts:161:      waitStateJson: json({ waitingFor: "USER", questionId: question.id, gapId: question.id, question: "请补充对照实验指标",
+tests\finalARequiresGuards.test.ts:662:    await db.agentMission.update({ where: { id: f.mission.id }, data: { waitStateJson: invalidWait } });
+tests\finalARequiresGuards.test.ts:677:    await db.agentMission.update({ where: { id: f.mission.id }, data: { waitStateJson: json({
+tests\finalARequiresGuards.test.ts:739:      data: { waitStateJson: json({ waitingFor: "OBSERVATION", questionId: f.question.id, question: "已解决旧问题",
+tests\finalAWorkPacketService.test.ts:113:      waitStateJson: { questionId: "q-pending", question: "请补充对照实验指标", waitingFor: "USER", missing: "PRIVATE", resolved: false } });
+tests\finalAWorkPacketService.test.ts:147:      waitStateJson: { questionId: "q-observation", resolved: true, waitingFor: "OBSERVATION" } });
+tests\finalAWorkPacketService.test.ts:281:    const mission = await createMissionRow(owner, { status: "WAITING_INPUT", waitStateJson: { questionId: "q-negative", question: "原问题", waitingFor: "USER", resigned: false } });
+tests\finalAWorkPacketService.test.ts:341:      waitStateJson: { questionId: "q-observed", resolved: true, waitingFor: "OBSERVATION" } });
+tests\finalAWorkPacketService.test.ts:375:      waitStateJson: { resolved: true, waitingFor: "OBSERVATION" } });
+tests\finalAWorkPacketService.test.ts:395:      waitStateJson: { questionId: "q-suppress", question: "请补充 10 月推理显存", waitingFor: "USER", missing: "PRIVATE", resolved: false } });
+tests\finalAWorkPacketService.test.ts:426:      waitStateJson: { questionId: "q-ghost", question: "请补充另一份记录", waitingFor: "USER", missing: "PRIVATE", resolved: false } });
+tests\finalAWorkPacketService.test.ts:439:    const mission = await createMissionRow(owner, { status: "WAITING_INPUT", waitStateJson: { questionId: "q-deleted", waitingFor: "USER" } });
+tests\finalAWorkPacketService.test.ts:456:      waitStateJson: { questionId: "q-control", question: "请补充控制实验", waitingFor: "USER", missing: "PRIVATE", resolved: false } });
+tests\finalAWorkPacketService.test.ts:488:      waitStateJson: { questionId: "q-runs", question: "请补充运行记录", waitingFor: "USER", missing: "PRIVATE", resolved: false } });
+tests\finalAWorkPacketService.test.ts:520:      waitStateJson: { questionId: "q-boundary", resolved: true, waitingFor: "OBSERVATION" } });
+tests\finalAWorkPacketService.test.ts:584:    for (const key of ["version", "status", "planRevision", "contextVersion", "constraintsVersion", "researchScopeVersion", "nextAttemptAt", "updatedAt", "budgetUsedJson", "lastErrorJson", "waitStateJson"] as const)
+tests\finalAWorkPacketService.test.ts:603:      waitStateJson: { questionId: "q-personal", resolved: true, waitingFor: "OBSERVATION" } });
+tests\finalAConcurrencyService.test.ts:122:    const mission = await db.agentMission.create({ data: { ownerUserId: user.id, projectId: project.id, goal: "核对来源", createRequestId: crypto.randomUUID(), createPayloadHash: "test", status: "WAITING_INPUT", successCriteriaJson: [], constraintsJson: {}, budgetJson: {}, waitStateJson: { questionId: "q-control-race", waitingFor: "USER" } } });
+tests\finalAWorkPacketContract.test.ts:37:  waitStateJson: { waitingFor: "OBSERVATION" },
+tests\finalAWorkPacketContract.test.ts:397:    const workState = project({ status: "WAITING_INPUT", waitStateJson: { questionId: "q-7", question: "请补齐对照组", waitingFor: "USER" }, continuationPolicyJson: { mode: "BOUNDED_INVESTIGATION", expiresAt: POLICY_EXPIRES } });
+tests\finalAWorkPacketContract.test.ts:533:    waitStateJson: { questionId: "q-1", question: "请补齐对照组", waitingFor: "USER" },
+components\FocusAgentWorkspace.tsx:10:import { missionStatusLabels } from "@/lib/mission/presentation";
+components\FocusAgentWorkspace.tsx:84:    return <span className={styles.chip} data-tone={title === "需要你判断" ? "user" : "agent"}>{missionStatusLabels[item.status] ?? title}</span>;
+components\FocusAgentWorkspace.tsx:98:            <div className={styles.heroMeta}>{hero.workState ? <WorkStateBadges state={hero.workState}/> : <span className={styles.chip} data-tone={heroKind === "INTERVENTION" ? "risk" : "user"}>{missionStatusLabels[hero.status] ?? (heroKind === "INTERVENTION" ? "需要关注" : "下一步")}</span>}<Link className={styles.heroProject + " focus-ring"} href={"/projects/" + hero.projectId}>{hero.projectTitle}</Link></div>
+lib\mission\workState.ts:8:  delegationEnabled?:boolean; id: string; status: string; version: number; waitStateJson?: unknown; planJson?: unknown;
+lib\mission\workState.ts:41:  const wait = record(m.waitStateJson), delegation = record(record(m.planJson).delegation), policy = record(m.continuationPolicyJson);
+lib\mission\workspaceSummary.ts:39:    id: true,planRevision:true,updatedAt:true, projectId:true, goal: true, status: true, version: true, lastErrorJson: true, waitStateJson:true, planJson:true, continuationPolicyJson:true, leaseUntil:true, nextAttemptAt:true,
+tests\final-e\projectionBoundaries.test.ts:91:        waitStateJson: { waitingFor: "OBSERVATION", startedAt: ISO(at(-3_600_000)) },
+tests\final-e\projectionBoundaries.test.ts:106:        waitStateJson: { waitingFor: "OBSERVATION", startedAt: ISO(at(-3_600_000)) },
+lib\mission\delegationObservation.ts:78:          ...(!changed && !(record(m.waitStateJson).questionId && record(m.waitStateJson).resolved !== true)
+lib\mission\delegationObservation.ts:79:            ? { waitStateJson: json({ ...record(m.waitStateJson), waitingFor: "OBSERVATION" }) }
+tests\final-e\observationAndSourceUse.test.ts:61:    data: { waitStateJson: json({ questionId, question: "请核对原要求", waitingFor: "ANSWER", startedAt: new Date(Date.now() - 3_600_000).toISOString() }) },
+lib\mission\waitNotice.ts:22:async function waitTarget(mission: { id: string; status: string; waitStateJson: unknown }): Promise<WaitTarget | null> {
+lib\mission\waitNotice.ts:24:    const questionId = String(record(mission.waitStateJson).questionId ?? "");
+lib\mission\waitNotice.ts:54:    select: { id: true, status: true, waitStateJson: true, ownerUserId: true, projectId: true, project: { select: { title: true } } },
+lib\mission\waitNotice.ts:66:      const current = await tx.agentMission.findUnique({ where: { id: m.id }, select: { status: true, waitStateJson: true, ownerUserId: true, projectId: true } });
+lib\mission\waitNotice.ts:67:      if (!current || current.status !== m.status || jsonHash(current.waitStateJson) !== jsonHash(m.waitStateJson)) return false;
+tests\final-e\missionCommandsIsolation.test.ts:62:    data: { waitStateJson: json({ questionId, question, waitingFor: "ANSWER", startedAt: new Date().toISOString() }) },
+tests\final-e\isolationAndSource.test.ts:66:      waitStateJson: json({ questionId: questionEvent.id, question: "请补充原始要求", waitingFor: "ANSWER", startedAt: new Date().toISOString() }),
+tests\final-e\controlAuthority.test.ts:58:      waitStateJson: json({ questionId, question: "请核对原来源", waitingFor: "ANSWER", startedAt: new Date(Date.now() - 3_600_000).toISOString() }),
+lib\mission\continuationService.ts:22:  const m=await ownedMission(userId,id,tx),wait=m.waitStateJson as unknown as WaitState|null;
+lib\mission\continuationService.ts:55:  const m=await ownedMission(userId,id,tx),wait=m.waitStateJson as unknown as WaitState|null;
+lib\mission\continuationService.ts:115:    await tx.agentMission.update({where:{id},data:{status:"READY",contextVersion:{increment:1},planRevision:{increment:1},version:{increment:1},waitStateJson:json({...wait,resolved:true,...(a.fit?{evidenceFitReview:a.fit,evidenceFitEventId:fitEventId}: {})}),planJson:json({...m.planJson as object,continuityBinding:{intentHash:continuity.intentHash,reusePolicyHash:continuity.reusePolicyHash},automaticContinuation:mode==="AUTO"?{policyHash:jsonHash(m.continuationPolicyJson),questionId:wait.questionId,metric:wait.requirements.metric,startedAt:wait.startedAt,sourcePointers:body.sourcePointers}:null}),lastErrorJson:{}}});
+lib\mission\continuationService.ts:128:  const wait=m.waitStateJson as unknown as WaitState|null;if(!wait?.requirements?.metric||wait.requirements.evidenceFitV1||wait.missing==="CONFLICT")return;
+lib\mission\contextBuilder.ts:131:    pendingQuestion: suppressing ? { note: "Source use policy changed; re-read admissible original material before continuing." } : m.waitStateJson ? { ...(m.waitStateJson as object), readSet: undefined, evidenceFitReview: fitReviewReference((m.waitStateJson as {evidenceFitReview?:Awaited<ReturnType<typeof assessEvidenceFit>>}).evidenceFitReview ?? null) } : null,
+components\ConversationWorkCard.tsx:9:import { missionStatusLabels } from "@/lib/mission/presentation";
+components\ConversationWorkCard.tsx:52:      <h3>{work.title}</h3><p className={styles.workStatus}>{missionStatusLabels[work.status] ?? ({ TODO: "待办", DOING: "进行中", DONE: "已完成", CANCELLED: "已取消" } as Record<string, string>)[work.status] ?? work.status}{work.planRevision > 0 && " · 计划 " + work.planRevision}</p>
+lib\mission\sourceSignals.ts:46:    const wait=m.waitStateJson as unknown as WaitState|null;if(!wait?.startedAt||!wait.questionId)return;
+lib\mission\sourceSignals.ts:57:    await tx.agentMission.update({where:{id:m.id},data:{waitStateJson:json({...wait,sourceCursor:{capture:captures.length===20?captures.at(-1)!.id:"",attachment:attachments.length===20?attachments.at(-1)!.id:""}})}});
+lib\mission\runner.ts:75:      await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...current.planJson as object,dynamicReview:{...guard,completed:true}}),waitStateJson:json({waitingFor:"USER",questionId:question.id,gapId:question.id,question:guard.question,missing:"PRIVATE",requirements:{},startedAt:new Date().toISOString(),readSet:[],reviewProposalId:guard.proposalId})}});
+lib\mission\runner.ts:146:     await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...current.planJson as object,automaticContinuation:null}),waitStateJson:json({waitingFor:"USER",questionId:q.id,gapId,question:choice.question,missing:choice.missing,requirements,evidencePremiseContext,startedAt:new Date().toISOString(),readSet:sourcesFrom(history.map(s=>s.resultJson))})}});await release(tx,current,"WAITING_INPUT");return null;
+lib\mission\automaticPolicy.ts:11: if((m.waitStateJson as unknown as WaitState|null)?.requirements?.evidenceFitV1)throw new AppError("EVIDENCE_REVIEW_REQUIRED","此问题需要人工核对条件，不能自动接续",409);
+tests\goalChangeReview.test.ts:212:    const m = await mission(f); expect(m.status).toBe("WAITING_INPUT"); expect(JSON.stringify(m.waitStateJson)).toContain("运行时缓存");
+components\MissionPanel.tsx:15:import {missionStatusLabels,missionToolLabels,missionCompletionFacts,missionErrorPhaseLabel,missionBackgroundNotice,type MissionBackground,type MissionCompletionSummary,type MissionRecovery} from "@/lib/mission/presentation";
+components\MissionPanel.tsx:38:const labels=missionStatusLabels;
+tests\globalFocusPresentation.test.ts:5:import { missionStatusLabels } from "@/lib/mission/presentation";
+tests\globalFocusPresentation.test.ts:13:  expect(native.focusStatusLabel(status)).toBe(missionStatusLabels[status]);
+lib\mission\readback.ts:140:  const selectedQuestionId = input.questionId ?? (m.waitStateJson as { questionId?: string } | null)?.questionId;
+lib\mission\readback.ts:241:  const wait = m.waitStateJson as { questionId?: string } | null;
+lib\services\workspaceContextService.ts:12:import { missionStatusLabels } from "@/lib/mission/presentation";
+lib\services\workspaceContextService.ts:73:const missionLabel = (status: string) => missionStatusLabels[status] ?? "状态待确认";
+tests\missionAutomaticContinuation.test.ts:26: it("结构化字段匹配不能覆盖未满足的显式附加要求",async()=>{const{p,m}=await fixture();const row=await db.agentMission.findUniqueOrThrow({where:{id:m.id}}),wait=row.waitStateJson as Record<string,unknown>;await db.agentMission.update({where:{id:m.id},data:{waitStateJson:json({...wait,requirements:{terms:["留出集A"],unit:"",period:"",sourceType:"EITHER",metric}})}});await material(p.id);await scan();expect((await missionDetail(userId,m.id)).status).toBe("WAITING_INPUT");});
+lib\mission\presentation.ts:2:export const missionStatusLabels: Record<string, string> = {
+lib\mission\missionService.ts:64:  const fitPremise=m.waitStateJson&&m.status==="WAITING_INPUT"?premiseFor(m,m.waitStateJson as unknown as WaitState):null;
+lib\mission\missionService.ts:77:      const wait=m.waitStateJson as unknown as WaitState|null;
+lib\mission\missionService.ts:90:        await tx.agentMission.update({where:{id},data:{waitStateJson:json({...wait,resolved:true,evidenceFitReview:fit,evidenceFitEventId:reviewed.id})}});
+components\MissionWorkPacket.tsx:15:import { missionStatusLabels } from "@/lib/mission/presentation";
+components\MissionWorkPacket.tsx:157:  return missionStatusLabels[status] ?? `状态待确认：${status}`;
+lib\mission\investigationDelegation.ts:227:    where: { userId: m.ownerUserId, missionId: m.id, OR: [{ questionId: "*" }, { questionId: String(record(m.waitStateJson).questionId ?? "") }] },
+lib\mission\investigationDelegation.ts:233:  const wait = record(m.waitStateJson), deadline = Date.parse(String(record(m.constraintsJson).deadline ?? ""));
+tests\missionWaitNotice.test.ts:24:  await db.agentMission.update({ where: { id: mission.id }, data: { status: "WAITING_INPUT", waitStateJson: { questionId: "q-1", missing: "数据划分比例" } } });
+tests\missionWaitNotice.test.ts:43:  await db.agentMission.update({ where: { id: missionId }, data: { waitStateJson: { questionId: "q-2", missing: "基线来源" } } });
+tests\ux3AttentionContinuity.test.ts:67:      waitStateJson: { waitingFor: "USER", questionId: "q-quiet-1", question: "需要补充次要参数吗？", missing: "PRIVATE", resolved: false },
+tests\ux3AttentionContinuity.test.ts:86:      waitStateJson: { waitingFor: "USER", questionId: "q-urgent-1", question: "关键验收条件缺失，无法继续", missing: "CRITICAL", resolved: false },
+tests\ux3AttentionContinuity.test.ts:105:      waitStateJson: { waitingFor: "USER", questionId: "q-morning-1", question: "请核对新的参考资料", missing: "PRIVATE", resolved: false },
+tests\ux3AttentionContinuity.test.ts:161:      waitStateJson: { waitingFor: "USER", questionId: "q-budget-1", question: "紧急关键决策", missing: "CRITICAL", resolved: false },
+tests\ux3ProactiveDiscovery.test.ts:156:  const waitState = updatedMission.waitStateJson as { waitingFor?: string };
+tests\ux3Responsibility.test.ts:13:  await db.agentMission.update({ where: { id: m.id }, data: { status: "WAITING_INPUT", waitStateJson: { waitingFor: "OBSERVATION" },
+tests\ux3ResponsibilityRevision.test.ts:275:      waitStateJson: {
+tests\ux3ResponsibilityRevision.test.ts:299:  expect((updatedMission1.waitStateJson as { questionId?: string })?.questionId).toBe("q-unresolved-1");
+tests\ux3ResponsibilityRevision.test.ts:322:      waitStateJson: { waitingFor: "OBSERVATION" },
+tests\ux3ResponsibilityRevision.test.ts:667:      waitStateJson: {
+tests\ux3ResponsibilityRevision.test.ts:690:  expect((checkedMission.waitStateJson as { resolved?: boolean })?.resolved).toBe(false); // 原问题不被意外解决
+tests\ux3ResponsibilityRevision.test.ts:705:    const finalWait = expiredMission.waitStateJson as { questionId?: string; resolved?: boolean };
+tests\ux3ThreeDayContinuity.test.ts:216:  expect((mAfterQuietCheck.waitStateJson as { waitingFor?: string })?.waitingFor).toBe("OBSERVATION");

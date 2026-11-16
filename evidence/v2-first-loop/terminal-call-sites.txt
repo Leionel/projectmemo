@@ -1,0 +1,341 @@
+tests\academicIntegration.test.ts:48: await run();let view=await missionDetail(f.u.id,m.id);expect(view.steps[0].status).toBe("SUCCEEDED");expect(view.used).toMatchObject({metadataRequests:1});expect(await db.externalSource.count({where:{missionId:m.id,retrievalMode:"ACADEMIC_METADATA"}})).toBe(1);
+scripts\e2e-document-fixture.ts:11:  const step=await db.agentMissionStep.findFirstOrThrow({where:{missionId:m.id}});if(step.status!=="SUCCEEDED")throw new Error("DOCUMENT_E2E_READ_FAILED");console.log(JSON.stringify({projectId:project.id,attachmentId:attachment.id,missionId:m.id}));
+harmonyos/entry/src/main/ets\pages\MissionDetail.ets:491:    const succeeded = this.mission.steps.filter((step: MissionStep) => step.status === 'SUCCEEDED');
+harmonyos/entry/src/main/ets\pages\MissionDetail.ets:755:        if (this.mission.steps.filter((step: MissionStep) => step.status === 'SUCCEEDED').length === 0) {
+harmonyos/entry/src/main/ets\pages\MissionDetail.ets:758:        ForEach(this.mission.steps.filter((step: MissionStep) => step.status === 'SUCCEEDED').slice(-3), (step: MissionStep) => {
+harmonyos/entry/src/main/ets\pages\MissionDetail.ets:814:        Text(step.status === 'SUCCEEDED' ? '✓' : step.status === 'FAILED' ? '×' : '·')
+harmonyos/entry/src/main/ets\pages\MissionDetail.ets:816:          .fontColor(step.status === 'SUCCEEDED' ? PMColors.BRAND : step.status === 'FAILED' ? PMColors.RISK : PMColors.INK_TERTIARY)
+harmonyos/entry/src/main/ets\pages\MissionDetail.ets:821:            if (step.status !== 'SUCCEEDED') { Text(missionStatusLabel(step.status)).fontSize(11).fontColor(step.status === 'FAILED' ? PMColors.RISK : PMColors.INK_TERTIARY) }
+harmonyos/entry/src/main/ets\models\WorkPacket.ets:904:    } else if (view.terminalStatus === 'SUCCEEDED') {
+scripts\eval-focus-review-journey.ts:120:  if (executed.status !== "PAUSED" || !steps.some(s => s.toolName === "read_project_material" && s.status === "SUCCEEDED")) throw new Error("原委托没有完成定向读取并暂停");
+tests\calendarEventExtensions.test.ts:118:    expect(step.status).toBe("SUCCEEDED");
+tests\calendarEventExtensions.test.ts:153:    expect(step.status).toBe("SUCCEEDED");
+tests\calendarEventExtensions.test.ts:230:  const step=await db.agentMissionStep.findFirstOrThrow({where:{missionId:mission.id,toolName:"propose_calendar_event"}});expect(step.status).toBe(cancelled?"UNKNOWN":"SUCCEEDED");
+tests\calendarEventExtensions.test.ts:244: const step=await db.agentMissionStep.findFirstOrThrow({where:{missionId:mission.id,toolName:"propose_calendar_events"}});expect(step.status).toBe("SUCCEEDED");
+scripts\eval-r4-specialists.ts:72:    const missionInput = { goal: sample.goal, successCriteria: [], planRevision: 1, pendingQuestion: null, outputTokenLimit: 1000, observations: [{ status: "SUCCEEDED", tool: "inspect_project", observation: { data: { current: sample.observation }, sources: [material.source] } }], sourceIndex: [material.source], tools: [tool], responseSchema: specs.missionStrategyV2.outputSchema.toJSONSchema(), remainingBudget: { models: 2, tools: 1 } };
+tests\calendarFeishu.test.ts:182:    expect(operation).toMatchObject({ kind: "CALENDAR_READ", status: "SUCCEEDED" });
+tests\calendarFeishu.test.ts:198:    expect(detail.steps.some(step => step.toolName === "calendar_read" && step.status === "SUCCEEDED")).toBe(true);
+harmonyos/entry/src/main/ets\components\AgentRunThread.ets:29:    const next = `${this.progress?.phase ?? ''}:${steps.length}:${steps.filter((s: ConversationReadStep) => s.status === 'SUCCEEDED').length}`;
+harmonyos/entry/src/main/ets\components\AgentRunThread.ets:37:    if (status === 'SUCCEEDED' || status === 'STARTED') { return PMColors.BRAND; }
+harmonyos/entry/src/main/ets\components\AgentRunThread.ets:43:    return status === 'SUCCEEDED' ? '已完成' : status === 'FAILED' ? '未读取到' : status === 'UNKNOWN' ? '结果未知' : status === 'STOPPED' ? '已停止' : '进行中';
+harmonyos/entry/src/main/ets\components\AgentRunThread.ets:62:    .backgroundColor(status === 'SUCCEEDED' ? PMColors.BRAND : status === 'FAILED' ? PMColors.RISK_LIGHT : PMColors.SURFACE)
+harmonyos/entry/src/main/ets\components\AgentMessageBlocks.ets:90:          Text(agentStateLabel(this.block.state ?? 'UNKNOWN')).fontSize(13).fontWeight(this.isPendingApproval() ? FontWeight.Medium : FontWeight.Normal).fontColor(this.isPendingApproval() ? PMColors.WARNING : this.block.state === 'SUCCEEDED' || this.block.state === 'COMMITTED' ? PMColors.BRAND : this.block.state === 'FAILED' ? PMColors.RISK : PMColors.INK_SECONDARY)
+harmonyos/entry/src/main/ets\components\AgentMessageBlocks.ets:103:          ForEach(this.block.steps ?? [], (s: InvestigationStep) => { Text((s.status === 'SUCCEEDED' ? '✓ ' : '· ') + (s.decision.informationNeed ?? '核对资料') + '\n' + (s.status === 'SUCCEEDED' ? '已读取原资料' : s.failureReason ?? '正在核对')).fontSize(14).lineHeight(24).fontColor(PMColors.INK_SECONDARY) }, (s: InvestigationStep) => s.id)
+tests\browserConversation.test.ts:66:    expect(op).toMatchObject({ kind: "BROWSER_READ", status: "SUCCEEDED", result: { coverage: { requests: 3 } } });
+tests\continuityRecoordination.test.ts:44:      expect(manifest.experience.steps.filter((s: { status: string }) => s.status === "SUCCEEDED")).toHaveLength(2);
+tests\calendarWrite.test.ts:114:    expect(step.status).toBe("SUCCEEDED");
+tests\calendarWrite.test.ts:173:    expect(detail.steps.find(s => s.toolName === "propose_calendar_event")?.status).toBe("SUCCEEDED");
+tests\conversationAnchor.test.ts:233:    await tx.agentMission.update({ where: { id: f.m.id }, data: { status: "SUCCEEDED" } });
+tests\continuityStages23.test.ts:40:  const slice=async(choice:Choice)=>{await runMissionSlice({id:f.m.id,provider:provider(choice),repository});const s=await db.agentMissionStep.findFirstOrThrow({where:{missionId:f.m.id},orderBy:{ordinal:"desc"}});expect(s.status).toBe("SUCCEEDED");return(s.resultJson as unknown as {sources:Array<{id:string;hash:string}>}).sources[0];};
+tests\continuityStages23.test.ts:85:  expect(await db.agentMissionStep.count({where:{missionId:f.m.id,status:"SUCCEEDED",toolName:"read_repository_ci"}})).toBe(0);
+scripts\final-a\probe-work-state-pure.ts:76:      "PURE-FS-A01-SUCCEEDED-UNKNOWN",
+scripts\final-a\probe-work-state-pure.ts:77:      { ...base, status: "SUCCEEDED", version: 3, lastErrorJson: { code: "EXTERNAL_UNKNOWN" } },
+tests\copilotContinuation.test.ts:469:      data: { status: "SUCCEEDED" },
+scripts\final-a\probe-fs-a.ts:90:  for (const status of ["SUCCEEDED", "CANCELLED"] as const) {
+scripts\final-a\probe-fs-a.ts:157:      "终态(SUCCEEDED/CANCELLED)叠加 lastErrorJson.code=EXTERNAL_UNKNOWN 时，共享 WorkState 投影应在 phase/reasonCode/actionLabel 中同时保留终态与未结算 UNKNOWN；取消不得显示成成功或可恢复；workspace 摘要不应因此丢失需核查的任务。",
+scripts\final-a\probe-fs-a.ts:162:        "readback 外层": "missionStatus 仍保留原终态（SUCCEEDED/CANCELLED），所以 readback 响应级的两个事实可同时读到。",
+scripts\final-a\probe-fs-a.ts:165:        workspace摘要: "终态任务被 where 过滤（status notIn SUCCEEDED/CANCELLED）整体丢弃；终态+UNKNOWN 的“查询原请求”核查入口不在摘要出现。",
+scripts\final-a\perf-readback.ts:441:  // 动作回执：3 个已完成行动，对应 SUCCEEDED 步骤（resultJson.data.actionId）。
+scripts\final-a\perf-readback.ts:456:        missionId, ordinal: 7 + index, planRevision: 3, toolName: "create_action", status: "SUCCEEDED",
+tests\ct8OutcomeExperience.test.ts:67:      status: step.status ?? "SUCCEEDED", canonicalInputJson: json(step.input ?? {}), inputHash: `h-${crypto.randomUUID()}`,
+tests\ct8OutcomeExperience.test.ts:109:    await seedMission(userId, projectId, { ...base, status: "SUCCEEDED", action: { status: "DONE", resultCard: true } });
+tests\ct8OutcomeExperience.test.ts:110:    await seedMission(userId, projectId, { ...base, status: "SUCCEEDED", action: { status: "CANCELLED", resultCard: true } });
+tests\ct8OutcomeExperience.test.ts:111:    await seedMission(userId, projectId, { goal: "整理资料形成报告", tools: base.tools, output: {}, status: "SUCCEEDED" });
+tests\ct8OutcomeExperience.test.ts:127:        tools: [{ tool: "inspect_action" }, { tool: "search_memory" }], output: { adopt: true }, status: "SUCCEEDED",
+tests\ct8OutcomeExperience.test.ts:141:      await seedMission(userId, projectId, { goal: "实验指标对比", status: "SUCCEEDED", sourceCaptureId: shared.id,
+tests\ct8OutcomeExperience.test.ts:154:    const m = await seedMission(userId, projectId, { goal: "失败原因归因", status: "SUCCEEDED",
+tests\ct8OutcomeExperience.test.ts:174:      await seedMission(userId, projectId, { goal: "整理资料形成报告", status: "SUCCEEDED",
+tests\ct8OutcomeExperience.test.ts:210:      [{ toolName: "inspect_project", toolVersion: "1", status: "SUCCEEDED", canonicalInputJson: {}, protocolJson: { schemaVersion: 1 } },
+tests\ct8OutcomeExperience.test.ts:211:        { toolName: "read_project_material", toolVersion: "1", status: "SUCCEEDED", canonicalInputJson: {}, protocolJson: { schemaVersion: 1 } }], "RESEARCH");
+tests\ct8OutcomeExperience.test.ts:253:    for (let i = 0; i < 2; i++) await seedMission(userId, sp.id, { goal: "整理资料形成报告", status: "SUCCEEDED", sourceCaptureId: capture.id,
+tests\ct8OutcomeExperience.test.ts:290:        [{ toolName: "inspect_project", toolVersion: "1", status: "SUCCEEDED", canonicalInputJson: {}, protocolJson: { schemaVersion: 1 } }], "RESEARCH"),
+tests\ct8OutcomeExperience.test.ts:312:        [{ toolName: "inspect_project", toolVersion: "1", status: "SUCCEEDED", canonicalInputJson: {}, protocolJson: { schemaVersion: 1 } }], "RESEARCH"),
+tests\ct8OutcomeExperience.test.ts:328:    const sampleMission = await seedMission(userId, bp.id, { goal: "整理资料形成报告", status: "SUCCEEDED",
+harmonyos/entry/src/main/ets\components\MissionWorkPacketView.ets:30:      if (stopped.terminalStatus === 'SUCCEEDED') { return '条件已验收'; }
+scripts\final-a\lib\probeFixtures.ts:111: * 造一条 SUCCEEDED 的 bind_project_sources 步骤：
+scripts\final-a\lib\probeFixtures.ts:130:      status: "SUCCEEDED",
+tests\decisionEvolution.test.ts:333:        status: "SUCCEEDED",
+tests\decisionEvolution.test.ts:357:    ).toBe("SUCCEEDED");
+tests\decisionEvolution.test.ts:731:        status: "SUCCEEDED",
+tests\decisionEvolution.test.ts:776:    expect(steps[0].status).toBe("SUCCEEDED");
+tests\decisionEvolution.test.ts:777:    expect(steps[1].status).toBe("SUCCEEDED");
+scripts\final-a\generate-samples.ts:130:  { name: "成功", file: "a2-succeeded.json", missionStatus: "SUCCEEDED", phaseHint: "COMPLETED",
+scripts\final-a\generate-samples.ts:131:    fixture: async owner => { const mission = await createMissionRow(owner, { status: "SUCCEEDED", finishedAt: new Date(Date.now() - 30_000) }); return { mission, note: "完成条件已通过；现实效果仍以原结果为准" }; } },
+harmonyos/entry/src/main/ets\components\MissionPanel.ets:74:      { title: '已结束', statuses: ['SUCCEEDED', 'CANCELLED', 'OBSOLETE', 'SKIPPED'] },
+harmonyos/entry/src/main/ets\components\MissionPanel.ets:94:    if (['SUCCEEDED', 'CANCELLED'].includes(item.status)) { return '查看成果与回执 →'; }
+harmonyos/entry/src/main/ets\components\MissionPanel.ets:129:          .enabled(this.readState === 'fresh' && item.status !== 'SUCCEEDED' && item.status !== 'CANCELLED')
+harmonyos/entry/src/main/ets\components\MissionMetricReceipt.ets:9:      Text(!this.execution.current ? '原指标依据已变化，此回执仅作历史记录。' : this.stepStatus === 'SUCCEEDED' ? '核算已完成。' : '核算还没结束；继续时只核对这一次，不会重复执行。').fontSize(14)
+scripts\final-a\a1-contract-samples.ts:87:      steps: [{ id: "step-2", ordinal: 2, toolName: "inspect_project", status: "SUCCEEDED", at: "2026-11-02T10:00:00.000Z", note: "读取项目" }],
+scripts\final-a\a1-contract-samples.ts:145:// 1. 终态 SUCCEEDED 与未结算 UNKNOWN 并存
+scripts\final-a\a1-contract-samples.ts:146:addCase("FS-A01-SUCCEEDED-UNKNOWN", "成功终态与未知调用结果同时可见，取消不显示成功、不提供恢复", workState({
+scripts\final-a\a1-contract-samples.ts:147:  status: "SUCCEEDED", finishedAt: EARLIER, lastErrorJson: { code: "EXTERNAL_UNKNOWN", message: "日历写入回包丢失" },
+scripts\final-a\a1-contract-samples.ts:148:}), { mission: { ...basePacketInput(workState({ status: "SUCCEEDED" })).mission, missionStatus: "SUCCEEDED", lastErrorCode: "EXTERNAL_UNKNOWN", finishedAt: EARLIER.toISOString() } });
+scripts\final-a\a1-contract-samples.ts:217:  status: "SUCCEEDED", updatedAt: null,
+scripts\final-a\a1-contract-samples.ts:218:}), { mission: { ...basePacketInput(workState({ status: "SUCCEEDED" })).mission, missionStatus: "SUCCEEDED", finishedAt: null, updatedAt: null } });
+harmonyos/entry/src/main/ets\common\WorkStateBadge.ets:16:    case 'COMPLETED': return state.terminal !== undefined && state.terminal !== null && state.terminal.status === 'SUCCEEDED' ? 'done' : 'cancelled';
+harmonyos/entry/src/main/ets\common\WorkStateBadge.ets:24:    if (state.terminal.status === 'SUCCEEDED') return '条件已验收';
+lib\types\workState.ts:11:  status: "SUCCEEDED" | "CANCELLED";
+lib\types\workState.ts:16:  reasonCode: "SUCCEEDED" | "CANCELLED";
+harmonyos/entry/src/main/ets\common\MissionWidgetContract.ets:52:  if (snapshot.status === 'SUCCEEDED') return '委托条件已验收，可回看结果';
+harmonyos/entry/src/main/ets\common\MissionProgressPresentation.ets:27:    const labels: Record<string, string> = { 'DOING': '进行中', 'TODO': '待办', 'DONE': '已完成', 'CANCELLED': '已取消', 'SUCCEEDED': '已执行', 'FAILED': '失败', 'READY': '准备执行', 'UNKNOWN': '结果待核对' };
+harmonyos/entry/src/main/ets\common\MissionProgressPresentation.ets:86:    if (step.status !== 'SUCCEEDED') { return ''; }
+tests\deploymentRuntime.test.ts:36:  expect(step.status).toBe("SUCCEEDED");expect(record(obs).layers).toMatchObject([{state:"UNKNOWN"},{state:"FAILED"},{state:"OBSERVED"},{state:"UNKNOWN"}]);
+tests\deploymentRuntime.test.ts:54:  expect(step.status).not.toBe("SUCCEEDED");expect(record(step.resultJson).sources).toBeUndefined();expect(transport).toHaveBeenCalledTimes(1);
+harmonyos/entry/src/main/ets\common\MissionContract.ets:5:    'WAITING_APPROVAL': '等待批准', 'PAUSED': '已暂停', 'SUCCEEDED': '委托条件已验收', 'CANCELLED': '已取消',
+harmonyos/entry/src/main/ets\common\MissionContract.ets:34:export function missionTerminal(status: string): boolean { return status === 'SUCCEEDED' || status === 'CANCELLED'; }
+harmonyos/entry/src/main/ets\common\MissionContract.ets:43:    { label: '执行条件', value: completion?.criteriaPassed === true ? '已通过本委托设定的条件' : completion?.criteriaPassed === false ? '条件未通过，请核对执行记录' : status === 'SUCCEEDED' ? '已验收，明细待读取' : '尚未完成条件验收' },
+lib\decision\scenarios.ts:152:      ["SUCCEEDED", "CANCELLED", "RUNNING"].includes(m.status) ||
+lib\decision\scenarios.ts:518:      ["RUNNING", "SUCCEEDED", "CANCELLED"].includes(m.status) ||
+scripts\pr6-turn-recovery-probe.ts:53:    if (mode === "snapshot" && ops?.["read-1"]?.status === "SUCCEEDED") process.exit(74);
+lib\decision\questions.ts:245:      mission: { projectId, status: { notIn: ["SUCCEEDED", "CANCELLED"] } },
+lib\decision\impact.ts:203:        (!!m && ["SUCCEEDED", "CANCELLED"].includes(m.status)) ||
+tests\documentReader.test.ts:65: const step=await db.agentMissionStep.findFirstOrThrow({where:{missionId:m.id,toolName:"read_document_page"}});expect(step.status).toBe("SUCCEEDED");const source=(step.resultJson as unknown as {sources:Array<{id:string;hash:string}>}).sources[0];
+harmonyos/entry/src/main/ets\common\AgentPresentationContract.ets:6:    'CREATED': '行动已创建', 'SUBMITTED': '已提交', 'RUNNING': '进行中', 'SUCCEEDED': '结果已保存', 'FAILED': '未完成', 'CANCELLED': '已取消', 'WAITING_USER': '等待你的回应' };
+lib\client\workStateBadge.ts:20:    case "COMPLETED": return state.terminal?.status === "SUCCEEDED" ? "done" : "cancelled";
+lib\client\workStateBadge.ts:27:  if (state.phase === "COMPLETED") return state.terminal?.status === "SUCCEEDED" ? "条件已验收" : state.terminal?.status === "CANCELLED" ? "已取消（不是成功）" : workPhaseLabel(state.phase);
+harmonyos/entry/src/main/ets\components\ConversationWorkPanel.ets:129:      if (this.workRef.kind === 'MISSION' && !['SUCCEEDED', 'CANCELLED', 'RUNNING'].includes(this.work.status)) {
+scripts\mission-evaluation\run.ts:98:        if (!state.steps.some(step => step.status === "SUCCEEDED") || runs < 2 || !entries.some(entry => entry.hasObservation)) throw new Error("ROUND_TRIP_NOT_VERIFIED");
+scripts\mission-evaluation\run.ts:145:            if (state.status === "SUCCEEDED") {
+lib\decision\dynamicCandidates.ts:72:  const observations = await db.agentMissionStep.findMany({ where: { missionId, status: "SUCCEEDED", toolName: "read_project_material" }, orderBy: { ordinal: "desc" }, take: 16, select: { resultJson: true, protocolJson: true } });
+lib\decision\changeUnderstanding.ts:45:  const steps = await db.agentMissionStep.findMany({ where: { missionId, status: "SUCCEEDED" }, orderBy: { ordinal: "desc" }, take: 8, select: { resultJson: true } });
+tests\experienceReuse.test.ts:56:      status: step.status ?? "SUCCEEDED", canonicalInputJson: {}, inputHash: `h-${crypto.randomUUID()}`,
+tests\experienceReuse.test.ts:94:    const engineeringOnly = await seedMission(userId, projectId, { goal: "只有工程成功", status: "SUCCEEDED", steps: [{ tool: "layer_a1" }, { tool: "layer_a2" }], output: true });
+tests\experienceReuse.test.ts:95:    const adopted = await seedMission(userId, projectId, { goal: "已采用成果", status: "SUCCEEDED", steps: [{ tool: "layer_b1" }, { tool: "layer_b2" }], output: true, adoption: true });
+tests\experienceReuse.test.ts:102:    const done = await seedMission(userId, projectId, { goal: "带行动完成", status: "SUCCEEDED", steps: [{ tool: "layer_c1" }], action: { status: "DONE", resultCard: true } });
+tests\experienceReuse.test.ts:114:    await seedMission(otherUserId, otherProjectId, { goal: "他人委托", status: "SUCCEEDED", steps: [{ tool: "layer_d1" }], output: true, adoption: true });
+tests\experienceReuse.test.ts:123:    await seedMission(userId, projectId, { goal: "样本A", status: "SUCCEEDED", steps: [{ tool: "inspect_action" }, { tool: "search_memory" }], output: true, adoption: true, action: { status: "DONE", resultCard: true } });
+tests\experienceReuse.test.ts:124:    await seedMission(userId, projectId, { goal: "样本B", status: "SUCCEEDED", steps: [{ tool: "inspect_action" }, { tool: "search_memory" }], output: true, adoption: true, action: { status: "DONE", resultCard: true } });
+tests\experienceReuse.test.ts:132:    const base = { goal: "未采用对照", steps: [{ tool: "counter_1" }, { tool: "counter_2" }] as StepSpec[], status: "SUCCEEDED" };
+tests\experienceReuse.test.ts:145:      goal: "协议失败后重试", status: "SUCCEEDED",
+tests\experienceReuse.test.ts:174:    await seedMission(userId, projectId, { goal: "影子样本1", status: "SUCCEEDED", steps: [{ tool: "shadow_1" }, { tool: "shadow_2" }], output: true, adoption: true, action: { status: "DONE", resultCard: true } });
+tests\experienceReuse.test.ts:175:    await seedMission(userId, projectId, { goal: "影子样本2", status: "SUCCEEDED", steps: [{ tool: "shadow_1" }, { tool: "shadow_2" }], output: true, adoption: true, action: { status: "DONE", resultCard: true } });
+tests\experienceNativeContract.test.ts:68:      await db.agentMissionStep.create({ data: { missionId: m.id, ordinal: index + 1, planRevision: 1, toolName: tool, toolVersion: "1", status: "SUCCEEDED", canonicalInputJson: {}, inputHash: `h-${index}`, readSetJson: [], protocolJson: { protocol: "JSON_CHOICE", schemaVersion: 1 } } });
+tests\experienceNativeContract.test.ts:79:    await db.agentMission.update({ where: { id: m.id }, data: { status: "SUCCEEDED" } });
+scripts\probe-metric-sandbox.ts:20: const step=view.steps.find(s=>s.toolName==="propose_metric_verification");if(step?.status!=="SUCCEEDED")throw new Error("JOB_NOT_SETTLED:"+JSON.stringify(view.error));report.status="REAL_CONTAINER_RECEIPT_RECORDED";
+lib\copilot\continuation.ts:73:      status: { notIn: ["SUCCEEDED", "CANCELLED"] },
+lib\copilot\continuation.ts:202:      status: { notIn: ["SUCCEEDED", "CANCELLED"] },
+scripts\final-c\seed-web-fixture.ts:9: *   4) SUCCEEDED + 草稿 Output + 已创建 Action（步骤引用）+ resultCardId 回执 + 归入回执
+scripts\final-c\seed-web-fixture.ts:15: *  10) SUCCEEDED + 未结算 UNKNOWN 效果（终态 + 未知调用并列）
+scripts\final-c\seed-web-fixture.ts:453:      status: "SUCCEEDED",
+scripts\final-c\seed-web-fixture.ts:652:    // 4) SUCCEEDED + 草稿 Output + Action + resultCardId 回执 + 归入回执
+scripts\final-c\seed-web-fixture.ts:657:      status: "SUCCEEDED",
+scripts\final-c\seed-web-fixture.ts:789:      status: "SUCCEEDED",
+scripts\final-c\seed-web-fixture.ts:797:      status: "SUCCEEDED",
+scripts\final-c\seed-web-fixture.ts:805:      status: "SUCCEEDED",
+scripts\final-c\seed-web-fixture.ts:820:      status: "SUCCEEDED",
+scripts\final-c\seed-web-fixture.ts:865:      status: "SUCCEEDED",
+scripts\final-c\seed-web-fixture.ts:869:      reasonCode: "SUCCEEDED",
+scripts\final-c\seed-web-fixture.ts:1083:      status: "SUCCEEDED",
+scripts\final-c\seed-web-fixture.ts:1316:    // 10) SUCCEEDED + 未结算 UNKNOWN 效果（终态与未知并列）
+scripts\final-c\seed-web-fixture.ts:1321:      status: "SUCCEEDED",
+scripts\final-c\seed-web-fixture.ts:1337:      status: "SUCCEEDED",
+scripts\final-c\seed-web-fixture.ts:1341:      reasonCode: "SUCCEEDED",
+tests\experimentMetrics.test.ts:35: const step=await db.agentMissionStep.findFirstOrThrow({where:{missionId:mission.id,toolName:"compare_experiment_metrics"}});expect(step.status,JSON.stringify(step.resultJson)).toBe("SUCCEEDED");expect(step.resultJson).toMatchObject({data:{comparison:{improvement:"REGRESSED"},execution:"NO_JOB_EXECUTED"}});
+lib\conversation\anchorService.ts:126:      : m.status === "SUCCEEDED" ? "原委托的服务端成功条件已验收。现实结果仍以具体证据与回执为准。"
+lib\conversation\anchorService.ts:145:  const reads = await tx.agentMissionStep.findMany({ where: { missionId: m.id, status: "SUCCEEDED", toolName: "read_project_material" }, orderBy: { ordinal: "desc" }, take: 4 });
+lib\conversation\anchorService.ts:283:      const terminal = nextCursor >= m.nextEventSeq && ["SUCCEEDED", "CANCELLED"].includes(m.status) && Number(watchBacklog[0].count) === 0;
+tests\final-e\missionCommandsIsolation.test.ts:360:        status: "SUCCEEDED", resultJson: json({ data: { actionId: action.id, resultCardId: card.id }, sources: [] }),
+tests\final-e\missionCommandsIsolation.test.ts:379:        status: "SUCCEEDED", resultJson: json({ data: { actionId: foreignAction.id }, sources: [] }),
+tests\final-e\projectionBoundaries.test.ts:58:  it("原终态 SUCCEEDED 与未结算 UNKNOWN 效果必须同时可见，不能只留其一", () => {
+tests\final-e\projectionBoundaries.test.ts:60:      row({ status: "SUCCEEDED", lastErrorJson: { code: "EXTERNAL_UNKNOWN", message: "外部请求结果未知" } }),
+tests\final-e\projectionBoundaries.test.ts:66:    // 原终态同样可见（不能把 SUCCEEDED 覆盖成纯 UNKNOWN）
+tests\final-e\projectionBoundaries.test.ts:67:    expect(text).toMatch(/SUCCEEDED|完成/);
+tests\final-e\projectionBoundaries.test.ts:140:    steps: [{ status: "SUCCEEDED", resultJson: { data: {}, sources: [{ id: "capture:x", hash: "h" }] } }],
+tests\final-e\observationAndSourceUse.test.ts:69:        readSetJson: json([]), status: "SUCCEEDED", finishedAt: new Date(),
+tests\finalAWorkPacketContract.test.ts:75:  status: "SUCCEEDED", at: "2026-11-02T00:00:00.000Z", note: "原工具步骤",
+tests\finalAWorkPacketContract.test.ts:164:    expect(packet.done.recentSteps[0]).toMatchObject({ id: "step-7", toolName: "search_project_memory", status: "SUCCEEDED" });
+tests\finalAWorkPacketContract.test.ts:221:      mission: { ...missionFacts, missionStatus: "SUCCEEDED" },
+tests\finalAWorkPacketContract.test.ts:222:      workState: project({ status: "SUCCEEDED" }),
+tests\finalAWorkPacketContract.test.ts:234:  it("SUCCEEDED + 未结算 UNKNOWN：终态可见，未知调用也可见，主动作先核对原结果", () => {
+tests\finalAWorkPacketContract.test.ts:235:    const workState = project({ status: "SUCCEEDED", lastErrorJson: { code: "EXTERNAL_UNKNOWN", message: "外部效果未结算" } });
+tests\finalAWorkPacketContract.test.ts:237:      mission: { ...missionFacts, missionStatus: "SUCCEEDED" },
+tests\finalAWorkPacketContract.test.ts:242:    expect(packet.stopped.workState.reasonCode).toBe("SUCCEEDED");
+tests\finalAWorkPacketContract.test.ts:243:    expect(packet.stopped.workState.terminal?.status).toBe("SUCCEEDED");
+tests\finalAWorkPacketContract.test.ts:675:      mission: { ...missionFacts, missionStatus: "SUCCEEDED", lastErrorCode: "EXTERNAL_UNKNOWN" },
+lib\types\agentExperience.ts:89:  status: z.enum(["STARTED", "SUCCEEDED", "FAILED", "UNKNOWN", "STOPPED"]),
+lib\types\agentExperience.ts:101:  if (v.status === "SUCCEEDED" && !v.observationHash)
+lib\types\agentExperience.ts:181:    state: z.enum(["CREATED", "SUBMITTED", "RUNNING", "WAITING_USER", "SUCCEEDED", "FAILED", "UNKNOWN", "CANCELLED"]),
+tests\finalATerminalUnknownSummary.test.ts:42:  status: "SUCCEEDED" | "CANCELLED";
+tests\finalATerminalUnknownSummary.test.ts:84:    key: "succeeded-external-unknown", status: "SUCCEEDED", updatedAt: mainSucceededAt,
+tests\finalATerminalUnknownSummary.test.ts:91:  normalSucceeded = await terminalMission(main, { key: "normal-succeeded", status: "SUCCEEDED", updatedAt: new Date("2026-02-02T03:00:00.000Z") });
+tests\finalATerminalUnknownSummary.test.ts:102:      ? { key: `trunc-succeeded-${index}`, status: "SUCCEEDED", updatedAt, lastErrorJson: { code: "EXTERNAL_UNKNOWN" } }
+tests\finalATerminalUnknownSummary.test.ts:108:  await terminalMission(clean, { key: "clean-succeeded", status: "SUCCEEDED", updatedAt: new Date("2026-02-05T03:00:00.000Z") });
+tests\finalATerminalUnknownSummary.test.ts:113:  it("SUCCEEDED+EXTERNAL_UNKNOWN 与 CANCELLED+UNKNOWN Step 都能从 terminalUnsettled 重新找到", async () => {
+tests\finalATerminalUnknownSummary.test.ts:129:    expect(succeeded).toMatchObject({ status: "SUCCEEDED", version: 2, goal: succeededUnknownError.goal });
+tests\finalATerminalUnknownSummary.test.ts:132:      terminal: { status: "SUCCEEDED", at: iso(mainSucceededAt), atSource: "FINISHED_AT", reasonCode: "SUCCEEDED" },
+tests\finalATerminalUnknownSummary.test.ts:196:    expect(window.items.map(item => item.status)).toEqual(["SUCCEEDED", "CANCELLED", "SUCCEEDED", "CANCELLED", "SUCCEEDED", "CANCELLED"]);
+tests\finalATerminalUnknownFocus.test.ts:50:  status: "SUCCEEDED" | "CANCELLED" | "WAITING_INPUT";
+tests\finalATerminalUnknownFocus.test.ts:110:  succeededUnknownError = await mission({ key: "succeeded-external-unknown", ownerUserId: mainUser.id, projectId: main.projectId, status: "SUCCEEDED", updatedAt: mainSucceededAt,
+tests\finalATerminalUnknownFocus.test.ts:114:  normalSucceeded = await mission({ key: "normal-succeeded", ownerUserId: mainUser.id, projectId: main.projectId, status: "SUCCEEDED", updatedAt: new Date("2026-02-02T03:00:00.000Z") });
+tests\finalATerminalUnknownFocus.test.ts:117:  otherOwnedInMainProject = await mission({ key: "other-owned-in-main", ownerUserId: otherUser.id, projectId: main.projectId, status: "SUCCEEDED", updatedAt: new Date("2026-02-05T03:00:00.000Z"),
+tests\finalATerminalUnknownFocus.test.ts:123:  memberOnlyTerminal = await mission({ key: "member-only-terminal", ownerUserId: isolationUser.id, projectId: shared.id, status: "SUCCEEDED", updatedAt: new Date("2026-02-06T03:00:00.000Z"),
+tests\finalATerminalUnknownFocus.test.ts:137:      ? { key: `trunc-succeeded-${index}`, ownerUserId: orderUser.id, projectId: truncation.projectId, status: "SUCCEEDED", updatedAt, lastErrorJson: { code: "EXTERNAL_UNKNOWN" } }
+tests\finalATerminalUnknownFocus.test.ts:140:  await mission({ key: "trunc-normal", ownerUserId: orderUser.id, projectId: truncation.projectId, status: "SUCCEEDED", updatedAt: new Date("2026-01-01T00:00:00.000Z") });
+tests\finalATerminalUnknownFocus.test.ts:144:  it("SUCCEEDED+EXTERNAL_UNKNOWN 与 CANCELLED+UNKNOWN Step 出现在 /focus 的 waiting，正常终态不出现", async () => {
+tests\finalATerminalUnknownFocus.test.ts:161:    expect(succeeded).toMatchObject({ status: "SUCCEEDED", actionLabel: "查看原结果并核对未知调用", title: succeededUnknownError.goal });
+tests\finalATerminalUnknownFocus.test.ts:164:      terminal: { status: "SUCCEEDED", at: iso(mainSucceededAt), atSource: "FINISHED_AT", reasonCode: "SUCCEEDED" },
+tests\finalATerminalUnknownFocus.test.ts:240:    expect(terminals.map(item => item.status)).toEqual(["SUCCEEDED", "CANCELLED", "SUCCEEDED", "CANCELLED", "SUCCEEDED"]);
+tests\finalAWorkStateContract.test.ts:19:  it("SUCCEEDED 保留终态事实，终态时间取 finishedAt", () => {
+tests\finalAWorkStateContract.test.ts:21:      status: "SUCCEEDED",
+tests\finalAWorkStateContract.test.ts:29:      reasonCode: "SUCCEEDED",
+tests\finalAWorkStateContract.test.ts:30:      terminal: { status: "SUCCEEDED", atSource: "FINISHED_AT", reasonCode: "SUCCEEDED" },
+tests\finalAWorkStateContract.test.ts:49:    const withUpdated = state({ status: "SUCCEEDED", updatedAt: new Date("2026-11-02T00:00:00.000Z") });
+tests\finalAWorkStateContract.test.ts:56:  it("SUCCEEDED 与未结算 UNKNOWN 同时可见：终态不被擦掉，UNKNOWN 不被隐藏", () => {
+tests\finalAWorkStateContract.test.ts:57:    const result = state({ status: "SUCCEEDED", lastErrorJson: { code: "EXTERNAL_UNKNOWN", message: "外部效果未结算" } });
+tests\finalAWorkStateContract.test.ts:60:      reasonCode: "SUCCEEDED",
+tests\finalAWorkStateContract.test.ts:63:      terminal: { status: "SUCCEEDED", reasonCode: "SUCCEEDED" },
+tests\finalAWorkStateContract.test.ts:88:    const result = state({ status: "SUCCEEDED", unknownSteps: 2 });
+tests\finalAWorkStateContract.test.ts:94:    const result = state({ status: "SUCCEEDED", pauseRequestedAt: new Date("2026-11-02T00:00:00.000Z") });
+tests\finalAWorkPacketService.test.ts:60:/** 造一条原委托资料链：SOURCE_ARRIVED 事件 + SUCCEEDED 的 bind_project_sources。 */
+tests\finalAWorkPacketService.test.ts:69:    status: "SUCCEEDED", finishedAt: new Date(),
+tests\finalAWorkPacketService.test.ts:208:    const succeeded = await createMissionRow(successOwner, { status: "SUCCEEDED", finishedAt: new Date(Date.now() - 30_000) });
+tests\finalAWorkPacketService.test.ts:612:      status: "SUCCEEDED", protocolJson: json({ personalMemoryReadSet: { items: [{ claimId: claim.id }] } }) } });
+lib\continuity\handoff.ts:35:    member.role === "OWNER" ? db.agentMission.findMany({ where: { ownerUserId: actor.userId, projectId: target, status: { notIn: ["CANCELLED", "SUCCEEDED"] } }, orderBy: { updatedAt: "desc" }, take: 8,select:missionSummarySelect }) : [],
+lib\continuity\invalidation.ts:18:    ...(scope.missionId ? { id: scope.missionId } : {}), status: { notIn: ["SUCCEEDED", "FAILED", "CANCELLED"] } } });
+tests\finalCResultsReceipts.test.ts:72:        { status: "SUCCEEDED", resultJson: { sources: [{ id: "capture:s1" }] } },
+tests\focusCollaboration.test.ts:214:  it.each(["READY", "RUNNING", "WAITING_INPUT", "WAITING_APPROVAL", "SUCCEEDED", "FAILED", "CANCELLED"])("refuses a resume shortcut for %s", async status => {
+lib\mission\delegationObservation.ts:27:    const observed = steps.filter(s => record(s.protocolJson).delegationCycle === poll.cycle && s.status === "SUCCEEDED");
+lib\mission\delegationObservation.ts:146:    await tx.agentMissionStep.update({ where: { id: stepId }, data: { status: "SUCCEEDED", resultJson: json(result), finishedAt: new Date() } });
+lib\conversation\investigationService.ts:325:      step.status = "SUCCEEDED"; step.finishedAt = new Date().toISOString(); step.observationHash = jsonHash(result);
+lib\conversation\investigationService.ts:384:    const retainedReads=(Object.values(record(record(turn.readManifestJson).operations)) as Array<{kind?:string;status?:string;result?:{sources?:ConversationSource[]}}>).filter(o=>o.kind==="READ"&&o.status==="SUCCEEDED").flatMap(o=>o.result?.sources??[]);
+lib\mission\repositoryTools.ts:14:type Operation = { state: "DISPATCH_COMMITTED" | "SUCCEEDED" | "FAILED" | "UNKNOWN"; units: number; response?: CiHttpResult };
+lib\mission\repositoryTools.ts:32:    if (replay) { if (replay.state === "SUCCEEDED") return replay.response!; throw new AppError("EXTERNAL_RESULT_UNKNOWN", "原仓库请求未可靠结算，不自动重发", 409); }
+lib\mission\repositoryTools.ts:37:        await tx.agentMissionStep.update({ where: { id: stepId }, data: { protocolJson: json({ ...p, [namespace]: { ...record(p[namespace]), [key]: { state: "SUCCEEDED", units, response } } }) } });
+lib\mission\modelAdapter.ts:21:  const modelContext=native?{...fullContext,observations:fullContext.observations?.filter(o=>!o.callId||o.status!=="SUCCEEDED")}:fullContext;
+lib\mission\modelAdapter.ts:32:    for(const h of history.filter(h=>h.status==="SUCCEEDED"&&h.callId)){
+lib\mission\contracts.ts:42:export const terminal = ["SUCCEEDED", "CANCELLED"];
+lib\mission\continuationService.ts:114:    await tx.agentMissionStep.create({data:{missionId:id,ordinal:(last._max.ordinal??0)+1,planRevision:m.planRevision+1,toolName:"bind_project_sources",status:"SUCCEEDED",canonicalInputJson:json(body.sourcePointers),inputHash:hash,readSetJson:json(sources),resultJson:json({data:{questionId:wait.questionId,answer:body.answer,userReviewed:mode==="MANUAL",continuationMode:mode,...(a.fit?{evidenceFitEventId:fitEventId,evidenceFit:a.fit}: {})},sources:bindingSources}),finishedAt:new Date()}});
+lib\mission\metricVerification.ts:21:  if(step.status==="SUCCEEDED"&&approval.status==="CONSUMED")return {mission,step,approval,replay:true};
+lib\mission\metricVerification.ts:85:  await tx.agentMissionStep.update({where:{id:stepId},data:{status:"SUCCEEDED",resultJson:json(result),verificationJson:json(receipt),finishedAt:new Date(),protocolJson:json({...record(step.protocolJson),sandboxJob:{phase:"SETTLED",name,receiptHash:receipt.receiptHash}})}});
+lib\mission\contextBuilder.ts:67:    db.agentMissionStep.findFirst({ where: { ...currentWhere, toolName: "inspect_project", status: "SUCCEEDED" }, orderBy: { ordinal: "desc" } }),
+lib\mission\contextBuilder.ts:68:    db.agentMissionStep.findFirst({ where: { ...currentWhere, toolName: "bind_project_sources", status: "SUCCEEDED" }, orderBy: { ordinal: "desc" } }),
+lib\mission\contextBuilder.ts:79:    if(step.toolName==="propose_metric_verification"&&step.status==="SUCCEEDED"){
+lib\mission\materialUseProjection.ts:71:    tx.agentMissionStep.findMany({ where: { missionId: input.missionId, toolName: "bind_project_sources", status: "SUCCEEDED" }, orderBy: { ordinal: "desc" }, take: 41 }),
+lib\mission\readback.ts:107:        where: { missionId: id, status: "SUCCEEDED" },
+lib\mission\workState.ts:28:  if (m.status === "SUCCEEDED")
+lib\mission\workState.ts:48:  const terminalStatus = m.status === "SUCCEEDED" || m.status === "CANCELLED" ? m.status : null;
+lib\conversation\presentationRuntime.ts:104:    a.catalog.push({ ...base("investigation", [], `本轮完成 ${state.steps.filter(s => s.status === "SUCCEEDED").length} 次资料读取`), semanticType: "investigation", investigationId: turnId,
+lib\conversation\presentationRuntime.ts:147:            state: action.status === "DONE" ? "SUCCEEDED" : action.status === "DOING" ? "RUNNING" : action.status === "CANCELLED" ? "CANCELLED" : "CREATED" });
+lib\mission\workspaceSummary.ts:10:const TERMINAL_STATUSES = ["SUCCEEDED", "CANCELLED"];
+lib\mission\workspaceSummary.ts:14:const TERMINAL_UNSETTLED_EMPTY_NOTE = "当前项目没有已结束（SUCCEEDED/CANCELLED）的终态委托；非终态 UNKNOWN 仍由原 items 的 workState 显示，不影响原摘要。";
+lib\mission\workspaceSummary.ts:27:  const where = {ownerUserId: userId, projectId, status: {notIn: ["SUCCEEDED", "CANCELLED"]}};
+lib\mission\workspaceSummary.ts:30:    db.agentMission.findMany({where: {...where, status: {notIn: [...attentionStates, "SUCCEEDED", "CANCELLED"]}}, orderBy: {updatedAt: "desc"}, take: 3, select: missionSummarySelect}),
+lib\mission\workspaceSummary.ts:45:    steps: {where: {status: "SUCCEEDED"}, orderBy: {ordinal: "desc" as const}, take: 1, select: {toolName: true, finishedAt: true}},
+lib\mission\presentation.ts:5:  SUCCEEDED: "委托条件已验收", CANCELLED: "已取消",
+lib\mission\presentation.ts:72:    { label: "执行条件", value: completion?.criteriaPassed === true ? "已通过本委托设定的条件" : completion?.criteriaPassed === false ? "条件未通过，请核对执行记录" : status === "SUCCEEDED" ? "已验收，明细待读取" : "尚未完成条件验收" },
+lib\conversation\progress.ts:13:  return { sequence: events.at(-1)?.seq ?? 0, events, phase: (manifest as { stopRequested?: boolean }).stopRequested ? "STOPPING" : phase ?? state.phase, mode: state.budget?.mode ?? "STANDARD", completedReads: state.steps.filter(s => s.status === "SUCCEEDED").length,
+lib\mission\workPacket.ts:193:  if (mission.missionStatus !== "SUCCEEDED" && mission.missionStatus !== "CANCELLED") return null;
+lib\mission\callCoverage.ts:47:  const toolSuccess = steps.filter(step => step.status === "SUCCEEDED").length;
+lib\mission\calendarWriteService.ts:108:    if (step.status === "SUCCEEDED" && approval.status === "CONSUMED") return step.resultJson;
+lib\mission\calendarWriteService.ts:114:      await tx.agentMissionStep.update({ where: { id: stepId }, data: { status: "SUCCEEDED", resultJson: json(result), finishedAt: new Date(),
+lib\mission\calendarWriteService.ts:144:    if (step.status === "SUCCEEDED" && approval.status === "CONSUMED") return { done: true as const, result: step.resultJson };
+lib\mission\calendarWriteService.ts:269:    if (step.status === "SUCCEEDED" && approval.status === "CONSUMED") return step.resultJson;
+lib\mission\calendarWriteService.ts:277:      await tx.agentMissionStep.update({ where: { id: stepId }, data: { status: "SUCCEEDED", resultJson: json(result), finishedAt: new Date(),
+lib\mission\calendarWriteService.ts:307:    if (step.status === "SUCCEEDED" && approval.status === "CONSUMED") return { done: true as const, result: step.resultJson };
+tests\fixtures\r4\pr5-baseline\modelAdapter.txt:20:  const modelContext=native?{...fullContext,observations:fullContext.observations?.filter(o=>!o.callId||o.status!=="SUCCEEDED")}:fullContext;
+tests\fixtures\r4\pr5-baseline\modelAdapter.txt:29:    for(const h of history.filter(h=>h.status==="SUCCEEDED"&&h.callId)){
+lib\conversation\researchTools.ts:179:    if (availableCharacters < 200 && previousOperation?.status !== "SUCCEEDED") throw new AppError("EXTERNAL_BUDGET_EXHAUSTED", "本轮资料容量已满，先依据已读片段回答", 409);
+lib\conversation\researchTools.ts:226:    if (availableCharacters < 200 && previousOperation?.status !== "SUCCEEDED") throw new AppError("EXTERNAL_BUDGET_EXHAUSTED", "本轮资料容量已满，先依据已读片段回答", 409);
+tests\fixtures\r4\pr5-baseline\dynamicCandidates.txt:70:  const observations = await db.agentMissionStep.findMany({ where: { missionId, status: "SUCCEEDED", toolName: "read_project_material" }, orderBy: { ordinal: "desc" }, take: 16, select: { resultJson: true, protocolJson: true } });
+lib\services\workspaceContextService.ts:38:    const missionWhere = { projectId: p.id, ownerUserId: actor.userId, status: { notIn: ["SUCCEEDED", "CANCELLED"] } };
+tests\fixtures\r4\pr5-baseline\changeUnderstanding.txt:39:  const steps = await db.agentMissionStep.findMany({ where: { missionId, status: "SUCCEEDED" }, orderBy: { ordinal: "desc" }, take: 8, select: { resultJson: true } });
+tests\goalChangeReview.test.ts:207:    expect(step.status).toBe("SUCCEEDED"); expect(JSON.stringify(step.resultJson)).toContain("6.8GB");
+tests\goalChangeReview.test.ts:237:    expect(await db.agentMissionStep.count({ where: { missionId: f.mission.id, status: "SUCCEEDED" } })).toBe(0);
+tests\fixtures\r4\experience-v1.json:866:                "status": "SUCCEEDED",
+tests\fixtures\r4\experience-v1.json:1114:        "status": "SUCCEEDED",
+tests\fixtures\r4\experience-v1.json:2055:                "status": "SUCCEEDED",
+tests\fixtures\r4\experience-v1.json:2307:        "status": "SUCCEEDED",
+tests\fixtures\r4\experience-v1.json:3249:                "status": "SUCCEEDED",
+tests\fixtures\r4\experience-v1.json:3490:        "status": "SUCCEEDED",
+lib\mission\branchObservation.ts:22:    const observed = steps.filter(s => record(s.protocolJson).branchCycle === poll.cycle && s.status === "SUCCEEDED");
+lib\mission\branchObservation.ts:60:    await tx.agentMissionStep.update({where:{id:pending.step.id},data:{status:"SUCCEEDED",finishedAt:new Date(),
+tests\globalWorkspace.integration.test.ts:79:  for (const status of ["WAITING_INPUT", "WAITING_APPROVAL", "PAUSED", "FAILED", "RUNNING", "READY", "SUCCEEDED", "CANCELLED"]) await make(owned.id, user.id, status);
+lib\conversation\turnRuntime.ts:41:export type TurnOperation = { id: string; inputHash: string; kind: string; generation?: number; replayKey?: string; requestUnits?: number; status: "RESERVED" | "DISPATCH_COMMITTED" | "DISPATCHING" | "SUCCEEDED" | "FAILED" | "UNKNOWN";
+lib\conversation\turnRuntime.ts:59:    const raw = network && (Object.values(ops) as TurnOperation[]).find(o => o.replayKey === replayKey && o.status === "SUCCEEDED");
+lib\conversation\turnRuntime.ts:87:    if (replay.status === "SUCCEEDED") return replay.result as T;
+lib\conversation\turnRuntime.ts:101:      ...op, status: "SUCCEEDED", finishedAt: new Date().toISOString(), result,
+lib\services\projectAgentContextService.ts:23:      const focused = await db.agentMission.findFirst({where:{id:member.focusMissionId,projectId,ownerUserId:userId,status:{notIn:["SUCCEEDED","CANCELLED"]}},select:{...missionSummarySelect,updatedAt:true,planRevision:true}})
+lib\services\projectAgentContextService.ts:51:    if(missionId && !await tx.agentMission.findFirst({where:{id:missionId,projectId,ownerUserId:userId,status:{notIn:["SUCCEEDED","CANCELLED"]}}}))throw new AppError("MISSION_NOT_FOUND","请选择本项目尚未结束的委托",404);
+lib\mission\approvalService.ts:22:  if(step.status==="SUCCEEDED"&&approval.status==="CONSUMED")return step.resultJson;
+lib\mission\approvalService.ts:33:  await tx.agentMissionStep.update({where:{id:stepId},data:{status:"SUCCEEDED",resultJson:json(result),verificationJson:{created:true,actionId:action.id},finishedAt:new Date()}});
+lib\mission\runtimeStore.ts:109: return tx.agentMission.update({where:{id:m.id},data:{status,pauseReason:reason??null,...(p?{planJson:json({...plan,...(status==="PAUSED"?{resumeStatus:"READY"}:{})}),nextAttemptAt}:status==="PAUSED"&&reason!=="USER"?{planJson:json({...m.planJson as object,resumeStatus:"READY"})}:{}),executionSlot:null,leaseOwner:null,leaseUntil:null,version:{increment:1},...(status==="SUCCEEDED"||status==="CANCELLED"?{finishedAt:new Date()}:{})}});
+lib\mission\runner.ts:145:     const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED",...((current.planJson as {impactGuard?:string}).impactGuard?{planRevision:current.planRevision}:{})},orderBy:{ordinal:"asc"}});
+lib\mission\runner.ts:150:     await event(tx,m.id,"CRITERIA_CHECKED",{...verification,phase:"VERIFY"});await release(tx,current,"SUCCEEDED");return null;
+lib\mission\runner.ts:153:    const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED",...((current.planJson as {impactGuard?:string}).impactGuard?{planRevision:current.planRevision}:{})},orderBy:{ordinal:"asc"}});const sources=sourcesFrom(history.map(s=>s.resultJson));const inputHash=toolInputHash(choice.tool,args,sources);
+lib\mission\runner.ts:248:   await tx.agentMissionStep.update({where:{id:step!.id},data:{status:"SUCCEEDED",resultJson:json(data),finishedAt:new Date()}});
+tests\metricSandbox.test.ts:30: expect(view.steps[0].status).toBe("SUCCEEDED");expect(view.used).toMatchObject({sandboxJobs:1});expect(docker.calls.filter(c=>c==="create")).toHaveLength(1);expect(docker.calls.filter(c=>c==="start")).toHaveLength(1);
+tests\metricSandbox.test.ts:36: expect((await missionDetail(f.user.id,f.m.id)).steps[0].status).toBe("SUCCEEDED");expect(docker.calls.filter(c=>c==="create")).toHaveLength(1);expect(docker.calls.filter(c=>c==="start")).toHaveLength(1);
+tests\metricSandbox.test.ts:59: expect(docker.calls.filter(x=>x==="start")).toHaveLength(1);const completed=await missionDetail(f.user.id,f.m.id);expect(completed.used).toMatchObject({sandboxJobs:1});expect(completed.steps[0].status).toBe("SUCCEEDED");
+tests\missionCompletion.test.ts:43:    await db.agentMission.update({ where: { id: m.id }, data: { status: "SUCCEEDED" } });
+tests\missionCompletion.test.ts:56:    expect(detail.status).toBe("SUCCEEDED");
+tests\missionCompletion.test.ts:66:    const facts = missionCompletionFacts("SUCCEEDED", undefined, "NEEDS_REVIEW");
+lib\mission\resultVerifier.ts:24:      for(const approval of approvals){if(approval.step.toolName!=="propose_metric_verification"||approval.step.status!=="SUCCEEDED")continue;
+lib\mission\resultVerifier.ts:30:      const reads=await tx.agentMissionStep.findMany({where:{missionId:m.id,toolName:"read_paper_metadata",status:"SUCCEEDED"}});
+tests\missionContinuation.test.ts:36: it("结构化成功条件不因有草稿或已恢复而跳过，足量来源和答复才通过",async()=>{const{p,m,d}=await fixture();await db.agentMission.update({where:{id:m.id},data:{successCriteriaJson:json(["DRAFT_EXISTS","REQUIRED_INPUT_PRESENT",{type:"SOURCE_COUNT",minimum:1}])}});await expect(db.$transaction(tx=>verifyMissionResult(tx,{...m,successCriteriaJson:json(["REQUIRED_INPUT_PRESENT"])},d.outputs[0].id))).rejects.toMatchObject({code:"CRITERIA_NOT_MET"});const pointer=await material(p.id);await confirmContinuation(userId,m.id,await bodyFor(m.id,[pointer]));const next=await slice(m.id,{kind:"tool",tool:"save_mission_output",args:{blocks:[{blockId:"new",kind:"PROJECT_OBSERVATION",text:"用户提供10月本地实验数据，含义待人工核验",sourceIds:[pointer.id]}]},summary:"修订"});const done=await slice(m.id,{kind:"finish",outputId:next.outputs[0].id});expect(done.status).toBe("SUCCEEDED");expect(done.outputs).toHaveLength(2);});
+lib\mission\responsibility.ts:64:    const active = !continuity.stopped && !expired && !["SUCCEEDED", "CANCELLED", "PAUSED", "FAILED"].includes(m.status) && !m.pauseRequestedAt && !m.cancelRequestedAt;
+tests\missionEarlierProgress.test.ts:4:const step = (ordinal: number, extra: Partial<EarlierStep> = {}): EarlierStep => ({ ordinal, tool: "search_memory", status: "SUCCEEDED", historical: false, withheld: false, note: "查找依据" + ordinal, ...extra });
+tests\missionEarlierProgress.test.ts:12:    expect(value.steps[0]).toEqual({ ordinal: 1, tool: "search_memory", status: "SUCCEEDED", withheld: true });
+lib\server\globalFocus.ts:15:const terminalStates = ["SUCCEEDED", "CANCELLED"];
+tests\missionProtocolRecovery.integration.test.ts:55:      expect(completed.id).toBe(mission.id); expect(completed.status).toBe("SUCCEEDED");
+tests\missionPanel.test.ts:12: const mission={id:"m",projectId:"p",goal:"整理阶段汇报",status:action?"WAITING_APPROVAL":"READY",version:1,constraintsVersion:1,researchScopeVersion:1,constraints:{...constraintsSchema.parse({}),llmContextApproved:false},researchScope:researchScopeSchema.parse({}),question:null,error:null,pauseReason:null,outputs:[],steps:action?[{id:"s",toolName:"propose_action",status:"SUCCEEDED",result:{data:{actionId:"a",title:"核对实验条件",status:"TODO"}}}]:[],approvals:action?[{id:"approval",proposalHash:"hash",proposal:{args:{title:"下一项验证",description:"验证公开条件",priority:4,dueAt:"2026-10-30T18:00:00.000Z"}},expiresAt:"2026-10-30T19:00:00.000Z"}]:[]};
+tests\missionPanel.test.ts:89: it("完成条件、草稿核验、采纳和现实结果并列，不把SUCCEEDED包装为事实完成",async()=>{
+tests\missionPanel.test.ts:90:  const f=fixture();Object.assign(f.mission,{status:"SUCCEEDED",completion:{criteriaPassed:true,criteriaCheckedAt:"2026-10-23T00:00:00Z",draftVerification:"NEEDS_REVIEW",adoptionCount:0,latestArtifactId:null,realityOutcome:"NOT_INFERRED"}});
+tests\missionResearch.test.ts:37: it("检索→读取→研究Output→完成，外部来源不产生项目事实",async()=>{const {p,m}=await fixture();const source=await fetched(m.id);const text=(source.excerptJson as {text:string}).text;const d=await slice(m.id,tool("save_mission_output",{kind:"RESEARCH",blocks:[{blockId:"comparison",kind:"EXTERNAL_REFERENCE",text:"公开研究报告Dice为0.85，尚未进行项目实测。",sourceIds:[source.id],citations:[{sourceId:source.id,start:0,end:text.length,excerptHash:textHash(text)}]}],missingInformation:["本地验证指标"]}));expect(d.outputs).toHaveLength(1);expect(d.outputs[0].verificationStatus).toBe("NEEDS_REVIEW");expect(await db.knowledgeCard.count({where:{projectId:p.id}})).toBe(0);const finished=await slice(m.id,{kind:"finish",outputId:d.outputs[0].id});expect(finished.status).toBe("SUCCEEDED");});
+components\AgentMessageBlocks.module.css:68:.receipt[data-state="SUCCEEDED"] .receiptMark { color:var(--teal-strong); background:var(--teal-pale); box-shadow:none; animation:blockSettle var(--dur-settle) var(--ease-out) both; }
+components\AgentMessageBlocks.module.css:91:@media(prefers-reduced-motion:reduce) { .approval[data-state="PENDING"],.receipt[data-state="SUCCEEDED"] .receiptMark,.change { animation:none; } .blocks [data-tether-line] path { animation:none; stroke-dashoffset:0; } }
+tests\missionRuntime.test.ts:32: it("观察→草稿→完成，来源版本与步骤保留",async()=>{const {m}=await fixture();let d=await slice(m.id,tool("inspect_project",{}));const source=(d.steps[0].result as {sources:Array<{id:string}>}).sources[0].id;d=await slice(m.id,tool("save_mission_output",{blocks:[{blockId:"p",kind:"PROJECT_OBSERVATION",text:"目标为整理进展",sourceIds:[source]}]}));expect(d.outputs).toHaveLength(1);d=await slice(m.id,{kind:"finish",outputId:d.outputs[0].id});expect(d.status).toBe("SUCCEEDED");expect(d.steps).toHaveLength(2);});
+tests\missionRuntime.test.ts:59: it("子进程提交后未回包即退出，恢复后只保留一个Action",async()=>{const {p,m}=await fixture();await propose(m.id);await approve(m.id);const step=await db.agentMissionStep.findFirstOrThrow({where:{missionId:m.id,status:"READY"}});const code=`(async()=>{const {claimMission}=await import('./lib/mission/runtimeStore.ts');const {commitApprovedAction}=await import('./lib/mission/approvalService.ts');const m=await claimMission('crash-child',${JSON.stringify(m.id)});await commitApprovedAction({id:m.id,owner:m.leaseOwner,epoch:m.leaseEpoch,contextVersion:m.contextVersion,planRevision:m.planRevision},${JSON.stringify(step.id)});process.exit(17);})();`;const result=spawnSync(process.execPath,[path.resolve('node_modules/tsx/dist/cli.mjs'),'--eval',code],{env:{...process.env,DATABASE_URL:`file:${isolated.file.replaceAll('\\','/')}`},encoding:'utf8',timeout:20000});expect(result.status,result.stderr).toBe(17);expect(await db.actionItem.count({where:{projectId:p.id}})).toBe(1);await slice(m.id,draft());expect(await db.actionItem.count({where:{projectId:p.id}})).toBe(1);expect((await db.agentMissionStep.findUniqueOrThrow({where:{id:step.id}})).status).toBe('SUCCEEDED');});
+tests\missionRuntime.test.ts:108:   const d=await missionDetail(userId,m.id);expect(d.status).toBe("SUCCEEDED");expect(d.outputs).toHaveLength(1);expect(d.steps).toHaveLength(1);
+components\AgentRunThread.tsx:20:  if (status === "SUCCEEDED") return "done";
+components\AgentRunThread.tsx:35:  const finished = steps.filter(step => step.status === "SUCCEEDED").length;
+components\AgentMemoryPanel.tsx:41:          {item.commitments.map((c, i) => <p key={i}>{c.note} · {c.actionStatus === "DONE" ? "已记录完成" : c.actionStatus === "DOING" ? "行动进行中" : c.missionStatus === "SUCCEEDED" ? "原委托已结束" : "查看原任务进度"}
+tests\missionRuntimeDiagnostics.test.ts:216:      const step = await db.agentMissionStep.create({ data: { missionId: m.id, ordinal: i, planRevision: 1, toolName: "search_memory", status: "SUCCEEDED", canonicalInputJson: {}, readSetJson: [], inputHash: jsonHash(i), resultJson: json({ data: canary + "填充".repeat(40), sources: [] }), finishedAt: new Date() } });
+tests\missionRuntimeDiagnostics.test.ts:322:    await db.$executeRawUnsafe(`CREATE TRIGGER diag_abort BEFORE UPDATE ON AgentMissionStep WHEN NEW.missionId='${m.id}' AND NEW.status='SUCCEEDED' BEGIN SELECT RAISE(ABORT,'${secret}'); END`);
+tests\missionRuntimeDiagnostics.test.ts:335:    const first = await db.agentMissionStep.findFirstOrThrow({ where: { missionId: m.id, status: "SUCCEEDED" } });
+components\AgentMessageBlocks.tsx:13:const receiptLabels: Record<string, string> = { CREATED: "行动已创建", SUBMITTED: "已提交", RUNNING: "进行中", WAITING_USER: "等待你的回应", SUCCEEDED: "结果已保存", FAILED: "未完成", UNKNOWN: "结果尚不明确", CANCELLED: "已取消" };
+components\AgentMessageBlocks.tsx:84:      <ol>{block.steps.map(step => <li key={step.id}><span data-status={step.status}>{step.status === "SUCCEEDED" ? <Check size={14}/> : <Circle size={10}/>}</span><div>
+components\AgentMessageBlocks.tsx:85:        <strong>{step.decision.decision === "READ_EXISTING" ? step.decision.informationNeed : "核对资料"}</strong><p>{step.status === "SUCCEEDED" ? "已读取原资料" : step.failureReason ?? "正在核对"}</p>
+components\AgentMessageBlocks.tsx:101:    if (block.semanticType === "receipt") return <section key={block.blockKey} {...common} className={styles.receipt} data-state={block.state} aria-label="原业务回执"><span className={styles.receiptMark}>{block.state === "SUCCEEDED" ? <Check size={17}/> : <Circle size={10}/>}</span><div><strong>{receiptLabels[block.state]}</strong><p>{block.fallbackText}</p>
+lib\experience\trajectoryIndex.ts:11: *  engineeringCompleted      原 Mission SUCCEEDED（既定工程验收）
+lib\experience\trajectoryIndex.ts:134:    const succeededLater = (tool: string, afterIndex: number) => steps.some((s, i) => i > afterIndex && s.toolName === tool && s.status === "SUCCEEDED");
+lib\experience\trajectoryIndex.ts:142:    const ordered = steps.filter(s => s.status === "SUCCEEDED").map(s => s.toolName);
+lib\experience\trajectoryIndex.ts:151:      engineeringCompleted: m.status === "SUCCEEDED",
+tests\p0bEvidence.integration.test.ts:87:    await db.agentMissionStep.create({ data: { missionId: m.id, ordinal: 1, planRevision: 1, toolName: "bind_project_sources", status: "SUCCEEDED", canonicalInputJson: {}, readSetJson: [], inputHash: jsonHash("input"),
+tests\p0bEvidence.integration.test.ts:92:      await db.agentMissionStep.create({ data: { missionId: m.id, ordinal: i, planRevision: 1, toolName: "search_memory", status: "SUCCEEDED", canonicalInputJson: {}, readSetJson: [], inputHash: jsonHash(i), resultJson: json({ data: "填充".repeat(1500), sources: [] }) } });
+tests\p3ReviewBoundaries.test.ts:161:    await db.agentMissionStep.create({ data: { missionId: m.id, ordinal: 1, planRevision: 1, toolName: "inspect_project", toolVersion: "1", status: "SUCCEEDED", canonicalInputJson: {}, inputHash: "fixture", readSetJson: json([source]), protocolJson: { schemaVersion: 1 }, resultJson: json({ data: {}, sources: [source] }) } });
+tests\p3ReviewBoundaries.test.ts:170:    await db.agentMission.update({ where: { id: m.id }, data: { status: "SUCCEEDED" } });
+lib\experience\conditions.ts:114:  const tools = unique(steps.filter(s => s.status === "SUCCEEDED").map(s => s.toolName));
+components\MissionPanel.tsx:37:const stepLabels:Record<string,string>={READY:"准备执行",RUNNING:"正在执行",WAITING_APPROVAL:"待批准",SUCCEEDED:"已执行",FAILED:"执行失败",UNKNOWN:"原job结果待核对",OBSOLETE:"依据已变化",SKIPPED:"已跳过"};
+components\MissionPanel.tsx:65: useEffect(()=>{let changed=false;for(const s of mission?.steps??[]){const id=s.result?.data?.actionId;if(s.status==="SUCCEEDED"&&id&&!seenActions.current.has(id)){seenActions.current.add(id);changed=true;}}if(changed)emitWorkspaceChange(projectId,["actions"]);},[mission,projectId]);
+components\MissionPanel.tsx:97: const terminal=["SUCCEEDED","CANCELLED"].includes(mission?.status??"");
+components\MissionPanel.tsx:98: const done=mission?.steps.filter(s=>s.status==="SUCCEEDED").length??0;
+components\MissionPanel.tsx:152:     <div className={styles.detailTools}><Link className="workspace-link focus-ring" href={"/focus?entryKind=MISSION&entryId="+mission.id+"&entryProject="+projectId}>调整当前重点／继续讨论</Link>{!["SUCCEEDED","CANCELLED"].includes(mission.status)&&<ProjectAgentFocusButton projectId={projectId} missionId={mission.id}/>}</div></div>
+components\MissionPanel.tsx:193:      return <section className={styles.attention} key={s.id} aria-label="批量外部日历写入回执"><h4>飞书日历</h4><p>{s.status==="SUCCEEDED"?`已创建 ${data?.events?.length??0} 个日程。`:s.status==="UNKNOWN"?"写入结果还不确定，可能已创建一部分；不会自动重复创建。":s.status==="FAILED"?"确定失败："+(data?.message??"飞书拒绝了本批写入")+"":"等待批准或执行。"}</p>{data?.compensation&&<p className={styles.muted}>补偿删除：已删除 {data.compensation.deleted.length} 个{data.compensation.remaining.length?`，仍有 ${data.compensation.remaining.length} 个未确认删除`:""}。</p>}</section>;})}
+components\MissionPanel.tsx:195:      return <section className={styles.attention} key={s.id} aria-label="外部日历写入回执"><h4>飞书日历</h4><p>{s.status==="SUCCEEDED"?"日程已创建。":s.status==="UNKNOWN"?"写入结果还不确定，可能已经创建；不会自动重复创建。":s.status==="FAILED"?"确定失败："+(data?.message??"飞书拒绝了本次写入")+"":"等待批准或执行。"}</p></section>;})}
+components\MissionPanel.tsx:200:    <details className={styles.activity}><summary>最近进展</summary>{mission.steps.filter(s=>s.status==="SUCCEEDED").slice(-2).map(s=><p key={s.id}>{toolLabels[s.toolName]??"工具步骤"}已执行</p>)}{mission.outputs[0]&&<p>草稿修订 {mission.outputs[0].revision} 已保存，内容待审阅。</p>}{done===0&&!mission.outputs.length&&<p>尚无已完成步骤；当前状态：{labels[mission.status]??"待核对"}。</p>}</details>
+components\MissionPanel.tsx:206:     <p className={styles.taskId}>任务编号：{mission.id}</p><ol>{mission.steps.map((s,index)=><li key={s.id}><span className={styles.stepNumber} data-status={s.status}>{s.status==="SUCCEEDED"?"✓":index+1}</span><div className={styles.stepBody}><div className={styles.stepHeading}><span>{toolLabels[s.toolName]??"执行步骤"}</span><small>{stepLabels[s.status]??"状态待确认"}</small></div>{s.result?.data?.actionId&&<p><a href={projectHref(projectId,`#action-${s.result.data.actionId}`)}>{s.toolName==="inspect_action"?"行动结果":"已创建行动"}：{s.result.data.title??"查看行动"}</a>（{s.result.data.status==="DONE"?"已报告完成":s.result.data.status==="CANCELLED"?"已取消":["IN_PROGRESS","DOING"].includes(s.result.data.status??"")?"进行中":"创建回执：待办"}）{s.result.data.resultCardId&&<a href={projectHref(projectId,`#card-${s.result.data.resultCardId}`)}>查看结果复盘</a>}</p>}</div></li>)}</ol>
+components\MissionPanel.module.css:33:.statusDot[data-status=SUCCEEDED],.statusDot[data-status=RUNNING] { background: var(--teal); }
+components\MissionPanel.module.css:41:.badge[data-status=RUNNING],.badge[data-status=SUCCEEDED] { color: var(--teal-strong); background: var(--teal-pale); }
+components\MissionPanel.module.css:67:.stepNumber[data-status=SUCCEEDED] { color: var(--teal-strong); background: var(--teal-pale); border-color: transparent; }
+components\MissionMetricReceipts.tsx:6:  <p>{!job.current?"原指标依据已变化，此回执仅作历史记录。":step.status==="SUCCEEDED"?"核算已完成。":receipt?"已拿到核算结果，等待确认。":step.status==="UNKNOWN"?"核算还没结束；继续时只核对这一次，不会重复执行。":"正在核对。"}</p>
+lib\memory\personalInvalidation.ts:54:  const candidates = await tx.agentMission.findMany({ where: { ownerUserId: userId, status: { notIn: ["SUCCEEDED", "FAILED", "CANCELLED"] } } });
+components\ExperienceSuggestions.tsx:70:            <span className={styles.badge} data-status={s.eligibleForInjection ? "SUCCEEDED" : "PAUSED"} style={{ marginLeft: ".5rem" }}>
+tests\pm3LongTermRecall.test.ts:111:      status: "SUCCEEDED", canonicalInputJson: {}, inputHash: `step-${i}`, readSetJson: [], protocolJson: {},
+tests\pm4EvolutionResponsibility.test.ts:79:    const step = await db.agentMissionStep.findFirstOrThrow({ where: { missionId: mission.id, status: "SUCCEEDED" } });
+tests\pm4EvolutionResponsibility.test.ts:97:  const step = await db.agentMissionStep.findFirstOrThrow({ where: { missionId: mission.id, status: "SUCCEEDED" } });
+components\ConversationWorkCard.tsx:67:      {workRef.kind === "MISSION" && !["SUCCEEDED", "CANCELLED", "RUNNING"].includes(work.status) && <details><summary>对比推进方案</summary><div className={styles.minuteFields}><label>可用时间（分钟）<input type="number" min="1" max="100000" value={minutes} onChange={e => setMinutes(e.target.value)}/></label><label>交付所需（分钟）<input type="number" min="1" max="100000" value={delivery} onChange={e => setDelivery(e.target.value)}/></label></div><button type="button" className="workspace-tool focus-ring" disabled={busy || !Number(minutes) || !Number(delivery)} onClick={() => void run(async () => { const r = await request<{ conversation: ConversationView; work: ConversationWork }>(base + "/scenarios", { ref: workRef, versionToken: work.versionToken, requestId: key({ minutes, delivery, token: work.versionToken }), availableMinutes: Number(minutes), deliveryMinutes: Number(delivery) }); if (live.current) { onChange(r.conversation); setWork(r.work); } })}>生成方案对比</button></details>}
+components\MissionWorkPacket.tsx:136:  SUCCEEDED: "已执行",
+tests\r4Investigation.test.ts:111:    expect(state.steps[0]).toMatchObject({ status: "SUCCEEDED", decision: { decision: "READ_EXISTING" } });
+tests\r4Investigation.test.ts:168:      expect(view.activeTurn?.progress).toMatchObject({ phase: "EVALUATING", completedReads: 1, steps: [{ label: "读取原始资料", status: "SUCCEEDED" }] });
+tests\r4Specialists.test.ts:111:    expect(await db.agentMissionStep.count({ where: { missionId: f.mission.id, toolName: "read_project_material", status: "SUCCEEDED" } })).toBe(1);
+tests\r4ExperienceContract.test.ts:54:    expect(investigationStepSchema.parse(f.observedStep).status).toBe("SUCCEEDED");
+tests\r4ExperienceContract.test.ts:139:    receipt.state = "SUCCEEDED";
+tests\s1ResultProgress.test.ts:18:      { status: "SUCCEEDED", resultJson: { data: { ok: true } } },
+tests\s1ResultProgress.test.ts:19:      { status: "SUCCEEDED", resultJson: { data: { ok: true }, sources: [{ id: "capture:1" }] } },
+tests\s2CallCoverage.test.ts:28:    { id: "s1", status: "SUCCEEDED", toolName: "inspect_project", toolVersion: "1", agentRunId: "r1" },
+tests\s2CallCoverage.test.ts:67:    toolName: "inspect_project", toolVersion: "1", canonicalInputJson: {}, inputHash: "h", readSetJson: [], status: "SUCCEEDED" } });
+tests\ux3ProactiveDiscovery.test.ts:132:  // Step 1: 运行第一步观察（此时创建并执行 step，状态 SUCCEEDED）
+tests\ux3ResponsibilityRevision.test.ts:600:  expect(steps.filter(s => s.status === "SUCCEEDED").length).toBe(0);
+tests\ux3ResponsibilityRevision.test.ts:879:          status: "SUCCEEDED",
+tests\ux3ThreeDayContinuity.test.ts:368:  expect(executedStep.status).toBe("SUCCEEDED");
+tests\workStateBadge.test.ts:19:    expect(workStateLabel({ phase: "COMPLETED", terminal: { status: "SUCCEEDED", reasonCode: "SUCCEEDED", ...at } })).toBe("条件已验收");

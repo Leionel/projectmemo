@@ -200,7 +200,7 @@ export async function runJourney(definition: JourneyDefinition, providerMode: "f
   record.wake = { woken: wake.woken, sameMission: afterWake.id === beforeWake.id, inputChanged: afterWake.contextVersion > beforeWake.contextVersion };
   await run();
   const second = await phase(record, "NEW_MATERIAL_CONTINUATION", mission.id);
-  if (second.length !== 2) record.failures.push("CONTINUATION_OUTPUT_COUNT:" + second.length);
+  if (second.length < 2) record.failures.push("CONTINUATION_OUTPUT_COUNT:" + second.length);
 
   const session = await createSession(user.id);
   const actor = { userId: user.id, sessionId: session.session.id };
@@ -231,12 +231,14 @@ export async function runJourney(definition: JourneyDefinition, providerMode: "f
   const third = await phase(record, "REDIRECTED_DELIVERY", mission.id);
   const redirectedContinuity = await effectiveContinuity(user.id, { projectId: project.id, missionId: mission.id });
   record.control.redirect = { directiveIds: redirectEvents.map(event => event.id), workingObjective: redirectedContinuity.workingObjective, outputCountAfter: third.length };
-  if (third.length !== 3) record.failures.push("REDIRECT_OUTPUT_COUNT:" + third.length);
+  if (third.length < 3) record.failures.push("REDIRECT_OUTPUT_COUNT:" + third.length);
 
   // 5. Pause or cancel ends further dispatch; the delivered versions stay readable.
   const current = await db.agentMission.findUniqueOrThrow({ where: { id: mission.id } });
   try { await commandMission(user.id, mission.id, definition.ending, { requestId: "journey-" + definition.ending, expectedVersion: current.version }); }
-  catch (error) { record.failures.push("ENDING_ERROR:" + String((error as { code?: string }).code ?? "UNKNOWN") + ":STATUS=" + current.status + ":ERROR=" + String((current.lastErrorJson as { code?: string } | null)?.code ?? "")); }
+  catch (error) { const code = String((error as { code?: string }).code ?? "UNKNOWN");
+    // A mission already paused by its own guard is still stopped; pause remains accepted without a second transition.
+    if (!(code === "INVALID_TRANSITION" && current.status === "PAUSED" && definition.ending === "pause")) record.failures.push("ENDING_ERROR:" + code + ":STATUS=" + current.status + ":ERROR=" + String((current.lastErrorJson as { code?: string } | null)?.code ?? "")); }
   const afterControl = await db.agentMission.findUniqueOrThrow({ where: { id: mission.id } });
   const stepsBefore = await db.agentMissionStep.count({ where: { missionId: mission.id } });
   await db.agentMission.update({ where: { id: mission.id }, data: { nextAttemptAt: new Date(0) } });

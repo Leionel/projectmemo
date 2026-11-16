@@ -70,8 +70,11 @@ export async function reserve(lease:Lease,kind:"models"|"tools",tool?:string,out
  if(Object.entries(limits).some(([key,value])=>typeof value === "number" && (used[key as keyof typeof used] ?? 0) > value))throw new AppError("BUDGET_EXHAUSTED","委托预算已用完，请检查后处理",409);
  await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json({...raw,...used,...(dailyUsage?{dailyUsage}:{})})}});return used;
  });}
-export async function settleUsage(lease:Lease,kind:"models"|"tools",durationMs:number,tokens?:{inputTokens:number|null;outputTokens:number|null}){return db.$transaction(async tx=>{
+export async function settleUsage(lease:Lease,kind:"models"|"tools",durationMs:number,tokens?:{inputTokens:number|null;outputTokens:number|null},reservedOutputTokens=0){return db.$transaction(async tx=>{
  const m=await fenced(tx,lease,false);const raw=record(m.budgetUsedJson);const used=usageOf(raw);used.activeMs=Math.max(0,used.activeMs-20000)+durationMs;
+ // The output-token reservation is per call; release it and keep actual usage instead,
+ // otherwise long-running continuous missions exhaust a lifetime reservation they never used.
+ if(kind==="models"&&reservedOutputTokens>0&&m.runtimeProtocolVersion===2)used.reservedOutputTokens=Math.max(0,used.reservedOutputTokens-reservedOutputTokens);
  if(kind==="models"&&tokens){if(tokens.inputTokens!==null)used.inputTokens+=tokens.inputTokens;if(tokens.outputTokens!==null)used.outputTokens+=tokens.outputTokens;if(tokens.inputTokens!==null&&tokens.outputTokens!==null)used.unknownCalls=Math.max(0,used.unknownCalls-1);}
  await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json({...raw,...used})}});
  });}

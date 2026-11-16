@@ -71,3 +71,11 @@
 - 结果：协议/持久化 34/40，内容 16/24。四条旅程均完成初稿→新材料→限制→改道/暂停的持久化；工具边界全私有。真实失败：developer 在续稿时越过证据门槛后停住；freelancer/course 改道后模型复用上一版 Output 被 `SKILL_OUTPUT_REQUIRED` 拒绝，未产出新版本；research 三版齐全但离线判据用字面“工作重点”误判改道。首稿过度依赖 inspect_project 概况而不是导入原文。
 - 修复（离线验证，未再付费）：runner 增加派发前预算钩子（守卫已有回归）；`completionReadback` 只对当前周期成果 canCheckpoint，新周期返回 `CURRENT_VERSION_REQUIRED`；门槛拒绝后一次受控重试并注入 `skillRepair` 提示；SKILL.md 要求导入材料必须 `read_project_material` 读原文、上下文变化后先保存新版本再 await；改道判据改为关键词命中。离线 fixture/http 仍 40/40+24/24；22 文件 188 条回归、tsc、lint 通过。
 - 待办：以上修复需真实模型小范围复验；已向用户提出新授权建议（developer+freelancer，≤8 次/条、合计 ≤16 次/≤40k tokens），未获新授权前不发起付费调用。完整回执见 `evidence/v2-first-loop/eval-v2/live/`。
+
+## 真实模型修复复验回执（用户指示继续、不怕上限）
+
+- 用户明确授权继续复验后，按真实失败逐项修复并重新执行，共 4 轮真实模型评测（DeepSeek `deepseek-flash`）：live 31 次/327,567 tokens（守卫缺陷，已如实记录）、live2 40 次/481,010、live3 35 次/401,699、live4 **38 次/440,918**。累计 144 次调用、1,651,194 tokens，余额 CNY 37.85→36.57（约 ¥1.28），全部为合成项目。
+- 真实失败驱动并已验证的修复：① `settleUsage` 结算时释放每次调用的 `reservedOutputTokens`，修复长期连续 Mission 被累计预留误判 `BUDGET_EXHAUSTED`；② v2 单次决策输出上限 2000→3000（截断修复仍 4000），`modelAdapter` 直接使用上下文上限；③ v2 允许第二次协议修复；④ 方法门槛拒绝后一次受控引导重试（`skillRepair` 带 `requiredTool=read_project_material` 与可用的 sourceId/sourceHash）；⑤ 内容与来源完全相同的连续私有稿去重为 `OUTPUT_UNCHANGED`；⑥ deliverable-creation SKILL 要求改道/受限后的新版本首段写出当前工作重点原话。
+- 最终结果：四条旅程协议 **40/40**、内容 **24/24**，真实模型 v3/v4 正文首段均写明本轮工作重点，未知条件与未验证项保留，工具边界全私有。developer/freelancer 3 版，research/course 4 版（中途保存经去重或为多稿版本），改道后同一 Mission 均产出新版本，暂停/取消后零派发。
+- 验证：离线 fixture/http 仍 40/40+24/24；全量测试、tsc、lint 结果见 `evidence/v2-first-loop/eval-v2/live4/`。证据：`eval-v2/live4/`（README、checks、report、journeys、测试日志）。
+- 边界：单次通过不等同于所有场景稳定（模型仍有随机性）；预算展示口径变化但实际模型/工具总量限制未放宽；72h 时钟/断电、真机/HAP、生产滚动升级仍未验证，V2 保持关闭。

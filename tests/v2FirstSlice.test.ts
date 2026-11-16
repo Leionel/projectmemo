@@ -15,6 +15,7 @@ import { effectiveContinuity, assertDirectiveEffect, submitDirective } from "@/l
 import { readMissionWorkbench } from "@/lib/mission/workbenchService";
 import { planSkillSequence } from "@/lib/skills/router";
 import { json } from "@/lib/mission/contracts";
+import { saveOutput } from "@/lib/mission/outputService";
 import { workspaceDirectory } from "@/lib/services/workspaceContextService";
 import { fixtureSkillProvider } from "../scripts/fixtures/v2-provider";
 import type { Decision } from "@/lib/mission/contracts";
@@ -56,6 +57,7 @@ test.each(["独立开发版本", "客户交付项目", "科研实验汇报", "�
   expect(JSON.parse(await buildContext(await db.agentMission.findUniqueOrThrow({ where: { id: f.m.id } }))).completionReadback)
     .toMatchObject({ canFinish: false, canCheckpoint: true, note: expect.stringContaining("await_event") });
   expect(first.outputs[0].sourceRefsJson).toEqual(expect.arrayContaining([expect.objectContaining({ id: "capture:" + f.capture.id })]));
+  expect((first.used as { reservedOutputTokens: number }).reservedOutputTokens).toBe(0);
   const before = first.used;
   const newer = await db.capture.create({ data: { projectId: f.p.id, sourceType: "TEXT", rawText: cohort + "：第二版新增限制，需要修订交付说明。" } });
   f.select(newer.id);
@@ -85,6 +87,19 @@ test("all four shipped Skills route, while creation cannot bypass the evidence g
     provider: "INJECTED_TEST", model: "fixture", protocol: "JSON_CHOICE", usage: { inputTokens: 1, outputTokens: 1 } }) });
   expect((await missionDetail(f.u.id, f.m.id)).error).toMatchObject({ code: "SKILL_OUTPUT_RESTRICTED" });
   expect(await db.agentMissionOutput.count({ where: { missionId: f.m.id } })).toBe(0);
+});
+test("an identical immediate draft is kept as the same version instead of a meaningless new revision", async () => {
+  const f = await fixture("重复稿");
+  const step = (ordinal: number, hash: string) => db.agentMissionStep.create({ data: {
+    missionId: f.m.id, ordinal, planRevision: 1, toolName: "save_mission_output", status: "SUCCEEDED",
+    canonicalInputJson: {}, inputHash: hash, readSetJson: [], finishedAt: new Date() } });
+  const firstStep = await step(101, "dup-1"), secondStep = await step(102, "dup-2");
+  const body = { blocks: [{ blockId: "same", kind: "INFERENCE" as const, text: "同一份私有稿", sourceIds: [] as string[] }] };
+  const first = await saveOutput(db, f.m.id, firstStep.id, body, []);
+  const second = await saveOutput(db, f.m.id, secondStep.id, body, []);
+  expect(second.id).toBe(first.id);
+  expect(await db.agentMissionOutput.count({ where: { missionId: f.m.id } })).toBe(1);
+  expect(await db.agentMissionEvent.count({ where: { missionId: f.m.id, type: "OUTPUT_UNCHANGED" } })).toBe(1);
 });
 test("v2 user question does not auto-resolve when new material arrives; cancel never revives", async () => {
   const f = await fixture("待判断");

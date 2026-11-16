@@ -60,7 +60,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
  let phase:MissionPhase="CONTEXT",contextManifest:MissionContextManifest|undefined,sourceDecisionRunId:string|null|undefined;
  const failedSettlements=new Set<"models"|"tools">();
  // Keep failed reservations and unknown usage; a lost lease must not hide the original failure.
- const settleFailed=async(kind:"models"|"tools",started:number,usage?:Decision["usage"])=>{try{await settleUsage(lease,kind,Date.now()-started,usage);}catch{failedSettlements.add(kind);}};
+ const settleFailed=async(kind:"models"|"tools",started:number,usage?:Decision["usage"],reservedOutputTokens=0)=>{try{await settleUsage(lease,kind,Date.now()-started,usage,reservedOutputTokens);}catch{failedSettlements.add(kind);}};
  const heartbeat=setInterval(()=>{void renew(lease).catch(()=>false);},10000);heartbeat.unref();
  try{
   if(recordDelegationPoll(m.planJson)){phase="TOOL";if(await runDelegationObservation(lease,tools,id=>{activeStepId=id;},options.repository))return true;phase="CONTEXT";}
@@ -114,12 +114,13 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    });
    // Evaluation-only pre-dispatch guard: refuse a call that could exceed an authorized token window.
     options.beforeDecision?.(context);
-    phase="DECISION";await reserve(lease,"models",undefined,decisionTokenLimit(m.lastErrorJson));const started=Date.now();
+    const outputReserve=decisionTokenLimit(m.lastErrorJson,m.runtimeProtocolVersion??1);
+    phase="DECISION";await reserve(lease,"models",undefined,outputReserve);const started=Date.now();
    const decision=await (async()=>{try{if(!options.provider)await reserveCloudCall(m.projectId);return await (options.provider??chooseNext)(context,tools);}catch(error){
     await settleFailed("models",started,error instanceof ModelProtocolError?error.metadata.usage:undefined);
     throw error;
    }})();
-   await settleUsage(lease,"models",Date.now()-started,decision.usage);
+   await settleUsage(lease,"models",Date.now()-started,decision.usage,outputReserve);
     options.onDecisionUsage?.(decision.usage,decision.provider);
    const parsedChoice=choiceSchemaFor(m.runtimeProtocolVersion).safeParse(decision.choice);
    if(!parsedChoice.success)throw new ModelProtocolError(protocolDiagnostic("INVALID_CHOICE",null,0,parsedChoice.error.issues.slice(0,8).map(issue=>({code:issue.code,path:issue.path.join(".")}))),decision);
@@ -197,7 +198,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
      const failure=missionFailure(error,"VERIFY");
      await db.$transaction(async tx=>{await fenced(tx,lease);await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"FAILED",provider:options.judge?"TEST_FIXTURE":"mission-claim-judge",fallbackReason:"JUDGE_UNAVAILABLE",trace:json({missionId:m.id,phase:"VERIFY",purpose:"CLAIM_JUDGE",claimId:request.claimId,code:failure.code,category:failure.category,diagnostic:failure.diagnostic,contextManifest})}});});throw error;
     }})();
-    await settleUsage(lease,"models",Date.now()-begin,response.usage);
+    await settleUsage(lease,"models",Date.now()-begin,response.usage,1000);
     await db.$transaction(async tx=>{await fenced(tx,lease);await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"SUCCESS",provider:response.provider,trace:json({missionId:m.id,phase:"VERIFY",purpose:"CLAIM_JUDGE",model:response.model,claimId:request.claimId,usage:response.usage,contextManifest}),resultJson:{verdict:response.verdict}}});});return response;
    }:undefined;
    claimChecks=await verifyResearchClaims(step.canonicalInputJson,step.readSetJson as unknown as Source[],{enabled:isFeatureEnabled("MISSION_SEMANTIC_CHECK_ENABLED",false),judge});

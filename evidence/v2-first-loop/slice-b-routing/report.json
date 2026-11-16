@@ -1,7 +1,7 @@
 {
   "datasetId": "projectmemo-v2-routing-64-v1",
   "datasetFingerprint": "1b71452899c586e4e893477be68301a90dac23e57ad4d4d80258f59b16fce89a",
-  "generatedAt": "2026-11-16T13:50:13.854Z",
+  "generatedAt": "2026-11-16T14:22:09.237Z",
   "provider": "INJECTED_V2_FIXTURE",
   "modelCalls": 0,
   "paidCalls": 0,
@@ -16,7 +16,7 @@
     "controlCasesWithDispatch": 0,
     "unprovenContentChecks": 0
   },
-  "durationMs": 4702,
+  "durationMs": 6020,
   "resultsFile": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\evidence\\v2-first-loop\\slice-b-routing\\results.jsonl",
   "note": "路由、工具边界与持久证据由真实 Router/Mission Runner/控制服务与真实 AgentMissionStep 采集；内容语义判据在离线注入模型下标记 UNPROVEN，不判真，按失败计入最终证据维度。"
 }

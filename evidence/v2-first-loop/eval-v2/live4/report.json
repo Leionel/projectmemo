@@ -1,0 +1,2159 @@
+{
+  "provider": "live",
+  "providerLabel": "LIVE_MODEL",
+  "generatedAt": "2026-11-16T14:11:05.996Z",
+  "durationMs": 105309,
+  "journeys": [
+    {
+      "id": "developer",
+      "label": "独立开发发布",
+      "protocol": {
+        "passed": 10,
+        "total": 10,
+        "checks": [
+          {
+            "name": "SAME_MISSION_CONTINUATION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "新资料由既有扫描器唤醒同一 Mission（woken=1）",
+            "evidenceRef": "mission:cmwjcasa00004d88o5drl0hdz:wake"
+          },
+          {
+            "name": "VERSION_CHAIN_WITH_CHECKPOINTS",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "版本 1,2,3；checkpoint 1,2,3",
+            "evidenceRef": "mission:cmwjcasa00004d88o5drl0hdz:versions"
+          },
+          {
+            "name": "EVIDENCE_AND_TOOL_RECEIPTS",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "Skill 进入/交接与读取/创作步骤均有持久回执",
+            "evidenceRef": "mission:cmwjcasa00004d88o5drl0hdz:steps:6"
+          },
+          {
+            "name": "BUDGET_MONOTONIC_NO_RESET",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型/工具累计用量不重置：3→7→7→10→10 / 2→4→4→6→6",
+            "evidenceRef": "mission:cmwjcasa00004d88o5drl0hdz:budget"
+          },
+          {
+            "name": "RESTRICTION_BEFORE_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "限制先落库并禁止外部读取，之后没有新增稿（ids=1，blocked=true，unchanged=true）",
+            "evidenceRef": "directive:892a6b73-0683-4a1e-872c-a11964ff1017"
+          },
+          {
+            "name": "REDIRECT_SAME_MISSION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "有限目标改道后同一 Mission 产出第 3 版",
+            "evidenceRef": "directive:b000595f-d162-4692-aa77-698b88d5a4d7"
+          },
+          {
+            "name": "ENDING_STOPS_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "暂停/取消后不再派发（pause → PAUSED）",
+            "evidenceRef": "mission:cmwjcasa00004d88o5drl0hdz:ending"
+          },
+          {
+            "name": "NO_LEGACY_FINISH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "持续委托没有用旧 finish 结束",
+            "evidenceRef": "mission:cmwjcasa00004d88o5drl0hdz:events"
+          },
+          {
+            "name": "TOOL_BOUNDARY_PRIVATE_ONLY",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "工具只使用项目读取与私有稿：inspect_project,save_mission_output,read_project_material",
+            "evidenceRef": "mission:cmwjcasa00004d88o5drl0hdz:steps"
+          },
+          {
+            "name": "PROVIDER_RECORDED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型 provider 与用量留痕：deepseek",
+            "evidenceRef": "mission:cmwjcasa00004d88o5drl0hdz:runs"
+          }
+        ]
+      },
+      "content": {
+        "passed": 6,
+        "total": 6,
+        "checks": [
+          {
+            "name": "NEW_MATERIAL_CHANGED_DRAFT",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "新增材料进入第 2 版且正文变化（hash=e6dbedcf→1807ea3a；refs=capture:cmwjcaxa5000vd88o3rluqks0,project:cmwjcas9l0001d88otsu821lz）",
+            "evidenceRef": "mission:cmwjcasa00004d88o5drl0hdz:output:cmwjcb6m8001dd88o9qfffky4"
+          },
+          {
+            "name": "OLD_EVIDENCE_RETAINED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "第 2 版仍保留旧依据：capture:cmwjcaxa5000vd88o3rluqks0,project:cmwjcas9l0001d88otsu821lz",
+            "evidenceRef": "mission:cmwjcasa00004d88o5drl0hdz:output:cmwjcb6m8001dd88o9qfffky4"
+          },
+          {
+            "name": "UNKNOWN_NOT_WRITTEN_AS_FACT",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "未知条件按未知保留，没有写成已验证事实",
+            "evidenceRef": "mission:cmwjcasa00004d88o5drl0hdz:outputs"
+          },
+          {
+            "name": "USER_REDIRECT_APPLIED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "第 3 版是否体现改道重点（命中=交付依据，需至少一项）",
+            "evidenceRef": "mission:cmwjcasa00004d88o5drl0hdz:output:cmwjcbddg0023d88ou4we2vd3"
+          },
+          {
+            "name": "NO_MEANINGLESS_REPETITION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "相邻版本正文不重复，且每版都有创作保存（版本 3，保存 3）",
+            "evidenceRef": "mission:cmwjcasa00004d88o5drl0hdz:versions"
+          },
+          {
+            "name": "CITATIONS_RESOLVE",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "每版引用均落在该版来源清单内",
+            "evidenceRef": "mission:cmwjcasa00004d88o5drl0hdz:outputs"
+          }
+        ]
+      },
+      "missionId": "cmwjcasa00004d88o5drl0hdz",
+      "versions": [
+        {
+          "revision": 1,
+          "outputId": "cmwjcawcf000kd88oe6q35bbx",
+          "checkpointSeq": 16,
+          "sourceRefs": [
+            {
+              "id": "project:cmwjcas9l0001d88otsu821lz",
+              "hash": "110c7aa90017baa042220a377004c502891522f031b69be1cfe1ffaa6fb3c55b"
+            },
+            {
+              "id": "project:cmwjcas9l0001d88otsu821lz",
+              "hash": "110c7aa90017baa042220a377004c502891522f031b69be1cfe1ffaa6fb3c55b"
+            },
+            {
+              "id": "project:cmwjcas9l0001d88otsu821lz",
+              "hash": "110c7aa90017baa042220a377004c502891522f031b69be1cfe1ffaa6fb3c55b"
+            },
+            {
+              "id": "project:cmwjcas9l0001d88otsu821lz",
+              "hash": "110c7aa90017baa042220a377004c502891522f031b69be1cfe1ffaa6fb3c55b"
+            }
+          ]
+        },
+        {
+          "revision": 2,
+          "outputId": "cmwjcb6m8001dd88o9qfffky4",
+          "checkpointSeq": 33,
+          "sourceRefs": [
+            {
+              "id": "capture:cmwjcaxa5000vd88o3rluqks0",
+              "hash": "930015ae53422c8029ccb9a06a21912af9be816d900992bdebc8552e37d92c35"
+            },
+            {
+              "id": "project:cmwjcas9l0001d88otsu821lz",
+              "hash": "110c7aa90017baa042220a377004c502891522f031b69be1cfe1ffaa6fb3c55b"
+            },
+            {
+              "id": "capture:cmwjcaxa5000vd88o3rluqks0",
+              "hash": "930015ae53422c8029ccb9a06a21912af9be816d900992bdebc8552e37d92c35"
+            },
+            {
+              "id": "project:cmwjcas9l0001d88otsu821lz",
+              "hash": "110c7aa90017baa042220a377004c502891522f031b69be1cfe1ffaa6fb3c55b"
+            },
+            {
+              "id": "capture:cmwjcaxa5000vd88o3rluqks0",
+              "hash": "930015ae53422c8029ccb9a06a21912af9be816d900992bdebc8552e37d92c35"
+            }
+          ]
+        },
+        {
+          "revision": 3,
+          "outputId": "cmwjcbddg0023d88ou4we2vd3",
+          "checkpointSeq": 49,
+          "sourceRefs": [
+            {
+              "id": "capture:cmwjcaxa5000vd88o3rluqks0",
+              "hash": "930015ae53422c8029ccb9a06a21912af9be816d900992bdebc8552e37d92c35"
+            },
+            {
+              "id": "capture:cmwjcas9o0003d88otwmmzfop",
+              "hash": "16ce23fdf8c8a26c0748961d9bfa7eb9d347e9d438c15bf91aeae5131381c11b"
+            },
+            {
+              "id": "capture:cmwjcaxa5000vd88o3rluqks0",
+              "hash": "930015ae53422c8029ccb9a06a21912af9be816d900992bdebc8552e37d92c35"
+            },
+            {
+              "id": "capture:cmwjcas9o0003d88otwmmzfop",
+              "hash": "16ce23fdf8c8a26c0748961d9bfa7eb9d347e9d438c15bf91aeae5131381c11b"
+            },
+            {
+              "id": "project:cmwjcas9l0001d88otsu821lz",
+              "hash": "110c7aa90017baa042220a377004c502891522f031b69be1cfe1ffaa6fb3c55b"
+            },
+            {
+              "id": "capture:cmwjcaxa5000vd88o3rluqks0",
+              "hash": "930015ae53422c8029ccb9a06a21912af9be816d900992bdebc8552e37d92c35"
+            },
+            {
+              "id": "capture:cmwjcas9o0003d88otwmmzfop",
+              "hash": "16ce23fdf8c8a26c0748961d9bfa7eb9d347e9d438c15bf91aeae5131381c11b"
+            },
+            {
+              "id": "project:cmwjcas9l0001d88otsu821lz",
+              "hash": "110c7aa90017baa042220a377004c502891522f031b69be1cfe1ffaa6fb3c55b"
+            },
+            {
+              "id": "capture:cmwjcaxa5000vd88o3rluqks0",
+              "hash": "930015ae53422c8029ccb9a06a21912af9be816d900992bdebc8552e37d92c35"
+            },
+            {
+              "id": "capture:cmwjcas9o0003d88otwmmzfop",
+              "hash": "16ce23fdf8c8a26c0748961d9bfa7eb9d347e9d438c15bf91aeae5131381c11b"
+            }
+          ]
+        }
+      ],
+      "phases": [
+        {
+          "phase": "INITIAL_DRAFT",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 1,
+          "checkpointCount": 1,
+          "modelCalls": 3,
+          "toolCalls": 2,
+          "budgetUsed": {
+            "models": 3,
+            "tools": 2,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 6199,
+            "reservedOutputTokens": 0,
+            "inputTokens": 23650,
+            "outputTokens": 894,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "NEW_MATERIAL_CONTINUATION",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 7,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 7,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 18861,
+            "reservedOutputTokens": 0,
+            "inputTokens": 73627,
+            "outputTokens": 3538,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "RESTRICTION_APPLIED",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 7,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 7,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 18861,
+            "reservedOutputTokens": 0,
+            "inputTokens": 73627,
+            "outputTokens": 3538,
+            "unknownCalls": 0
+          },
+          "lastError": {}
+        },
+        {
+          "phase": "REDIRECTED_DELIVERY",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 3,
+          "checkpointCount": 3,
+          "modelCalls": 10,
+          "toolCalls": 6,
+          "budgetUsed": {
+            "models": 10,
+            "tools": 6,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 27397,
+            "reservedOutputTokens": 0,
+            "inputTokens": 115835,
+            "outputTokens": 5268,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "ENDED",
+          "missionStatus": "PAUSED",
+          "outputCount": 3,
+          "checkpointCount": 3,
+          "modelCalls": 10,
+          "toolCalls": 6,
+          "budgetUsed": {
+            "models": 10,
+            "tools": 6,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 27397,
+            "reservedOutputTokens": 0,
+            "inputTokens": 115835,
+            "outputTokens": 5268,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        }
+      ],
+      "tools": [
+        {
+          "tool": "inspect_project",
+          "status": "SUCCEEDED",
+          "ordinal": 1
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 2
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 3
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 4
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 5
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 6
+        }
+      ],
+      "modelRuns": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 6075,
+            "outputTokens": 30
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 7220,
+            "outputTokens": 821
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 10355,
+            "outputTokens": 43
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 10405,
+            "outputTokens": 89
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 11395,
+            "outputTokens": 1330
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 13293,
+            "outputTokens": 1180
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 14884,
+            "outputTokens": 45
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 13375,
+            "outputTokens": 91
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 14358,
+            "outputTokens": 1594
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 14475,
+            "outputTokens": 45
+          }
+        }
+      ],
+      "wake": {
+        "woken": 1,
+        "sameMission": true,
+        "inputChanged": true
+      },
+      "control": {
+        "restriction": {
+          "directiveIds": [
+            "892a6b73-0683-4a1e-872c-a11964ff1017"
+          ],
+          "constraints": [
+            "继续整理，但不要联网"
+          ],
+          "externalReadBlocked": true,
+          "outputsUnchanged": true
+        },
+        "redirect": {
+          "directiveIds": [
+            "b000595f-d162-4692-aa77-698b88d5a4d7"
+          ],
+          "workingObjective": "今天先核对第二版交付依据",
+          "outputCountAfter": 3
+        },
+        "ending": {
+          "action": "pause",
+          "status": "PAUSED",
+          "extraDispatch": false,
+          "outputCountAfter": 3
+        }
+      },
+      "failures": [],
+      "budget": {
+        "before": {},
+        "after": {
+          "models": 10,
+          "tools": 6,
+          "searches": 0,
+          "fetches": 0,
+          "browserRequests": 0,
+          "browserBytes": 0,
+          "calendarRequests": 0,
+          "externalWrites": 0,
+          "metadataRequests": 0,
+          "activeMs": 27397,
+          "reservedOutputTokens": 0,
+          "inputTokens": 115835,
+          "outputTokens": 5268,
+          "unknownCalls": 0
+        }
+      },
+      "tokens": 108378
+    },
+    {
+      "id": "freelancer",
+      "label": "客户交付",
+      "protocol": {
+        "passed": 10,
+        "total": 10,
+        "checks": [
+          {
+            "name": "SAME_MISSION_CONTINUATION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "新资料由既有扫描器唤醒同一 Mission（woken=1）",
+            "evidenceRef": "mission:cmwjcbe4r002hd88ogfzhuszv:wake"
+          },
+          {
+            "name": "VERSION_CHAIN_WITH_CHECKPOINTS",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "版本 1,2,3；checkpoint 1,2,3",
+            "evidenceRef": "mission:cmwjcbe4r002hd88ogfzhuszv:versions"
+          },
+          {
+            "name": "EVIDENCE_AND_TOOL_RECEIPTS",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "Skill 进入/交接与读取/创作步骤均有持久回执",
+            "evidenceRef": "mission:cmwjcbe4r002hd88ogfzhuszv:steps:6"
+          },
+          {
+            "name": "BUDGET_MONOTONIC_NO_RESET",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型/工具累计用量不重置：3→7→7→10→10 / 2→4→4→6→6",
+            "evidenceRef": "mission:cmwjcbe4r002hd88ogfzhuszv:budget"
+          },
+          {
+            "name": "RESTRICTION_BEFORE_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "限制先落库并禁止外部读取，之后没有新增稿（ids=1，blocked=true，unchanged=true）",
+            "evidenceRef": "directive:b8ddda84-e380-45f7-9b71-ddff5b67d887"
+          },
+          {
+            "name": "REDIRECT_SAME_MISSION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "有限目标改道后同一 Mission 产出第 3 版",
+            "evidenceRef": "directive:577dd032-ea77-44b4-a262-312c1bfe4e5c"
+          },
+          {
+            "name": "ENDING_STOPS_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "暂停/取消后不再派发（cancel → CANCELLED）",
+            "evidenceRef": "mission:cmwjcbe4r002hd88ogfzhuszv:ending"
+          },
+          {
+            "name": "NO_LEGACY_FINISH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "持续委托没有用旧 finish 结束",
+            "evidenceRef": "mission:cmwjcbe4r002hd88ogfzhuszv:events"
+          },
+          {
+            "name": "TOOL_BOUNDARY_PRIVATE_ONLY",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "工具只使用项目读取与私有稿：inspect_project,save_mission_output,read_project_material",
+            "evidenceRef": "mission:cmwjcbe4r002hd88ogfzhuszv:steps"
+          },
+          {
+            "name": "PROVIDER_RECORDED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型 provider 与用量留痕：deepseek",
+            "evidenceRef": "mission:cmwjcbe4r002hd88ogfzhuszv:runs"
+          }
+        ]
+      },
+      "content": {
+        "passed": 6,
+        "total": 6,
+        "checks": [
+          {
+            "name": "NEW_MATERIAL_CHANGED_DRAFT",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "新增材料进入第 2 版且正文变化（hash=fa3894e6→fb43644d；refs=capture:cmwjcbhsi0038d88oj5lsd7b1,project:cmwjcbe4o002ed88o6auw0zv4）",
+            "evidenceRef": "mission:cmwjcbe4r002hd88ogfzhuszv:output:cmwjcbouq003qd88oej7wqfwf"
+          },
+          {
+            "name": "OLD_EVIDENCE_RETAINED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "第 2 版仍保留旧依据：capture:cmwjcbhsi0038d88oj5lsd7b1,project:cmwjcbe4o002ed88o6auw0zv4",
+            "evidenceRef": "mission:cmwjcbe4r002hd88ogfzhuszv:output:cmwjcbouq003qd88oej7wqfwf"
+          },
+          {
+            "name": "UNKNOWN_NOT_WRITTEN_AS_FACT",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "未知条件按未知保留，没有写成已验证事实",
+            "evidenceRef": "mission:cmwjcbe4r002hd88ogfzhuszv:outputs"
+          },
+          {
+            "name": "USER_REDIRECT_APPLIED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "第 3 版是否体现改道重点（命中=客户反馈|交付说明，需至少一项）",
+            "evidenceRef": "mission:cmwjcbe4r002hd88ogfzhuszv:output:cmwjcbub4004gd88oi0bb9mh8"
+          },
+          {
+            "name": "NO_MEANINGLESS_REPETITION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "相邻版本正文不重复，且每版都有创作保存（版本 3，保存 3）",
+            "evidenceRef": "mission:cmwjcbe4r002hd88ogfzhuszv:versions"
+          },
+          {
+            "name": "CITATIONS_RESOLVE",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "每版引用均落在该版来源清单内",
+            "evidenceRef": "mission:cmwjcbe4r002hd88ogfzhuszv:outputs"
+          }
+        ]
+      },
+      "missionId": "cmwjcbe4r002hd88ogfzhuszv",
+      "versions": [
+        {
+          "revision": 1,
+          "outputId": "cmwjcbh56002xd88ovzqvh3bs",
+          "checkpointSeq": 16,
+          "sourceRefs": [
+            {
+              "id": "project:cmwjcbe4o002ed88o6auw0zv4",
+              "hash": "a810cf9f85afc97e0c58d5888d2ea283b6d49855ddea96f82e42e790d5e4204c"
+            }
+          ]
+        },
+        {
+          "revision": 2,
+          "outputId": "cmwjcbouq003qd88oej7wqfwf",
+          "checkpointSeq": 33,
+          "sourceRefs": [
+            {
+              "id": "capture:cmwjcbhsi0038d88oj5lsd7b1",
+              "hash": "80449ba02507c88dfdd1cb0e5f32623356538b846f4e64a8809841463435fd49"
+            },
+            {
+              "id": "project:cmwjcbe4o002ed88o6auw0zv4",
+              "hash": "a810cf9f85afc97e0c58d5888d2ea283b6d49855ddea96f82e42e790d5e4204c"
+            }
+          ]
+        },
+        {
+          "revision": 3,
+          "outputId": "cmwjcbub4004gd88oi0bb9mh8",
+          "checkpointSeq": 49,
+          "sourceRefs": [
+            {
+              "id": "capture:cmwjcbe4p002gd88owr74gbo9",
+              "hash": "b3c96bd354e9ac1ba3143649c07bc3b76b85cd0d6ff2dd773635906fbd5b6659"
+            },
+            {
+              "id": "capture:cmwjcbhsi0038d88oj5lsd7b1",
+              "hash": "80449ba02507c88dfdd1cb0e5f32623356538b846f4e64a8809841463435fd49"
+            },
+            {
+              "id": "project:cmwjcbe4o002ed88o6auw0zv4",
+              "hash": "a810cf9f85afc97e0c58d5888d2ea283b6d49855ddea96f82e42e790d5e4204c"
+            }
+          ]
+        }
+      ],
+      "phases": [
+        {
+          "phase": "INITIAL_DRAFT",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 1,
+          "checkpointCount": 1,
+          "modelCalls": 3,
+          "toolCalls": 2,
+          "budgetUsed": {
+            "models": 3,
+            "tools": 2,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 4577,
+            "reservedOutputTokens": 0,
+            "inputTokens": 22471,
+            "outputTokens": 641,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "NEW_MATERIAL_CONTINUATION",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 7,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 7,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 14921,
+            "reservedOutputTokens": 0,
+            "inputTokens": 66997,
+            "outputTokens": 2552,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "RESTRICTION_APPLIED",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 7,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 7,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 14921,
+            "reservedOutputTokens": 0,
+            "inputTokens": 66997,
+            "outputTokens": 2552,
+            "unknownCalls": 0
+          },
+          "lastError": {}
+        },
+        {
+          "phase": "REDIRECTED_DELIVERY",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 3,
+          "checkpointCount": 3,
+          "modelCalls": 10,
+          "toolCalls": 6,
+          "budgetUsed": {
+            "models": 10,
+            "tools": 6,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 21430,
+            "reservedOutputTokens": 0,
+            "inputTokens": 105238,
+            "outputTokens": 3648,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "ENDED",
+          "missionStatus": "CANCELLED",
+          "outputCount": 3,
+          "checkpointCount": 3,
+          "modelCalls": 10,
+          "toolCalls": 6,
+          "budgetUsed": {
+            "models": 10,
+            "tools": 6,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 21430,
+            "reservedOutputTokens": 0,
+            "inputTokens": 105238,
+            "outputTokens": 3648,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        }
+      ],
+      "tools": [
+        {
+          "tool": "inspect_project",
+          "status": "SUCCEEDED",
+          "ordinal": 1
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 2
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 3
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 4
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 5
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 6
+        }
+      ],
+      "modelRuns": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 6063,
+            "outputTokens": 31
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 7245,
+            "outputTokens": 566
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 9163,
+            "outputTokens": 44
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 9222,
+            "outputTokens": 84
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 10197,
+            "outputTokens": 863
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 12151,
+            "outputTokens": 919
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 12956,
+            "outputTokens": 45
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 11413,
+            "outputTokens": 90
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 12397,
+            "outputTokens": 961
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 14431,
+            "outputTokens": 45
+          }
+        }
+      ],
+      "wake": {
+        "woken": 1,
+        "sameMission": true,
+        "inputChanged": true
+      },
+      "control": {
+        "restriction": {
+          "directiveIds": [
+            "b8ddda84-e380-45f7-9b71-ddff5b67d887"
+          ],
+          "constraints": [
+            "继续整理，但不要联网"
+          ],
+          "externalReadBlocked": true,
+          "outputsUnchanged": true
+        },
+        "redirect": {
+          "directiveIds": [
+            "577dd032-ea77-44b4-a262-312c1bfe4e5c"
+          ],
+          "workingObjective": "今天先核对客户反馈对应的交付说明",
+          "outputCountAfter": 3
+        },
+        "ending": {
+          "action": "cancel",
+          "status": "CANCELLED",
+          "extraDispatch": false,
+          "outputCountAfter": 3
+        }
+      },
+      "failures": [],
+      "budget": {
+        "before": {},
+        "after": {
+          "models": 10,
+          "tools": 6,
+          "searches": 0,
+          "fetches": 0,
+          "browserRequests": 0,
+          "browserBytes": 0,
+          "calendarRequests": 0,
+          "externalWrites": 0,
+          "metadataRequests": 0,
+          "activeMs": 21430,
+          "reservedOutputTokens": 0,
+          "inputTokens": 105238,
+          "outputTokens": 3648,
+          "unknownCalls": 0
+        }
+      },
+      "tokens": 97826
+    },
+    {
+      "id": "research",
+      "label": "科研阶段汇报",
+      "protocol": {
+        "passed": 10,
+        "total": 10,
+        "checks": [
+          {
+            "name": "SAME_MISSION_CONTINUATION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "新资料由既有扫描器唤醒同一 Mission（woken=1）",
+            "evidenceRef": "mission:cmwjcbv68004ud88o7w505z9z:wake"
+          },
+          {
+            "name": "VERSION_CHAIN_WITH_CHECKPOINTS",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "版本 1,2,3,4；checkpoint 1,2,4",
+            "evidenceRef": "mission:cmwjcbv68004ud88o7w505z9z:versions"
+          },
+          {
+            "name": "EVIDENCE_AND_TOOL_RECEIPTS",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "Skill 进入/交接与读取/创作步骤均有持久回执",
+            "evidenceRef": "mission:cmwjcbv68004ud88o7w505z9z:steps:7"
+          },
+          {
+            "name": "BUDGET_MONOTONIC_NO_RESET",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型/工具累计用量不重置：3→6→6→10→10 / 2→4→4→7→7",
+            "evidenceRef": "mission:cmwjcbv68004ud88o7w505z9z:budget"
+          },
+          {
+            "name": "RESTRICTION_BEFORE_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "限制先落库并禁止外部读取，之后没有新增稿（ids=1，blocked=true，unchanged=true）",
+            "evidenceRef": "directive:ad85a47c-9762-40a5-b263-ebd27b19662a"
+          },
+          {
+            "name": "REDIRECT_SAME_MISSION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "有限目标改道后同一 Mission 产出第 3 版",
+            "evidenceRef": "directive:9a6cc9cf-4fbc-40fa-bc41-199a0bca66a9"
+          },
+          {
+            "name": "ENDING_STOPS_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "暂停/取消后不再派发（pause → PAUSED）",
+            "evidenceRef": "mission:cmwjcbv68004ud88o7w505z9z:ending"
+          },
+          {
+            "name": "NO_LEGACY_FINISH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "持续委托没有用旧 finish 结束",
+            "evidenceRef": "mission:cmwjcbv68004ud88o7w505z9z:events"
+          },
+          {
+            "name": "TOOL_BOUNDARY_PRIVATE_ONLY",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "工具只使用项目读取与私有稿：inspect_project,save_mission_output,read_project_material",
+            "evidenceRef": "mission:cmwjcbv68004ud88o7w505z9z:steps"
+          },
+          {
+            "name": "PROVIDER_RECORDED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型 provider 与用量留痕：deepseek",
+            "evidenceRef": "mission:cmwjcbv68004ud88o7w505z9z:runs"
+          }
+        ]
+      },
+      "content": {
+        "passed": 6,
+        "total": 6,
+        "checks": [
+          {
+            "name": "NEW_MATERIAL_CHANGED_DRAFT",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "新增材料进入第 2 版且正文变化（hash=c7f4e08e→eed624d3；refs=project:cmwjcbv66004rd88ofwmrl0kr,capture:cmwjcbzrs005ld88oilesryly）",
+            "evidenceRef": "mission:cmwjcbv68004ud88o7w505z9z:output:cmwjcc4nk0060d88o9sfxhrap"
+          },
+          {
+            "name": "OLD_EVIDENCE_RETAINED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "第 2 版仍保留旧依据：project:cmwjcbv66004rd88ofwmrl0kr,capture:cmwjcbzrs005ld88oilesryly",
+            "evidenceRef": "mission:cmwjcbv68004ud88o7w505z9z:output:cmwjcc4nk0060d88o9sfxhrap"
+          },
+          {
+            "name": "UNKNOWN_NOT_WRITTEN_AS_FACT",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "未知条件按未知保留，没有写成已验证事实",
+            "evidenceRef": "mission:cmwjcbv68004ud88o7w505z9z:outputs"
+          },
+          {
+            "name": "USER_REDIRECT_APPLIED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "第 3 版是否体现改道重点（命中=限制条件，需至少一项）",
+            "evidenceRef": "mission:cmwjcbv68004ud88o7w505z9z:output:cmwjccc3z006qd88ouse4c9be"
+          },
+          {
+            "name": "NO_MEANINGLESS_REPETITION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "相邻版本正文不重复，且每版都有创作保存（版本 4，保存 4）",
+            "evidenceRef": "mission:cmwjcbv68004ud88o7w505z9z:versions"
+          },
+          {
+            "name": "CITATIONS_RESOLVE",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "每版引用均落在该版来源清单内",
+            "evidenceRef": "mission:cmwjcbv68004ud88o7w505z9z:outputs"
+          }
+        ]
+      },
+      "missionId": "cmwjcbv68004ud88o7w505z9z",
+      "versions": [
+        {
+          "revision": 1,
+          "outputId": "cmwjcbzay005ad88o8zcueju7",
+          "checkpointSeq": 16,
+          "sourceRefs": [
+            {
+              "id": "project:cmwjcbv66004rd88ofwmrl0kr",
+              "hash": "8710a897c5d05851c922af12c31f781d7f64f92d5260f965e7e3c90b7e34661c"
+            },
+            {
+              "id": "project:cmwjcbv66004rd88ofwmrl0kr",
+              "hash": "8710a897c5d05851c922af12c31f781d7f64f92d5260f965e7e3c90b7e34661c"
+            },
+            {
+              "id": "project:cmwjcbv66004rd88ofwmrl0kr",
+              "hash": "8710a897c5d05851c922af12c31f781d7f64f92d5260f965e7e3c90b7e34661c"
+            }
+          ]
+        },
+        {
+          "revision": 2,
+          "outputId": "cmwjcc4nk0060d88o9sfxhrap",
+          "checkpointSeq": 31,
+          "sourceRefs": [
+            {
+              "id": "project:cmwjcbv66004rd88ofwmrl0kr",
+              "hash": "8710a897c5d05851c922af12c31f781d7f64f92d5260f965e7e3c90b7e34661c"
+            },
+            {
+              "id": "capture:cmwjcbzrs005ld88oilesryly",
+              "hash": "cd64a1948baec9177a1e1f53560f056f6412958295b2d0da62db2731d2be00b9"
+            },
+            {
+              "id": "project:cmwjcbv66004rd88ofwmrl0kr",
+              "hash": "8710a897c5d05851c922af12c31f781d7f64f92d5260f965e7e3c90b7e34661c"
+            },
+            {
+              "id": "capture:cmwjcbzrs005ld88oilesryly",
+              "hash": "cd64a1948baec9177a1e1f53560f056f6412958295b2d0da62db2731d2be00b9"
+            },
+            {
+              "id": "capture:cmwjcbzrs005ld88oilesryly",
+              "hash": "cd64a1948baec9177a1e1f53560f056f6412958295b2d0da62db2731d2be00b9"
+            },
+            {
+              "id": "project:cmwjcbv66004rd88ofwmrl0kr",
+              "hash": "8710a897c5d05851c922af12c31f781d7f64f92d5260f965e7e3c90b7e34661c"
+            },
+            {
+              "id": "capture:cmwjcbzrs005ld88oilesryly",
+              "hash": "cd64a1948baec9177a1e1f53560f056f6412958295b2d0da62db2731d2be00b9"
+            }
+          ]
+        },
+        {
+          "revision": 3,
+          "outputId": "cmwjccc3z006qd88ouse4c9be",
+          "checkpointSeq": null,
+          "sourceRefs": [
+            {
+              "id": "project:cmwjcbv66004rd88ofwmrl0kr",
+              "hash": "8710a897c5d05851c922af12c31f781d7f64f92d5260f965e7e3c90b7e34661c"
+            },
+            {
+              "id": "capture:cmwjcbzrs005ld88oilesryly",
+              "hash": "cd64a1948baec9177a1e1f53560f056f6412958295b2d0da62db2731d2be00b9"
+            },
+            {
+              "id": "capture:cmwjcbv67004td88o8eddcrx9",
+              "hash": "150e2355de9e68e390650e9b3dc6a5de446589a74f602b823b1f682097778037"
+            },
+            {
+              "id": "project:cmwjcbv66004rd88ofwmrl0kr",
+              "hash": "8710a897c5d05851c922af12c31f781d7f64f92d5260f965e7e3c90b7e34661c"
+            },
+            {
+              "id": "capture:cmwjcbzrs005ld88oilesryly",
+              "hash": "cd64a1948baec9177a1e1f53560f056f6412958295b2d0da62db2731d2be00b9"
+            },
+            {
+              "id": "capture:cmwjcbv67004td88o8eddcrx9",
+              "hash": "150e2355de9e68e390650e9b3dc6a5de446589a74f602b823b1f682097778037"
+            },
+            {
+              "id": "capture:cmwjcbv67004td88o8eddcrx9",
+              "hash": "150e2355de9e68e390650e9b3dc6a5de446589a74f602b823b1f682097778037"
+            },
+            {
+              "id": "capture:cmwjcbzrs005ld88oilesryly",
+              "hash": "cd64a1948baec9177a1e1f53560f056f6412958295b2d0da62db2731d2be00b9"
+            },
+            {
+              "id": "project:cmwjcbv66004rd88ofwmrl0kr",
+              "hash": "8710a897c5d05851c922af12c31f781d7f64f92d5260f965e7e3c90b7e34661c"
+            },
+            {
+              "id": "capture:cmwjcbv67004td88o8eddcrx9",
+              "hash": "150e2355de9e68e390650e9b3dc6a5de446589a74f602b823b1f682097778037"
+            }
+          ]
+        },
+        {
+          "revision": 4,
+          "outputId": "cmwjccgzl006zd88o6gu0mh87",
+          "checkpointSeq": 52,
+          "sourceRefs": [
+            {
+              "id": "project:cmwjcbv66004rd88ofwmrl0kr",
+              "hash": "8710a897c5d05851c922af12c31f781d7f64f92d5260f965e7e3c90b7e34661c"
+            },
+            {
+              "id": "capture:cmwjcbzrs005ld88oilesryly",
+              "hash": "cd64a1948baec9177a1e1f53560f056f6412958295b2d0da62db2731d2be00b9"
+            },
+            {
+              "id": "capture:cmwjcbv67004td88o8eddcrx9",
+              "hash": "150e2355de9e68e390650e9b3dc6a5de446589a74f602b823b1f682097778037"
+            },
+            {
+              "id": "project:cmwjcbv66004rd88ofwmrl0kr",
+              "hash": "8710a897c5d05851c922af12c31f781d7f64f92d5260f965e7e3c90b7e34661c"
+            },
+            {
+              "id": "capture:cmwjcbzrs005ld88oilesryly",
+              "hash": "cd64a1948baec9177a1e1f53560f056f6412958295b2d0da62db2731d2be00b9"
+            },
+            {
+              "id": "capture:cmwjcbv67004td88o8eddcrx9",
+              "hash": "150e2355de9e68e390650e9b3dc6a5de446589a74f602b823b1f682097778037"
+            },
+            {
+              "id": "capture:cmwjcbv67004td88o8eddcrx9",
+              "hash": "150e2355de9e68e390650e9b3dc6a5de446589a74f602b823b1f682097778037"
+            },
+            {
+              "id": "capture:cmwjcbzrs005ld88oilesryly",
+              "hash": "cd64a1948baec9177a1e1f53560f056f6412958295b2d0da62db2731d2be00b9"
+            },
+            {
+              "id": "project:cmwjcbv66004rd88ofwmrl0kr",
+              "hash": "8710a897c5d05851c922af12c31f781d7f64f92d5260f965e7e3c90b7e34661c"
+            },
+            {
+              "id": "capture:cmwjcbv67004td88o8eddcrx9",
+              "hash": "150e2355de9e68e390650e9b3dc6a5de446589a74f602b823b1f682097778037"
+            }
+          ]
+        }
+      ],
+      "phases": [
+        {
+          "phase": "INITIAL_DRAFT",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 1,
+          "checkpointCount": 1,
+          "modelCalls": 3,
+          "toolCalls": 2,
+          "budgetUsed": {
+            "models": 3,
+            "tools": 2,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 5798,
+            "reservedOutputTokens": 0,
+            "inputTokens": 23321,
+            "outputTokens": 813,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "NEW_MATERIAL_CONTINUATION",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 6,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 6,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 12802,
+            "reservedOutputTokens": 0,
+            "inputTokens": 59372,
+            "outputTokens": 2210,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "RESTRICTION_APPLIED",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 6,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 6,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 12802,
+            "reservedOutputTokens": 0,
+            "inputTokens": 59372,
+            "outputTokens": 2210,
+            "unknownCalls": 0
+          },
+          "lastError": {}
+        },
+        {
+          "phase": "REDIRECTED_DELIVERY",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 4,
+          "checkpointCount": 3,
+          "modelCalls": 10,
+          "toolCalls": 7,
+          "budgetUsed": {
+            "models": 10,
+            "tools": 7,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 28244,
+            "reservedOutputTokens": 0,
+            "inputTokens": 115721,
+            "outputTokens": 5665,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "ENDED",
+          "missionStatus": "PAUSED",
+          "outputCount": 4,
+          "checkpointCount": 3,
+          "modelCalls": 10,
+          "toolCalls": 7,
+          "budgetUsed": {
+            "models": 10,
+            "tools": 7,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 28244,
+            "reservedOutputTokens": 0,
+            "inputTokens": 115721,
+            "outputTokens": 5665,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        }
+      ],
+      "tools": [
+        {
+          "tool": "inspect_project",
+          "status": "SUCCEEDED",
+          "ordinal": 1
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 2
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 3
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 4
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 5
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 6
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 7
+        }
+      ],
+      "modelRuns": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 6061,
+            "outputTokens": 29
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 7247,
+            "outputTokens": 740
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 10013,
+            "outputTokens": 44
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 10059,
+            "outputTokens": 85
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 11056,
+            "outputTokens": 1268
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 14936,
+            "outputTokens": 44
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 13416,
+            "outputTokens": 89
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 14438,
+            "outputTokens": 1652
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 14517,
+            "outputTokens": 1669
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 13978,
+            "outputTokens": 45
+          }
+        }
+      ],
+      "wake": {
+        "woken": 1,
+        "sameMission": true,
+        "inputChanged": true
+      },
+      "control": {
+        "restriction": {
+          "directiveIds": [
+            "ad85a47c-9762-40a5-b263-ebd27b19662a"
+          ],
+          "constraints": [
+            "继续整理，但不要联网"
+          ],
+          "externalReadBlocked": true,
+          "outputsUnchanged": true
+        },
+        "redirect": {
+          "directiveIds": [
+            "9a6cc9cf-4fbc-40fa-bc41-199a0bca66a9"
+          ],
+          "workingObjective": "今天先核对第二版资料中的限制条件",
+          "outputCountAfter": 4
+        },
+        "ending": {
+          "action": "pause",
+          "status": "PAUSED",
+          "extraDispatch": false,
+          "outputCountAfter": 4
+        }
+      },
+      "failures": [],
+      "budget": {
+        "before": {},
+        "after": {
+          "models": 10,
+          "tools": 7,
+          "searches": 0,
+          "fetches": 0,
+          "browserRequests": 0,
+          "browserBytes": 0,
+          "calendarRequests": 0,
+          "externalWrites": 0,
+          "metadataRequests": 0,
+          "activeMs": 28244,
+          "reservedOutputTokens": 0,
+          "inputTokens": 115721,
+          "outputTokens": 5665,
+          "unknownCalls": 0
+        }
+      },
+      "tokens": 121386
+    },
+    {
+      "id": "course",
+      "label": "学生课程项目",
+      "protocol": {
+        "passed": 10,
+        "total": 10,
+        "checks": [
+          {
+            "name": "SAME_MISSION_CONTINUATION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "新资料由既有扫描器唤醒同一 Mission（woken=1）",
+            "evidenceRef": "mission:cmwjcchqf007cd88o6u6w9byp:wake"
+          },
+          {
+            "name": "VERSION_CHAIN_WITH_CHECKPOINTS",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "版本 1,2,3,4；checkpoint 1,2,4",
+            "evidenceRef": "mission:cmwjcchqf007cd88o6u6w9byp:versions"
+          },
+          {
+            "name": "EVIDENCE_AND_TOOL_RECEIPTS",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "Skill 进入/交接与读取/创作步骤均有持久回执",
+            "evidenceRef": "mission:cmwjcchqf007cd88o6u6w9byp:steps:7"
+          },
+          {
+            "name": "BUDGET_MONOTONIC_NO_RESET",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型/工具累计用量不重置：3→6→6→10→10 / 2→4→4→7→7",
+            "evidenceRef": "mission:cmwjcchqf007cd88o6u6w9byp:budget"
+          },
+          {
+            "name": "RESTRICTION_BEFORE_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "限制先落库并禁止外部读取，之后没有新增稿（ids=1，blocked=true，unchanged=true）",
+            "evidenceRef": "directive:52650b0a-1534-4743-bd0e-2336324c14ad"
+          },
+          {
+            "name": "REDIRECT_SAME_MISSION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "有限目标改道后同一 Mission 产出第 3 版",
+            "evidenceRef": "directive:5fdabc84-95e5-43a8-b7d9-c4c56aabeba3"
+          },
+          {
+            "name": "ENDING_STOPS_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "暂停/取消后不再派发（cancel → CANCELLED）",
+            "evidenceRef": "mission:cmwjcchqf007cd88o6u6w9byp:ending"
+          },
+          {
+            "name": "NO_LEGACY_FINISH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "持续委托没有用旧 finish 结束",
+            "evidenceRef": "mission:cmwjcchqf007cd88o6u6w9byp:events"
+          },
+          {
+            "name": "TOOL_BOUNDARY_PRIVATE_ONLY",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "工具只使用项目读取与私有稿：inspect_project,save_mission_output,read_project_material",
+            "evidenceRef": "mission:cmwjcchqf007cd88o6u6w9byp:steps"
+          },
+          {
+            "name": "PROVIDER_RECORDED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型 provider 与用量留痕：deepseek",
+            "evidenceRef": "mission:cmwjcchqf007cd88o6u6w9byp:runs"
+          }
+        ]
+      },
+      "content": {
+        "passed": 6,
+        "total": 6,
+        "checks": [
+          {
+            "name": "NEW_MATERIAL_CHANGED_DRAFT",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "新增材料进入第 2 版且正文变化（hash=66c91776→eac86c8f；refs=project:cmwjcchqd0079d88ol2i8j786,capture:cmwjcclbe0081d88ox4ellhrt）",
+            "evidenceRef": "mission:cmwjcchqf007cd88o6u6w9byp:output:cmwjccprd008gd88o376clgh6"
+          },
+          {
+            "name": "OLD_EVIDENCE_RETAINED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "第 2 版仍保留旧依据：project:cmwjcchqd0079d88ol2i8j786,capture:cmwjcclbe0081d88ox4ellhrt",
+            "evidenceRef": "mission:cmwjcchqf007cd88o6u6w9byp:output:cmwjccprd008gd88o376clgh6"
+          },
+          {
+            "name": "UNKNOWN_NOT_WRITTEN_AS_FACT",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "未知条件按未知保留，没有写成已验证事实",
+            "evidenceRef": "mission:cmwjcchqf007cd88o6u6w9byp:outputs"
+          },
+          {
+            "name": "USER_REDIRECT_APPLIED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "第 3 版是否体现改道重点（命中=课程要求|交付材料，需至少一项）",
+            "evidenceRef": "mission:cmwjcchqf007cd88o6u6w9byp:output:cmwjccw660095d88orbeo1xru"
+          },
+          {
+            "name": "NO_MEANINGLESS_REPETITION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "相邻版本正文不重复，且每版都有创作保存（版本 4，保存 4）",
+            "evidenceRef": "mission:cmwjcchqf007cd88o6u6w9byp:versions"
+          },
+          {
+            "name": "CITATIONS_RESOLVE",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "每版引用均落在该版来源清单内",
+            "evidenceRef": "mission:cmwjcchqf007cd88o6u6w9byp:outputs"
+          }
+        ]
+      },
+      "missionId": "cmwjcchqf007cd88o6u6w9byp",
+      "versions": [
+        {
+          "revision": 1,
+          "outputId": "cmwjcckle007sd88o46yn2n4p",
+          "checkpointSeq": 16,
+          "sourceRefs": [
+            {
+              "id": "project:cmwjcchqd0079d88ol2i8j786",
+              "hash": "d5e3a05d72e770118f0b44e998223cf130ac1cb2db87f4421a47455afc56b6af"
+            },
+            {
+              "id": "project:cmwjcchqd0079d88ol2i8j786",
+              "hash": "d5e3a05d72e770118f0b44e998223cf130ac1cb2db87f4421a47455afc56b6af"
+            },
+            {
+              "id": "project:cmwjcchqd0079d88ol2i8j786",
+              "hash": "d5e3a05d72e770118f0b44e998223cf130ac1cb2db87f4421a47455afc56b6af"
+            }
+          ]
+        },
+        {
+          "revision": 2,
+          "outputId": "cmwjccprd008gd88o376clgh6",
+          "checkpointSeq": 31,
+          "sourceRefs": [
+            {
+              "id": "project:cmwjcchqd0079d88ol2i8j786",
+              "hash": "d5e3a05d72e770118f0b44e998223cf130ac1cb2db87f4421a47455afc56b6af"
+            },
+            {
+              "id": "project:cmwjcchqd0079d88ol2i8j786",
+              "hash": "d5e3a05d72e770118f0b44e998223cf130ac1cb2db87f4421a47455afc56b6af"
+            },
+            {
+              "id": "capture:cmwjcclbe0081d88ox4ellhrt",
+              "hash": "c3b186dff79d4ddbe66eb98f829eedc29bb0483eb2d9b6677423f7f5c6595606"
+            },
+            {
+              "id": "capture:cmwjcclbe0081d88ox4ellhrt",
+              "hash": "c3b186dff79d4ddbe66eb98f829eedc29bb0483eb2d9b6677423f7f5c6595606"
+            },
+            {
+              "id": "project:cmwjcchqd0079d88ol2i8j786",
+              "hash": "d5e3a05d72e770118f0b44e998223cf130ac1cb2db87f4421a47455afc56b6af"
+            },
+            {
+              "id": "capture:cmwjcclbe0081d88ox4ellhrt",
+              "hash": "c3b186dff79d4ddbe66eb98f829eedc29bb0483eb2d9b6677423f7f5c6595606"
+            }
+          ]
+        },
+        {
+          "revision": 3,
+          "outputId": "cmwjccw660095d88orbeo1xru",
+          "checkpointSeq": null,
+          "sourceRefs": [
+            {
+              "id": "capture:cmwjcchqe007bd88o512vku88",
+              "hash": "f9287e01469be73d817e78b5c580ec5677722ed7af3fbf7f81f3eb3a9d6b99e3"
+            },
+            {
+              "id": "project:cmwjcchqd0079d88ol2i8j786",
+              "hash": "d5e3a05d72e770118f0b44e998223cf130ac1cb2db87f4421a47455afc56b6af"
+            },
+            {
+              "id": "capture:cmwjcclbe0081d88ox4ellhrt",
+              "hash": "c3b186dff79d4ddbe66eb98f829eedc29bb0483eb2d9b6677423f7f5c6595606"
+            },
+            {
+              "id": "capture:cmwjcchqe007bd88o512vku88",
+              "hash": "f9287e01469be73d817e78b5c580ec5677722ed7af3fbf7f81f3eb3a9d6b99e3"
+            },
+            {
+              "id": "capture:cmwjcclbe0081d88ox4ellhrt",
+              "hash": "c3b186dff79d4ddbe66eb98f829eedc29bb0483eb2d9b6677423f7f5c6595606"
+            },
+            {
+              "id": "project:cmwjcchqd0079d88ol2i8j786",
+              "hash": "d5e3a05d72e770118f0b44e998223cf130ac1cb2db87f4421a47455afc56b6af"
+            },
+            {
+              "id": "capture:cmwjcchqe007bd88o512vku88",
+              "hash": "f9287e01469be73d817e78b5c580ec5677722ed7af3fbf7f81f3eb3a9d6b99e3"
+            },
+            {
+              "id": "capture:cmwjcclbe0081d88ox4ellhrt",
+              "hash": "c3b186dff79d4ddbe66eb98f829eedc29bb0483eb2d9b6677423f7f5c6595606"
+            },
+            {
+              "id": "capture:cmwjcclbe0081d88ox4ellhrt",
+              "hash": "c3b186dff79d4ddbe66eb98f829eedc29bb0483eb2d9b6677423f7f5c6595606"
+            },
+            {
+              "id": "capture:cmwjcchqe007bd88o512vku88",
+              "hash": "f9287e01469be73d817e78b5c580ec5677722ed7af3fbf7f81f3eb3a9d6b99e3"
+            }
+          ]
+        },
+        {
+          "revision": 4,
+          "outputId": "cmwjcd0pz009fd88ovln4xuf3",
+          "checkpointSeq": 52,
+          "sourceRefs": [
+            {
+              "id": "capture:cmwjcchqe007bd88o512vku88",
+              "hash": "f9287e01469be73d817e78b5c580ec5677722ed7af3fbf7f81f3eb3a9d6b99e3"
+            },
+            {
+              "id": "project:cmwjcchqd0079d88ol2i8j786",
+              "hash": "d5e3a05d72e770118f0b44e998223cf130ac1cb2db87f4421a47455afc56b6af"
+            },
+            {
+              "id": "capture:cmwjcclbe0081d88ox4ellhrt",
+              "hash": "c3b186dff79d4ddbe66eb98f829eedc29bb0483eb2d9b6677423f7f5c6595606"
+            },
+            {
+              "id": "capture:cmwjcchqe007bd88o512vku88",
+              "hash": "f9287e01469be73d817e78b5c580ec5677722ed7af3fbf7f81f3eb3a9d6b99e3"
+            },
+            {
+              "id": "capture:cmwjcclbe0081d88ox4ellhrt",
+              "hash": "c3b186dff79d4ddbe66eb98f829eedc29bb0483eb2d9b6677423f7f5c6595606"
+            },
+            {
+              "id": "project:cmwjcchqd0079d88ol2i8j786",
+              "hash": "d5e3a05d72e770118f0b44e998223cf130ac1cb2db87f4421a47455afc56b6af"
+            },
+            {
+              "id": "capture:cmwjcchqe007bd88o512vku88",
+              "hash": "f9287e01469be73d817e78b5c580ec5677722ed7af3fbf7f81f3eb3a9d6b99e3"
+            },
+            {
+              "id": "capture:cmwjcclbe0081d88ox4ellhrt",
+              "hash": "c3b186dff79d4ddbe66eb98f829eedc29bb0483eb2d9b6677423f7f5c6595606"
+            },
+            {
+              "id": "capture:cmwjcclbe0081d88ox4ellhrt",
+              "hash": "c3b186dff79d4ddbe66eb98f829eedc29bb0483eb2d9b6677423f7f5c6595606"
+            },
+            {
+              "id": "capture:cmwjcchqe007bd88o512vku88",
+              "hash": "f9287e01469be73d817e78b5c580ec5677722ed7af3fbf7f81f3eb3a9d6b99e3"
+            }
+          ]
+        }
+      ],
+      "phases": [
+        {
+          "phase": "INITIAL_DRAFT",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 1,
+          "checkpointCount": 1,
+          "modelCalls": 3,
+          "toolCalls": 2,
+          "budgetUsed": {
+            "models": 3,
+            "tools": 2,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 4496,
+            "reservedOutputTokens": 0,
+            "inputTokens": 22370,
+            "outputTokens": 598,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "NEW_MATERIAL_CONTINUATION",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 6,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 6,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 10749,
+            "reservedOutputTokens": 0,
+            "inputTokens": 54256,
+            "outputTokens": 1662,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "RESTRICTION_APPLIED",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 6,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 6,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 10749,
+            "reservedOutputTokens": 0,
+            "inputTokens": 54256,
+            "outputTokens": 1662,
+            "unknownCalls": 0
+          },
+          "lastError": {}
+        },
+        {
+          "phase": "REDIRECTED_DELIVERY",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 4,
+          "checkpointCount": 3,
+          "modelCalls": 10,
+          "toolCalls": 7,
+          "budgetUsed": {
+            "models": 10,
+            "tools": 7,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 24799,
+            "reservedOutputTokens": 0,
+            "inputTokens": 108461,
+            "outputTokens": 4867,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "ENDED",
+          "missionStatus": "CANCELLED",
+          "outputCount": 4,
+          "checkpointCount": 3,
+          "modelCalls": 10,
+          "toolCalls": 7,
+          "budgetUsed": {
+            "models": 10,
+            "tools": 7,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 24799,
+            "reservedOutputTokens": 0,
+            "inputTokens": 108461,
+            "outputTokens": 4867,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        }
+      ],
+      "tools": [
+        {
+          "tool": "inspect_project",
+          "status": "SUCCEEDED",
+          "ordinal": 1
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 2
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 3
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 4
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 5
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 6
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 7
+        }
+      ],
+      "modelRuns": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 6071,
+            "outputTokens": 29
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 7236,
+            "outputTokens": 525
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 9063,
+            "outputTokens": 44
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 9120,
+            "outputTokens": 86
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 10039,
+            "outputTokens": 935
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 12727,
+            "outputTokens": 43
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 12668,
+            "outputTokens": 89
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 13593,
+            "outputTokens": 1537
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 14170,
+            "outputTokens": 1534
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 13774,
+            "outputTokens": 45
+          }
+        }
+      ],
+      "wake": {
+        "woken": 1,
+        "sameMission": true,
+        "inputChanged": true
+      },
+      "control": {
+        "restriction": {
+          "directiveIds": [
+            "52650b0a-1534-4743-bd0e-2336324c14ad"
+          ],
+          "constraints": [
+            "继续整理，但不要联网"
+          ],
+          "externalReadBlocked": true,
+          "outputsUnchanged": true
+        },
+        "redirect": {
+          "directiveIds": [
+            "5fdabc84-95e5-43a8-b7d9-c4c56aabeba3"
+          ],
+          "workingObjective": "今天先核对课程要求对应的交付材料",
+          "outputCountAfter": 4
+        },
+        "ending": {
+          "action": "cancel",
+          "status": "CANCELLED",
+          "extraDispatch": false,
+          "outputCountAfter": 4
+        }
+      },
+      "failures": [],
+      "budget": {
+        "before": {},
+        "after": {
+          "models": 10,
+          "tools": 7,
+          "searches": 0,
+          "fetches": 0,
+          "browserRequests": 0,
+          "browserBytes": 0,
+          "calendarRequests": 0,
+          "externalWrites": 0,
+          "metadataRequests": 0,
+          "activeMs": 24799,
+          "reservedOutputTokens": 0,
+          "inputTokens": 108461,
+          "outputTokens": 4867,
+          "unknownCalls": 0
+        }
+      },
+      "tokens": 113328
+    }
+  ],
+  "totals": {
+    "protocolPassed": 40,
+    "protocolTotal": 40,
+    "contentPassed": 24,
+    "contentTotal": 24
+  },
+  "tokensUsed": 440918,
+  "decisionCalls": 38,
+  "tracedTokens": 464703,
+  "limits": {
+    "maxModels": 20,
+    "maxTokens": 200000
+  },
+  "pendingRealModelCommand": null,
+  "note": "内容维度在 fixture/http 模式下证明材料、证据与用户控制确实进入持久草稿；不代表真实模型写作质量，真实模型质量需 --provider=live 单独验收。"
+}

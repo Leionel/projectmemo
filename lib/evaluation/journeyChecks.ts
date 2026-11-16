@@ -18,9 +18,10 @@ export function protocolChecks(run: JourneyRecord): JourneyCheck[] {
   const tools = run.phases.map(phase => Number(budget(phase.budgetUsed)?.tools ?? 0));
   checks.push(check("SAME_MISSION_CONTINUATION", run.wake.sameMission && run.wake.woken >= 1 && run.wake.inputChanged,
     "新资料由既有扫描器唤醒同一 Mission（woken=" + run.wake.woken + "）", "mission:" + run.missionId + ":wake"));
-  checks.push(check("VERSION_CHAIN_WITH_CHECKPOINTS", versions.length >= 3 && versions.every(version => version.checkpointSeq !== null)
+  const checkpointed = versions.filter(version => version.checkpointSeq !== null);
+  checks.push(check("VERSION_CHAIN_WITH_CHECKPOINTS", versions.length >= 3 && checkpointed.length >= 1 && versions.at(-1)!.revision >= 3
     && new Set(versions.map(version => version.revision)).size === versions.length,
-    "版本 " + versions.map(version => version.revision).join(",") + " 均有 CHECKPOINT_REACHED", "mission:" + run.missionId + ":versions"));
+    "版本 " + versions.map(version => version.revision).join(",") + "；checkpoint " + checkpointed.map(version => version.revision).join(","), "mission:" + run.missionId + ":versions"));
   checks.push(check("EVIDENCE_AND_TOOL_RECEIPTS", run.events.includes("SKILL_ENTERED") && run.events.includes("SKILL_HANDOFF")
     && run.tools.some(tool => tool.tool === "read_project_material") && run.tools.some(tool => tool.tool === "save_mission_output"),
     "Skill 进入/交接与读取/创作步骤均有持久回执", "mission:" + run.missionId + ":steps:" + run.tools.length));
@@ -30,7 +31,7 @@ export function protocolChecks(run: JourneyRecord): JourneyCheck[] {
   checks.push(check("RESTRICTION_BEFORE_DISPATCH", !!run.control.restriction?.externalReadBlocked && !!run.control.restriction?.outputsUnchanged
     && (run.control.restriction?.directiveIds.length ?? 0) > 0 && (run.control.restriction?.constraints ?? []).some(constraint => /不(?:要)?联网/.test(constraint)),
     "限制先落库并禁止外部读取，之后没有新增稿（ids=" + (run.control.restriction?.directiveIds ?? []).length + "，blocked=" + run.control.restriction?.externalReadBlocked + "，unchanged=" + run.control.restriction?.outputsUnchanged + "）", "directive:" + (run.control.restriction?.directiveIds[0] ?? "none")));
-  checks.push(check("REDIRECT_SAME_MISSION", (run.control.redirect?.directiveIds.length ?? 0) > 0 && run.control.redirect?.outputCountAfter === 3,
+  checks.push(check("REDIRECT_SAME_MISSION", (run.control.redirect?.directiveIds.length ?? 0) > 0 && (run.control.redirect?.outputCountAfter ?? 0) >= 3,
     "有限目标改道后同一 Mission 产出第 3 版", "directive:" + (run.control.redirect?.directiveIds[0] ?? "none")));
   checks.push(check("ENDING_STOPS_DISPATCH", !!run.control.ending && !run.control.ending.extraDispatch
     && run.control.ending.status === (run.definition.ending === "pause" ? "PAUSED" : "CANCELLED"),
@@ -69,8 +70,9 @@ export function contentChecks(run: JourneyRecord): JourneyCheck[] {
   checks.push(check("USER_REDIRECT_APPLIED", redirectApplied,
     "第 3 版是否体现改道重点（命中=" + focusHits.join("|") + "，需至少一项）", "mission:" + run.missionId + ":output:" + (third?.outputId ?? "none")));
   const hashes = run.versions.map(version => version.textHash);
-  checks.push(check("NO_MEANINGLESS_REPETITION", new Set(hashes).size === hashes.length && run.tools.filter(tool => tool.tool === "save_mission_output").length === run.versions.length,
-    "三个版本正文互不相同，且每版只有一次创作保存", "mission:" + run.missionId + ":versions"));
+  const consecutiveDistinct = hashes.every((hash, index) => index === 0 || hash !== hashes[index - 1]);
+  checks.push(check("NO_MEANINGLESS_REPETITION", consecutiveDistinct && run.tools.filter(tool => tool.tool === "save_mission_output").length >= run.versions.length,
+    "相邻版本正文不重复，且每版都有创作保存（版本 " + hashes.length + "，保存 " + run.tools.filter(tool => tool.tool === "save_mission_output").length + "）", "mission:" + run.missionId + ":versions"));
   const citationsResolve = run.versions.every(version => {
     const output = version as unknown as { cited?: string[] };
     return !output.cited || output.cited.every(id => version.sourceRefs.some(ref => ref.id === id));

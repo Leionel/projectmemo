@@ -18,6 +18,11 @@ export async function saveOutput(tx:Tx,missionId:string,stepId:string,input:unkn
  const m=await tx.agentMission.findUniqueOrThrow({where:{id:missionId}});await validateSources(m.projectId,sources,tx,missionId);
  const currentChecks=isFeatureEnabled("MISSION_SEMANTIC_CHECK_ENABLED",false)&&checks?checks:body.blocks.map(b=>({blockId:b.blockId,status:"NOT_CHECKED"}));
  if(checks?.some(c=>{const block=body.blocks.find(b=>b.blockId===c.blockId);return !block||c.claimStart<0||c.claimEnd>block.text.length||c.claimStart>=c.claimEnd||c.claimHash!==jsonHash(block.text.slice(c.claimStart,c.claimEnd));}))throw new AppError("CLAIM_CHANGED","核验内容与草稿不一致",409);
+ // Identical content is not a new version: keep the latest revision and record the no-op.
+ const previous=await tx.agentMissionOutput.findFirst({where:{missionId},orderBy:{revision:"desc"}});
+ if(previous&&jsonHash(record(previous.contentJson).blocks)===jsonHash(body.blocks)&&jsonHash(previous.sourceRefsJson)===jsonHash(sources)){
+  await event(tx,missionId,"OUTPUT_UNCHANGED",{outputId:previous.id,revision:previous.revision});return previous;
+ }
  const last=await tx.agentMissionOutput.aggregate({where:{missionId},_max:{revision:true}});
  const output=await tx.agentMissionOutput.create({data:{missionId,stepId,revision:(last._max.revision??0)+1,kind:body.kind,contentJson:json(body),sourceRefsJson:json(sources),claimChecksJson:json(currentChecks),verificationStatus:"NEEDS_REVIEW"}});
  if(body.memorySynthesis){

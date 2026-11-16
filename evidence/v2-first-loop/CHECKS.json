@@ -1,0 +1,77 @@
+{
+  "checkedAt": "2026-11-16T10:49:50.334855+00:00",
+  "branch": "codex/v2-first-loop",
+  "baseline": "00e250bb7c11da24807b74b6239ff7aa3b46b07c",
+  "uniqueSchemaOwner": "Codex /root",
+  "checks": {
+    "regression": {
+      "files": 19,
+      "tests": 174,
+      "result": "PASS",
+      "command": "see final-regression.log"
+    },
+    "types": {
+      "command": "npm.cmd exec tsc -- --noEmit",
+      "result": "PASS"
+    },
+    "lint": {
+      "command": "npm.cmd exec eslint -- components/v2 app/v2 lib/skills lib/mission/workbenchService.ts lib/types/workbench.ts lib/experience/workbenchFixture.ts lib/continuity/directiveService.ts scripts/v2-local-demo.ts scripts/verify-v2-workbench.ts scripts/fixtures/v2-provider.ts tests/v2FirstSlice.test.ts",
+      "result": "PASS"
+    },
+    "build": {
+      "command": "NEXT_DIST_DIR=.next-v2-build (isolated synthetic DATABASE_URL, LLM_MODE=mock); npm.cmd run build -- --webpack",
+      "result": "PASS_WITH_EXISTING_WARNING",
+      "warning": "lib/browser/reader.ts module.createRequire static parsing"
+    },
+    "browser": {
+      "command": "npm.cmd exec tsx -- scripts/verify-v2-workbench.ts",
+      "result": "PASS",
+      "receipt": "browser/receipt.json"
+    },
+    "frozenCases": {
+      "cases": 64,
+      "selfCheck": "PASS",
+      "routerExecuted": false
+    }
+  },
+  "migration": {
+    "files": [
+      "prisma/migrations/20261116093000_mission_runtime_protocol_v2/migration.sql"
+    ],
+    "effect": "AgentMission.runtimeProtocolVersion NOT NULL DEFAULT 1",
+    "emptyReplay": "PASS",
+    "legacyUpgrade": "PASS",
+    "developmentOrProductionDbChanged": false
+  },
+  "data": {
+    "source": "synthetic temp SQLite",
+    "provider": "INJECTED_V2_FIXTURE or mocked HTTP",
+    "paidCalls": 0
+  },
+  "environment": {
+    "node": "24.16.0",
+    "nextInstalled": "16.2.11",
+    "prismaInstalled": "7.8.0",
+    "vitestInstalled": "4.1.10",
+    "declaredDependencyCleanInstallVerified": false
+  },
+  "originalWorktree": {
+    "path": "D:/Projects/hongmen",
+    "statusItems": 1364,
+    "trackedModified": 1,
+    "buildProfileSHA256": "28f5bf49f856a90287c46b1a67a710b93b145eedd68d802e197094db1341996c",
+    "unchanged": true
+  },
+  "unverified": [
+    "actual-model drafting quality",
+    "full 64-case instrumented Router evaluation",
+    "real cohort retention/value",
+    "72h real clock and device-power-loss",
+    "HarmonyOS HAP/physical device",
+    "production rollout",
+    "clean declared dependencies",
+    "production browser reader warning path",
+    "large observation-queue window coverage",
+    "mixed old Worker binaries must not consume v2 rows; upgrade all API/Workers before enabling V2"
+  ]
+}

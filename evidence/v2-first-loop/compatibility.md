@@ -17,3 +17,5 @@
 最终回归命令与结果：final-regression.log（19文件174条）；构建build.log；四Skill部署追踪skill-trace.log；浏览器browser-check.log与browser/receipt.json。此前失败中间日志保存在history/，不作为当前验收结果。
 
 数据全部为临时SQLite合成项目/注入模型或模拟HTTP。原工作树末次核对仍为1364项待提交、原HEAD不变，鸿蒙build-profile.json5 SHA256仍为28f5bf49f856a90287c46b1a67a710b93b145eedd68d802e197094db1341996c。
+
+发布边界：旧客户端/旧v1记录在新服务上的兼容已经测试；旧Worker二进制不认识版本字段，不能获准消费v2行。迁移及全部API/Worker升级完成前保持V2关闭，升级完成后才可创建v2委托。关闭功能开关只能冻结新代码中的v2执行，不能让旧二进制获得新协议能力；没有执行生产滚动升级。

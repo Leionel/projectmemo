@@ -2,7 +2,7 @@
 
 - 用户假设：开发者、自由职业者优先验证，科研/学生项目为重要对照；依据持续改稿、回访、成果采纳和成本比较，不预设最优首发。
 - 基线：00e250bb7c11da24807b74b6239ff7aa3b46b07c。原工作树1364项待提交：1项鸿蒙构建配置、1363项未跟踪资料，保留原处；只复制V2规划和本地依赖到独立工作树。
-- 独立分支：codex/v2-first-loop。本轮执行者是唯一Schema/Migration负责人；所有新增迁移由此分支生成和验证。
+- 独立分支：codex/v2-first-loop。Codex /root（codex/v2-first-loop）是唯一Schema/Migration负责人；所有新增迁移由此分支生成和验证。
 - 范围：PR-00裁决与冻结样例；PR-01a显式v2协议/观察等待兼容；PR-01b研究→创作→checkpoint→新材料唤醒→同委托改稿；交互PoC复用AgentPresentation，游戏仅作成果入口实验。
 - 状态决定：v1 choiceSchema与finish保持原义；v2必须显式登记且已有有界许可。WAITING_INPUT中的OBSERVATION不能被当作QUESTION或发催答通知。保留单槽、预算、租约、source/read-set与控制代次。
 - 已检索：WAITING_INPUT 96文件/266行，SUCCEEDED 134文件/341行，finish/协议24文件，自动接续与Worker14文件；完整清单在evidence/v2-first-loop/。这些是检索覆盖，兼容性结论须由后续回归支持。
@@ -30,3 +30,12 @@
 - 迁移：本片无新增迁移；仍仅PR-01a默认1的协议版本列。没有修改原开发库/生产库。唯一Schema/Migration负责人仍为本轮执行者。
 - 构建：Next webpack生产构建通过，四份SKILL.md均在文件追踪清单。原browser/reader.ts存在createRequire静态解析警告，未验证生产浏览器工具路径。独立工作树现用依赖副本，版本仍与声明有既有差异。
 - 64条案例：冻结数据/评分器自检通过；当前首片是Mission内的四方法调度与R→D接力，不等于64条跨对话Router实测通过。
+- 发布门槛：这里证明新服务对旧协议请求/记录的兼容，不证明旧Worker二进制能处理v2行。上线必须先保持V2关闭，完成迁移并升级全部API/Worker后再开启；混跑旧Worker的同库环境不能创建v2委托。当前独立演示全部为同一代码版本，生产滚动升级尚未验收。
+
+## 交互PoC回执
+
+- 可点击页面：/v2/workbench，默认关闭，使用MISSION_WORKBENCH_ENABLED；真实委托由missionId定位，不会在读取失败时偷偷回落到样例。渲染复用AgentMessageBlocks/AgentPresentation，提供版本、差异、来源、事件与原Conversation输入链。
+- 浏览器已验：版本与证据切换、科研对照、三个成果相关玩法、离页后新资料生成第3版、自然改道生成第4版并回到await_event；模拟回包丢失后原请求重试不重复产稿；360px无横向溢出。browser/receipt.json与截图为注入模型合成数据证据。
+- 本地演示：npm.cmd exec tsx -- scripts/v2-local-demo.ts。仅127.0.0.1，自动建立新临时库，控制台入口4416、工作台4415；注入provider仅由独立CLI传入，产品API没有选择测试provider的开关。停止进程即停止演示，临时库保留以便核对。
+- 复验：npm.cmd exec tsx -- scripts/verify-v2-workbench.ts（先启动全新的演示）。验证脚本会新增合成资料、输入限制与有限目标，不操作个人项目。游戏目前是导师追问/引用辨认/手动分工入口，不含多人同步或游戏引擎。
+- 待验：真实模型连续改稿质量、真实用户持续使用与获客假设、完整64条Router实测、长时运行/断电恢复、真机/HAP、生产部署与干净声明依赖环境。当前摘要仍采用既有有界候选窗口，规模化观察队列的排序覆盖需后续压测。

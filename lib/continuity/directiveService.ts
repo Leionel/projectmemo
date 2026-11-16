@@ -8,6 +8,7 @@ import { assertProject, assertSession, record, type Tx } from "@/lib/conversatio
 import { directiveCommandSchema, type DirectiveScope, type ContinuityView, type EffectiveDirective } from "@/lib/types/continuity";
 import type { ConversationActor } from "@/lib/types/conversation";
 import { admitDirective, candidateHash } from "./admission";
+import { isFeatureEnabled } from "@/lib/config/features";
 const intentPolicy = "effective-directives-v1";
 export function actorDirectiveScope(actor: ConversationActor, projectId: string): DirectiveScope {
   return { projectId, ...(actor.conversationId ? { conversationId: actor.conversationId } : {}),
@@ -108,6 +109,17 @@ export async function admitDirectiveInTx(actor: ConversationActor, raw: unknown,
       admissionJson: json(admission), sourceIdsJson: json(sourceIds), validFrom: from, validUntil: until, timezone: input.timezone } }); events.push(e.id);
   };
   const kind = admission.kind ?? previous?.kind ?? input.kind ?? "WORKING_OBJECTIVE", quote = input.quote ?? previous?.quote ?? "停止复用所选资料";
+  // Only an exact, current Mission-scoped literal control can continue v2 work.
+  // Capture the old binding before creating the event: unrelated stale controls cannot be silently accepted.
+  const controlled = isFeatureEnabled("MISSION_V2_ENABLED", false) && input.scope.missionId && !input.scope.conversationId && input.operation === "SET"
+    && admission.status === "DIRECT_APPLIED" && ["CONSTRAINT", "WORKING_OBJECTIVE"].includes(kind) && +from <= +now
+    ? await tx.agentMission.findFirst({ where: { id: input.scope.missionId, ownerUserId: actor.userId, runtimeProtocolVersion: 2 } }) : null;
+  const priorControl = controlled ? await effectiveContinuity(actor.userId, { projectId: controlled.projectId, missionId: controlled.id }, tx) : null;
+  const binding = record(record(controlled?.planJson).continuityBinding), policy = record(controlled?.continuationPolicyJson);
+  const canContinue = controlled && priorControl && !priorControl.stopped && !controlled.pauseRequestedAt && !controlled.cancelRequestedAt
+    && (controlled.status === "READY" || controlled.status === "RUNNING" || controlled.status === "WAITING_INPUT" && record(controlled.waitStateJson).waitingFor === "OBSERVATION")
+    && policy.mode === "BOUNDED_INVESTIGATION" && Date.parse(String(policy.expiresAt)) > +now
+    && binding.intentHash === priorControl.intentHash && binding.reusePolicyHash === priorControl.reusePolicyHash;
   let sourceIds = input.operation === "SUPPRESS_USE" ? input.sourceIds ?? [] : [];
   if (input.operation === "SUPPRESS_USE") {
     const { sourceLineage } = await import("./sourcePolicy");
@@ -132,6 +144,20 @@ export async function admitDirectiveInTx(actor: ConversationActor, raw: unknown,
     await tx.conversationTurn.update({ where: { id: t.id }, data: { readManifestJson: json({ ...record(t.readManifestJson), directiveCandidate: { ...record(record(t.readManifestJson).directiveCandidate), status: "USER_CONFIRMED" } }) } });
   }
   await invalidateContinuityConsumers(tx, actor.userId, input.scope, events, kind === "STOP" && input.operation !== "WITHDRAW", projectIds, now);
+  if (canContinue) {
+    const view = await effectiveContinuity(actor.userId, { projectId: controlled.projectId, missionId: controlled.id }, tx);
+    let modelAllowed = true;
+    try { assertDirectiveEffect(view, "MODEL"); } catch { modelAllowed = false; }
+    if (modelAllowed && !view.stopped) {
+      const current = await tx.agentMission.findUniqueOrThrow({ where: { id: controlled.id } });
+      const plan = record(current.planJson), observe = kind === "CONSTRAINT" && controlled.status === "WAITING_INPUT";
+      await tx.agentMission.update({ where: { id: current.id }, data: { status: observe ? "WAITING_INPUT" : "READY",
+        pauseReason: null, nextAttemptAt: observe ? now : null, lastErrorJson: json({}),
+        planJson: json({ ...plan, continuityBinding: { intentHash: view.intentHash, reusePolicyHash: view.reusePolicyHash } }) } });
+      const { event } = await import("@/lib/mission/repository");
+      await event(tx, current.id, "NATURAL_CONTROL_APPLIED", { directiveEventIds: events, kind, status: observe ? "WAITING_INPUT" : "READY", grantsAuthority: false });
+    }
+  }
   return { admission, events, view: await effectiveContinuity(actor.userId, input.scope, tx) };
 }
 export async function submitDirective(actor: ConversationActor, conversationId: string, raw: unknown) {

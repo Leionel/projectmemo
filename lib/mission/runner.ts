@@ -19,6 +19,7 @@ import { gapRequirementsSchema } from "./gaps";
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { enterObservationCheckpoint } from "./checkpoint";
+import { prepareSkillCursor, assertSkillTool, recordSkillResult } from "@/lib/skills/runtime";
 import { AppError } from "@/lib/api";
 import { missionStrategyV2 } from "@/lib/agent/specialistPrompts";
 import { chooseNext, type DecisionProvider } from "./modelAdapter";
@@ -93,7 +94,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    const constraints=m.constraintsJson as {llmContextApproved?:boolean;costCeiling?:{amount:number}|null};
    if(!options.provider&&!constraints.llmContextApproved)throw new AppError("LLM_CONTEXT_NOT_APPROVED","请先确认云模型使用本委托上下文的范围",409);
    if(!options.provider&&constraints.costCeiling)throw new AppError("COST_POLICY_REQUIRED","金额上限尚无法自动换算，需确认调用额度或使用不计费模式",409);
-   const context=await buildContext(m,tools,{remoteProcessing:!options.provider});contextManifest=missionContextManifest(context,m);
+   const context=await buildContext(m.runtimeProtocolVersion===2?await prepareSkillCursor(lease):m,tools,{remoteProcessing:!options.provider});contextManifest=missionContextManifest(context,m);
    const built=JSON.parse(context) as { sourceInput: { projectId: string; revision: number; role: string }; hypotheses?: { readSet?: { claimId: string; projectId: string; revision: number; validityHash: string }[] };
      experienceReadSet?: ExperienceReadRef[]; experienceAdvisories?: Array<{ id: string; version: number; contentHash: string }>;
      personalMemoryReadSet?: unknown };
@@ -154,7 +155,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
      phase="VERIFY";const verification=await verifyMissionResult(tx,current,choice.outputId);phase="COMMIT";
      await event(tx,m.id,"CRITERIA_CHECKED",{...verification,phase:"VERIFY"});await release(tx,current,"SUCCEEDED");return null;
     }
-    phase="TOOL";const tool=tools[choice.tool],args=toolArgs;assertAutomaticTool(current,choice.tool,tool.effects.businessWrite);assertToolConstraints(current.constraintsJson,choice.tool,args);
+    phase="TOOL";await assertSkillTool(tx,current,choice.tool);const tool=tools[choice.tool],args=toolArgs;assertAutomaticTool(current,choice.tool,tool.effects.businessWrite);assertToolConstraints(current.constraintsJson,choice.tool,args);
     const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED",...((current.planJson as {impactGuard?:string}).impactGuard?{planRevision:current.planRevision}:{})},orderBy:{ordinal:"asc"}});const sources=sourcesFrom(history.map(s=>s.resultJson));const inputHash=toolInputHash(choice.tool,args,sources);
     if(history.slice(-2).length===2&&history.slice(-2).every(s=>s.inputHash===inputHash))throw new AppError("NO_PROGRESS","连续调用没有新信息，请调整目标或补充资料",409);
     phase="COMMIT";const last=await tx.agentMissionStep.aggregate({where:{missionId:m.id},_max:{ordinal:true}});
@@ -171,6 +172,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
   phase="TOOL";activeStepId=step.id;sourceDecisionRunId=step.agentRunId;const tool=tools[step.toolName];if(!tool)throw new AppError("UNKNOWN_TOOL","该工具版本不可恢复",409);
   const currentMission=await db.agentMission.findUniqueOrThrow({where:{id:m.id}});assertAutomaticTool(currentMission,step.toolName,tool.effects.businessWrite);
   assertToolConstraints(currentMission.constraintsJson,step.toolName,step.canonicalInputJson);
+  await assertSkillTool(db,currentMission,step.toolName);
   const args=tool.schema.parse(step.canonicalInputJson);assertDynamicTool(currentMission,step.toolName,args);await assertExperienceReadSet(m.ownerUserId,record(step.protocolJson).experienceReadSet);await assertPersonalMemoryReadSet(m.ownerUserId,record(step.protocolJson).personalMemoryReadSet);await reserve(lease,"tools",step.toolName);const started=Date.now();
   const result=await(async()=>{try{const value=await tool.run({userId:m.ownerUserId,projectId:m.projectId,missionId:m.id},args);if(JSON.stringify(value).length>40000)throw new AppError("TOOL_OUTPUT_LIMIT","工具结果超出任务读取范围",409);return value;}catch(error){await settleFailed("tools",started);throw error;}})();
   await settleUsage(lease,"tools",Date.now()-started);
@@ -251,6 +253,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    }
    if(step!.toolName==="inspect_action"){const action=data.data as {actionId?:string;status?:string;resultCardId?:string};if(action.status==="DONE"&&action.resultCardId)await event(tx,m.id,"USER_REPORTED",{stepId:step!.id,actionId:action.actionId,resultCardId:action.resultCardId});}
    await tx.agentMissionStep.update({where:{id:step!.id},data:{status:"SUCCEEDED",resultJson:json(data),finishedAt:new Date()}});
+   await recordSkillResult(tx,current,step!.toolName,data);
    await event(tx,m.id,"TOOL_FINISHED",{stepId:step!.id,result:data,phase:"COMMIT"});await release(tx,current,"READY");
   });return true;
  }catch(error){

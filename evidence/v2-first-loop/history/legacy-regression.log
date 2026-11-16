@@ -1,0 +1,12 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/missionRuntime.test.ts tests/missionNativeContract.test.ts tests/missionWaitNotice.test.ts tests/missionModelProtocol.test.ts tests/missionProtocolRecovery.integration.test.ts tests/missionContinuation.test.ts tests/agentUxWorkState.test.ts tests/agentUxJourney.test.ts tests/missionPanel.test.ts tests/ux3ThreeDayContinuity.test.ts tests/ux3ResponsibilityRevision.test.ts tests/continuityIntent.test.ts tests/continuityStages23.test.ts tests/v2ModelProtocol.test.ts
+
+
+ RUN  v4.1.10 C:/Users/Administrator/.codex/worktrees/v2-first-loop/hongmen
+
+
+ Test Files  14 passed (14)
+      Tests  129 passed (129)
+   Start at  18:14:15
+   Duration  40.43s (transform 3.98s, setup 0ms, import 23.19s, tests 12.83s, environment 1.54s)

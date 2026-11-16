@@ -40,9 +40,12 @@ export async function workspaceDirectory(actor: ConversationActor, scope: string
       db.actionItem.findMany({ where: { projectId: p.id, isSimulated: false, status: { in: ["TODO", "DOING"] } },
         orderBy: [{ priority: "desc" }, { id: "asc" }], take: 4, select: { id: true, title: true, status: true, dueAt: true } }),
       privateMissions ? db.agentMission.findMany({ where: missionWhere, take: 4, orderBy: [{ updatedAt: "desc" }, { id: "asc" }],
-        select: { id: true, goal: true, status: true, version: true, planRevision: true, contextVersion: true, pauseReason: true } }) : [],
+        select: { id: true, goal: true, status: true, version: true, planRevision: true, contextVersion: true, pauseReason: true, waitStateJson: true } }) : [],
       db.actionItem.count({ where: { projectId: p.id, isSimulated: false, status: { in: ["TODO", "DOING"] } } }),
-      privateMissions ? db.agentMission.count({ where: { ...missionWhere, status: { in: ["WAITING_INPUT", "WAITING_APPROVAL"] } } }) : 0,
+      privateMissions ? db.$transaction([
+        db.agentMission.count({ where: { ...missionWhere, status: { in: ["WAITING_INPUT", "WAITING_APPROVAL"] } } }),
+        db.agentMission.count({ where: { ...missionWhere, status: "WAITING_INPUT", waitStateJson: { path: "$.waitingFor", equals: "OBSERVATION" } } }),
+      ]).then(([total, observations]) => total - observations) : 0,
       privateMissions ? db.agentMission.count({ where: { ...missionWhere, status: { in: ["PAUSED", "FAILED"] } } }) : 0,
       privateMissions ? db.agentMission.count({ where: missionWhere }) : 0,
       db.agentIntervention.findMany({ where: { projectId: p.id, isSimulated: false, status: "OPEN", NOT: { dedupeKey: { startsWith: "goal:" } } },
@@ -70,7 +73,7 @@ const pauseReasonLabels: Record<string, string> = { USER: "用户手动暂停", 
 const missionEventLabels: Record<string, string> = { QUESTION: "忆程提问", INPUT: "用户补充", PAUSE: "暂停",
   CONSTRAINTS_CHANGED: "约束已修改", IMPACT_REASSESSMENT_REQUIRED: "需要重新评估影响" };
 const localDate = (iso: string) => new Date(iso).toLocaleDateString("sv-SE", { timeZone: "Asia/Shanghai" });
-const missionLabel = (status: string) => missionStatusLabels[status] ?? "状态待确认";
+const missionLabel = (status: string, wait?: unknown) => status === "WAITING_INPUT" && wait && typeof wait === "object" && "waitingFor" in wait && wait.waitingFor === "OBSERVATION" ? "等待新变化" : missionStatusLabels[status] ?? "状态待确认";
 const actionLabel = (status: string) => actionStatusLabels[status as keyof typeof actionStatusLabels] ?? "状态待确认";
 
 export async function observeProjects(actor: ConversationActor, directory: WorkspaceDirectory, projectIds: string[], query: string,
@@ -91,7 +94,7 @@ export async function observeProjects(actor: ConversationActor, directory: Works
         orderBy: { seq: "desc" }, take: 4, select: { id: true, seq: true, type: true, payloadJson: true } });
       if (!refs.some(r => r.id === m.id)) refs.push({ kind: "MISSION", id: m.id, projectId: p.id, title: m.goal,
         status: m.status, version: m.version, href: "/projects/" + p.id + "/missions?mission=" + m.id });
-      const text = ["委托：" + m.goal, "状态：" + missionLabel(m.status), ...(m.pauseReason ? ["暂停原因：" + (pauseReasonLabels[m.pauseReason] ?? "需要你核对后再继续")] : []),
+      const text = ["委托：" + m.goal, "状态：" + missionLabel(m.status, m.waitStateJson), ...(m.pauseReason ? ["暂停原因：" + (pauseReasonLabels[m.pauseReason] ?? "需要你核对后再继续")] : []),
         ...events.map(e => "事件：" + (missionEventLabels[e.type] ?? "其他记录") + " " + JSON.stringify(e.payloadJson))].join("\n").slice(0, 1800);
       sources.push({ id: p.id + "/mission:" + m.id, projectId: p.id, sourceId: "mission:" + m.id, revision: String(m.version),
         title: "原委托状态与最近事件", excerpt: text, observedAt, temporalState: "CURRENT", knowledgeClass: "PROJECT_OBSERVATION",
@@ -111,7 +114,7 @@ export async function observeProjects(actor: ConversationActor, directory: Works
     }
     const hash = await sourceHash(p.id, "project:" + p.id);
     const excerpt = [p.title, "项目目标：" + p.goal, "截止日期：" + (p.deadline ? localDate(p.deadline) : "未知"), "未完成行动：" + p.actionCount + " 项", "待回应委托：" + p.waiting + " 项", "阻塞项：" + p.blocked + " 项",
-      ...p.missions.map(m => "委托：" + m.goal + "；状态：" + missionLabel(m.status)), ...p.actions.map(a => "行动：" + a.title + "；状态：" + actionLabel(a.status))].join("\n").slice(0, 1800);
+      ...p.missions.map(m => "委托：" + m.goal + "；状态：" + missionLabel(m.status, m.waitStateJson)), ...p.actions.map(a => "行动：" + a.title + "；状态：" + actionLabel(a.status))].join("\n").slice(0, 1800);
     sources.push({ id: p.id + "/project:" + p.id, projectId: p.id, sourceId: "project:" + p.id,
       revision: hash!, title: p.title + " 当前状态", excerpt, observedAt,
       temporalState: "CURRENT", knowledgeClass: "PROJECT_OBSERVATION", start: 0, end: excerpt.length, excerptHash: jsonHash(excerpt) });

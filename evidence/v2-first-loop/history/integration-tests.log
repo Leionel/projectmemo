@@ -1,0 +1,39 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2FirstSlice.test.ts tests/v2MissionProtocol.test.ts tests/continuityIntent.test.ts tests/continuityStages23.test.ts
+
+
+ RUN  v4.1.10 C:/Users/Administrator/.codex/worktrees/v2-first-loop/hongmen
+
+ ❯ tests/v2FirstSlice.test.ts (8 tests | 4 failed) 1195ms
+   × 独立开发版本: persisted research→creation, restart, new material and same-Mission draft v2 397ms
+   × 客户交付项目: persisted research→creation, restart, new material and same-Mission draft v2 172ms
+   × 科研实验汇报: persisted research→creation, restart, new material and same-Mission draft v2 168ms
+   × 学生课程项目: persisted research→creation, restart, new material and same-Mission draft v2 157ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/v2FirstSlice.test.ts > 独立开发版本: persisted research→creation, restart, new material and same-Mission draft v2
+ FAIL  tests/v2FirstSlice.test.ts > 客户交付项目: persisted research→creation, restart, new material and same-Mission draft v2
+ FAIL  tests/v2FirstSlice.test.ts > 科研实验汇报: persisted research→creation, restart, new material and same-Mission draft v2
+ FAIL  tests/v2FirstSlice.test.ts > 学生课程项目: persisted research→creation, restart, new material and same-Mission draft v2
+AssertionError: {"code":"NO_PROGRESS","message":"连续调用没有新信息，请调整目标或补充资料","phase":"TOOL","category":"DOMAIN","recovery":{"kind":"REVIEW_REQUIRED","automatic":false,"message":"请核对当前失败原因后继续，已有步骤和结果保留。"}}: expected 'PAUSED' to be 'WAITING_INPUT' // Object.is equality
+
+Expected: "WAITING_INPUT"
+Received: "PAUSED"
+
+ ❯ tests/v2FirstSlice.test.ts:47:53
+     45| test.each(["独立开发版本", "客户交付项目", "科研实验汇报", "学生课程项目"])("%s: persisted res…
+     46|   const f = await fixture(cohort), first = await cycle(f);
+     47|   expect(first.status, JSON.stringify(first.error)).toBe("WAITING_INPU…
+       |                                                     ^
+     48|   expect(first.outputs).toHaveLength(1);
+     49|   expect(first.workState.phase).toBe("WAITING_OBSERVATION");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  4 failed | 27 passed (31)
+   Start at  18:12:52
+   Duration  11.42s (transform 2.77s, setup 0ms, import 6.50s, tests 4.16s, environment 0ms)

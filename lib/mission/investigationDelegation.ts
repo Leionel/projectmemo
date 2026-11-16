@@ -217,7 +217,7 @@ export function delegationAttention(m: AgentMission, reason: string, now = new D
   if (!p) return null;
   const hour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: p.timezone, hour: "2-digit", hourCycle: "h23" }).format(now));
   const quiet = p.quietStart === p.quietEnd ? false : p.quietStart < p.quietEnd ? hour >= p.quietStart && hour < p.quietEnd : hour >= p.quietStart || hour < p.quietEnd;
-  return { level: quiet ? "QUEUE" : "DIGEST", reason, occurredAt: now.toISOString(), needsUser: true, systemPush: false };
+  return { level: quiet ? "QUEUE" : "DIGEST", reason, occurredAt: now.toISOString(), needsUser: !(reason === "WAITING_INPUT" && record(m.waitStateJson).waitingFor === "OBSERVATION"), systemPush: false };
 }
 
 export async function scopedDelegationAttention(tx: Tx, m: AgentMission, reason: string, now = new Date()) {
@@ -260,6 +260,7 @@ export async function processInvestigationDelegations(limit = 8) {
         await tx.user.updateMany({ where: { id: candidate.ownerUserId }, data: { continuitySeq: { increment: 0 } } });
         await lock(tx, candidate.id);
         const m = await tx.agentMission.findUniqueOrThrow({ where: { id: candidate.id } });
+        if (m.runtimeProtocolVersion === 2 && !isFeatureEnabled("MISSION_V2_ENABLED", false)) return;
         const p = boundedPolicy(m);
         if (!p || m.status !== "WAITING_INPUT" || m.pauseRequestedAt || m.cancelRequestedAt) return;
 

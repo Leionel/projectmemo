@@ -118,10 +118,11 @@ async function missionSnapshots(tx: Tx, actor: ConversationActor, a: Conversatio
   const ref: ConversationRef = { kind: "MISSION", id: m.id, projectId: m.projectId, title: m.goal, status: m.status, version: m.version,
     href: "/projects/" + m.projectId + "/missions?mission=" + m.id };
   const wait = record(m.waitStateJson);
-  const question = m.status === "WAITING_INPUT" ? await tx.agentMissionEvent.findFirst({ where: { missionId: m.id, type: "QUESTION" }, orderBy: { seq: "desc" } }) : null;
+  const observation = m.status === "WAITING_INPUT" && wait.waitingFor === "OBSERVATION";
+  const question = m.status === "WAITING_INPUT" && !observation ? await tx.agentMissionEvent.findFirst({ where: { missionId: m.id, type: "QUESTION" }, orderBy: { seq: "desc" } }) : null;
   const approval = m.status === "WAITING_APPROVAL" ? await tx.agentMissionApproval.findFirst({ where: { missionId: m.id, status: "PENDING" }, orderBy: { id: "desc" } }) : null;
   const snapshots: Snapshot[] = [{ key: "state:" + jsonHash({ status: m.status, plan: m.planRevision, context: m.contextVersion, questionId: question?.id, approvalId: approval?.id }),
-    content: m.status === "WAITING_INPUT" ? "原委托正在等待补充：\n" + String(record(question?.payloadJson).question ?? wait.question ?? "请核对原问题")
+    content: observation ? "本轮成果已保存，原委托正在等待新变化；已有稿件和跟进许可保留。" : m.status === "WAITING_INPUT" ? "原委托正在等待补充：\n" + String(record(question?.payloadJson).question ?? wait.question ?? "请核对原问题")
       : m.status === "WAITING_APPROVAL" ? "原委托有一项待批准操作。请先核对原提案；尚未执行。"
       : m.status === "SUCCEEDED" ? "原委托的服务端成功条件已验收。现实结果仍以具体证据与回执为准。"
       : m.status === "CANCELLED" ? "原委托已取消，已有记录仍保留。"
@@ -263,7 +264,7 @@ export async function syncConversationAnchors(actor: ConversationActor, id: stri
       const events = await tx.agentMissionEvent.findMany({ where: { missionId: m.id, seq: { gt: a.eventCursor } }, orderBy: { seq: "asc" }, take: 40 });
       for (const e of events.filter(e => e.type === "SOURCE_ARRIVED")) {
         const p = record(e.payloadJson), pointer = record(p.sourcePointer), wait = record(m.waitStateJson);
-        if (m.status !== "WAITING_INPUT" || p.questionId !== wait.questionId || typeof pointer.id !== "string" || typeof pointer.hash !== "string") continue;
+        if (m.status !== "WAITING_INPUT" || wait.waitingFor === "OBSERVATION" || p.questionId !== wait.questionId || typeof pointer.id !== "string" || typeof pointer.hash !== "string") continue;
         const view = await readProjectMaterialView(a.projectId, pointer.id, tx);
         if (!view || !view.source.text.trim() || view.source.hash !== pointer.hash) continue;
         const assessment = await previewContinuationInTx(tx, actor.userId, m.id, { questionId: p.questionId, sourcePointers: [pointer] });

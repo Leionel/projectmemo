@@ -30,6 +30,8 @@ async function step(id: string, choice: RuntimeChoice) {
   return missionDetail(userId, id);
 }
 async function draft(id: string) {
+  if((await db.agentMission.findUniqueOrThrow({where:{id}})).runtimeProtocolVersion===2)
+    await step(id,{kind:"tool",tool:"inspect_project",args:{},summary:"读取项目资料"});
   return step(id, { kind: "tool", tool: "save_mission_output", args: { blocks: [
     { blockId: "next", kind: "INFERENCE", text: "建议继续核对项目资料", sourceIds: [] } ] }, summary: "测试私有稿" });
 }
@@ -78,7 +80,7 @@ test("v2 checkpoint releases the slot, preserves budget, and is not a question o
   const row = await db.agentMission.findUniqueOrThrow({ where: { id: m.id } });
   expect(row.finishedAt).toBeNull();
   expect(row.executionSlot).toBeNull();
-  expect(row.budgetUsedJson).toMatchObject({ models: 2, tools: 1 });
+  expect(row.budgetUsedJson).toMatchObject({ models: 3, tools: 2 });
   expect(await waitTarget({ ...row, waitStateJson: { waitingFor: "OBSERVATION", questionId: "historical-question" } })).toBeNull();
   await expect(commandMission(userId, m.id, "input", { requestId: "stale", expectedVersion: row.version,
     questionId: "historical-question", answer: "不能回答观察等待" })).rejects.toMatchObject({ code: "INPUT_CHANGED" });

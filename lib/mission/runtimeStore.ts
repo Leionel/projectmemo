@@ -104,7 +104,7 @@ export async function settleCalendarUsage(lease:Lease,reserved:number,actual:num
  });}
 export async function release(tx:Tx,m:AgentMission,status:string,reason?:string){
  const p=boundedPolicy(m);let plan=m.planJson as object,nextAttemptAt:Date|null|undefined;
- if(p){const current=await tx.agentMission.findUniqueOrThrow({where:{id:m.id}}),state=(current.planJson as {delegation?:object}).delegation??{};
+ if(p){const current=await tx.agentMission.findUniqueOrThrow({where:{id:m.id}});plan=current.planJson as object;const state=(current.planJson as {delegation?:object}).delegation??{};
   if(status==="WAITING_INPUT"){const input=await investigationInputHash(current,tx);nextAttemptAt=new Date(Math.min(Date.parse(p.expiresAt),Date.now()+p.checkEveryMinutes*60000));plan={...current.planJson as object,delegation:{...state,inputHash:input.hash,attention:await scopedDelegationAttention(tx,current,"WAITING_INPUT")}};}
   else if(status==="PAUSED")plan={...current.planJson as object,delegation:{...state,attention:await scopedDelegationAttention(tx,current,reason??"REVIEW_REQUIRED")}};
  }

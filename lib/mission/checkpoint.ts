@@ -22,6 +22,8 @@ export async function enterObservationCheckpoint(tx: Tx, mission: AgentMission, 
   const verification = await verifyMissionResult(tx, mission, choice.outputId);
   const output = await tx.agentMissionOutput.findUniqueOrThrow({ where: { id: choice.outputId } });
   const plan = record(mission.planJson), previous = record(plan.checkpoint);
+  if (record(plan.skillCursor).outputId !== output.id)
+    throw new AppError("SKILL_OUTPUT_REQUIRED", "持续成果需要当前创作接力的真实产物", 409);
   const checkpoint = previous.outputId === output.id ? previous : {
     schemaVersion: 1, cycleSeq: Number(previous.cycleSeq ?? 0) + 1,
     outputId: output.id, outputRevision: output.revision, readSetHash: jsonHash(output.sourceRefsJson),

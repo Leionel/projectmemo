@@ -101,16 +101,16 @@ function Pulse({focus,hero}:{focus:GlobalFocus;hero:Hero|null}) {
 }
 function PanelHeading({title,items}:{title:string;items:FocusEntry[]}) { return <div className={styles.panelHeading}><h2>{title}</h2><span>本次列出 {items.length} 项</span></div>; }
 function MissionRow({item,waiting}:{item:FocusEntry;waiting:boolean}) {
-  const question=item.status==="WAITING_INPUT", approval=item.status==="WAITING_APPROVAL";
+  const question=item.status==="WAITING_INPUT"&&item.workState?.phase!=="WAITING_OBSERVATION", approval=item.status==="WAITING_APPROVAL";
   const label=item.workState?.actionLabel??(question?"补充委托资料":approval?"审阅待批准提案":item.status==="PAUSED"?"查看暂停原因":item.status==="FAILED"?"查看失败原因":"查看委托进展");
   return <article className={styles.missionRow}><div className={styles.rowBody}><div className={styles.meta}><span className={waiting?"workspace-status":"workspace-status workspace-status-neutral"}>{item.workState?.phase==="WAITING_OBSERVATION"?"等待新变化":missionStatusLabels[item.status]}</span><Link prefetch={false} className="focus-ring" href={`/projects/${item.projectId}`}>{item.projectTitle}</Link></div><h3>{item.title}</h3>{item.detail&&<blockquote className={styles.question}><span>{question?"忆程追问":approval?"待审阅提案":"当前原因"}</span><p>{item.detail}</p></blockquote>}{item.activity&&<p className={styles.activity}>{item.activity}{item.activityAt&&<> · <time dateTime={item.activityAt}>{new Date(item.activityAt).toLocaleString("zh-CN")}</time></>}</p>}</div><Link prefetch={false} className={`${question||approval?"editorial-button":"workspace-link"} ${styles.rowAction} focus-ring`} href={`/projects/${item.projectId}/missions?mission=${encodeURIComponent(item.id)}`}>{label}<ArrowRight size={14} aria-hidden="true"/></Link></article>;
 }
 function MissionGroup({title,items,waiting=false}:{title:string;items:FocusEntry[];waiting?:boolean}) {
   if(!items.length)return null;
   // 暂停/失败是运行状态而非用户判断：归并为一条摘要，逐条运行记录保留在展开区。
-  const pending=items.filter(item=>item.status==="WAITING_INPUT"||item.status==="WAITING_APPROVAL");
+  const pending=items.filter(item=>item.workState?item.workState.requiresUser&&item.status!=="PAUSED"&&item.status!=="FAILED":item.status==="WAITING_INPUT"||item.status==="WAITING_APPROVAL");
   const stopped=items.filter(item=>item.status==="PAUSED"||item.status==="FAILED");
-  const active=items.filter(item=>item.status==="READY"||item.status==="RUNNING");
+  const active=items.filter(item=>item.status==="READY"||item.status==="RUNNING"||item.workState?.phase==="WAITING_OBSERVATION");
   return <section id={waiting?"focus-waiting":"focus-running"} className={`${styles.panel} ${waiting?styles.handover:""}`} aria-label={title}><PanelHeading title={title} items={items}/>
     {pending.slice(0,3).map(item=><MissionRow key={item.id} item={item} waiting={waiting}/>)}
     {active.map(item=><MissionRow key={item.id} item={item} waiting={false}/>)}

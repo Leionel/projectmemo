@@ -54,7 +54,7 @@
 - XLSX/DOCX：多工作表、共享/富文本/内联字符串、布尔/数字、宏、DOCTYPE、损坏包、超限；DOCX 原路径仍通过。
 - 类型：`npx tsc --noEmit` 通过；scoped eslint 0 error（仅有已禁用的本地 `<img>` 规则说明）。
 - 生产构建：`NEXT_DIST_DIR=.next-webgames3 npm.cmd run build` 通过（Next 16.4.6）。
-- 生产包浏览器验收：`NEXT_DIST_DIR=.next-webgames3 npm.cmd exec tsx -- scripts/verify-web-games.ts`，**29/29** 通过，回执 `browser-receipt.json`，截图 17 张。覆盖：素材 200、XLSX 生产接口、原文定位、多选、服务端 verdict、刷新恢复、交回回执、1280/360 无横向溢出、删除与反馈清除、导师丢包重试与三轮、冲刺真实回执/自述/改道/结束/暂停分离、reduced-motion、来源撤题。
+- 生产包浏览器验收：`NEXT_DIST_DIR=.next-webgames3 npm.cmd exec tsx -- scripts/verify-web-games.ts`，**31/31** 通过，回执 `browser-receipt.json`，截图 17 张。覆盖：素材 200、XLSX 生产接口、原文定位、拖放/键盘/点选三种选卡路径、服务端 verdict、刷新恢复、交回回执、1280/360 无横向溢出、删除与反馈清除、导师丢包重试与三轮、冲刺真实回执/自述/改道/结束/暂停分离、reduced-motion、来源撤题。
 
 ### 全量测试
 

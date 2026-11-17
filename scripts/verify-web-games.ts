@@ -115,8 +115,17 @@ async function main() {
     await page.waitForTimeout(700);
     check("原文阅读定位到相关段落", (await page.locator('[aria-label="原文阅读"]').innerText()).includes("已定位到与稿件最接近的段落"));
     check("客户合成来源名称可读", (await page.locator("article").first().innerText()).includes("输入回归记录（节选）.txt"));
+    await page.locator("article").first().dragTo(page.locator("[data-dragging]").first());
+    await page.waitForTimeout(300);
+    check("拖放进入引用槽", (await page.locator("main").innerText()).includes("已放入 1 条引用"));
+    await page.getByRole("button", { name: "清空" }).click();
+    await page.waitForTimeout(200);
+    await page.getByRole("button", { name: "选择这条" }).first().focus();
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(200);
+    check("键盘选择与点选一致", (await page.locator("main").innerText()).includes("已放入 1 条引用"));
     await page.getByRole("button", { name: "选择这条" }).first().click();
-    await page.getByRole("button", { name: "选择这条" }).first().click();
+    await page.waitForTimeout(200);
     check("多选进入引用槽", (await page.locator("main").innerText()).includes("已放入 2 条引用"));
     await shot(page, "02-evidence-selected-1440");
     await page.getByRole("button", { name: "核对引用" }).click();

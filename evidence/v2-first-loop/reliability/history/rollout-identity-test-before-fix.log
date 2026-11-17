@@ -1,0 +1,38 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2RuntimeReliability.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ❯ tests/v2RuntimeReliability.test.ts (5 tests | 1 failed) 4079ms
+   ✓ clock advance: the next observation is only woken once nextAttemptAt is due  377ms
+   ✓ clock advance: an expired lease is recovered by a later Worker without duplicating output 197ms
+   ✓ a worker without v2 support neither resets nor claims v2 rows 149ms
+   × rollout gate blocks v2 rows while disabled and mixed worker versions 17ms
+   ✓ long-run harness: start --wait, status and report produce wall-clock evidence  3330ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/v2RuntimeReliability.test.ts > rollout gate blocks v2 rows while disabled and mixed worker versions
+AssertionError: expected 'BLOCKED' to be 'V1_ONLY_SAFE' // Object.is equality
+
+Expected: "V1_ONLY_SAFE"
+Received: "BLOCKED"
+
+ ❯ tests/v2RuntimeReliability.test.ts:107:26
+    105|   process.env.MISSION_V2_ENABLED = "false";
+    106|   const v1Only = await inspectV2Rollout();
+    107|   expect(v1Only.verdict).toBe("V1_ONLY_SAFE");
+       |                          ^
+    108|   expect(v1Only.ok).toBe(true);
+    109|   // v2 row while flag off is blocked.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  08:49:13
+   Duration  6.31s (transform 1.27s, setup 0ms, import 2.03s, tests 4.08s, environment 0ms)
+

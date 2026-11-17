@@ -1,0 +1,19 @@
+{
+  "out": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\evidence\\v2-first-loop\\reliability\\long-run",
+  "db": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\evidence\\v2-first-loop\\reliability\\long-run\\long-run.db",
+  "missionId": "cmwjzansg0004yo8oeq0iq21n",
+  "createdAt": "2026-11-17T00:53:06.213Z",
+  "stoppedAt": null,
+  "cycles": 10,
+  "durationMs": 829,
+  "statuses": {
+    "READY": 6,
+    "WAITING_INPUT": 4
+  },
+  "maxOutputs": 3,
+  "maxArtifacts": 0,
+  "budgetMonotonic": true,
+  "reservedReleased": true,
+  "finalUnknownCalls": 0,
+  "note": "This report covers only the wall-clock window actually executed; it is not a claim of 72h uptime."
+}

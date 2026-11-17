@@ -86,3 +86,13 @@
 - `d403734` 补齐非创作 Skill 交付：终态规划/研究/复盘把 `save_mission_output` 解释为阶段成果，写入 `planJson.skillArtifacts`，不写报告 Output、不创建行动；必须经原输出/来源校验（至少一段真实来源，引用可解析）。交付后 `PAUSED + SKILL_DELIVERABLE_READY`，工作台显示阶段成果/依据/未知项；恢复进入 `WAITING_INPUT+OBSERVATION`，不重复跑同一阶段。路由修正否定动作（“不开始写报告”）与研究动词。单测 4/4、正常入口浏览器 4 项、全量 268 文件 2099 条、构建通过。
 - 质量评分：新增 `lib/evaluation/contentQuality.ts`；替换宽松的“出现工作重点即算落实改道”，加入差异率/新增来源/来源与引用相关性/旧依据保留/复制用户要求/关键未知等确定性判据；语义四项固定 `UNVERIFIED/HUMAN_REVIEW` 并单独报告。负例 7/7（复制要求、标题伪装、无关引用、改几个字、遗漏未知全部失败）。冻结 64 条指纹 `1b7145…` 由测试锁定，未修改 oracle。
 - 离线评测：fixture/http 均协议 40/40、结构内容 24/24、语义未验证 16；路由 64/64、安全 0、关键 0。无新增迁移；无真实模型付费调用；V2 仍关闭。
+
+## 2026-11-17 持续运行可靠性（第二轮）
+
+- 相同内容重传不再唤醒：`investigationInputHash` 增加忽略来源 id 的集合化内容指纹；结构哈希变化但内容指纹相同只记一次 `INVESTIGATION_DUPLICATE_IGNORED` 并顺延检查，不派发模型、不改预算。检查点同时持久化 `inputHash/contentHash`。
+- Worker 崩溃恢复：真实子进程在读取后、产稿提交前、检查点提交后退出，新进程沿用同一 Mission/租约/证据包续跑；产稿前崩溃留下 RUNNING 步骤，租约过期后重跑且只提交一个 revision。两进程竞争 READY 恰好一个认领。
+- 控制竞态：新材料与暂停/取消/改道/撤权/许可到期并发时，停止后不派发；改道绑定新工作重点；许可到期与撤权在派发前 hold 且保留草稿。
+- 摘要优先级：项目摘要用 SQLite JSON 谓词先取用户需判断的行（兼容 `waitStateJson` 为 NULL 的历史行），观察等待不再挤掉用户问题。
+- 混合升级防护：`claimMission`/过期 RUNNING 清理按允许协议版本过滤，关闭 V2 时 v2 行完全不被认领或改写；Worker 版本号升级为 `r4-ux3-worker-v2`，启动时检查迁移列和“关闭开关但存在 v2 行”；新增只读 `scripts/v2-rollout-check.ts`（四种状态证据：V1_ONLY_SAFE / V2_ROWS_DISABLED / MIXED_WORKER / V2_READY）。
+- 长时运行：新增 `scripts/v2-long-run.ts`（start/status/material/stop/report，独立 SQLite、真实 Runner 循环），本轮冒烟 10 周期、3 版、预算单调、预留归零；明确不是 72h 证明。
+- 验证：全量 272 文件/2124 条、故障注入 8/8、控制竞态 7/7、运行可靠性 5/5、去重回归 5/5、tsc/lint/Web 构建通过、Harmony 合约 155/155（本地补齐 oh_modules，未改 ArkTS）；无新增迁移、无付费调用、未改真实数据库。V2 仍默认关闭。

@@ -1,0 +1,18 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/missionWorkspaceSummary.test.ts tests/v2ControlConcurrency.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ✓ tests/missionWorkspaceSummary.test.ts (4 tests) 180ms
+ ✓ tests/v2ControlConcurrency.test.ts (7 tests) 2021ms
+   ✓ new material arriving concurrently with pause never dispatches after the stop  371ms
+   ✓ a redirect directive racing a new material wake produces one revision with the new objective bound  323ms
+   ✓ long-running cycles settle reservations, known usage and unknown calls without resetting budgets  844ms
+
+ Test Files  2 passed (2)
+      Tests  11 passed (11)
+   Start at  08:51:16
+   Duration  6.39s (transform 1.51s, setup 0ms, import 3.76s, tests 2.20s, environment 0ms)
+

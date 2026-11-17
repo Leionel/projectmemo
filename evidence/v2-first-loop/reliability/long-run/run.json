@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-17T00:53:06.213Z",
+  "dbPath": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\evidence\\v2-first-loop\\reliability\\long-run\\long-run.db",
+  "ownerUserId": "cmwjzanrb0000yo8o3kp3ld72",
+  "projectId": "cmwjzans00001yo8ov9hiadnk",
+  "captureId": "cmwjzans30003yo8ot2yz7day",
+  "missionId": "cmwjzansg0004yo8oeq0iq21n",
+  "intervalMs": 30,
+  "cycles": 10,
+  "materialEvery": 2
+}

@@ -1,0 +1,36 @@
+{
+  "ok": true,
+  "verdict": "V1_ONLY_SAFE",
+  "reason": "仅 v1 行且功能关闭，可安全运行旧 Worker",
+  "v2Rows": 0,
+  "v2Enabled": false,
+  "workerVersion": null,
+  "workerStatus": "UNOBSERVED",
+  "checks": [
+    {
+      "name": "SCHEMA_PROTOCOL_COLUMN",
+      "status": "PASS",
+      "detail": "AgentMission.runtimeProtocolVersion 已存在"
+    },
+    {
+      "name": "V2_FEATURE_FLAG",
+      "status": "WARN",
+      "detail": "MISSION_V2_ENABLED 关闭（v2 行应保持冻结）"
+    },
+    {
+      "name": "V2_ROWS",
+      "status": "PASS",
+      "detail": "v2 行 0 条"
+    },
+    {
+      "name": "WORKER_BUILD",
+      "status": "WARN",
+      "detail": "尚未观察到 Worker 心跳"
+    },
+    {
+      "name": "WORKER_IDENTITY",
+      "status": "PASS",
+      "detail": "Worker 身份与当前配置一致或未观察"
+    }
+  ]
+}

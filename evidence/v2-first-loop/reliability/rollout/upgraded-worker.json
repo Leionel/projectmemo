@@ -1,0 +1,36 @@
+{
+  "ok": true,
+  "verdict": "V2_READY",
+  "reason": "全部检查通过",
+  "v2Rows": 1,
+  "v2Enabled": true,
+  "workerVersion": "r4-ux3-worker-v2",
+  "workerStatus": "RECENT",
+  "checks": [
+    {
+      "name": "SCHEMA_PROTOCOL_COLUMN",
+      "status": "PASS",
+      "detail": "AgentMission.runtimeProtocolVersion 已存在"
+    },
+    {
+      "name": "V2_FEATURE_FLAG",
+      "status": "PASS",
+      "detail": "MISSION_V2_ENABLED=true"
+    },
+    {
+      "name": "V2_ROWS",
+      "status": "PASS",
+      "detail": "v2 行 1 条"
+    },
+    {
+      "name": "WORKER_BUILD",
+      "status": "PASS",
+      "detail": "最近 Worker 版本 r4-ux3-worker-v2（要求 r4-ux3-worker-v2）"
+    },
+    {
+      "name": "WORKER_IDENTITY",
+      "status": "PASS",
+      "detail": "Worker 身份与当前配置一致或未观察"
+    }
+  ]
+}

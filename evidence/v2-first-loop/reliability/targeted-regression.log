@@ -1,0 +1,60 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2ContinuityReliability.test.ts tests/v2FaultInjection.test.ts tests/v2ControlConcurrency.test.ts tests/v2RuntimeReliability.test.ts tests/continuityStages23.test.ts tests/continuitySuppression.test.ts tests/continuityRuntime.test.ts tests/ux3ThreeDayContinuity.test.ts tests/missionWorkspaceSummary.test.ts tests/finalATerminalUnknownSummary.test.ts tests/finalATerminalUnknownFocus.test.ts tests/agentUxWorkState.test.ts tests/missionRuntime.test.ts tests/v2FirstSlice.test.ts tests/v2SkillArtifacts.test.ts tests/v2DelegationEntry.test.ts tests/v2DelegationIdempotency.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ✓ tests/v2FaultInjection.test.ts (8 tests) 26641ms
+   ✓ crash after read: a new process resumes the same Mission and reaches the next checkpoint  4444ms
+   ✓ crash before output commit: restart re-runs the unfinished step and commits one revision  4369ms
+   ✓ crash after receipt commit: restart scans never re-trigger the delivered output  3545ms
+   ✓ two worker processes racing one READY mission: exactly one claims and writes once  2987ms
+   ✓ a second process recovers the delivery of 这次只做计划，报告不要动  2749ms
+   ✓ a second process recovers the delivery of 先研究，不开始写报告  2816ms
+   ✓ a second process recovers the delivery of 只复盘，不创建行动  2807ms
+   ✓ a second process recovers the delivery of 整理持续报告  2912ms
+ ✓ tests/v2RuntimeReliability.test.ts (5 tests) 4174ms
+   ✓ clock advance: the next observation is only woken once nextAttemptAt is due  393ms
+   ✓ long-run harness: start --wait, status and report produce wall-clock evidence  3402ms
+ ✓ tests/missionRuntime.test.ts (32 tests) 3565ms
+     ✓ 子进程提交后未回包即退出，恢复后只保留一个Action  1310ms
+ ✓ tests/v2FirstSlice.test.ts (15 tests) 3442ms
+   ✓ 独立开发版本: persisted research→creation, restart, new material and same-Mission draft v2  562ms
+   ✓ 客户交付项目: persisted research→creation, restart, new material and same-Mission draft v2  315ms
+   ✓ 科研实验汇报: persisted research→creation, restart, new material and same-Mission draft v2  336ms
+   ✓ 学生课程项目: persisted research→creation, restart, new material and same-Mission draft v2  341ms
+   ✓ natural compound veto persists through original Conversation/Directive services  388ms
+   ✓ workbench reads frozen versions without writes, rejects outsiders and withholds suppressed material  333ms
+ ✓ tests/v2ContinuityReliability.test.ts (5 tests) 3071ms
+   ✓ identical content re-upload does not wake the mission or consume model budget  847ms
+   ✓ 100 repeated scans with no new information produce no dispatch, draft or budget change  737ms
+   ✓ one real content change wakes once, produces one revision, and never loops on its own delivered output  1004ms
+ ✓ tests/v2ControlConcurrency.test.ts (7 tests) 2020ms
+   ✓ new material arriving concurrently with pause never dispatches after the stop  379ms
+   ✓ a redirect directive racing a new material wake produces one revision with the new objective bound  313ms
+   ✓ long-running cycles settle reservations, known usage and unknown calls without resetting budgets  824ms
+ ✓ tests/continuityStages23.test.ts (11 tests) 1277ms
+   ✓ CT2 original Mission dynamically reads pinned CI, jobs and redacted log; revoke blocks derived Artifact reuse  401ms
+   ✓ CT3 original Runner polls declared fixed SHA; stable CI uses zero models, changed CI resumes reasoning  355ms
+ ✓ tests/v2SkillArtifacts.test.ts (4 tests) 874ms
+   ✓ 这次只做计划，报告不要动：交付可查看阶段成果，原报告与行动不变，并进入可恢复状态  432ms
+ ✓ tests/v2DelegationIdempotency.test.ts (6 tests) 656ms
+   ✓ identical retry returns the same receipt bound to the original confirmation  483ms
+ ✓ tests/v2DelegationEntry.test.ts (4 tests) 584ms
+   ✓ preview writes nothing and shows the bounded scope  385ms
+ ✓ tests/continuitySuppression.test.ts (2 tests) 501ms
+   ✓ one root suppression closes memory, Investigation sources, dialogue, Artifact, Mission context and ACTIVE experience consumers  439ms
+ ✓ tests/ux3ThreeDayContinuity.test.ts (2 tests) 344ms
+   ✓ UX-3D: 三日纵向完整旅程 (D1交代->D2动态调查与重启保持->D3手机纠正与Web读回) 及跨天预算不变量  314ms
+ ✓ tests/finalATerminalUnknownFocus.test.ts (7 tests) 283ms
+ ✓ tests/continuityRuntime.test.ts (3 tests) 294ms
+ ✓ tests/finalATerminalUnknownSummary.test.ts (9 tests) 278ms
+ ✓ tests/missionWorkspaceSummary.test.ts (4 tests) 173ms
+ ✓ tests/agentUxWorkState.test.ts (7 tests) 53ms
+
+ Test Files  17 passed (17)
+      Tests  131 passed (131)
+   Start at  08:51:34
+   Duration  66.20s (transform 2.34s, setup 0ms, import 14.47s, tests 48.23s, environment 1ms)
+

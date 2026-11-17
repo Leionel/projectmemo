@@ -1,0 +1,161 @@
+{
+  "slice": "持续运行可靠性",
+  "baseline": "9c7b256",
+  "generatedAt": "2026-11-17T09:05:00+08:00",
+  "fixes": {
+    "identicalContentDedupe": "contentHash ignores source ids; duplicate re-upload records INVESTIGATION_DUPLICATE_IGNORED once and schedules next check without waking",
+    "summaryPrioritization": "user-actionable WAITING_INPUT/WAITING_APPROVAL/PAUSED/FAILED rows are selected with a JSON predicate before observation waiters",
+    "protocolClaimGuard": "claimMission and stale-RUNNING reset filter allowed runtimeProtocolVersion; v2 rows untouched while V2 flag off",
+    "mixedWorkerGate": "WORKER_CAPABILITY_VERSION=r4-ux3-worker-v2, task UI inspectV2Rollout, Worker startup aborts on unmigrated schema or frozen v2 rows"
+  },
+  "tests": {
+    "continuityReliability": {
+      "file": "tests/v2ContinuityReliability.test.ts",
+      "passed": 5,
+      "total": 5,
+      "log": "targeted-tests.log"
+    },
+    "faultInjection": {
+      "file": "tests/v2FaultInjection.test.ts",
+      "passed": 8,
+      "total": 8,
+      "log": "fault-injection.log",
+      "phases": [
+        "crash-after-read",
+        "crash-before-output-commit",
+        "crash-after-checkpoint",
+        "two-workers-race",
+        "four-skill-cross-process-recovery"
+      ]
+    },
+    "controlConcurrency": {
+      "file": "tests/v2ControlConcurrency.test.ts",
+      "passed": 7,
+      "total": 7,
+      "log": "control-concurrency.log"
+    },
+    "runtimeReliability": {
+      "file": "tests/v2RuntimeReliability.test.ts",
+      "passed": 5,
+      "total": 5,
+      "log": "clock-rollout-longrun.log"
+    },
+    "targeted": {
+      "files": 17,
+      "tests": 131,
+      "exitCode": 0,
+      "log": "targeted-regression.log"
+    },
+    "fullSuite": {
+      "files": 272,
+      "tests": 2124,
+      "exitCode": 0,
+      "log": "full-tests.log"
+    },
+    "types": {
+      "command": "npm.cmd exec tsc -- --noEmit",
+      "exitCode": 0,
+      "log": "tsc.log"
+    },
+    "lint": {
+      "exitCode": 0,
+      "log": "eslint.log"
+    },
+    "build": {
+      "exitCode": 0,
+      "log": "build.log"
+    },
+    "harmony": {
+      "command": "npm.cmd run harmony:test",
+      "tests": 155,
+      "passed": 155,
+      "exitCode": 0,
+      "log": "harmony-test.log",
+      "note": "本地从原检出复制 oh_modules 依赖缓存后运行；未改 ArkTS 源码，未做真机/HAP"
+    },
+    "combinedReliability": {
+      "files": 4,
+      "tests": 25,
+      "exitCode": 0,
+      "log": "targeted-tests.log"
+    }
+  },
+  "longRun": {
+    "harness": "scripts/v2-long-run.ts",
+    "commands": [
+      "start --wait",
+      "status",
+      "material",
+      "stop",
+      "report"
+    ],
+    "smoke": {
+      "cycles": 10,
+      "intervalMs": 30,
+      "outputs": 3,
+      "waiting": 4,
+      "budgetMonotonic": true,
+      "reservedReleased": true,
+      "durationMs": 829,
+      "files": [
+        "long-run/evidence.jsonl",
+        "long-run/run.json",
+        "long-run/report.json",
+        "long-run/status.log",
+        "long-run/start.log"
+      ],
+      "explicitLimit": "实际墙钟窗口，不是 72 小时证明"
+    }
+  },
+  "rolloutGate": {
+    "script": "scripts/v2-rollout-check.ts",
+    "evidence": {
+      "v1-only": {
+        "file": "rollout/v1-only.json",
+        "verdict": "V1_ONLY_SAFE",
+        "ok": true
+      },
+      "v2-rows-disabled": {
+        "file": "rollout/v2-rows-disabled.json",
+        "verdict": "BLOCKED",
+        "reason": "V2_ROWS_PRESENT_WHILE_DISABLED",
+        "ok": false
+      },
+      "mixed-worker": {
+        "file": "rollout/mixed-worker.json",
+        "verdict": "BLOCKED",
+        "reason": "MIXED_WORKER_VERSION",
+        "ok": false
+      },
+      "upgraded-worker": {
+        "file": "rollout/upgraded-worker.json",
+        "verdict": "V2_READY",
+        "ok": true
+      }
+    }
+  },
+  "migration": {
+    "newMigrations": 0,
+    "realDatabaseChanged": false
+  },
+  "compatibility": {
+    "v1": "unchanged",
+    "v2Default": "disabled",
+    "web": "build pass",
+    "harmonyContract": "155/155",
+    "device": "not run"
+  },
+  "history": [
+    "history/identical-content-before-fix.log",
+    "history/summary-and-controls-before-fix.log",
+    "history/summary-null-waitstate-regression.log",
+    "history/rollout-identity-test-before-fix.log"
+  ],
+  "limits": [
+    "no real 72h run",
+    "no real old Worker binary mixed-run",
+    "no real device/HAP",
+    "no paid model calls",
+    "no production deployment"
+  ]
+}

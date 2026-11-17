@@ -1,0 +1,16 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2RuntimeReliability.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ✓ tests/v2RuntimeReliability.test.ts (5 tests) 4080ms
+   ✓ clock advance: the next observation is only woken once nextAttemptAt is due  381ms
+   ✓ long-run harness: start --wait, status and report produce wall-clock evidence  3321ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  08:49:31
+   Duration  6.31s (transform 1.26s, setup 0ms, import 2.03s, tests 4.08s, environment 0ms)
+

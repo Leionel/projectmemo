@@ -1,0 +1,37 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ❯ tests/v2RuntimeReliability.test.ts (6 tests | 1 failed) 7453ms
+   × clock advance: an expired lease is recovered by a later Worker without duplicating output 242ms
+
+ Test Files  1 failed | 282 passed (283)
+      Tests  1 failed | 2189 passed (2190)
+   Start at  18:12:58
+   Duration  986.88s (transform 22.72s, setup 0ms, import 340.04s, tests 465.01s, environment 81.33s)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/v2RuntimeReliability.test.ts > clock advance: an expired lease is recovered by a later Worker without duplicating output
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/v2RuntimeReliability.test.ts:80:19
+     78|     // this fixture depend on the wall-clock hour at which the suite h…
+     79|     nextAttemptAt: null, leaseUntil: new Date(now.getTime() + 60000), …
+     80|   vi.setSystemTime(new Date(now.getTime() + 61000));
+       |                   ^
+     81|   const claimed = await runMissionSlice({ id: f.mission.id, provider: …
+     82|   expect(claimed).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

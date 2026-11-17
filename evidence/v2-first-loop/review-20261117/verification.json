@@ -1,0 +1,37 @@
+{
+  "baseline": "04b4b732",
+  "data": "SYNTHETIC_ONLY",
+  "paidCalls": 0,
+  "schemaMigrationsAdded": 0,
+  "owner": "Codex /root",
+  "fullSuite": {
+    "files": 283,
+    "passed": 2193,
+    "log": "full-tests.log"
+  },
+  "laterRuntimeDocxChecks": {
+    "passed": 21,
+    "log": "runtime-docx-final-tests.log"
+  },
+  "sliceA": {
+    "passed": 27,
+    "log": "slice-a-tests.log"
+  },
+  "harmony": {
+    "passed": 165,
+    "unsignedHapBytes": 8941026
+  },
+  "gate": "NOT_PASSED",
+  "codeHashes": {
+    "package.json": "479c9815143cbf18ef9ce469b5afd1541de88c7b2a53bf75c42d690a2ed73cf3",
+    "package-lock.json": "22306f153c68c94f6ad8f0db8fea04819d362653c7487436ea0b900fc12bc760",
+    "prisma/schema.prisma": "3d8b0e2920910ad8ace601221899114d3a7ce61729dc9774dd3b08466f6e2399",
+    "lib/mission/runner.ts": "d7455f543854f756a0eaf82891300bd824acec9b116460811f55e54164ca6448",
+    "lib/mission/runtimeStore.ts": "50dc2d200076d75bac77f45d125e202533f85e07c023b3c63dc0869a4f3e0bc2",
+    "lib/intake/docx.ts": "271b0f7a837be8b8147a31f9a2e6ad3a80ed1dd46589bfc3b28acb1c158710ee",
+    "lib/intake/docxWorker.cjs": "1dd45b8a0bd4d4b3a2862da4448868f6c7f567be410d0a93e37960d0fc70859b",
+    "lib/mission/sprintService.ts": "0150f96263f67fc7cf393380479f04ca5e48c91643f3a78acc6b7308f830ac9a",
+    "scripts/v2-long-run.ts": "ddbeebc1e0b8086388db50643fba969d96108e55dd8df5edffde110efca30982",
+    "scripts/v2-long-run-task.ps1": "123e8fd8cdb5994459ededf27586243b162b2dbe8dbe3d55c021b1b351129475"
+  }
+}

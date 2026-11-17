@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-17T10:55:16.460Z",
+  "startedAt": "2026-11-17T10:55:16.460Z",
+  "dbPath": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\evidence\\v2-first-loop\\review-20261117\\scheduled-smoke\\long-run.db",
+  "ownerUserId": "cmwkkt20e0000u08o9uoy117h",
+  "projectId": "cmwkkt21d0001u08o1ijkn9bm",
+  "captureId": "cmwkkt21g0003u08opzt8xgtp",
+  "missionId": "cmwkkt21z0004u08oaq86lzve",
+  "intervalMs": 250,
+  "cycles": 4,
+  "materialEvery": 2,
+  "durationHours": 72,
+  "schedulerTaskName": "ProjectMemo-V2-ddbba537bf71"
+}

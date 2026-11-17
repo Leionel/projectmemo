@@ -1,0 +1,49 @@
+{
+  "out": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\evidence\\v2-first-loop\\review-20261117\\background-smoke",
+  "workerPid": 27024,
+  "workerAlive": false,
+  "schedulerTaskName": null,
+  "stopRequestedAt": null,
+  "startedAt": "2026-11-17T10:58:23.454Z",
+  "durationHours": 72,
+  "elapsedHours": 0.01934472222222222,
+  "resumeCount": 0,
+  "mission": {
+    "status": "WAITING_INPUT",
+    "pauseReason": null,
+    "budgetUsedJson": "{\"models\":3,\"tools\":2,\"searches\":0,\"fetches\":0,\"browserRequests\":0,\"browserBytes\":0,\"calendarRequests\":0,\"externalWrites\":0,\"metadataRequests\":0,\"activeMs\":4,\"reservedOutputTokens\":0,\"inputTokens\":30,\"outputTokens\":15,\"unknownCalls\":0}",
+    "version": 8,
+    "contextVersion": 2,
+    "planRevision": 2,
+    "updatedAt": "2026-11-17T10:58:29.234+00:00"
+  },
+  "outputs": {
+    "c": 1,
+    "latest": 1
+  },
+  "checkpoints": {
+    "c": 1
+  },
+  "evidenceLines": 15,
+  "gapsOverLimit": 0,
+  "lastEvidenceAt": "2026-11-17T10:58:41.436Z",
+  "lastEvidence": {
+    "at": "2026-11-17T10:58:41.436Z",
+    "cycle": 14,
+    "startedAt": "2026-11-17T10:58:23.454Z",
+    "elapsedHours": 0.004995,
+    "resumeCount": 0,
+    "materialAdded": false,
+    "woken": 0,
+    "status": "WAITING_INPUT",
+    "pauseReason": null,
+    "outputs": 1,
+    "artifacts": 0,
+    "models": 3,
+    "tools": 2,
+    "reservedOutputTokens": 0,
+    "inputTokens": 30,
+    "outputTokens": 15,
+    "unknownCalls": 0
+  }
+}

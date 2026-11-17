@@ -1,0 +1,49 @@
+{
+  "out": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\evidence\\v2-first-loop\\review-20261117\\long-run-72h-verified",
+  "db": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\evidence\\v2-first-loop\\review-20261117\\long-run-72h-verified\\long-run.db",
+  "missionId": "cmwkkzqry0004mk8oyw32mtl6",
+  "createdAt": "2026-11-17T11:00:28.426Z",
+  "startedAt": "2026-11-17T11:00:28.426Z",
+  "stoppedAt": null,
+  "resumeCount": 0,
+  "expectedHours": 72,
+  "actualHours": 0.08095472222222222,
+  "cycles": 5,
+  "durationMs": 240485,
+  "gapsOverLimit": 0,
+  "longestGapSeconds": 0,
+  "dayBuckets": {
+    "2026-11-17": {
+      "cycles": 5,
+      "outputs": 1,
+      "models": 3,
+      "materials": 1
+    }
+  },
+  "statuses": {
+    "READY": 2,
+    "WAITING_INPUT": 3
+  },
+  "maxOutputs": 1,
+  "maxArtifacts": 0,
+  "budgetMonotonic": true,
+  "reservedReleased": true,
+  "finalUnknownCalls": 0,
+  "wallClockComplete": false,
+  "coverage": {
+    "elapsedHours": 0.08095472222222222,
+    "windowElapsed": false,
+    "observedHours": 0.06680138888888888,
+    "validOrder": true,
+    "evidenceComplete": false,
+    "wallClockComplete": false,
+    "progressObserved": true,
+    "terminalFailure": false,
+    "reliabilityGatePassed": false,
+    "gaps": [],
+    "leadingGapSeconds": 3.247,
+    "trailingGapSeconds": 47.705,
+    "note": "Observed intervals are bounded by successive heartbeats; elapsed calendar time alone cannot pass this gate."
+  },
+  "note": "This report covers only the wall-clock window actually executed; it is not a claim of 72h uptime."
+}

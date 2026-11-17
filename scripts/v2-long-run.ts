@@ -12,9 +12,10 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { spawn } from "node:child_process";
-import { randomUUID } from "node:crypto";
+import { spawn, execFileSync } from "node:child_process";
+import { randomUUID, createHash } from "node:crypto";
 import Database from "better-sqlite3";
+import { assessRunCoverage } from "./fixtures/long-run-coverage";
 
 const argv = process.argv.slice(2);
 const command = argv[0] ?? "";
@@ -31,7 +32,16 @@ const dbPath = path.join(outDir, "long-run.db");
 
 type RunConfig = { schemaVersion: 1; createdAt: string; startedAt: string; dbPath: string; ownerUserId: string; projectId: string;
   captureId: string; missionId: string; intervalMs: number; cycles: number; materialEvery: number; durationHours: number;
-  workerPid?: number; stoppedAt?: string; stopRequestedAt?: string; resumedAt?: string; resumeCount?: number };
+  workerPid?: number; schedulerTaskName?: string; stoppedAt?: string; stopRequestedAt?: string; resumedAt?: string; resumeCount?: number };
+function launchWindows(config: RunConfig, mode: "Register" | "Background" = "Register") {
+  if (process.platform !== "win32") throw new Error("Windows 后台宿主仅用于 Windows；其他平台使用系统服务运行 worker 子命令");
+  const taskName = "ProjectMemo-V2-" + createHash("sha256").update(outDir).digest("hex").slice(0, 12);
+  config.schedulerTaskName = mode === "Register" ? taskName : undefined;
+  writeConfig(config);
+  const result = execFileSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-File", path.resolve("scripts/v2-long-run-task.ps1"),
+    "-Mode", mode, "-Workspace", process.cwd(), "-NodePath", process.execPath, "-OutDirectory", outDir, "-TaskName", taskName], { encoding: "utf8", windowsHide: true });
+  console.log(result.trim());
+}
 function isAlive(pid?: number): boolean { if (!pid) return false; try { process.kill(pid, 0); return true; } catch { return false; } }
 function readEvidence(): Array<Record<string, number | string | boolean>> {
   return fs.existsSync(evidencePath) ? fs.readFileSync(evidencePath, "utf8").trim().split("\n").filter(Boolean)
@@ -73,19 +83,27 @@ async function start() {
       allowedTools: ["read_project_material", "save_mission_output"], connectionIds: [], timezone: "Asia/Shanghai" } });
     await db.$disconnect();
     const config: RunConfig = { schemaVersion: 1, createdAt: stamp(), startedAt: stamp(), dbPath, ownerUserId: user.id, projectId: project.id,
-      captureId: capture.id, missionId: mission.id, intervalMs: Number(flag("interval-ms") ?? 5000),
-      cycles: Number(flag("cycles") ?? 0), materialEvery: Number(flag("material-every") ?? 12),
+      captureId: capture.id, missionId: mission.id, intervalMs: Number(flag("interval-ms") ?? 60000),
+      cycles: Number(flag("cycles") ?? 0), materialEvery: Number(flag("material-every") ?? 60),
       durationHours: Number(flag("duration-hours") ?? 72) };
     writeConfig(config);
   }
   const config = readConfig();
+  if (isAlive(config.workerPid)) throw new Error("已有运行中的 Worker，请使用 status；不要重复启动");
+  if (fs.existsSync(path.join(outDir, "stop.flag"))) throw new Error("本次运行已经请求停止；续跑请使用 resume，不要重复 start");
+  if (![config.intervalMs, config.durationHours].every(value => Number.isFinite(value) && value > 0) || ![config.cycles, config.materialEvery].every(value => Number.isSafeInteger(value) && value >= 0)) throw new Error("长跑参数必须为有效的有界正数");
   const wait = has("wait");
+  if (has("scheduled") || has("background-host")) {
+    if (wait || has("scheduled") && has("background-host")) throw new Error("--scheduled、--background-host、--wait 只能选择一种");
+    launchWindows(config, has("scheduled") ? "Register" : "Background"); return;
+  }
   const child = spawn(process.execPath, ["--import", "tsx", path.resolve("scripts/v2-long-run.ts"), "worker", "--out", outDir],
     { cwd: process.cwd(), env: { ...process.env, ...flags(), DATABASE_URL: databaseUrl(config.dbPath) },
       detached: !wait, stdio: wait ? ["ignore", "inherit", "inherit"] : ["ignore", fs.openSync(logPath, "a"), fs.openSync(logPath, "a")],
       windowsHide: true });
+  config.workerPid = child.pid; writeConfig(config);
   if (!wait) {
-    config.workerPid = child.pid; writeConfig(config); child.unref();
+    child.unref();
     console.log(JSON.stringify({ started: true, workerPid: child.pid, out: outDir, db: dbPath, intervalMs: config.intervalMs,
       cycles: config.cycles, durationHours: config.durationHours, expectedEndAt: new Date(Date.now() + config.durationHours * 3600000).toISOString() }, null, 2));
   } else {
@@ -97,6 +115,7 @@ async function start() {
 
 async function worker() {
   const config = readConfig();
+  config.workerPid = process.pid; writeConfig(config);
   Object.assign(process.env, flags(), { DATABASE_URL: databaseUrl(config.dbPath) });
   const { db } = await import("../lib/db");
   const { processInvestigationDelegations } = await import("../lib/mission/investigationDelegation");
@@ -143,6 +162,7 @@ async function worker() {
     cycle++;
   }
   await db.$disconnect();
+  writeConfig({ ...readConfig(), stoppedAt: stamp() });
 }
 function elapsedArtifacts(planJson: unknown): number {
   const plan = planJson as { skillArtifacts?: unknown[] };
@@ -160,7 +180,7 @@ function status() {
   const last = lines.at(-1), gaps = lines.slice(1).map((line, index) => (Date.parse(String(line.at)) - Date.parse(String(lines[index].at))) / 1000)
     .filter(seconds => seconds > Math.max(120, config.intervalMs / 1000 * 2.5));
   console.log(JSON.stringify({ out: outDir, workerPid: config.workerPid ?? null, workerAlive: isAlive(config.workerPid),
-    stopRequestedAt: config.stopRequestedAt ?? null, startedAt: config.startedAt, durationHours: config.durationHours,
+    schedulerTaskName: config.schedulerTaskName ?? null, stopRequestedAt: config.stopRequestedAt ?? null, startedAt: config.startedAt, durationHours: config.durationHours,
     elapsedHours: (Date.now() - Date.parse(config.startedAt)) / 3600000,
     resumeCount: config.resumeCount ?? 0, mission: mission ?? null, outputs, checkpoints, evidenceLines: lines.length,
     gapsOverLimit: gaps.length, lastEvidenceAt: last ? String(last.at) : null, lastEvidence: last ?? null }, null, 2));
@@ -180,11 +200,20 @@ function material() {
 function resume() {
   const config = readConfig();
   if (isAlive(config.workerPid)) { console.log(JSON.stringify({ resumed: false, reason: "ALREADY_RUNNING", workerPid: config.workerPid }, null, 2)); return; }
+  if (Date.now() - Date.parse(config.startedAt) >= config.durationHours * 3600000 || config.cycles > 0 && readEvidence().length >= config.cycles)
+    throw new Error("原运行窗口已结束，请保留报告并使用新目录启动");
   fs.rmSync(path.join(outDir, "stop.flag"), { force: true });
+  if (has("scheduled") || has("background-host")) {
+    config.resumedAt = stamp(); config.resumeCount = (config.resumeCount ?? 0) + 1;
+    delete config.stopRequestedAt; delete config.stoppedAt;
+    launchWindows(config, has("scheduled") ? "Register" : "Background"); return;
+  }
   const child = spawn(process.execPath, ["--import", "tsx", path.resolve("scripts/v2-long-run.ts"), "worker", "--out", outDir],
     { cwd: process.cwd(), env: { ...process.env, ...flags(), DATABASE_URL: databaseUrl(config.dbPath) },
       detached: true, stdio: ["ignore", fs.openSync(logPath, "a"), fs.openSync(logPath, "a")], windowsHide: true });
-  config.workerPid = child.pid; config.resumedAt = stamp(); config.resumeCount = (config.resumeCount ?? 0) + 1; writeConfig(config); child.unref();
+  config.workerPid = child.pid; config.resumedAt = stamp(); config.resumeCount = (config.resumeCount ?? 0) + 1;
+  delete config.stopRequestedAt; delete config.stoppedAt;
+  writeConfig(config); child.unref();
   console.log(JSON.stringify({ resumed: true, workerPid: child.pid, resumeCount: config.resumeCount, out: outDir }, null, 2));
 }
 
@@ -193,17 +222,14 @@ function stop() {
   fs.writeFileSync(path.join(outDir, "stop.flag"), stamp());
   config.stopRequestedAt = stamp();
   writeConfig(config);
-  if (config.workerPid) {
-    try { process.kill(config.workerPid); } catch {
-      try { spawn("taskkill", ["/PID", String(config.workerPid), "/T", "/F"], { windowsHide: true }); } catch { /* already stopped */ }
-    }
-  }
-  console.log(JSON.stringify({ stopRequested: true, workerPid: config.workerPid ?? null, out: outDir }, null, 2));
+  // Cooperative stop preserves an in-flight receipt and cannot kill an unrelated recycled PID.
+  console.log(JSON.stringify({ stopRequested: true, workerPid: config.workerPid ?? null, out: outDir, mode: "COOPERATIVE", note: "下一个心跳检查停止标志；用 status 确认退出" }, null, 2));
 }
 
 function report() {
   const config = readConfig();
   const lines = readEvidence();
+  const coverage = assessRunCoverage(config, lines);
   const statuses = lines.reduce<Record<string, number>>((counts, line) => { const key = String(line.status); counts[key] = (counts[key] ?? 0) + 1; return counts; }, {});
   const models = lines.map(line => Number(line.models ?? 0)), reserved = lines.map(line => Number(line.reservedOutputTokens ?? 0));
   const gaps = lines.slice(1).map((line, index) => (Date.parse(String(line.at)) - Date.parse(String(lines[index].at))) / 1000)
@@ -221,9 +247,9 @@ function report() {
     statuses, maxOutputs: Math.max(0, ...lines.map(line => Number(line.outputs ?? 0))), maxArtifacts: Math.max(0, ...lines.map(line => Number(line.artifacts ?? 0))),
     budgetMonotonic: models.every((value, index) => index === 0 || value >= models[index - 1]),
     reservedReleased: reserved.every(value => value === 0), finalUnknownCalls: Number(lines.at(-1)?.unknownCalls ?? 0),
-    wallClockComplete: (Date.now() - Date.parse(config.startedAt)) >= config.durationHours * 3600000,
+    wallClockComplete: coverage.wallClockComplete, coverage,
     note: "This report covers only the wall-clock window actually executed; it is not a claim of 72h uptime." };
-  fs.writeFileSync(path.join(outDir, "report.json"), JSON.stringify(report, null, 2));
+  fs.writeFileSync(path.resolve(flag("report-out") ?? path.join(outDir, "report.json")), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 }
 

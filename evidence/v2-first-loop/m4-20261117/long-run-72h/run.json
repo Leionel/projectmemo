@@ -11,5 +11,8 @@
   "cycles": 0,
   "materialEvery": 60,
   "durationHours": 72,
-  "workerPid": 24428
+  "workerPid": 29776,
+  "resumedAt": "2026-11-17T10:12:21.878Z",
+  "resumeCount": 1,
+  "stopRequestedAt": "2026-11-17T10:44:59.893Z"
 }

@@ -9,6 +9,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import Database from "better-sqlite3";
+import { spawn } from "node:child_process";
 
 const arg = (name: string, fallback = "") => {
   const index = process.argv.indexOf("--" + name);
@@ -19,7 +20,7 @@ const outDir = path.resolve(arg("out", "evidence/v2-first-loop/m4-20261117/load-
 fs.mkdirSync(outDir, { recursive: true });
 const dbPath = path.join(outDir, "load.db");
 const databaseUrl = "file:" + dbPath.replaceAll("\\", "/");
-for (const suffix of ["", "-shm", "-wal"]) { try { fs.rmSync(dbPath + suffix, { force: true }); } catch { /* fresh load DB */ } }
+if (fs.existsSync(dbPath)) throw new Error("测试库已存在，请选择新目录以保留旧证据");
 for (const name of fs.readdirSync("prisma/migrations").sort()) {
   const file = path.join("prisma/migrations", name, "migration.sql");
   if (!fs.existsSync(file)) continue;
@@ -32,13 +33,10 @@ Object.assign(process.env, { DATABASE_URL: databaseUrl, LLM_MODE: "mock", MISSIO
 
 const { db } = await import("../lib/db");
 const { createMission, editContinuationPolicy, missionDetail } = await import("../lib/mission/missionService");
-const { runMissionSlice } = await import("../lib/mission/runner");
 const { readProjectMaterial } = await import("../lib/mission/sourceSignals");
 const { fixtureSkillProvider } = await import("./fixtures/v2-provider");
 
 const user = await db.user.create({ data: { username: "load-" + randomUUID(), displayName: "负载探针", passwordHash: "unused" } });
-const project = await db.project.create({ data: { title: "负载项目", description: "隔离负载探针", goal: "持续报告", scenario: "RESEARCH",
-  memberships: { create: { userId: user.id, role: "OWNER" } } } });
 const policy = { mode: "BOUNDED_INVESTIGATION" as const, schemaVersion: 1, expiresAt: new Date(Date.now() + 86400000).toISOString(),
   checkEveryMinutes: 60, maxModels: 50, maxTools: 100, maxMetadataRequests: 0,
   allowedTools: ["read_project_material", "save_mission_output"], connectionIds: [], timezone: "Asia/Shanghai" };
@@ -50,6 +48,7 @@ for (let index = 0; index < count; index++) {
   const p = await db.project.create({ data: { title: "负载项目 " + index, description: "隔离负载探针", goal: "持续报告", scenario: "RESEARCH",
     memberships: { create: { userId: user.id, role: "OWNER" } } } });
   const capture = await db.capture.create({ data: { projectId: p.id, sourceType: "TEXT", rawText: "负载资料 " + index + "：结果仍待核对。" } });
+  const acceptBegin = Date.now();
   const created = await createMission(user.id, { runtimeProtocolVersion: 2, projectId: p.id, requestId: randomUUID(), goal: "整理持续报告", llmContextApproved: true });
   const mission = await editContinuationPolicy(user.id, created.id, { requestId: "grant", expectedVersion: created.version, policy });
   const state = states[index % states.length];
@@ -65,14 +64,13 @@ for (let index = 0; index < count; index++) {
     const material = await readProjectMaterial(p.id, "capture:" + capture.id);
     return { sourceId: material!.id, sourceHash: material!.hash };
   };
-  missions.push({ missionId: mission.id, projectId: p.id, captureId: capture.id, state, createdAt: Date.now(), claims: 0, outputs: 0,
+  missions.push({ missionId: mission.id, projectId: p.id, captureId: capture.id, state, createdAt: acceptBegin, acceptedMs: Date.now() - acceptBegin, claims: 0, outputs: 0,
     provider: fixtureSkillProvider(source) });
 }
 
-const accepted: number[] = [], queue: number[] = [], firstResult: number[] = [], foregroundLatency: number[] = [], busyErrors: string[] = [];
+const accepted: number[] = missions.map(item => item.acceptedMs!), queue: number[] = [], firstResult: number[] = [], foregroundLatency: number[] = [], busyErrors: string[] = [];
 let foregroundSamples = 0, foregroundFailures = 0;
 const startedAt = Date.now();
-const deadline = startedAt + 60000;
 async function foreground() {
   const target = missions[foregroundSamples % missions.length];
   const begin = performance.now();
@@ -80,45 +78,29 @@ async function foreground() {
   catch { foregroundFailures++; foregroundLatency.push(performance.now() - begin); }
   foregroundSamples++;
 }
-const foregroundTimer = setInterval(() => { void foreground(); }, 100);
-async function workerLoop(worker: number) {
-  while (Date.now() < deadline) {
-    let worked = false;
-    for (const item of missions) {
-      if (!["READY", "STALE_RUNNING"].includes(item.state)) continue;
-      const current = await db.agentMission.findUniqueOrThrow({ where: { id: item.missionId } });
-      if (!["READY", "RUNNING"].includes(current.status)) continue;
-      const begin = performance.now();
-      try {
-        const claimed = await runMissionSlice({ id: item.missionId, provider: item.provider, workerId: "load-" + worker });
-        if (!claimed) continue;
-        worked = true; item.claims++;
-        if (item.acceptedMs === undefined) { item.acceptedMs = Date.now() - item.createdAt; accepted.push(item.acceptedMs); }
-        if (item.queuedMs === undefined) { item.queuedMs = Date.now() - item.createdAt; queue.push(item.queuedMs); }
-        if (!item.firstResultMs) {
-          const outputs = await db.agentMissionOutput.count({ where: { missionId: item.missionId } });
-          if (outputs > 0) { item.firstResultMs = Date.now() - item.createdAt; firstResult.push(item.firstResultMs); }
-        }
-      } catch (error) {
-        const code = (error as { code?: string }).code ?? (error instanceof Error ? error.message : "UNKNOWN");
-        if (/SQLITE_BUSY|P1008|P2028|P2034/.test(String(code))) busyErrors.push(String(code));
-      }
-      if (item.claims >= 6) item.state = "OBSERVATION";
-    }
-    if (!worked) {
-      let runnable = false;
-      for (const item of missions) {
-        if (item.state === "RUNNING") continue;
-        const row = await db.agentMission.findUnique({ where: { id: item.missionId }, select: { status: true } });
-        if (row && ["READY", "RUNNING"].includes(row.status)) { runnable = true; break; }
-      }
-      if (!runnable) break;
-      await new Promise(resolve => setTimeout(resolve, 15));
-    }
-  }
+let foregroundDone = false;
+const foregroundRun = (async () => { while (!foregroundDone || foregroundSamples < 30) { await foreground(); await new Promise(resolve => setTimeout(resolve, 50)); } })();
+const runnable = missions.filter(item => ["READY", "STALE_RUNNING"].includes(item.state));
+const manifest = path.join(outDir, "manifest.json");
+fs.writeFileSync(manifest, JSON.stringify({ databaseUrl, deadline: Date.now() + 60000, missions: runnable.map(({ missionId, projectId, captureId }) => ({ missionId, projectId, captureId })) }));
+const exits = await Promise.all([1, 2].map(n => {
+  const fd = fs.openSync(path.join(outDir, "load-worker-" + n + ".log"), "a");
+  const child = spawn(process.execPath, ["--import", "tsx", path.resolve("scripts/v2-load-worker.ts"), manifest, "load-worker-" + n], { windowsHide: true, env: process.env, stdio: ["ignore", fd, fd] });
+  fs.closeSync(fd);
+  return new Promise<{pid: number | undefined; code: number | null}>(resolve => { child.once("error", () => resolve({pid: child.pid, code: -1})); child.once("exit", code => resolve({pid: child.pid, code})); });
+}));
+foregroundDone = true; await foregroundRun;
+type LogRow = { type: string; missionId?: string; at: number; begin?: number; outputs?: number; code?: string };
+const logs = [1, 2].flatMap(n => { const f = path.join(outDir, "load-worker-" + n + ".jsonl"); return fs.existsSync(f) ? fs.readFileSync(f, "utf8").trim().split("\n").map(line => JSON.parse(line) as LogRow) : []; });
+const failures = logs.filter(row => row.type === "ERROR");
+busyErrors.push(...failures.filter(row => /SQLITE_BUSY|P1008|P2028|P2034/.test(row.code ?? "")).map(row => row.code!));
+for (const item of runnable) {
+  const slices = logs.filter(row => row.type === "SLICE" && row.missionId === item.missionId).sort((a,b) => a.at-b.at);
+  item.claims = slices.length;
+  if (slices.length) queue.push(slices[0].begin! - item.createdAt);
+  const output = slices.find(row => Number(row.outputs) > 0);
+  if (output) firstResult.push(output.at - item.createdAt);
 }
-await Promise.all([workerLoop(1), workerLoop(2)]);
-clearInterval(foregroundTimer);
 const final = await db.agentMission.findMany({ where: { ownerUserId: user.id }, select: { id: true, status: true, budgetUsedJson: true } });
 for (const mission of final) {
   const outputs = await db.agentMissionOutput.count({ where: { missionId: mission.id } });
@@ -130,17 +112,19 @@ const budget = final.reduce((total, mission) => { const value = mission.budgetUs
   outputTokens: total.outputTokens + (value.outputTokens ?? 0), unknownCalls: total.unknownCalls + (value.unknownCalls ?? 0),
   reservedOutputTokens: total.reservedOutputTokens + (value.reservedOutputTokens ?? 0) }; }, { models: 0, tools: 0, inputTokens: 0, outputTokens: 0, unknownCalls: 0, reservedOutputTokens: 0 });
 const percentile = (values: number[], p: number) => values.length ? [...values].sort((a, b) => a - b)[Math.min(values.length - 1, Math.ceil(values.length * p) - 1)] : null;
-const claims = missions.map(item => item.claims);
+const claims = runnable.map(item => item.claims);
 const report = { schemaVersion: 1, generatedAt: new Date().toISOString(), count, states: missions.reduce<Record<string, number>>((acc, item) => { acc[item.state] = (acc[item.state] ?? 0) + 1; return acc; }, {}),
   target: { p95AcceptedMs: 2000, p90FirstLocalResultMs: 120000 },
-  accepted: { samples: accepted.length, p50Ms: percentile(accepted, 0.5), p95Ms: percentile(accepted, 0.95), targetMet: (percentile(accepted, 0.95) ?? 0) < 2000 },
+  accepted: { samples: accepted.length, p50Ms: percentile(accepted, 0.5), p95Ms: percentile(accepted, 0.95), targetMet: (percentile(accepted, 0.95) ?? Infinity) < 2000 },
   queue: { samples: queue.length, p95Ms: percentile(queue, 0.95) },
-  firstLocalResult: { samples: firstResult.length, p50Ms: percentile(firstResult, 0.5), p90Ms: percentile(firstResult, 0.9), targetMet: (percentile(firstResult, 0.9) ?? 0) < 120000 },
+  firstLocalResult: { samples: firstResult.length, p50Ms: percentile(firstResult, 0.5), p90Ms: percentile(firstResult, 0.9), targetMet: (percentile(firstResult, 0.9) ?? Infinity) < 120000 },
   foreground: { samples: foregroundSamples, failures: foregroundFailures, p50Ms: percentile(foregroundLatency, 0.5), p95Ms: percentile(foregroundLatency, 0.95) },
+  workerProcesses: exits, errors: failures, runnable: runnable.length, incompleteMissions: runnable.length - firstResult.length,
   failureRate: missions.filter(item => item.claims === 0 && ["READY", "STALE_RUNNING"].includes(item.state)).length / Math.max(1, missions.filter(item => ["READY", "STALE_RUNNING"].includes(item.state)).length),
   fairness: { claimsMin: Math.min(...claims), claimsMax: Math.max(...claims) },
   busyErrors: busyErrors.length, usage: budget, durationMs: Date.now() - startedAt,
-  provider: "INJECTED_LOAD_FIXTURE (in-process, no paid call)", limitation: "Local mock throughput is not real cloud capacity; RUNNING rows with live leases stay untouched by design." };
+  provider: "INJECTED_LOAD_FIXTURE (two OS processes, no paid call)", limitation: "Local mock throughput is not real cloud capacity; RUNNING rows with live leases stay untouched by design." };
 fs.writeFileSync(path.join(outDir, "report.json"), JSON.stringify(report, null, 2));
 console.log(JSON.stringify(report, null, 2));
 await db.$disconnect();
+process.exitCode = failures.length || exits.some(e => e.code !== 0) || firstResult.length !== runnable.length || foregroundFailures || !report.accepted.targetMet || !report.firstLocalResult.targetMet ? 2 : 0;

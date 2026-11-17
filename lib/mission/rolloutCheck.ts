@@ -33,6 +33,7 @@ export async function inspectV2Rollout(options: { now?: number } = {}): Promise<
   const workerVersion = presence.version;
   checks.push({ name: "WORKER_BUILD", status: presence.workerId && workerVersion === WORKER_CAPABILITY_VERSION ? "PASS" : "WARN",
     detail: presence.workerId ? `最近 Worker 版本 ${workerVersion ?? "未知"}（要求 ${WORKER_CAPABILITY_VERSION}）` : "尚未观察到 Worker 心跳" });
+  checks.push({ name: "PROCESS_INVENTORY", status: "WARN", detail: "此检查只读取最近一份 Worker 心跳，不能证明没有其他旧 Worker。扩量或回滚前须核对进程清单并排空执行槽。" });
   checks.push({ name: "WORKER_IDENTITY", status: presence.workerId && presence.identityMatches === false ? "BLOCK" : "PASS",
     detail: presence.identityMatches === false ? `Worker 与当前配置不一致：${presence.mismatchReason}` : "Worker 身份与当前配置一致或未观察" });
 

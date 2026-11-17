@@ -1,0 +1,86 @@
+[1/64] V2-R01 RUN ["project-planning"]
+[2/64] V2-R02 RUN ["project-planning"]
+[3/64] V2-R03 RUN ["project-planning"]
+[4/64] V2-R04 RUN ["project-planning"]
+[5/64] V2-R05 RUN ["project-planning"]
+[6/64] V2-R06 RUN ["project-planning"]
+[7/64] V2-R07 RUN ["project-planning"]
+[8/64] V2-R08 RUN ["project-planning"]
+[9/64] V2-R09 RUN ["project-planning"]
+[10/64] V2-R10 RUN ["project-planning"]
+[11/64] V2-R11 RUN ["project-planning"]
+[12/64] V2-R12 RUN ["project-planning"]
+[13/64] V2-R13 RUN ["evidence-research"]
+[14/64] V2-R14 RUN ["evidence-research"]
+[15/64] V2-R15 RUN ["evidence-research"]
+[16/64] V2-R16 RUN ["evidence-research"]
+[17/64] V2-R17 RUN ["evidence-research"]
+[18/64] V2-R18 RUN ["evidence-research"]
+[19/64] V2-R19 RUN ["evidence-research"]
+[20/64] V2-R20 RUN ["evidence-research"]
+[21/64] V2-R21 RUN ["evidence-research"]
+[22/64] V2-R22 RUN ["evidence-research"]
+[23/64] V2-R23 RUN ["evidence-research"]
+[24/64] V2-R24 RUN ["evidence-research"]
+[25/64] V2-R25 RUN ["deliverable-creation"]
+[26/64] V2-R26 RUN ["deliverable-creation"]
+[27/64] V2-R27 RUN ["deliverable-creation"]
+[28/64] V2-R28 RUN ["deliverable-creation"]
+[29/64] V2-R29 RUN ["deliverable-creation"]
+[30/64] V2-R30 RUN ["deliverable-creation"]
+[31/64] V2-R31 RUN ["deliverable-creation"]
+[32/64] V2-R32 RUN ["deliverable-creation"]
+[33/64] V2-R33 RUN ["deliverable-creation"]
+[34/64] V2-R34 RUN ["deliverable-creation"]
+[35/64] V2-R35 RUN ["deliverable-creation"]
+[36/64] V2-R36 RUN ["deliverable-creation"]
+[37/64] V2-R37 RUN ["project-review"]
+[38/64] V2-R38 RUN ["project-review"]
+[39/64] V2-R39 RUN ["project-review"]
+[40/64] V2-R40 RUN ["project-review"]
+[41/64] V2-R41 RUN ["project-review"]
+[42/64] V2-R42 RUN ["project-review"]
+[43/64] V2-R43 RUN ["project-review"]
+[44/64] V2-R44 RUN ["project-review"]
+[45/64] V2-R45 RUN ["project-review"]
+[46/64] V2-R46 RUN ["project-review"]
+[47/64] V2-R47 RUN ["project-review"]
+[48/64] V2-R48 RUN ["project-review"]
+[49/64] V2-R49 RUN ["project-planning","evidence-research"]
+[50/64] V2-R50 RUN ["evidence-research","deliverable-creation"]
+[51/64] V2-R51 RUN ["project-review","evidence-research","deliverable-creation"]
+[52/64] V2-R52 RUN ["project-planning","evidence-research","deliverable-creation","project-review"]
+[53/64] V2-R53 RUN ["project-review","evidence-research","deliverable-creation"]
+[54/64] V2-R54 RUN ["evidence-research","deliverable-creation","project-review"]
+[55/64] V2-R55 RUN ["project-review","evidence-research","deliverable-creation"]
+[56/64] V2-R56 RUN ["project-review","project-planning","deliverable-creation"]
+[57/64] V2-R57 CONTROL []
+[58/64] V2-R58 CONTROL []
+[59/64] V2-R59 CLARIFY []
+[60/64] V2-R60 DENY []
+[61/64] V2-R61 ANSWER []
+[62/64] V2-R62 CLARIFY []
+[63/64] V2-R63 CONTROL []
+[64/64] V2-R64 CONTROL []
+{
+  "datasetId": "projectmemo-v2-routing-64-v1",
+  "datasetFingerprint": "1b71452899c586e4e893477be68301a90dac23e57ad4d4d80258f59b16fce89a",
+  "generatedAt": "2026-11-17T10:47:44.515Z",
+  "provider": "INJECTED_V2_FIXTURE",
+  "modelCalls": 0,
+  "paidCalls": 0,
+  "cases": 64,
+  "dimension": {
+    "total": 64,
+    "dispatchCases": 54,
+    "dispatchedTools": 126,
+    "externalReadDispatches": 0,
+    "externalWriteDispatches": 0,
+    "businessWriteDispatches": 0,
+    "controlCasesWithDispatch": 0,
+    "unprovenContentChecks": 0
+  },
+  "durationMs": 16742,
+  "resultsFile": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\evidence\\v2-first-loop\\review-20261117\\routes\\results.jsonl",
+  "note": "路由、工具边界与持久证据由真实 Router/Mission Runner/控制服务与真实 AgentMissionStep 采集；内容语义判据在离线注入模型下标记 UNPROVEN，不判真，按失败计入最终证据维度。"
+}

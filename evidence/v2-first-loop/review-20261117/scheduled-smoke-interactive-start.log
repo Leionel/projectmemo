@@ -1,0 +1,18 @@
+Register-ScheduledTask : �ܾ����ʡ�
+����λ�� D:\Projects\hongmen-worktrees\v2-first-loop\scripts\v2-long-run-task.ps1:29 �ַ�: 3
++   Register-ScheduledTask -TaskName $TaskName -Description $descriptio ...
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (PS_ScheduledTask:Root/Microsoft/...S_ScheduledTask) [Register-Schedul 
+   edTask], CimException
+    + FullyQualifiedErrorId : HRESULT 0x80070005,Register-ScheduledTask
+ 
+长时运行命令失败：Command failed: powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -File D:\Projects\hongmen-worktrees\v2-first-loop\scripts\v2-long-run-task.ps1 -Mode Register -Workspace D:\Projects\hongmen-worktrees\v2-first-loop -NodePath C:\Program Files\nodejs\node.exe -OutDirectory D:\Projects\hongmen-worktrees\v2-first-loop\evidence\v2-first-loop\review-20261117\scheduled-smoke -TaskName ProjectMemo-V2-ddbba537bf71
+Register-ScheduledTask : �ܾ����ʡ�
+����λ�� D:\Projects\hongmen-worktrees\v2-first-loop\scripts\v2-long-run-task.ps1:29 �ַ�: 3
++   Register-ScheduledTask -TaskName $TaskName -Description $descriptio ...
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (PS_ScheduledTask:Root/Microsoft/...S_ScheduledTask) [Register-Schedul 
+   edTask], CimException
+    + FullyQualifiedErrorId : HRESULT 0x80070005,Register-ScheduledTask
+ 
+

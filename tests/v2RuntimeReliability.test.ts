@@ -74,7 +74,9 @@ test("clock advance: an expired lease is recovered by a later Worker without dup
   vi.useFakeTimers({ toFake: ["Date"], shouldAdvanceTime: true });
   vi.setSystemTime(now);
   await db.agentMission.update({ where: { id: f.mission.id }, data: { status: "RUNNING", executionSlot: 1, leaseOwner: "dead-worker",
-    leaseUntil: new Date(now.getTime() + 60000), leaseEpoch: { increment: 1 } } });
+    // claimMission clears scheduling on claim; keeping a prior observation's nextAttemptAt makes
+    // this fixture depend on the wall-clock hour at which the suite happens to run.
+    nextAttemptAt: null, leaseUntil: new Date(now.getTime() + 60000), leaseEpoch: { increment: 1 } } });
   vi.setSystemTime(new Date(now.getTime() + 61000));
   const claimed = await runMissionSlice({ id: f.mission.id, provider: f.provider });
   expect(claimed).toBe(true);

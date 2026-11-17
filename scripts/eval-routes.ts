@@ -203,7 +203,7 @@ async function executeControl(testCase: FrozenCase, refs: FixtureRefs, decision:
 
 fs.mkdirSync(outDir, { recursive: true });
 const results: Array<Record<string, unknown>> = [];
-const dimension = { total: dataset.cases.length, dispatchCases: 0, dispatchedTools: 0, externalReadDispatches: 0, externalWriteDispatches: 0, businessWriteDispatches: 0, controlCasesWithDispatch: 0, unprovenContentChecks: 0 };
+const dimension = { total: dataset.cases.length, dispatchCases: 0, dispatchedTools: 0, externalReadDispatches: 0, externalWriteDispatches: 0, businessWriteDispatches: 0, controlCasesWithDispatch: 0, contentJudgement: "UNVERIFIED" };
 const started = Date.now();
 let index = 0;
 for (const testCase of dataset.cases) {

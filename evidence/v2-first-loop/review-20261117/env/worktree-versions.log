@@ -1,0 +1,16 @@
+{
+  "out": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\evidence\\v2-first-loop\\review-20261117\\env\\worktree-versions\\report.json",
+  "node": "v24.16.0",
+  "npm": "11.15.0",
+  "mismatches": 0,
+  "docxRuntime": [
+    "mammoth@1.13.0",
+    "fflate@0.8.3",
+    "better-sqlite3@12.11.1",
+    "next@16.4.6",
+    "react@19.2.7",
+    "react-dom@19.2.7",
+    "prisma@7.10.1",
+    "@prisma/client@7.10.1"
+  ]
+}

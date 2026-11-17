@@ -8,6 +8,8 @@ const skipBuildTypeCheck = process.env.PROJECTMEMO_BUILD_SKIP_TYPECHECK === "1";
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
   outputFileTracingRoot: path.resolve(import.meta.dirname),
+  // Runtime state and private evidence belong on their configured volumes, never in the server bundle.
+  outputFileTracingExcludes: { "/*": ["./.env*", "./.runtime/**", "./evidence/**", "./tmp/**", "./storage/**", "./prisma/*.db*"] },
   outputFileTracingIncludes: { "/*": ["./skills/builtins/**/SKILL.md", "./lib/intake/docxWorker.cjs", "./node_modules/mammoth/**", "./node_modules/fflate/**"] },
   serverExternalPackages: ["better-sqlite3"],
   // 设置时跳过构建内并行 TypeScript 子进程，避免低内存机器在

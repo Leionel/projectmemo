@@ -21,10 +21,15 @@ const rows = Object.entries(declared).sort(([left], [right]) => left.localeCompa
   let installed: string | null = null;
   try { installed = (JSON.parse(fs.readFileSync(path.join("node_modules", name, "package.json"), "utf8")) as { version: string }).version; } catch { installed = null; }
   return { name, declared: spec, lockRoot: lockedSpecs[name] ?? null, lockedVersion: entry?.version ?? null, installed,
-    exactInstalled: installed !== null && installed === spec, mismatch: installed !== null && installed !== spec };
+    exactInstalled: installed !== null && installed === spec,
+    // Range specifications such as ^19.2.0 are not installed version strings. Compare the
+    // installation with the lock's resolved version, and the manifest specification with lock root.
+    mismatch: installed === null || installed !== entry?.version || lockedSpecs[name] !== spec };
 });
 let npmVersion = "unavailable";
-try { npmVersion = execFileSync(process.platform === "win32" ? "npm.cmd" : "npm", ["--version"], { encoding: "utf8" }).trim(); } catch { /* diagnostics only */ }
+try { npmVersion = process.platform === "win32"
+  ? execFileSync("cmd.exe", ["/d", "/s", "/c", "npm --version"], { encoding: "utf8", windowsHide: true }).trim()
+  : execFileSync("npm", ["--version"], { encoding: "utf8" }).trim(); } catch { /* diagnostics only */ }
 const docxRuntime = ["mammoth", "fflate", "better-sqlite3", "next", "react", "react-dom", "prisma", "@prisma/client"].map(name => rows.find(row => row.name === name)).filter(Boolean);
 const report = { schemaVersion: 1, generatedAt: new Date().toISOString(), node: process.version, npm: npmVersion,
   lockfileVersion: lock.lockfileVersion, packageCount: Object.keys(lock.packages).length,

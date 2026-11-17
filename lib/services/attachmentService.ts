@@ -54,7 +54,7 @@ function keepWithin(text: string, maxChars: number) {
 export async function extractPdfText(buffer: Buffer, maxChars = PDF_TEXT_LIMIT): Promise<string | null> {
   const executable = process.env.PDFTOTEXT_PATH || "pdftotext";
   return new Promise((resolve, reject) => {
-    const child = spawn(executable, ["-bbox", "-enc", "UTF-8", "-", "-"], {
+    const child = spawn(/* turbopackIgnore: true */ executable, ["-bbox", "-enc", "UTF-8", "-", "-"], {
       windowsHide: true,
       stdio: ["pipe", "pipe", "pipe"],
     });

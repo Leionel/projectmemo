@@ -61,8 +61,8 @@ export function recordWorkerPresence(data: {
   const filePath = getPresencePath();
   let existing: Partial<WorkerPresenceInfo> = inMemoryPresence ?? {};
   try {
-    if (fs.existsSync(filePath)) {
-      existing = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    if (fs.existsSync(/* turbopackIgnore: true */ filePath)) {
+      existing = JSON.parse(fs.readFileSync(/* turbopackIgnore: true */ filePath, "utf-8"));
     }
   } catch {}
 
@@ -97,8 +97,8 @@ export function readWorkerPresence(now = Date.now()): WorkerPresenceInfo {
   const filePath = getPresencePath();
   let data: WorkerPresenceInfo | null = null;
   try {
-    if (fs.existsSync(filePath)) {
-      data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    if (fs.existsSync(/* turbopackIgnore: true */ filePath)) {
+      data = JSON.parse(fs.readFileSync(/* turbopackIgnore: true */ filePath, "utf-8"));
     }
   } catch {}
 
@@ -142,7 +142,7 @@ export function clearWorkerPresenceForTest(): void {
   inMemoryPresence = null;
   const filePath = getPresencePath();
   try {
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    if (fs.existsSync(/* turbopackIgnore: true */ filePath)) fs.unlinkSync(filePath);
   } catch {}
 }
 

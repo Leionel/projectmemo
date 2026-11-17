@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-17T10:43:29.954Z",
+  "node": "v24.16.0",
+  "npm": "11.15.0",
+  "lockfileVersion": 3,
+  "packageCount": 879,
+  "declaredExact": 10,
+  "installedMismatches": [],
+  "docxRuntime": [
+    {
+      "name": "mammoth",
+      "declared": "1.13.0",
+      "lockRoot": "1.13.0",
+      "lockedVersion": "1.13.0",
+      "installed": "1.13.0",
+      "exactInstalled": true,
+      "mismatch": false
+    },
+    {
+      "name": "fflate",
+      "declared": "0.8.3",
+      "lockRoot": "0.8.3",
+      "lockedVersion": "0.8.3",
+      "installed": "0.8.3",
+      "exactInstalled": true,
+      "mismatch": false
+    },
+    {
+      "name": "better-sqlite3",
+      "declared": "^12.4.1",
+      "lockRoot": "^12.4.1",
+      "lockedVersion": "12.11.1",
+      "installed": "12.11.1",
+      "exactInstalled": false,
+      "mismatch": false
+    },
+    {
+      "name": "next",
+      "declared": "16.4.6",
+      "lockRoot": "16.4.6",
+      "lockedVersion": "16.4.6",
+      "installed": "16.4.6",
+      "exactInstalled": true,
+      "mismatch": false
+    },
+    {
+      "name": "react",
+      "declared": "^19.2.0",
+      "lockRoot": "^19.2.0",
+      "lockedVersion": "19.2.7",
+      "installed": "19.2.7",
+      "exactInstalled": false,
+      "mismatch": false
+    },
+    {
+      "name": "react-dom",
+      "declared": "^19.2.0",
+      "lockRoot": "^19.2.0",
+      "lockedVersion": "19.2.7",
+      "installed": "19.2.7",
+      "exactInstalled": false,
+      "mismatch": false
+    },
+    {
+      "name": "prisma",
+      "declared": "7.10.1",
+      "lockRoot": "7.10.1",
+      "lockedVersion": "7.10.1",
+      "installed": "7.10.1",
+      "exactInstalled": true,
+      "mismatch": false
+    },
+    {
+      "name": "@prisma/client",
+      "declared": "7.10.1",
+      "lockRoot": "7.10.1",
+      "lockedVersion": "7.10.1",
+      "installed": "7.10.1",
+      "exactInstalled": true,
+      "mismatch": false
+    }
+  ],
+  "cleanInstallVerified": false,
+  "productionPackVerified": false,
+  "limitation": "This baseline reads the existing node_modules; it is not a clean-install proof. Run npm ci in an empty temp checkout with network access to verify reproducibility."
+}

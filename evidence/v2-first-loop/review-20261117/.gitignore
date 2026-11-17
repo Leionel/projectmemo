@@ -1,0 +1,9 @@
+*.db
+*.db-wal
+*.db-shm
+long-run-72h-verified/run.json
+long-run-72h-verified/evidence.jsonl
+long-run-72h-verified/worker.log
+long-run-72h-verified/scheduled-worker.log
+long-run-72h-verified/stop.flag
+long-run-72h-verified/report.json

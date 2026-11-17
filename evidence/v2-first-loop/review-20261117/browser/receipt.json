@@ -1,0 +1,43 @@
+{
+  "at": "2026-11-17T10:37:17.119Z",
+  "origin": "http://127.0.0.1:4480",
+  "data": "isolated synthetic SQLite",
+  "provider": "localhost HTTP mock with 10s latency",
+  "missionId": "cmwkk33a20002u48oh7jrex71",
+  "checks": [
+    "real in-flight Runner permits sprint; idle refusal separately covered by v2ProjectSprint.test.ts",
+    "3 real Step receipts and 1 new Output",
+    "lost self-report response retries same requestId",
+    "ending sprint preserves Mission version/status",
+    "reload keeps ended sprint; opens original output/evidence",
+    "360px has no horizontal overflow"
+  ],
+  "before": {
+    "status": "WAITING_INPUT",
+    "version": 10
+  },
+  "after": {
+    "status": "WAITING_INPUT",
+    "version": 10
+  },
+  "sprint": {
+    "id": "cmwkk34ad0006u48ott08zw1p",
+    "missionId": "cmwkk33a20002u48oh7jrex71",
+    "objective": "核对报告中的两条引用",
+    "startedAt": "2026-11-17T10:35:06.229Z",
+    "endsAt": "2026-11-17T10:50:06.228Z",
+    "status": "ENDED",
+    "selfReportedDone": true,
+    "agent": {
+      "working": false,
+      "label": "正在等待资料或你的判断",
+      "completedSteps": 3,
+      "newOutputs": 1,
+      "latestRevision": 1
+    }
+  },
+  "errors": [],
+  "overflow": false,
+  "physicalHarmonyVerified": false,
+  "realProviderQualityVerified": false
+}

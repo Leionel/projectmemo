@@ -40,7 +40,7 @@ const { processInvestigationDelegations } = await import("../lib/mission/investi
 const { runMissionSlice } = await import("../lib/mission/runner");
 const { startMockModelServer } = await import("../lib/evaluation/mockModelServer");
 
-const mock = await startMockModelServer();
+const mock = await startMockModelServer({ delayMs: Number(process.env.V2_ENTRY_MODEL_DELAY_MS ?? 0) });
 Object.assign(process.env, { LLM_MODE: "openai-compatible", LLM_PROVIDER: "openai-compatible",
   LLM_BASE_URL: mock.baseUrl, LLM_API_KEY: "mock-local-only", LLM_MODEL_NAME: "mock-local-model", LLM_TIMEOUT_MS: "20000" });
 

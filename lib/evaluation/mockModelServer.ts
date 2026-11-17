@@ -26,10 +26,12 @@ async function latestPointers(projectId: string): Promise<Array<{ sourceId: stri
   return pointers;
 }
 
-export async function startMockModelServer(options: { model?: string } = {}) {
+export async function startMockModelServer(options: { model?: string; delayMs?: number } = {}) {
   const readThisCycle = new Set<string>(), model = options.model ?? "mock-local-model";
   const server = http.createServer(async (request, response) => {
     if (request.method !== "POST" || !request.url?.endsWith("/chat/completions")) { response.writeHead(404).end(); return; }
+    // Optional local-only latency makes an actual in-flight Runner visible to browser acceptance.
+    if (options.delayMs) await new Promise(resolve => setTimeout(resolve, Math.min(15000, Math.max(0, options.delayMs!))));
     let body = "";
     for await (const chunk of request) body += chunk;
     let context: MockContext | null = null;

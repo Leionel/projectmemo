@@ -10,6 +10,7 @@ import { ReentryBriefPanel } from "./ReentryBrief";
 import styles from "./OutcomeWorkbench.module.css";
 import { MissionMaterialForm } from "./MissionMaterialForm";
 import { OutcomeChallenges } from "./OutcomeChallenges";
+import { ProjectSprint } from "./ProjectSprint";
 
 async function api(url: string, body?: unknown) {
   const response = await fetch(url, { method: body ? "POST" : "GET", cache: "no-store",
@@ -124,6 +125,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
       载入新资料样例 <ArrowUpRight size={15} aria-hidden="true" /></button></div>}
     {error && <div role="alert" className={styles.error}>{error}{hasPending && "；原请求编号已保留，再次发送会重试原请求。"}</div>}
     {live && <ReentryBriefPanel missionId={missionId} onOpenRevision={revision => { setSelectedRevision(revision); setView("draft"); }} />}
+    {live && snapshot.challengesEnabled && <ProjectSprint key={missionId} missionId={missionId} onOpenRevision={revision => { setSelectedRevision(revision); setView("draft"); }} />}
     <div className={styles.workspace}>
       <aside className={styles.progress} aria-label="Agent过程反馈"><h2>这份成果的进展</h2>
         <p className={styles.objective}>{snapshot.workingObjective}</p>

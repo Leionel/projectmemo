@@ -1,0 +1,13 @@
+.sprint { margin-top: 24px; padding: 22px; border: 1px solid var(--border, #dcdcd3); border-radius: 18px; background: var(--card, #fbfaf6); }
+.sprint header, .sprint h2, .sprint h3, .receipts, .receipts span, .start, .sprint footer { display: flex; align-items: center; gap: 10px; }
+.sprint header { justify-content: space-between; }
+.sprint h2 { margin: 0; font-size: 17px; }.sprint h3 { font-size: 14px; margin: 0 0 12px; }
+.sprint header > span { font-variant-numeric: tabular-nums; font-size: 20px; }
+.lanes { display: grid; grid-template-columns: 1fr 1fr; margin: 20px 0; border-block: 1px solid var(--border, #dcdcd3); }
+.lanes > div { padding: 18px 10px; min-width: 0; overflow-wrap: anywhere; }.lanes > div + div { border-left: 1px solid var(--border, #dcdcd3); padding-left: 22px; }
+.sprint p { line-height: 1.6; }.sprint small, .hint { color: var(--muted-foreground, #72746a); font-size: 12px; }
+.sprint form { margin-top: 18px; }.sprint form label { display: grid; gap: 8px; font-size: 14px; }
+.sprint form input { min-width: 0; width: 100%; padding: 10px; border: 1px solid var(--border, #dcdcd3); border-radius: 8px; background: transparent; }
+.sprint button, .sprint select { padding: 8px 12px; border: 1px solid var(--border, #dcdcd3); border-radius: 8px; background: transparent; color: inherit; font: inherit; font-size: 13px; }
+.sprint button { cursor: pointer; }.sprint button:disabled { opacity: .5; cursor: default; }.start { margin-top: 12px; }.receipts { flex-wrap: wrap; margin-bottom: 14px; font-size: 13px; }
+@media (max-width: 640px) { .lanes { grid-template-columns: 1fr; }.lanes > div + div { border-left: 0; border-top: 1px solid var(--border, #dcdcd3); padding-left: 10px; }.sprint footer { flex-wrap: wrap; } }

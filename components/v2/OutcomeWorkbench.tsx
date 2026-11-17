@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ArrowUpRight, BookOpen, Check, ChevronRight, FileText, GitCompareArrows, RefreshCw } from "lucide-react";
 import { AgentMessageBlocks } from "@/components/AgentMessageBlocks";
 import { workbenchFixture } from "@/lib/experience/workbenchFixture";
-import { workbenchMessage, type WorkbenchSnapshot } from "@/lib/types/workbench";
+import { workbenchArtifactMessage, workbenchMessage, type WorkbenchSnapshot } from "@/lib/types/workbench";
 import styles from "./OutcomeWorkbench.module.css";
 
 async function api(url: string, body?: unknown) {
@@ -21,6 +21,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
   const [snapshot, setSnapshot] = useState<WorkbenchSnapshot | null>(() => live ? null : workbenchFixture());
   const [research, setResearch] = useState(false), [selectedRevision, setSelectedRevision] = useState<number | null>(null);
   const [view, setView] = useState<"draft" | "diff">("draft"), [sourceKey, setSourceKey] = useState<string | null>(null);
+  const [selectedArtifactId, setSelectedArtifactId] = useState<string | null>(null);
   const [message, setMessage] = useState(""), [busy, setBusy] = useState(false), [error, setError] = useState("");
   const [notice, setNotice] = useState(""), [game, setGame] = useState<"mentor" | "evidence" | "sprint" | null>(null);
   const [chosen, setChosen] = useState(""), [answer, setAnswer] = useState(""), [sprinting, setSprinting] = useState(false);
@@ -76,7 +77,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
     } catch (e) { setError(e instanceof Error ? e.message : "提交未确认，请重试原请求"); }
     finally { setBusy(false); }
   }
-  async function control(action: "pause" | "cancel") {
+  async function control(action: "pause" | "cancel" | "resume") {
     if (!snapshot || busy) return;
     setBusy(true); setError("");
     try {
@@ -84,7 +85,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
       const detail = await api("/api/missions/" + encodeURIComponent(snapshot.id));
       const current = detail.mission ?? detail;
       await api("/api/missions/" + encodeURIComponent(snapshot.id) + "/" + action, { requestId: crypto.randomUUID(), expectedVersion: current.version });
-      setConfirmingEnd(false); setNotice(action === "pause" ? "已收到暂停请求，后台不再派发新步骤。" : "已结束持续跟进；已交付版本与依据仍然保留。");
+      setConfirmingEnd(false); setNotice(action === "pause" ? "已收到暂停请求，后台不再派发新步骤。" : action === "resume" ? "已恢复跟进；阶段成果与原报告都保留。" : "已结束持续跟进；已交付版本与依据仍然保留。");
       await refresh();
     } catch (e) { setError(e instanceof Error ? e.message : "操作未确认，请重试"); }
     finally { setBusy(false); }
@@ -96,6 +97,8 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
   if (!snapshot) return <main className={styles.loading}><h1>成果工作台</h1><p role="status">{error || "正在读取原委托…"}</p>
     {error && <><button onClick={() => void refresh()}>重试读取</button><a href="/login">登录后继续</a></>}</main>;
   const output = snapshot.outputs.find(o => o.revision === selectedRevision) ?? snapshot.outputs[0];
+  const artifact = snapshot.stageArtifacts.find(item => item.id === selectedArtifactId) ?? snapshot.stageArtifacts[0];
+  const stageReady = snapshot.reasonCode === "SKILL_DELIVERABLE_READY";
   const previous = output ? snapshot.outputs.find(o => o.revision < output.revision) : undefined;
   const source = snapshot.sources.find(s => s.key === sourceKey) ??
     snapshot.sources.find(s => output?.sourceKeys.includes(s.key)) ?? snapshot.sources[0];
@@ -106,8 +109,8 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
       <span>{live ? (snapshot.provider.startsWith("INJECTED") ? "隔离流程演示 · 注入模型" : "原委托实时读回") : "可点击交互样例 · 未运行模型"}</span></div>
     <header className={styles.heading}><div><p>{snapshot.projectTitle}</p><h1>{snapshot.goal}</h1>
       <div className={styles.state} role="status"><span aria-hidden="true" className={styles.dot} />
-        {phaseLabels[snapshot.phase] ?? snapshot.reason}</div></div>
-      {live ? <div className={styles.controls}><button className={styles.secondary} onClick={() => void refresh()}><RefreshCw size={15} aria-hidden="true" />重新读取</button><button className={styles.secondary} disabled={busy || snapshot.status !== "READY" && snapshot.phase !== "WAITING_OBSERVATION"} onClick={() => void control("pause")}>暂停跟进</button><button className={styles.secondary} disabled={busy} onClick={() => void (confirmingEnd ? control("cancel") : setConfirmingEnd(true))}>{confirmingEnd ? "确认结束跟进" : "结束跟进"}</button></div> :
+        {stageReady ? snapshot.reason : phaseLabels[snapshot.phase] ?? snapshot.reason}</div></div>
+      {live ? <div className={styles.controls}><button className={styles.secondary} onClick={() => void refresh()}><RefreshCw size={15} aria-hidden="true" />重新读取</button>{stageReady && <button className={styles.secondary} disabled={busy} onClick={() => void control("resume")}>继续跟进</button>}<button className={styles.secondary} disabled={busy || snapshot.status !== "READY" && snapshot.phase !== "WAITING_OBSERVATION"} onClick={() => void control("pause")}>暂停跟进</button><button className={styles.secondary} disabled={busy} onClick={() => void (confirmingEnd ? control("cancel") : setConfirmingEnd(true))}>{confirmingEnd ? "确认结束跟进" : "结束跟进"}</button></div> :
         <div className={styles.sampleChoices}><button aria-pressed={!research} onClick={() => switchSample(false)}>开发样例</button>
           <button aria-pressed={research} onClick={() => switchSample(true)}>科研对照</button></div>}
     </header>
@@ -124,6 +127,18 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
           <small>{live ? "读取时间" : "样例时点"} {new Date(snapshot.checkedAt).toLocaleTimeString("zh-CN", { timeZone: "Asia/Shanghai" })}（北京时间）</small></div>
       </aside>
       <section className={styles.document} aria-label="项目成果">
+        {artifact && <section className={styles.stageArtifacts} aria-label="阶段成果">
+          <div className={styles.documentHead}><div className={styles.views}><h2><FileText size={15} aria-hidden="true" />阶段成果</h2></div>
+            <div className={styles.versions} aria-label="阶段成果列表">{snapshot.stageArtifacts.map(item => <button key={item.id}
+              aria-pressed={item.id === artifact.id} onClick={() => { setSelectedArtifactId(item.id); setSourceKey(null); }}>{item.label}</button>)}</div></div>
+          <p className={styles.paperLabel}>{artifact.label} · 原报告与业务行动未改动</p>
+          <AgentMessageBlocks message={workbenchArtifactMessage(artifact, snapshot.projectId, snapshot.provider)}
+            conversationId={"workbench-artifact-" + snapshot.id} busy={busy} onAction={async () => { /* Read-only presentation has no business actions. */ }} />
+          <div className={styles.references}><span>本阶段依据</span>{[...new Set(artifact.blocks.flatMap(block => block.sourceIds))].map(id => {
+            const found = snapshot.sources.find(item => item.id === id && artifact.sourceKeys.includes(item.key));
+            return found ? <button key={id} onClick={() => setSourceKey(found.key)}><BookOpen size={14} aria-hidden="true" />定位原记录</button> : null;
+          })}{artifact.unknowns.length > 0 && <p>仍未知：{artifact.unknowns.join("；")}</p>}</div>
+        </section>}
         <div className={styles.documentHead}><div className={styles.views}>
           <button aria-pressed={view === "draft"} onClick={() => setView("draft")}><FileText size={15} aria-hidden="true" />成果</button>
           <button aria-pressed={view === "diff"} onClick={() => setView("diff")}><GitCompareArrows size={15} aria-hidden="true" />修改对照</button></div>
@@ -146,7 +161,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
             const found = snapshot.sources.find(s => s.id === id && output.sourceKeys.includes(s.key));
             return found ? <button key={id} onClick={() => setSourceKey(found.key)}><BookOpen size={14} aria-hidden="true" />定位原记录</button> : null;
           }) : <p>这版内容仅为推断或来源需要重新核对。</p>}</div>
-        </div> : <p className={styles.empty}>原委托还没有生成成果。后台过程会显示在左侧，已有材料仍保留。</p>}
+        </div> : <p className={styles.empty}>原委托还没有生成报告稿。阶段成果与后台过程保留在本次读取中。</p>}
         <div className={styles.games}><span>围绕这份成果试一试</span>
           <button aria-pressed={game === "mentor"} onClick={() => setGame(game === "mentor" ? null : "mentor")}>严格导师</button>
           <button aria-pressed={game === "evidence"} onClick={() => setGame(game === "evidence" ? null : "evidence")}>证据侦探</button>

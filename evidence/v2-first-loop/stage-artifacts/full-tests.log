@@ -1,0 +1,559 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ✓ tests/browserReader.test.ts (10 tests) 23315ms
+     ✓ 受控 JS 页面在渲染后取得动态正文与截图出处  1919ms
+     ✓ 空页面不冒充读取成功  1664ms
+     ✓ 异步正文未完成时标记 PARTIAL 并保留已见片段  7070ms
+     ✓ 页面注入只作内容，弹窗/表单/WebSocket/私网 iframe 与图片被拦截  1734ms
+     ✓ 重定向到私网地址时阻断导航  1135ms
+     ✓ 只展开原生 details，不读取闭合隐藏正文  3186ms
+     ✓ 页面子请求预算在本次观察内生效  1204ms
+   ✓ 分块正文没有Content-Length也计入硬上限，不能报告完整读取  664ms
+   ✓ 重定向每跳都重新进入受控传输，页面元数据只保留可见标题  3210ms
+   ✓ 每个HTTP子请求都通过原运行授权守卫，停止后不再派发子资源  1521ms
+ ✓ tests/continuityRecoordination.test.ts (3 tests) 13572ms
+   ✓ two OS directive writers with distinct commands and the same expected sequence have one winner  3402ms
+   ✓ real OS worker competition: revise during dispatched model  5620ms
+   ✓ real OS worker competition: takeover during dispatched model  4549ms
+ ✓ tests/r4ResearchRecovery.test.ts (2 tests) 10485ms
+     ✓ 重启复用已完成网页检查点，不再次发送请求  5469ms
+     ✓ 发送意图后中断，重启保留未知且不重发  5012ms
+ ✓ tests/copilotPersistence.test.ts (14 tests) 8158ms
+     ✓ uses two OS processes without duplicate create_action effects  1528ms
+     ✓ uses two OS processes without duplicate generate_artifact effects  1461ms
+     ✓ recovers an OS exit before receipt commit for create_action atomically  1311ms
+     ✓ recovers an OS exit before receipt commit for generate_artifact atomically  1320ms
+     ✓ replays an artifact committed by a child that exits before returning a response  1267ms
+     ✓ replays the additive migration on an old-schema copy without changing legacy data  847ms
+ ✓ tests/deployUpdate.test.ts (24 tests) 7346ms
+     ✓ validates the release against master even after a legacy-branch fetch, rejecting unrelated commits  2660ms
+     ✓ 依赖 swap 时，停服前核验系统和实际内存组换页策略：60/0  333ms
+     ✓ 依赖 swap 时，停服前核验系统和实际内存组换页策略：60/60  313ms
+     ✓ failure trap restores only after services were stopped: STOPPED=1  529ms
+ ✓ tests/ux2CorrectionRecoordination.test.ts (1 test) 5085ms
+   ✓ 双进程原执行链在途纠正（合成模型响应）：新 generation 实际消费纠正，旧结果不发布且费用保留  5084ms
+ ✓ tests/finalAWorkPacketService.test.ts (20 tests) 4778ms
+     ✓ FS-A07：无新事件但越过许可/期限/审批边界时权限 EXPIRED、主操作变重核  4067ms
+ ✓ tests/r4Investigation.test.ts (17 tests) 4122ms
+     ✓ runs PROMPT_ONLY ablation on the original loop without UI calls or client-visible switches  354ms
+     ✓ changes the next decision using a real 'RESEARCH' source and preserves one original Action  362ms
+     ✓ changes the next decision using a real 'COMPETITION' source and preserves one original Action  325ms
+     ✓ changes the next decision using a real 'COURSE' source and preserves one original Action  329ms
+     ✓ discards revoked and revised late responses before any proposal is published  386ms
+     ✓ confirms only published bindings and replays the same UI request as one effect  356ms
+     ✓ keeps a known answer and original proposal if UI generation is unknown, without replaying the model  300ms
+ ✓ tests/pageAuth.test.ts (12 tests) 1944ms
+     ✓ 匿名访问项目列表页被重定向到登录页  363ms
+     ✓ 匿名访问全局focus需登录，不能返回聚合内容  550ms
+     ✓ 无关用户访问成果生成页按 404 处理  456ms
+ ✓ tests/r4ExperienceContract.test.ts (44 tests) 3658ms
+   ✓ keeps native DTO fields aligned with shared contracts and old Conversation messages optional  3628ms
+ ✓ tests/missionRuntime.test.ts (32 tests) 3554ms
+     ✓ 子进程提交后未回包即退出，恢复后只保留一个Action  1275ms
+ ✓ tests/v2FirstSlice.test.ts (15 tests) 3368ms
+   ✓ 独立开发版本: persisted research→creation, restart, new material and same-Mission draft v2  573ms
+   ✓ 客户交付项目: persisted research→creation, restart, new material and same-Mission draft v2  318ms
+   ✓ 科研实验汇报: persisted research→creation, restart, new material and same-Mission draft v2  323ms
+   ✓ 学生课程项目: persisted research→creation, restart, new material and same-Mission draft v2  309ms
+   ✓ natural compound veto persists through original Conversation/Directive services  340ms
+   ✓ bounded literal objective redirects v2 immediately without changing authority or resetting usage  301ms
+   ✓ workbench reads frozen versions without writes, rejects outsiders and withholds suppressed material  341ms
+ ✓ tests/decisionEvolution.test.ts (29 tests) 2919ms
+     ✓ a process dying after durable intent leaves work for two replacement OS consumers; effect is once  1831ms
+ ✓ tests/s0MarkdownNetwork.test.ts (4 tests) 2779ms
+     ✓ 真实 Chromium 渲染与 preload 不向 canary 发起请求  2761ms
+ ✓ tests/p3ReviewBoundaries.test.ts (12 tests) 2588ms
+   ✓ 两个独立 OS 进程同时采纳，持久回执仍只生成一条资料  1020ms
+   ✓ 旧库增量升级清除混入的异主样本，保留历史使用与旧仓库信号  938ms
+ ✓ tests/conversationAnchor.test.ts (22 tests) 2180ms
+ ✓ tests/missionAutomaticContinuation.test.ts (12 tests) 2204ms
+     ✓ 16个等待任务共享到达/接续批次，不被updatedAt双扫描饿死  661ms
+     ✓ 预算耗尽、云许可撤销、取消、暂停和成员撤权均不恢复  328ms
+ ✓ tests/missionPanel.test.ts (18 tests) 2073ms
+     ✓ 选择的核算、论文和行动结果完成条件进入真实创建请求，不扩大研究许可  383ms
+ ✓ tests/focusCollaboration.test.ts (25 tests) 1966ms
+ ✓ tests/v2Journey.test.ts (3 tests) 2025ms
+   ✓ continuous revision journey: first draft, new material, restriction, redirect, delivered versions and pause  1351ms
+   ✓ pause and cancel end dispatch while delivered versions stay readable  497ms
+ ✓ tests/database.integration.test.ts (13 tests) 1684ms
+     ✓ creates project, card, relation and artifact through services  562ms
+ ✓ tests/loginIdentity.test.ts (13 tests) 1916ms
+     ✓ 7. ambiguous identifiers never pick an account arbitrarily  305ms
+ ✓ tests/globalWorkspace.integration.test.ts (2 tests) 1493ms
+   ✓ 全局检索只读取成员项目，保留归档筛选、稳定分页和提醒实际状态  618ms
+ ✓ tests/missionResearch.test.ts (35 tests) 1821ms
+stdout | tests/auditRegression20261109.test.ts > 长时间和大数据 > D2 500 张卡片时确认事务内的上下文读取不超过事务预算
+[audit] readCopilotContext 500 cards: 834ms; getProjectDetail: 8ms
+
+stderr | tests/auditRegression20261109.test.ts > 部署与恢复能力 > F5 健康检查反映数据库状态
+Health check failed Error: no such file
+    at D:/Projects/hongmen-worktrees/v2-first-loop/tests/auditRegression20261109.test.ts:361:53
+    at file:///D:/Projects/hongmen-worktrees/v2-first-loop/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+
+stderr | tests/auditRegression20261109.test.ts > 部署与恢复能力 > F7 磁盘写满时不留下半截文件，并返回中文可操作错误
+Storage is full Error: ENOSPC: no space left on device
+    at Object.<anonymous> (D:/Projects/hongmen-worktrees/v2-first-loop/tests/auditRegression20261109.test.ts:383:27) {
+  code: 'ENOSPC'
+}
+
+stderr | tests/auditRegression20261109.test.ts > 部署与恢复能力 > F8 PDF 工具缺失时错误是简体中文且不暴露内部路径
+PDF extractor unavailable Error: spawn C:\Users\ADMINI~1\AppData\Local\Temp\projectmemo-audit-ErEmNH\missing-pdftotext ENOENT
+    at Process.ChildProcess._handle.onexit (node:internal/child_process:287:19)
+    at onErrorNT (node:internal/child_process:508:16)
+    at processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'spawn C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\projectmemo-audit-ErEmNH\\missing-pdftotext',
+  path: 'C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\projectmemo-audit-ErEmNH\\missing-pdftotext',
+  spawnargs: [ '-bbox', '-enc', 'UTF-8', '-', '-' ]
+}
+
+stderr | tests/auditRegression20261109.test.ts
+PDF extraction failed exit -4058
+
+ ✓ tests/auditRegression20261109.test.ts (23 tests) 1602ms
+     ✓ D2 500 张卡片时确认事务内的上下文读取不超过事务预算  1073ms
+ ✓ tests/documentReader.test.ts (8 tests) 1577ms
+   ✓ CT4 original Conversation investigates the real PDF and publishes a bound dual-client citation  774ms
+   ✓ CT4 actual Poppler locates two physical PDF pages and records parser version  302ms
+ ✓ tests/missionContinuation.test.ts (10 tests) 1606ms
+     ✓ 缺单位/时间、无关内容和冲突均继续等待  403ms
+ ✓ tests/xiaoyi.adapter.test.ts (13 tests) 1629ms
+ ✓ tests/goalChangeReview.test.ts (16 tests) 1547ms
+ ✓ tests/conversationAnchorContract.test.ts (3 tests) 1435ms
+   ✓ upgrades populated F1 GoalQuestion/Intervention anchors while preserving original messages and manual policy  1097ms
+ ✓ tests/trustReceipt.integration.test.ts (3 tests) 1401ms
+     ✓ abstains without evidence and blocks a forged write  616ms
+ ✓ tests/temporalLedger.test.ts (12 tests) 1445ms
+     ✓ runs propose, confirm, search, timeline and revoke without silent activation  722ms
+ ✓ tests/focusConversation.test.ts (22 tests) 1401ms
+     ✓ names a discussion from its first question, keeps it across follow-ups and preserves explicit titles  370ms
+ ✓ tests/calendarEventExtensions.test.ts (10 tests) 1333ms
+     ✓ 参与人通过独立接口添加并回读核对，附件随创建写入并回读  393ms
+ ✓ tests/continuityStages23.test.ts (11 tests) 1273ms
+   ✓ CT2 original Mission dynamically reads pinned CI, jobs and redacted log; revoke blocks derived Artifact reuse  426ms
+   ✓ CT3 original Runner polls declared fixed SHA; stable CI uses zero models, changed CI resumes reasoning  344ms
+ ✓ tests/missionArtifactAdoption.test.ts (9 tests) 1276ms
+     ✓ 直接归入也遵守只读和停止；撤回后旧预览不复活，原回执仍可重放  350ms
+ ✓ tests/pm1PersonalMemoryScope.test.ts (7 tests) 1495ms
+     ✓ 旧库副本升级：先建旧 schema 插入遗留行，再应用新迁移完成回填且数据保留  1245ms
+ ✓ tests/attachmentApiErrors.test.ts (17 tests) 1233ms
+ ✓ tests/r4Research.test.ts (18 tests) 1220ms
+     ✓ 原 HTTP 适配器与 Focus 完成用户 URL→读取→引用→确认归入→重放  444ms
+ ✓ tests/missionRuntimeDiagnostics.test.ts (24 tests) 1411ms
+ ✓ tests/calendarWrite.test.ts (11 tests) 1087ms
+ ✓ tests/auth.test.ts (19 tests) 1073ms
+ ✓ tests/metricSandbox.test.ts (7 tests) 1062ms
+   ✓ lost start reply keeps original reservation; user resume reconciles same job with zero second create/start  353ms
+ ✓ tests/pm2PersonalCandidates.test.ts (4 tests) 1019ms
+   ✓ J05：设备限制只形成带条件的候选，不自动激活；关闭开关时不产生候选  428ms
+   ✓ J08/J23：两端竞争只激活一次；拒绝后同根同表述不再提议；编辑后确认按用户表述激活  478ms
+ ✓ tests/r4ResearchMigration.test.ts (1 test) 837ms
+   ✓ PR6 增量迁移保留旧会话/回执，空库也可完整重放  836ms
+ ✓ tests/ux2MigrationUpgrade.test.ts (1 test) 1003ms
+   ✓ UX2 在旧库副本增量升级，保留原记录且不猜测回填授权  1002ms
+stderr | tests/r4Specialists.test.ts > R4 PR5 original-result and specialist integration > keeps received Capture usage and task identity on invalid output fallback
+LLM structure failed; falling back to deterministic mock agent: MODEL_OUTPUT_INVALID
+
+ ✓ tests/r4Specialists.test.ts (10 tests) 970ms
+     ✓ uses the actual chat comparison binding to preview/confirm the frozen original Mission once  362ms
+ ✓ tests/ux2HypothesisRuntime.test.ts (3 tests) 957ms
+   ✓ D1提出、D3同一推测反证、D5新任务接续，原批准→真实Action→resultCardId读回  798ms
+ ✓ tests/missionNativeContract.test.ts (15 tests) 967ms
+ ✓ tests/browserMission.test.ts (6 tests) 930ms
+     ✓ 已检索来源可渲染读取，原来源/预算/上下文同账  397ms
+ ✓ tests/s0ProjectDeletion.test.ts (7 tests) 901ms
+ ✓ tests/deploymentRuntime.test.ts (9 tests) 906ms
+stderr | tests/registration.test.ts > Public account lifecycle > verifies once, logs in through existing cookie/session and logs out server-side
+Promise returned by `expect(actual).resolves.toMatchObject(expected)` was not awaited. Vitest currently auto-awaits hanging assertions at the end of the test, but this will cause the test to fail in the next Vitest major. Please remember to await the assertion.
+    at D:/Projects/hongmen-worktrees/v2-first-loop/tests/registration.test.ts:185:6
+
+stderr | tests/registration.test.ts > Public account lifecycle > blocks all paid chat/embedding calls by default and atomically enforces a provisioned daily limit
+LLM structure failed; falling back to deterministic mock agent: CLOUD_ACCESS_DISABLED
+
+ ✓ tests/registration.test.ts (14 tests) 904ms
+ ✓ tests/s0MigrationReplay.test.ts (1 test) 885ms
+   ✓ S0 迁移能升级旧库副本，保留原行；源库不被迁移  884ms
+ ✓ tests/v2SkillArtifacts.test.ts (4 tests) 864ms
+   ✓ 这次只做计划，报告不要动：交付可查看阶段成果，原报告与行动不变，并进入可恢复状态  427ms
+stdout | tests/finalAConcurrencyService.test.ts > A2 FS-A07 并发：真实双连接写入下 readback 响应内部一致 > 第二连接并发推进版本 + 受控复查点：内部不一致=0，RETRIED/VERSION_ADVANCED 正确标记
+[final-a-concurrency] {"readerRounds":32,"writerCommits":47,"writerBusyRetries":0,"consistencies":{"VERSION_STABLE":30,"RETRIED":1,"VERSION_ADVANCED":1},"unstableResponses":2,"internalInconsistencies":0,"missionVersionBefore":1,"missionVersionAfter":55,"snapshotRetries":{"retried":1,"advanced":2}}
+
+ ✓ tests/finalAConcurrencyService.test.ts (4 tests) 870ms
+     ✓ 第二连接并发推进版本 + 受控复查点：内部不一致=0，RETRIED/VERSION_ADVANCED 正确标记  604ms
+ ✓ tests/skillRouter.test.ts (6 tests) 857ms
+   ✓ frozen 64 routing cases are answered from real isolated fixture records  836ms
+ ✓ tests/finalARequiresGuards.test.ts (29 tests) 817ms
+ ✓ tests/v2MissionProtocol.test.ts (6 tests) 807ms
+ ✓ tests/missionEvidenceFitIntegration.test.ts (10 tests) 799ms
+ ✓ tests/browserConversation.test.ts (10 tests) 750ms
+     ✓ 真实浏览器观察写入原来源与原操作账本，重复步骤回放不再启动  405ms
+ ✓ tests/ct8OutcomeExperience.test.ts (12 tests) 741ms
+ ✓ tests/conversationCalendarProposal.test.ts (11 tests) 731ms
+ ✓ tests/missionWaitNotice.test.ts (2 tests) 695ms
+   ✓ 同一个等待只提醒一次；新问题再提醒；邮件不含问题正文  589ms
+ ✓ tests/copilotContinuation.test.ts (16 tests) 738ms
+ ✓ tests/continuityJourney.test.ts (1 test) 678ms
+   ✓ D1 → D3 correction → original Mission resume → Action/resultCardId → D5 new session; stale proposal stays rejected  668ms
+ ✓ tests/missionMaterialUseProjection.test.ts (6 tests) 676ms
+ ✓ tests/conversationAttachmentUi.test.ts (5 tests) 675ms
+ ✓ tests/actionTransitionRace.test.ts (2 tests) 645ms
+ ✓ tests/calendarFeishu.test.ts (14 tests) 524ms
+ ✓ tests/continuityMigration.test.ts (1 test) 640ms
+   ✓ additive upgrade preserves legacy user/conversation bytes and foreign keys; empty replay is covered by integration databases  639ms
+ ✓ tests/missionClaimVerification.integration.test.ts (5 tests) 645ms
+ ✓ tests/actionReminder.test.ts (20 tests) 572ms
+     ✓ saves the in-app plan time first and only reports synced after a real event id exists  306ms
+ ✓ tests/v2DelegationIdempotency.test.ts (6 tests) 665ms
+   ✓ identical retry returns the same receipt bound to the original confirmation  482ms
+ ✓ tests/e2eAuthSeedGuard.test.ts (1 test) 574ms
+   ✓ E2E身份和合成额度禁止写入其他数据库或非mock环境  573ms
+ ✓ tests/v2DelegationEntry.test.ts (4 tests) 602ms
+   ✓ preview writes nothing and shows the bounded scope  403ms
+ ✓ tests/experienceReuse.test.ts (12 tests) 567ms
+stderr | tests/s0CapabilityAndCreation.test.ts > 规则与失败后备模式持久读回，幂等重放不把规则成功升级为实模成功
+LLM structure failed; falling back to deterministic mock agent: synthetic-provider-timeout
+
+ ✓ tests/s0CapabilityAndCreation.test.ts (3 tests) 712ms
+   ✓ Project、OWNER 和原请求回执同事务；丢失回包重试不重复创建  554ms
+stderr | tests/projectIntake.test.ts > S1-A 项目前材料与确认建项 > 建项成功但附件同步失败时保留原项目身份，重试不重复建项
+PDF extraction failed Syntax Error: Couldn't find trailer dictionary
+Syntax Error: Couldn't find trailer dictionary
+Syntax Error: Couldn't read xref table
+
+stderr | tests/projectIntake.test.ts > S1-A 项目前材料与确认建项 > 到期清理真实删除临时原件，包含未登记的遗留文件；撤回同样清理
+PDF extraction failed Syntax Error: Couldn't find trailer dictionary
+Syntax Error: Couldn't find trailer dictionary
+Syntax Error: Couldn't read xref table
+
+ ✓ tests/projectIntake.test.ts (11 tests) 604ms
+ ✓ tests/pm4EvolutionResponsibility.test.ts (5 tests) 629ms
+ ✓ tests/s1IndependentReview.test.ts (21 tests) 563ms
+ ✓ tests/continuityCandidate.test.ts (2 tests) 573ms
+   ✓ model interpretation is a candidate only, authenticated quote and exact user control are separate: true  420ms
+ ✓ tests/academicIntegration.test.ts (3 tests) 555ms
+ ✓ tests/s2IntakeCoverage.test.ts (9 tests) 505ms
+ ✓ tests/pm3LongTermRecall.test.ts (5 tests) 507ms
+ ✓ tests/attachmentRetryBehavior.test.ts (12 tests) 470ms
+ ✓ tests/continuitySuppression.test.ts (2 tests) 510ms
+   ✓ one root suppression closes memory, Investigation sources, dialogue, Artifact, Mission context and ACTIVE experience consumers  439ms
+ ✓ tests/schedule.test.ts (13 tests) 480ms
+     ✓ places READY actions in stable order with no overlap; blocked and estimateless actions are reported  320ms
+ ✓ tests/final-e/observationAndSourceUse.test.ts (10 tests) 509ms
+ ✓ tests/ux3ResponsibilityRevision.test.ts (12 tests) 484ms
+ ✓ tests/continuityIntent.test.ts (6 tests) 451ms
+ ✓ tests/p0bEvidence.integration.test.ts (4 tests) 440ms
+ ✓ tests/finalCIntakeNextStep.test.ts (3 tests) 433ms
+ ✓ tests/final-e/missionCommandsIsolation.test.ts (13 tests) 433ms
+ ✓ tests/projectLifecycle.test.ts (12 tests) 408ms
+ ✓ tests/missionProtocolRecovery.integration.test.ts (1 test) 422ms
+     ✓ two invalid decisions pause; explicit resume keeps Mission, successful reads and cumulative budget  412ms
+ ✓ tests/pm1PersonalConsumption.test.ts (4 tests) 418ms
+ ✓ tests/conversationAttachment.test.ts (11 tests) 405ms
+ ✓ tests/settingsAuth.test.ts (10 tests) 396ms
+ ✓ tests/missionContinuationPanel.test.ts (8 tests) 415ms
+ ✓ tests/ux2ConversationDigest.test.ts (1 test) 391ms
+   ✓ 原讨论答案内发布综合与推测，新讨论实际消费；撤权、抑制与新增输入分别使其失效  384ms
+ ✓ tests/calendarSync.test.ts (7 tests) 397ms
+     ✓ records external eventId and sync status without touching the in-app schedule  316ms
+ ✓ tests/final-e/controlAuthority.test.ts (6 tests) 389ms
+ ✓ tests/finalCWorkPacket.test.ts (19 tests) 402ms
+ ✓ tests/ux3ThreeDayContinuity.test.ts (2 tests) 344ms
+   ✓ UX-3D: 三日纵向完整旅程 (D1交代->D2动态调查与重启保持->D3手机纠正与Web读回) 及跨天预算不变量  318ms
+ ✓ tests/decisionEvolutionUi.test.ts (4 tests) 371ms
+ ✓ tests/ux3ProactiveDiscovery.test.ts (4 tests) 377ms
+ ✓ tests/projectState.integration.test.ts (13 tests) 356ms
+ ✓ tests/finalIntegrationObservation.test.ts (10 tests) 344ms
+ ✓ tests/attachmentInboxErrors.test.ts (7 tests) 372ms
+ ✓ tests/attachmentAtomicity.test.ts (2 tests) 324ms
+ ✓ tests/projectsPageArchive.test.ts (3 tests) 345ms
+ ✓ tests/s0PersonalInFlight.test.ts (4 tests) 360ms
+ ✓ tests/ux2DigestRuntime.test.ts (1 test) 331ms
+   ✓ 原 Mission 调查输出内生成综合，后续上下文使用；只读不额外调用或写库，来源变化立即失效  322ms
+ ✓ tests/loginResetRace.test.ts (2 tests) 319ms
+ ✓ tests/continuityRuntime.test.ts (3 tests) 299ms
+ ✓ tests/ux3BranchRuntime.test.ts (2 tests) 317ms
+ ✓ tests/r4PresentationClient.test.ts (9 tests) 276ms
+ ✓ tests/ux3CumulativeBudget.test.ts (4 tests) 316ms
+ ✓ tests/phase1Reliability.test.ts (6 tests) 303ms
+ ✓ tests/missionCompletion.test.ts (3 tests) 296ms
+ ✓ tests/ux2InputVersion.test.ts (2 tests) 294ms
+ ✓ tests/experimentMetrics.test.ts (4 tests) 289ms
+ ✓ tests/projectReentry.test.ts (5 tests) 286ms
+ ✓ tests/projectEpisodeStaleness.test.ts (6 tests) 346ms
+ ✓ tests/finalATerminalUnknownFocus.test.ts (7 tests) 299ms
+ ✓ tests/changeImpact.test.ts (12 tests) 264ms
+ ✓ tests/r2ClosedLoop.test.ts (1 test) 261ms
+ ✓ tests/finalATerminalUnknownSummary.test.ts (9 tests) 282ms
+ ✓ tests/actionFeasibility.test.ts (12 tests) 244ms
+ ✓ tests/finalAEvidenceReviewWindow.test.ts (5 tests) 269ms
+stderr | tests/projectHealth.test.ts > project health (只读确定性项目体检) > keeps other results and names the section when one sub-check fails
+[project-health] section "state" failed {
+  code: 'PROJECT_STATE_DISABLED',
+  error: AppError: 项目状态功能当前已关闭
+      at stateDetector (D:/Projects/hongmen-worktrees/v2-first-loop/lib/services/projectHealthService.ts:246:11)
+      at runDetector (D:/Projects/hongmen-worktrees/v2-first-loop/lib/services/projectHealthService.ts:122:11)
+      at buildProjectHealthReport (D:/Projects/hongmen-worktrees/v2-first-loop/lib/services/projectHealthService.ts:644:11)
+      at processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at D:/Projects/hongmen-worktrees/v2-first-loop/tests/projectHealth.test.ts:379:22
+      at file:///D:/Projects/hongmen-worktrees/v2-first-loop/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20 {
+    code: 'PROJECT_STATE_DISABLED',
+    status: 503,
+    details: undefined
+  }
+}
+
+stderr | tests/projectHealth.test.ts > project health isolation (体检的用户隔离与错误清洗) > returns a stable Chinese classification instead of raw internal error text
+[project-health] section "episodes" failed {
+  code: 'SECTION_UNAVAILABLE',
+  error: TypeError: claims is not iterable
+      at evaluateEpisodeFreshness (D:/Projects/hongmen-worktrees/v2-first-loop/lib/services/projectEpisodeService.ts:933:23)
+      at episodeDetector (D:/Projects/hongmen-worktrees/v2-first-loop/lib/services/projectHealthService.ts:183:27)
+      at processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at runDetector (D:/Projects/hongmen-worktrees/v2-first-loop/lib/services/projectHealthService.ts:122:5)
+      at buildProjectHealthReport (D:/Projects/hongmen-worktrees/v2-first-loop/lib/services/projectHealthService.ts:644:5)
+      at D:/Projects/hongmen-worktrees/v2-first-loop/tests/projectHealth.test.ts:606:20
+      at file:///D:/Projects/hongmen-worktrees/v2-first-loop/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+}
+
+stderr | tests/projectHealth.test.ts > project health isolation (体检的用户隔离与错误清洗) > only reports a known disabled section as disabled, not as an internal failure
+[project-health] section "state" failed {
+  code: 'PROJECT_STATE_DISABLED',
+  error: AppError: 项目状态功能当前已关闭
+      at stateDetector (D:/Projects/hongmen-worktrees/v2-first-loop/lib/services/projectHealthService.ts:246:11)
+      at runDetector (D:/Projects/hongmen-worktrees/v2-first-loop/lib/services/projectHealthService.ts:122:11)
+      at buildProjectHealthReport (D:/Projects/hongmen-worktrees/v2-first-loop/lib/services/projectHealthService.ts:644:11)
+      at processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at D:/Projects/hongmen-worktrees/v2-first-loop/tests/projectHealth.test.ts:624:22
+      at file:///D:/Projects/hongmen-worktrees/v2-first-loop/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20 {
+    code: 'PROJECT_STATE_DISABLED',
+    status: 503,
+    details: undefined
+  }
+}
+
+stderr | tests/projectHealth.test.ts > project health isolation (体检的用户隔离与错误清洗) > folds SQLITE-style error codes into the stable unavailable classification
+[project-health] section "episodes" failed {
+  code: 'SQLITE_BUSY',
+  error: Error: SQLITE raw detail should stay server-side
+      at D:/Projects/hongmen-worktrees/v2-first-loop/tests/projectHealth.test.ts:638:35
+      at processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at file:///D:/Projects/hongmen-worktrees/v2-first-loop/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20 {
+    code: 'SQLITE_BUSY'
+  }
+}
+
+ ✓ tests/projectHealth.test.ts (15 tests) 282ms
+ ✓ tests/interventionPolicy.test.ts (9 tests) 256ms
+ ✓ tests/r3Baseline.test.ts (6 tests) 265ms
+ ✓ tests/finalCFreshnessGuard.test.ts (5 tests) 262ms
+stderr | tests/demoUser.test.ts > 演示账号初始化 > 生产环境显式开启但缺少口令时拒绝使用内置默认密码
+[auth] 演示账号已启用但缺少 DEMO_PASSWORD 或 DEMO_PASSWORD_HASH，跳过初始化。
+
+ ✓ tests/demoUser.test.ts (6 tests) 256ms
+ ✓ tests/finalCResultsReceipts.test.ts (9 tests) 265ms
+ ✓ tests/s2AdaptivePreference.test.ts (3 tests) 263ms
+ ✓ tests/final-e/isolationAndSource.test.ts (3 tests) 256ms
+ ✓ tests/missionContinuation.review.test.ts (1 test) 240ms
+ ✓ tests/episodeAction.test.ts (9 tests) 248ms
+ ✓ tests/experienceNativeContract.test.ts (1 test) 232ms
+ ✓ tests/projectAgentContext.test.ts (9 tests) 272ms
+ ✓ tests/projectEpisode.test.ts (10 tests) 260ms
+ ✓ tests/qaCrossStage1Gaps.test.ts (2 tests) 239ms
+ ✓ tests/projectNavigation.test.ts (13 tests) 242ms
+ ✓ tests/meetingStateDiff.test.ts (11 tests) 256ms
+ ✓ tests/phase2Acceptance.test.ts (7 tests) 234ms
+ ✓ tests/s1MemoryInfluence.test.ts (4 tests) 238ms
+ ✓ tests/episodeSummaryCompression.test.ts (13 tests) 234ms
+ ✓ tests/repoCi.test.ts (4 tests) 242ms
+ ✓ tests/cardEditorInteraction.test.ts (3 tests) 252ms
+ ✓ tests/ux2ClaimSourceRights.test.ts (5 tests) 248ms
+ ✓ tests/final-e/stopAndLease.test.ts (3 tests) 267ms
+ ✓ tests/memoryLifecycle.test.ts (8 tests) 245ms
+ ✓ tests/experimentIntegration.test.ts (2 tests) 244ms
+ ✓ tests/ux2CorrectionControls.test.ts (2 tests) 258ms
+ ✓ tests/agentUxJourney.test.ts (1 test) 240ms
+ ✓ tests/finalCBasisEvidence.test.ts (16 tests) 239ms
+ ✓ tests/ux2ClaimCorrection.test.ts (7 tests) 223ms
+ ✓ tests/artifactAudit.test.ts (8 tests) 242ms
+ ✓ tests/ux3AttentionContinuity.test.ts (3 tests) 216ms
+stderr | tests/personalExpression.test.ts > 日常输入生成候选 > 关闭开关后不再提议；累积上限内不堆积；异常不影响调用方
+[personal-expression] 候选记录失败，不影响原操作 
+Invalid `tx.userMemoryPolicy.create()` invocation in
+D:/Projects/hongmen-worktrees/v2-first-loop/lib/memory/userMemoryPolicy.ts:23:30
+
+  20 export async function policyInTx(tx: Tx, userId: string): Promise<UserMemoryPolicyRow> {
+  21   const existing = await tx.userMemoryPolicy.findUnique({ where: { ownerUserId: userId } });
+  22   if (existing) return existing;
+→ 23   return tx.userMemoryPolicy.create(
+Foreign key constraint violated on the foreign key
+
+ ✓ tests/personalExpression.test.ts (7 tests) 218ms
+ ✓ tests/repoSensing.test.ts (12 tests) 225ms
+ ✓ tests/memoryConsolidation.test.ts (6 tests) 198ms
+ ✓ tests/copilotContinuationPanel.test.ts (2 tests) 227ms
+ ✓ tests/ux3Responsibility.test.ts (1 test) 168ms
+ ✓ tests/s0CaptureIsolation.test.ts (6 tests) 250ms
+ ✓ tests/webProjectState.test.ts (8 tests) 217ms
+ ✓ tests/ux2SourceBinding.test.ts (5 tests) 212ms
+ ✓ tests/actionBoardInput.test.ts (3 tests) 214ms
+ ✓ tests/harmonyConversationReliability.test.ts (8 tests) 192ms
+ ✓ tests/conversationMemoryUse.test.ts (1 test) 193ms
+ ✓ tests/ux3ResponsibilityControls.test.ts (2 tests) 203ms
+stderr | tests/attachment.test.ts > S05: Project Inbox Attachment Upload and Memory Ingestion > stores an unreadable PDF truthfully and deduplicates before writing another file
+PDF extraction failed Syntax Error: Couldn't find trailer dictionary
+Syntax Error: Couldn't find trailer dictionary
+Syntax Error: Couldn't read xref table
+
+ ✓ tests/attachment.test.ts (2 tests) 183ms
+ ✓ tests/s2AuditFixes.test.ts (4 tests) 190ms
+ ✓ tests/focusUiQuality.test.ts (2 tests) 178ms
+ ✓ tests/repoSignalNativeContract.test.ts (1 test) 169ms
+ ✓ tests/missionWorkspaceSummary.test.ts (4 tests) 184ms
+ ✓ tests/deliverableGap.test.ts (32 tests) 169ms
+stderr | tests/llmOutcomeContract.test.ts > structureCaptureWithMeta 不采用截断/无效的模型 JSON > finish_reason=length 时 FALLBACK、确定性 mock 数据、失败原因与审计保留
+LLM structure failed; falling back to deterministic mock agent: MODEL_OUTPUT_TRUNCATED
+
+stderr | tests/llmOutcomeContract.test.ts > structureCaptureWithMeta 不采用截断/无效的模型 JSON > stop 但内容不符合卡片 schema 时同样 FALLBACK，不采用模型 JSON
+LLM structure failed; falling back to deterministic mock agent: MODEL_OUTPUT_INVALID
+
+stderr | tests/llmOutcomeContract.test.ts > prepareArtifactGeneration 回退 mock 模板且 AgentRun audit 保留 MODEL_OUTPUT_TRUNCATED > 用独立 DB + mock HTTP 走真实调用链：模板内容落库、审计为 FALLBACK 并保留失败原因/用量
+LLM artifact generation failed; using mock template AppError: 成果草稿生成未完成
+    at Module.prepareArtifactGeneration (D:/Projects/hongmen-worktrees/v2-first-loop/lib/services/artifactService.ts:113:45)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at D:/Projects/hongmen-worktrees/v2-first-loop/tests/llmOutcomeContract.test.ts:376:22
+    at file:///D:/Projects/hongmen-worktrees/v2-first-loop/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20 {
+  code: 'MODEL_OUTPUT_TRUNCATED',
+  status: 503,
+  details: undefined
+}
+
+stderr | tests/llmOutcomeContract.test.ts > prepareArtifactGeneration 回退 mock 模板且 AgentRun audit 保留 MODEL_OUTPUT_TRUNCATED > 用独立 DB + mock HTTP 走真实调用链：模板内容落库、审计为 FALLBACK 并保留失败原因/用量
+LLM artifact generation failed; using mock template AppError: 成果草稿生成未完成
+    at prepareArtifactGeneration (D:/Projects/hongmen-worktrees/v2-first-loop/lib/services/artifactService.ts:113:45)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at Module.generateArtifact (D:/Projects/hongmen-worktrees/v2-first-loop/lib/services/artifactService.ts:176:20)
+    at D:/Projects/hongmen-worktrees/v2-first-loop/tests/llmOutcomeContract.test.ts:390:22
+    at file:///D:/Projects/hongmen-worktrees/v2-first-loop/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20 {
+  code: 'MODEL_OUTPUT_TRUNCATED',
+  status: 503,
+  details: undefined
+}
+
+ ✓ tests/llmOutcomeContract.test.ts (23 tests) 170ms
+ ✓ tests/s2CallCoverage.test.ts (4 tests) 162ms
+ ✓ tests/capturePromptBounds.test.ts (7 tests) 174ms
+ ✓ tests/copilotConcurrency.test.ts (2 tests) 152ms
+ ✓ tests/finalCReadbackRecovery.test.ts (2 tests) 169ms
+ ✓ tests/intakeOriginalPages.test.ts (2 tests) 161ms
+stdout | tests/auditS2CallCoverageWindow.test.ts > 同项目其它 CHAT 记录把本委托回执挤出窗口时，不能把未覆盖写成 0 次且一致
+[audit] resourceUsage.summary = 模型 2 次 · 工具 0 次
+[audit] callCoverage.summary  = 可核对调用：模型已检查 2 次（成功 2 / 失败 0）· 工具已检查 0 次（成功 0 / 失败 0）
+[audit] callCoverage.notes    = ["已检查的 2 条模型回执均记录了输入和输出 token；这不代表完整任务用量。","费用与估算保持未知：未绑定费率、币种与账单，不把次数换算成金额。","范围仅当前委托的原回执；不含建项预览、其他独立讨论或跨项目用量。"]
+[audit] inspected             = {"agentRuns":2,"steps":0,"limit":20,"truncated":false}
+
+ ✓ tests/auditS2CallCoverageWindow.test.ts (1 test) 160ms
+ ✓ tests/projectDecisionTimeline.test.ts (2 tests) 172ms
+ ✓ tests/s2ResourceReadback.test.ts (3 tests) 167ms
+ ✓ tests/attachmentCorrection.test.ts (2 tests) 156ms
+ ✓ tests/userNav.test.ts (2 tests) 157ms
+ ✓ tests/agentUxControls.test.ts (1 test) 151ms
+ ✓ tests/projectEvolutionSummary.test.ts (3 tests) 138ms
+ ✓ tests/pm1PersonalAdmission.test.ts (13 tests) 138ms
+ ✓ tests/missionJudgmentChanges.test.ts (2 tests) 118ms
+ ✓ tests/harmonyAttachmentAuth.test.ts (7 tests) 132ms
+ ✓ tests/missionArtifactAdoptionPanel.test.ts (1 test) 145ms
+ ✓ tests/missionTargetPanels.test.ts (2 tests) 139ms
+ ✓ tests/authSessionResilience.test.ts (18 tests) 126ms
+ ✓ tests/messageToolbar.test.ts (2 tests) 133ms
+ ✓ tests/finalBVideoFocus.test.ts (1 test) 137ms
+ ✓ tests/finalBHomepageInteraction.test.ts (3 tests) 119ms
+ ✓ tests/hybridSearch.test.ts (4 tests) 121ms
+ ✓ tests/projectStartGuide.test.ts (2 tests) 113ms
+ ✓ tests/projectOverviewToolbar.test.ts (2 tests) 101ms
+ ✓ tests/deploymentMigration.test.ts (1 test) 87ms
+ ✓ tests/health.test.ts (2 tests) 83ms
+ ✓ tests/missionEvaluationBudget.test.ts (10 tests) 93ms
+ ✓ tests/missionReadbackPanel.test.ts (4 tests) 100ms
+ ✓ tests/deploymentTransport.test.ts (4 tests) 79ms
+ ✓ tests/browserTransport.test.ts (1 test) 72ms
+ ✓ tests/harmonyEntryIsolation.test.ts (2 tests) 49ms
+ ✓ tests/captureDraftReady.test.ts (1 test) 66ms
+stderr | tests/pdfExtractorFailure.test.ts > 提取器提前退出时将管道断开作为可处理的提取失败
+PDF extraction failed C:\Program Files\nodejs\node.exe: bad option: -bbox
+C:\Program Files\nodejs\node.exe: bad option: -enc
+
+ ✓ tests/pdfExtractorFailure.test.ts (1 test) 72ms
+ ✓ tests/agentUxWorkState.test.ts (7 tests) 56ms
+ ✓ tests/pdfLayout.test.ts (5 tests) 6ms
+ ✓ tests/missionProtocolRepair.test.ts (12 tests) 39ms
+ ✓ tests/calendarApprovalUi.test.ts (2 tests) 44ms
+ ✓ tests/missionModelProtocol.test.ts (10 tests) 39ms
+ ✓ tests/s0WorkerIdentity.test.ts (2 tests) 28ms
+ ✓ tests/calendarProviderContract.test.ts (3 tests) 29ms
+ ✓ tests/researchEvaluationBudget.test.ts (3 tests) 27ms
+ ✓ tests/missionEvidenceFit.test.ts (18 tests) 18ms
+stderr | tests/llm.fallback.test.ts > S03: LLM Capture and Deterministic Fallback Audit > should gracefully fallback to mock and log reason when LLM call fails or times out
+LLM structure failed; falling back to deterministic mock agent: fetch failed
+
+ ✓ tests/llm.fallback.test.ts (2 tests) 14ms
+ ✓ tests/final-e/projectionBoundaries.test.ts (14 tests) 19ms
+ ✓ tests/browserPolicy.test.ts (38 tests) 12ms
+ ✓ tests/v2ModelProtocol.test.ts (2 tests) 18ms
+ ✓ tests/missionEvaluationRetry.test.ts (4 tests) 16ms
+ ✓ tests/missionClaimVerifier.test.ts (10 tests) 17ms
+ ✓ tests/evidenceAssessment.test.ts (9 tests) 15ms
+ ✓ tests/reminderClientContract.test.ts (10 tests) 12ms
+ ✓ tests/finalAWorkPacketContract.test.ts (34 tests) 18ms
+ ✓ tests/projectOverviewContext.test.ts (3 tests) 14ms
+ ✓ tests/projectState.test.ts (15 tests) 12ms
+ ✓ tests/validation.test.ts (8 tests) 12ms
+ ✓ tests/crossrefMetadata.test.ts (3 tests) 14ms
+ ✓ tests/focusRunning.test.ts (1 test) 11ms
+ ✓ tests/accountMail.test.ts (8 tests) 10ms
+ ✓ tests/p0cEvidence.test.ts (1 test) 9ms
+ ✓ tests/missionClaimSegments.test.ts (4 tests) 9ms
+ ✓ tests/finalAWorkStateContract.test.ts (31 tests) 8ms
+stderr | tests/intakeModelOutput.test.ts > 项目前理解的模型输出 > 缺少核心内容、非 JSON 和被截断的输出明确失败
+Intake model output rejected [ 'summary:too_small' ]
+Intake model output rejected INVALID_JSON
+
+ ✓ tests/intakeModelOutput.test.ts (4 tests) 8ms
+ ✓ tests/provider-config.test.ts (8 tests) 8ms
+ ✓ tests/intakeQuoteCheck.test.ts (18 tests) 6ms
+ ✓ tests/researchQueryCompilation.test.ts (4 tests) 6ms
+ ✓ tests/missionEarlierProgress.test.ts (4 tests) 6ms
+ ✓ tests/projectChangeBrief.test.ts (5 tests) 6ms
+ ✓ tests/projectWorkspaceOverview.test.ts (1 test) 4ms
+ ✓ tests/globalFocusPresentation.test.ts (8 tests) 5ms
+ ✓ tests/trustReceipt.test.ts (6 tests) 5ms
+ ✓ tests/projectWorkspaceAuth.test.ts (5 tests) 5ms
+ ✓ tests/webClientContract.test.ts (32 tests) 4ms
+ ✓ tests/ux3WorkerCycle.test.ts (3 tests) 4ms
+ ✓ tests/suggestions.test.ts (3 tests) 4ms
+ ✓ tests/contentQuality.test.ts (7 tests) 4ms
+ ✓ tests/projectDashboard.test.ts (5 tests) 4ms
+ ✓ tests/harmonySettingsEditable.test.ts (1 test) 4ms
+ ✓ tests/conversationPriorityPresentation.test.ts (6 tests) 4ms
+ ✓ tests/s1ResultProgress.test.ts (5 tests) 3ms
+ ✓ tests/deploymentEvidence.test.ts (3 tests) 3ms
+ ✓ tests/artifacts.test.ts (6 tests) 3ms
+ ✓ tests/mockAgent.test.ts (3 tests) 3ms
+ ✓ tests/workStateBadge.test.ts (4 tests) 3ms
+ ✓ tests/linker.test.ts (1 test) 3ms
+ ✓ tests/sessionCookie.test.ts (4 tests) 3ms
+ ✓ tests/projectAttention.test.ts (11 tests) 3ms
+ ✓ tests/missionBackgroundNotice.test.ts (3 tests) 3ms
+ ✓ tests/recordPresentation.test.ts (1 test) 2ms
+
+ Test Files  268 passed (268)
+      Tests  2099 passed (2099)
+   Start at  08:16:58
+   Duration  458.35s (transform 8.49s, setup 0ms, import 159.36s, tests 205.20s, environment 40.91s)
+
+FULL_EXIT=0

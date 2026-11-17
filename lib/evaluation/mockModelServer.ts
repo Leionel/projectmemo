@@ -13,7 +13,7 @@ import { textHash } from "@/lib/research/sourceRepository";
 type MockContext = {
   contextVersion?: number; goal?: string; sourceInput?: { projectId?: string };
   continuity?: { workingObjective?: string | null };
-  skillExecution?: { stage: string; outputId?: string; evidencePack?: { sources: Array<{ id: string; text: string }>; unknowns?: Array<{ column?: string }> } };
+  skillExecution?: { stage: string; stageIndex?: number; sequence?: string[]; outputId?: string; evidencePack?: { sources: Array<{ id: string; text: string }>; unknowns?: Array<{ column?: string }> } };
 };
 
 async function latestPointers(projectId: string): Promise<Array<{ sourceId: string; sourceHash: string }>> {
@@ -44,8 +44,21 @@ export async function startMockModelServer(options: { model?: string } = {}) {
       choice = { kind: "ask", question: "请补充本轮工作目标", missing: "PRIVATE" };
     } else {
       const scopeKey = String(context?.sourceInput?.projectId ?? "") + ":" + String(context?.contextVersion ?? 0);
+      const terminalArtifact = skill.stage !== "deliverable-creation" && skill.stageIndex === (skill.sequence?.length ?? 1) - 1
+        && !!skill.evidencePack?.sources?.length && readThisCycle.has(scopeKey + ":" + skill.stage);
       if (skill.outputId && (skill.stage === "deliverable-creation" || readThisCycle.has(scopeKey + ":" + skill.stage))) {
         choice = { kind: "await_event", outputId: skill.outputId, reason: "DELIVERABLE_READY", subscriptionIds: ["project-materials"] };
+      } else if (terminalArtifact) {
+        const pack: Array<{ id: string; text: string }> = (skill.evidencePack?.sources ?? []).slice(-4);
+        const blocks: Array<Record<string, unknown>> = pack.map((source, index) => {
+          const text = source.text.slice(0, 900);
+          return { blockId: "stage-source-" + (index + 1), kind: "PROJECT_OBSERVATION", text: "阶段资料：" + text, sourceIds: [source.id],
+            citations: [{ sourceId: source.id, start: 0, end: text.length, excerptHash: textHash(text) }] };
+        });
+        blocks.push({ blockId: "stage-note", kind: "INFERENCE",
+          text: "本阶段只交付" + skill.stage + "结果；未知项保持未知，不修改原报告，不创建行动。" + (context?.continuity?.workingObjective ? "本轮工作重点：" + context.continuity.workingObjective + "。" : ""), sourceIds: [] });
+        choice = { kind: "tool", tool: "save_mission_output", summary: "交付阶段成果", args: { blocks,
+          missingInformation: [...(skill.evidencePack?.unknowns ?? []).slice(0, 5).map(unknown => (unknown.column || "数值列") + " 缺少单位或口径，按未知保留"), "关键条件或口径未写明时按未知保留"] } };
       } else if (skill.stage !== "deliverable-creation") {
         readThisCycle.add(scopeKey + ":" + skill.stage);
         // The newest readable source is the material change that woke this mission; reading it

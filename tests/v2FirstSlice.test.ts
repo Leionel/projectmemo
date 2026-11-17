@@ -85,7 +85,7 @@ test("all four shipped Skills route, while creation cannot bypass the evidence g
   await runMissionSlice({ id: f.m.id, provider: async () => ({ choice: { kind: "tool", tool: "save_mission_output",
     summary: "越过计划改稿", args: { blocks: [{ blockId: "x", kind: "INFERENCE", text: "无来源稿", sourceIds: [] }] } },
     provider: "INJECTED_TEST", model: "fixture", protocol: "JSON_CHOICE", usage: { inputTokens: 1, outputTokens: 1 } }) });
-  expect((await missionDetail(f.u.id, f.m.id)).error).toMatchObject({ code: "SKILL_OUTPUT_RESTRICTED" });
+  expect((await missionDetail(f.u.id, f.m.id)).error).toMatchObject({ code: "SKILL_GATE_NOT_MET" });
   expect(await db.agentMissionOutput.count({ where: { missionId: f.m.id } })).toBe(0);
 });
 test("an identical immediate draft is kept as the same version instead of a meaningless new revision", async () => {

@@ -162,6 +162,15 @@ export async function assertSkillTool(tx: Tx, m: AgentMission, tool: string) {
   if (c.route.restrictions.noExternalRead && EXTERNAL_READ_TOOLS.has(tool))
     throw new AppError("SKILL_TOOL_RESTRICTED", "当前工作限制不允许联网或外部读取", 409);
   if (tool === "save_mission_output" || tool.startsWith("propose_")) {
+    const terminal = c.stageIndex === c.sequence.length - 1;
+    // A terminal non-creation Skill delivers its own stage artifact; this never becomes a report
+    // revision and never creates a business action.
+    if (tool === "save_mission_output" && c.stage !== "deliverable-creation" && terminal) {
+      if (!c.evidencePack?.sources.length)
+        throw new AppError("SKILL_GATE_NOT_MET", "先读取有效项目资料，再交付" + BUILTIN_SKILLS[c.stage].label + "阶段成果", 409);
+      await validateSources(m.projectId, c.evidencePack.sources, tx, m.id);
+      return;
+    }
     if (c.route.restrictions.noOutputRevision)
       throw new AppError("SKILL_OUTPUT_RESTRICTED", "这轮只做" + BUILTIN_SKILLS[c.sequence[0]]?.label + "，不改动成果草稿", 409);
     if (c.stage !== "deliverable-creation")

@@ -20,6 +20,7 @@ import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { enterObservationCheckpoint } from "./checkpoint";
 import { prepareSkillCursor, assertSkillTool, recordSkillResult, skillContext } from "@/lib/skills/runtime";
+import { saveSkillArtifact } from "@/lib/skills/artifacts";
 import { AppError } from "@/lib/api";
 import { missionStrategyV2 } from "@/lib/agent/specialistPrompts";
 import { chooseNext, type DecisionProvider } from "./modelAdapter";
@@ -220,6 +221,21 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    }
    if(step!.toolName==="web_search"||step!.toolName==="web_fetch"||step!.toolName==="read_paper_metadata"||step!.toolName==="browser_read")await persistObservations(tx,m.id,result.data);
    if(step!.toolName==="save_mission_output"){
+    const skill=current.runtimeProtocolVersion===2?skillContext(current):undefined;
+    const artifactMode=!!skill&&skill.stage!=="deliverable-creation"&&skill.stageIndex===skill.sequence.length-1;
+    if(artifactMode){
+     // Terminal planning/research/review delivers a stage artifact; the report and business state stay untouched.
+     phase="VERIFY";
+     const artifact=await saveSkillArtifact(tx,current,step!.canonicalInputJson,step!.readSetJson as unknown as Source[],{stage:skill!.stage,sequence:skill!.sequence});
+     const live=await tx.agentMission.findUniqueOrThrow({where:{id:m.id}});
+     const plan=record(live.planJson),cursor=record(plan.skillCursor);
+     const updated=await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...plan,skillCursor:{...cursor,artifactReady:true,artifactId:artifact.id}}),pauseReason:"SKILL_DELIVERABLE_READY",lastErrorJson:Prisma.DbNull,nextAttemptAt:null}});
+     await tx.agentMissionStep.update({where:{id:step!.id},data:{status:"SUCCEEDED",resultJson:json({data:{artifactId:artifact.id},sources:[]}),finishedAt:new Date()}});
+     await event(tx,m.id,"TOOL_FINISHED",{stepId:step!.id,result:{artifactId:artifact.id,skillId:artifact.skillId},phase:"COMMIT"});
+     await event(tx,m.id,"SKILL_DELIVERABLE_READY",{stepId:step!.id,artifactId:artifact.id,skillId:artifact.skillId,checks:artifact.checks,
+       sourceRefs:artifact.sources.map(source=>({id:source.id,hash:source.hash})),reportUnchanged:true,businessActionsUnchanged:true});
+     await release(tx,updated,"PAUSED","SKILL_DELIVERABLE_READY");return;
+    }
     phase="VERIFY";const output=await saveOutput(tx,m.id,step!.id,step!.canonicalInputJson,step!.readSetJson as unknown as Source[],claimChecks);phase="COMMIT";data={data:{outputId:output.id,revision:output.revision},sources:[]};
    }
    if(step!.toolName==="propose_metric_verification"){

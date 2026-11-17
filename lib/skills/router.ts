@@ -131,7 +131,8 @@ export function extractRestrictions(message: string): RoutingRestrictions {
     || /(?:暂时|先)(?:不|别)(?:查|看|补)(?:新|外部|公开)?(?:资料|材料|数据)/.test(message)
     || /不补新资料/.test(message);
   flags.noExternalRead = external;
-  flags.noOutputRevision = /(?:报告|稿件|成果|草稿|文档).{0,4}(?:不要|别|先别).{0,3}(?:动|改|写)/.test(message)
+  flags.noOutputRevision = /不(?:开始|再)?(?:写|改|动)(?:新)?(?:的)?报告/.test(message)
+    || /(?:报告|稿件|成果|草稿|文档).{0,4}(?:不要|别|先别).{0,3}(?:动|改|写)/.test(message)
     || /(?:不要|别|先别|不再|不要)(?:再|去|继续)?(?:改稿|改报告|动报告|改这份|修改稿件|写新报告)/.test(message);
   flags.preserveAdoptedArtifacts = /(?:不要|别|不得)覆盖已采纳|保留已采纳|不覆盖已采纳/.test(message);
   if (/不要覆盖已采纳/.test(message)) flags.noOutputRevision = false;
@@ -182,7 +183,7 @@ const PLANNING_STRONG = [
 const PLANNING_WEAK = [/任务顺序/, /最小.{0,4}方案/, /验收清单/, /(?:依赖|缺项).{0,4}(?:列出|列出来)/, /排个顺序/];
 
 const RESEARCH_STRONG = [
-  /(?:核对|核查|复查|补查|查清|检查|查看|查阅|比较|对比|核实|分析|验证|证明|评估|确认|排查)/,
+  /(?:核对|核查|复查|补查|查清|检查|查看|查阅|比较|对比|核实|分析|验证|证明|评估|确认|排查|研究|调研|调查)/,
   /(?:是否|能否|能不能|足以|支持(?:它|什么|这|该)?|真的支持|漏了|缺少|缺失)/,
   /(?:新观察|新数据|新记录|新实验|CI失败|CI过了|SHA|DOI|PDF|前两页|指标口径)/,
 ];
@@ -222,6 +223,9 @@ const REVIEW_WEAK = [/(?:上次|当前|现在).{0,6}(?:结论|决定|状态)/, /
 
 function clauseSkill(clause: string): BuiltinSkillId | null {
   if (!clause) return null;
+  // A clause that tells the agent NOT to do an action is a restriction, not a request for that method.
+  if (/(?:不|别|不要|先别|暂时不|不再|停止|避免)(?:再|去|开始|继续)?(?:写|生成|整理|修改|改|研究|调研|调查|查|做|创建|执行|联网|补)/.test(clause)
+    && !/只(?:做|复盘|写|要)/.test(clause)) return null;
   // A clause whose only content is a negative instruction is a control, not a method request.
   const positive = clause.replace(/(?:不要|别|不用|不必|暂时不|先不|先别|不再|无需|不允许|不能)/g, "");
   if (!positive.replace(/[的了呢吧啊]/g, "").trim()) return null;

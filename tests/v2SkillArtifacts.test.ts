@@ -154,3 +154,37 @@ test("阶段成果缺少真实来源时被拒绝，不会写进原报告或进�
   expect(((row.planJson as { skillArtifacts?: unknown[] }).skillArtifacts ?? [])).toHaveLength(0);
   expect(await db.agentMissionOutput.count({ where: { missionId: mission.id } })).toBe(0);
 });
+
+test("source suppression withholds stage unknowns and checks as well as draft text", async () => {
+  const f = await runScenario("这次只做计划，报告不要动", false);
+  const canary = "PRIVATE_STAGE_UNKNOWN_CANARY";
+  const plan = f.row.planJson as unknown as { skillArtifacts: Array<{ unknowns: string[]; checks: unknown[] }> };
+  plan.skillArtifacts[0].unknowns = [canary];
+  plan.skillArtifacts[0].checks = [{ name: "SOURCE_NOTE", passed: true, detail: canary }];
+  await db.agentMission.update({ where: { id: f.mission.id }, data: { planJson: json(plan) } });
+  const { createSession } = await import("@/lib/auth/session");
+  const { createConversation } = await import("@/lib/conversation/service");
+  const { submitDirective } = await import("@/lib/continuity/directiveService");
+  const { readMissionWorkbench } = await import("@/lib/mission/workbenchService");
+  const actor = { userId, sessionId: (await createSession(userId)).session.id };
+  const c = await createConversation(actor, { requestId: "suppress-stage", scope: "PROJECT", projectId: f.project.id });
+  expect(JSON.stringify(await readMissionWorkbench(userId, f.mission.id))).toContain(canary);
+  await submitDirective(actor, c.id, { commandId: "suppress", expectedSeq: 0, scope: { projectId: f.project.id, missionId: f.mission.id },
+    operation: "SUPPRESS_USE", sourceIds: [f.source.id] });
+  expect(JSON.stringify(await readMissionWorkbench(userId, f.mission.id))).not.toContain(canary);
+  expect(JSON.stringify((await db.agentMission.findUniqueOrThrow({ where: { id: f.mission.id } })).planJson)).toContain(canary);
+});
+
+test("stage artifacts reject unread sources and unsourced factual blocks", async () => {
+  const f = await fixture("只复盘，不创建行动");
+  const { saveSkillArtifact } = await import("@/lib/skills/artifacts");
+  const current = await db.agentMission.findUniqueOrThrow({ where: { id: f.mission.id } });
+  const skill = { stage: "project-review" as const, sequence: ["project-review" as const] };
+  const body = { blocks: [
+    { blockId: "real", kind: "PROJECT_OBSERVATION", text: "真实来源", sourceIds: [f.source.id] },
+    { blockId: "fake", kind: "PROJECT_OBSERVATION", text: "未读取的记录", sourceIds: ["capture:missing"] },
+  ] };
+  await expect(saveSkillArtifact(db, current, body, [f.source], skill)).rejects.toMatchObject({ code: "SOURCE_NOT_FOUND" });
+  body.blocks[1].sourceIds = [];
+  await expect(saveSkillArtifact(db, current, body, [f.source], skill)).rejects.toMatchObject({ code: "SOURCE_REQUIRED" });
+});

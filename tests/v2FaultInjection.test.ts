@@ -17,10 +17,10 @@ function childEnv() {
     MISSION_ENABLED: "true", MISSION_V2_ENABLED: "true", MISSION_INVESTIGATION_DELEGATION_ENABLED: "true", MISSION_WORKBENCH_ENABLED: "true" };
 }
 type ChildResult = { code: number | null; signal: string | null; result: Record<string, unknown> | null; stderr: string };
-function runChild(mode: string, args: { mission: string; project: string; capture: string }): Promise<ChildResult> {
+function runChild(mode: string, args: { mission: string; project: string; capture: string; barrier?: string }): Promise<ChildResult> {
   return new Promise(resolve => {
     const child = spawn(process.execPath, ["--import", "tsx", childScript, "--mode=" + mode,
-      "--mission=" + args.mission, "--project=" + args.project, "--capture=" + args.capture],
+      "--mission=" + args.mission, "--project=" + args.project, "--capture=" + args.capture, ...(args.barrier ? ["--barrier=" + args.barrier] : [])],
       { cwd: process.cwd(), env: childEnv(), windowsHide: true });
     let stdout = "", stderr = "";
     child.stdout.on("data", chunk => { stdout += String(chunk); });
@@ -126,10 +126,13 @@ test("two worker processes racing one READY mission: exactly one claims and writ
   const f = await fixture("整理持续报告");
   await checkpointInChild(f);
   const newer = await wakeWithMaterial(f, "第二版资料：移动端回归已补测，分享入口未验证。");
-  const [left, right] = await Promise.all([
-    runChild("work", { mission: f.mission.id, project: f.project.id, capture: newer.id }),
-    runChild("work", { mission: f.mission.id, project: f.project.id, capture: newer.id }),
-  ]);
+  const barrier = path.join(isolated.dir, "claim-barrier"); fs.mkdirSync(barrier);
+  const attempts = [runChild("work", { mission: f.mission.id, project: f.project.id, capture: newer.id, barrier }),
+    runChild("work", { mission: f.mission.id, project: f.project.id, capture: newer.id, barrier })];
+  const loser = await Promise.race(attempts);
+  fs.writeFileSync(path.join(barrier, "release"), "release");
+  const [left, right] = await Promise.all(attempts);
+  expect(loser.result?.claimed).toBe(false);
   expect(left.code).toBe(0);
   expect(right.code).toBe(0);
   const claimed = [left.result?.claimed, right.result?.claimed].filter(Boolean).length;

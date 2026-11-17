@@ -77,3 +77,9 @@ test("semantic claims stay unverified and are never reported as passes", () => {
   expect(semantic.length).toBeGreaterThan(0);
   expect(semantic.every(check => check.status === "UNVERIFIED" && check.judge === "HUMAN_REVIEW")).toBe(true);
 });
+
+test("an unrelated generic unknown cannot cover a missing specific condition", () => {
+  const checks = assessRevision({ previous: first, current: goodRevision, sources,
+    requiredUnknowns: ["分享入口未验证", "审批人未给出"] });
+  expect(checks.find(check => check.name === "UNKNOWN_PRESERVED")?.status).toBe("FAIL");
+});

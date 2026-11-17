@@ -5,7 +5,7 @@ import { record } from "@/lib/conversation/repository";
 import { json, jsonHash, type Source } from "@/lib/mission/contracts";
 import { event, validateSources, type Tx } from "@/lib/mission/repository";
 import { outputSchema } from "@/lib/mission/tools";
-import { validateResearchOutput } from "@/lib/mission/researchOutputSchema";
+import { validateOutputContent } from "@/lib/mission/outputValidation";
 import type { BuiltinSkillId } from "./registry";
 
 /**
@@ -57,7 +57,7 @@ export async function saveSkillArtifact(tx: Tx, mission: AgentMission, input: un
   const body = outputSchema.parse(input);
   if (!body.blocks.some(block => block.sourceIds.length > 0))
     throw new AppError("SKILL_ARTIFACT_UNSOURCED", "阶段成果缺少可核对来源，未保存", 409);
-  validateResearchOutput(body, available);
+  validateOutputContent(body, available);
   const sourceIds = [...new Set(body.blocks.flatMap(block => block.sourceIds))];
   const sources = sourceIds.map(id => available.find(source => source.id === id)).filter((source): source is Source => !!source)
     .map(source => ({ ...source, text: source.text.slice(0, 2000) }));

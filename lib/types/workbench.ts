@@ -5,7 +5,7 @@ export type WorkbenchOutput = {
   blocks: Array<{ blockId: string; text: string; kind: string; sourceIds: string[] }>;
   presentation: AgentPresentation;
 };
-export type WorkbenchSource = { key: string; id: string; revision: string; hash: string; text: string; current: boolean; kind: string };
+export type WorkbenchSource = { key: string; id: string; revision: string; hash: string; text: string; current: boolean; kind: string; name?: string };
 export type WorkbenchStageArtifact = {
   id: string; skillId: string; label: string; createdAt: string; sourceKeys: string[];
   blocks: Array<{ blockId: string; text: string; kind: string; sourceIds: string[] }>;

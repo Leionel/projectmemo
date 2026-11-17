@@ -124,6 +124,20 @@ test("rollout gate blocks v2 rows while disabled and mixed worker versions", asy
   expect(ready.ok).toBe(true);
 });
 
+test("enabling V2 requires a recent compatible Worker even before the first v2 row", async () => {
+  process.env.WORKER_PRESENCE_FILE = path.join(isolated.dir, "first-v2-presence.json");
+  await db.agentMission.updateMany({ data: { runtimeProtocolVersion: 1 } });
+  expect((await inspectV2Rollout()).ok).toBe(false);
+  const now = Date.now();
+  recordWorkerPresence({ workerId: "v2-worker", version: WORKER_CAPABILITY_VERSION, now });
+  expect((await inspectV2Rollout({ now })).ok).toBe(true);
+  expect((await inspectV2Rollout({ now: now + 61000 })).ok).toBe(false);
+  process.env.MISSION_V2_ENABLED = "false";
+  recordWorkerPresence({ workerId: "v2-worker", version: WORKER_CAPABILITY_VERSION, now });
+  process.env.MISSION_V2_ENABLED = "true";
+  expect((await inspectV2Rollout({ now })).ok).toBe(false);
+});
+
 test("long-run harness: start --wait, status and report produce wall-clock evidence", async () => {
   const out = path.join(os.tmpdir(), "pm-long-run-" + crypto.randomUUID());
   const run = (args: string[]) => new Promise<{ code: number | null; stdout: string }>(resolve => {

@@ -96,3 +96,10 @@
 - 混合升级防护：`claimMission`/过期 RUNNING 清理按允许协议版本过滤，关闭 V2 时 v2 行完全不被认领或改写；Worker 版本号升级为 `r4-ux3-worker-v2`，启动时检查迁移列和“关闭开关但存在 v2 行”；新增只读 `scripts/v2-rollout-check.ts`（四种状态证据：V1_ONLY_SAFE / V2_ROWS_DISABLED / MIXED_WORKER / V2_READY）。
 - 长时运行：新增 `scripts/v2-long-run.ts`（start/status/material/stop/report，独立 SQLite、真实 Runner 循环），本轮冒烟 10 周期、3 版、预算单调、预留归零；明确不是 72h 证明。
 - 验证：全量 272 文件/2124 条、故障注入 8/8、控制竞态 7/7、运行可靠性 5/5、去重回归 5/5、tsc/lint/Web 构建通过、Harmony 合约 155/155（本地补齐 oh_modules，未改 ArkTS）；无新增迁移、无付费调用、未改真实数据库。V2 仍默认关闭。
+
+## 2026-11-17 复查修复
+
+- 统一 Worker 心跳版本，启用 V2 前核对 Worker 活性及完整环境身份；关闭 V2 的新 Worker 仍处理 V1，冻结 V2。
+- 阶段成果复用报告的来源校验；来源停用时同步隐藏检查与未知元数据；评分不再接受泛化未知替代具体条件。
+- 两进程竞争测试使用显式屏障保证真正重叠。定向 5 文件/24 条与故障注入 8 条通过，无新增迁移。
+- 完整回执：[REVIEW_FIXES_20261117.md](REVIEW_FIXES_20261117.md)。M2 材料闭环及全量结果另记下一切片。

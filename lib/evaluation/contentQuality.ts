@@ -96,8 +96,8 @@ export function assessRevision(input: {
       "改道重点命中=" + (hits.join("|") || "无") + "，变化词 " + changedTokens + "，来源重合 " + evidenceHits));
   }
   if (input.requiredUnknowns?.length) {
-    const missing = input.requiredUnknowns.filter(unknown => !unknownText.includes(unknown) && !unknownText.includes("未知") && !unknownText.includes("未给出") && !unknownText.includes("未写明"));
-    checks.push(check("UNKNOWN_PRESERVED", missing.length === 0, missing.length ? "遗漏关键未知：" + missing.join("；") : "关键未知保留"));
+    const missing = input.requiredUnknowns.filter(unknown => !normalize(unknownText).includes(normalize(unknown)));
+    checks.push(check("UNKNOWN_PRESERVED", missing.length === 0, missing.length ? "未找到关键未知原文：" + missing.join("；") + "；改写含义由人工审核" : "关键未知原文保留"));
   }
   return checks;
 }

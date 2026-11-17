@@ -41,9 +41,10 @@ export async function inspectV2Rollout(options: { now?: number } = {}): Promise<
   if (!hasProtocolColumn) { verdict = "BLOCKED"; reason = "MIGRATION_REQUIRED"; }
   else if (unsupportedRows > 0) { verdict = "BLOCKED"; reason = "UNSUPPORTED_PROTOCOL_VERSION"; }
   else if (v2Rows > 0 && !v2Enabled) { verdict = "BLOCKED"; reason = "V2_ROWS_PRESENT_WHILE_DISABLED"; }
-  else if (v2Rows > 0 && presence.workerId && workerVersion && workerVersion !== WORKER_CAPABILITY_VERSION) { verdict = "BLOCKED"; reason = "MIXED_WORKER_VERSION"; }
-  else if (v2Rows > 0 && presence.workerId && presence.identityMatches === false) { verdict = "BLOCKED"; reason = "WORKER_IDENTITY_MISMATCH"; }
-  else if (v2Rows > 0 && !presence.workerId) { verdict = "BLOCKED"; reason = "V2_WORKER_UNOBSERVED"; }
+  else if (v2Enabled && !presence.workerId) { verdict = "BLOCKED"; reason = "V2_WORKER_UNOBSERVED"; }
+  else if (v2Enabled && workerVersion !== WORKER_CAPABILITY_VERSION) { verdict = "BLOCKED"; reason = "MIXED_WORKER_VERSION"; }
+  else if (v2Enabled && presence.identityMatches !== true) { verdict = "BLOCKED"; reason = "WORKER_IDENTITY_MISMATCH"; }
+  else if (v2Enabled && (!presence.isProcessAlive || presence.status !== "RECENT")) { verdict = "BLOCKED"; reason = "V2_WORKER_STALE"; }
   else if (v2Rows === 0 && !v2Enabled) { verdict = "V1_ONLY_SAFE"; reason = "仅 v1 行且功能关闭，可安全运行旧 Worker"; }
   const ok = verdict !== "BLOCKED";
   if (!ok) checks.push({ name: "VERDICT", status: "BLOCK", detail: reason });

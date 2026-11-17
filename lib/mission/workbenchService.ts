@@ -27,6 +27,15 @@ export async function readMissionWorkbench(userId: string, id: string): Promise<
       tx.agentMissionStep.count({ where: { missionId: id, status: "UNKNOWN" } }),
     ]);
     const sources: WorkbenchSource[] = [], outputs: WorkbenchOutput[] = [], stageArtifacts: WorkbenchStageArtifact[] = [];
+    const materialEvents = await tx.agentMissionEvent.findMany({ where: { missionId: id, type: { in: ["USER_MATERIAL_ADDED", "USER_FEEDBACK_ADDED"] } },
+      orderBy: { seq: "desc" }, take: 64, select: { payloadJson: true } });
+    const sourceNames = new Map<string, string>();
+    const receipt = record(record(m.planJson).v2DelegationReceipt);
+    if (typeof receipt.materialSourceId === "string" && typeof receipt.materialName === "string") sourceNames.set(receipt.materialSourceId, receipt.materialName);
+    for (const event of materialEvents) {
+      const payload = record(event.payloadJson);
+      if (typeof payload.sourceId === "string" && typeof payload.name === "string" && !sourceNames.has(payload.sourceId)) sourceNames.set(payload.sourceId, payload.name);
+    }
     /** Resolve real source refs against the current owner/source-use policy; returns the visible ids. */
     const visibleRefs = async (refs: Source[]): Promise<Set<string>> => {
       const allowed = new Set<string>();
@@ -38,7 +47,8 @@ export async function readMissionWorkbench(userId: string, id: string): Promise<
         if (sources.some(item => item.key === key)) continue;
         let current = true;
         try { await validateSources(m.projectId, [source], tx, id); } catch { current = false; }
-        sources.push({ key, id: source.id, revision: source.revision, hash: source.hash, text: source.text.slice(0, 4000), current, kind: source.kind });
+        sources.push({ key, id: source.id, revision: source.revision, hash: source.hash, text: source.text.slice(0, 4000), current, kind: source.kind,
+          ...(sourceNames.has(source.id) ? { name: sourceNames.get(source.id) } : {}) });
       }
       return allowed;
     };
@@ -56,9 +66,10 @@ export async function readMissionWorkbench(userId: string, id: string): Promise<
     for (const artifact of readSkillArtifacts(m.planJson)) {
       const allowed = await visibleRefs(artifact.sources);
       const blocks = withSuppressedText(artifact.blocks, artifact.sources, allowed);
+      const allSourcesAllowed = artifact.sources.every(source => allowed.has(source.id));
       stageArtifacts.push({ id: artifact.id, skillId: artifact.skillId, label: BUILTIN_SKILLS[artifact.skillId]?.label ?? artifact.skillId,
         createdAt: artifact.createdAt, blocks, sourceKeys: artifact.sources.filter(source => allowed.has(source.id)).map(source => source.id + "@" + source.hash),
-        presentation: presentationOf(blocks), checks: artifact.checks, unknowns: artifact.unknowns });
+        presentation: presentationOf(blocks), checks: allSourcesAllowed ? artifact.checks : [], unknowns: allSourcesAllowed ? artifact.unknowns : [] });
     }
     for (const row of rows) {
       const refs = row.sourceRefsJson as unknown as Source[];
@@ -77,6 +88,7 @@ export async function readMissionWorkbench(userId: string, id: string): Promise<
       events, approvals, unknownSteps });
     const labels: Record<string, string> = { SKILL_ENTERED: "开始读取项目资料", SKILL_HANDOFF: "证据包已交给创作",
       SKILL_OUTPUT_READY: "创作产物已保存", OUTPUT_SAVED: "私有稿已更新", CHECKPOINT_REACHED: "成果备好，继续留意变化",
+      USER_MATERIAL_ADDED: "你补充的资料已保存", USER_FEEDBACK_ADDED: "你的反馈已保存，等待核对影响",
       SKILL_ARTIFACT_SAVED: "阶段成果已保存", SKILL_DELIVERABLE_READY: "阶段成果已备好，原报告与行动未改动",
       INVESTIGATION_WOKEN: "新资料唤醒原委托", INVESTIGATION_OBSERVATION_CHANGED: "观察到获准变化",
       CLAIMED: "后台取得本轮执行权", TOOL_STARTED: "正在执行获准步骤", TOOL_FINISHED: "步骤回执已保存",

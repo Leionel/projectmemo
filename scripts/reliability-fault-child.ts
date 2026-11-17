@@ -5,6 +5,8 @@
  * Not a product entry point: no provider selection from the product API, fixture transport only.
  */
 import { randomUUID } from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 
 const arg = (name: string) => {
   const prefix = "--" + name + "=";
@@ -107,7 +109,18 @@ try {
       break;
     }
     case "work": {
-      const claimed = await runMissionSlice({ id: missionId, provider: provider(), workerId: "fault-" + randomUUID() });
+      const base = provider(), barrier = arg("barrier");
+      const claimed = await runMissionSlice({ id: missionId, provider: async raw => {
+        if (barrier) {
+          // Keep the winning lease active until the other real process has attempted its claim.
+          const started = Date.now();
+          while (!fs.existsSync(path.join(barrier, "release"))) {
+            if (Date.now() - started > 15000) throw new Error("CLAIM_BARRIER_TIMEOUT");
+            await new Promise(resolve => setTimeout(resolve, 25));
+          }
+        }
+        return base(raw);
+      }, workerId: "fault-" + randomUUID() });
       result = { mode, claimed, ...(await state()) };
       break;
     }

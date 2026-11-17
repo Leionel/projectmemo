@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "character": "bookmark-spirit",
+  "version": "v1",
+  "generatedAt": "2026-11-17",
+  "design": {
+    "spec": "docs/v2/assets/mascot-concepts/20261117/bookmark-spirit-v1/character-spec.png",
+    "prompts": "docs/v2/assets/mascot-concepts/20261117/bookmark-spirit-v1/PROMPTS.md",
+    "reference": "docs/v2/assets/mascot-concepts/20261117/02-bookmark-spirit-v1.png",
+    "note": "设计母版与提示词不参与页面加载；docs 目录按仓库约定不强制入库。"
+  },
+  "tool": "WorkBuddy ImageGen（图生图）+ 本地确定性去背与统一基线",
+  "canvas": {
+    "master": 1024,
+    "web": 512,
+    "baseline": 944,
+    "note": "同画幅、同基线；网页按实际尺寸加载 web 版本"
+  },
+  "palette": {
+    "pine": "#27685D",
+    "ink": "#1C2E2C",
+    "ivory": "#F7F5EF",
+    "copper": "#BC7B4C"
+  },
+  "states": {
+    "idle": {
+      "label": "安静抱着项目夹",
+      "usage": "空闲、等待或静态陪伴",
+      "master": "master/idle.png",
+      "web": "web/idle.png",
+      "width": 512,
+      "height": 512,
+      "hasAlpha": true,
+      "source": "ImageGen 图生图（master 参考）+ chroma key",
+      "webBytes": 58816
+    },
+    "inspect": {
+      "label": "看原记录、持放大镜",
+      "usage": "查看来源与导师核查",
+      "master": "master/inspect.png",
+      "web": "web/inspect.png",
+      "width": 512,
+      "height": 512,
+      "hasAlpha": true,
+      "source": "ImageGen 图生图（master 参考）+ chroma key",
+      "webBytes": 58825
+    },
+    "thinking": {
+      "label": "轻托下巴、略显疑问",
+      "usage": "未知项、等待回答",
+      "master": "master/thinking.png",
+      "web": "web/thinking.png",
+      "width": 512,
+      "height": 512,
+      "hasAlpha": true,
+      "source": "ImageGen 图生图（master 参考）+ chroma key",
+      "webBytes": 51799
+    },
+    "writing": {
+      "label": "坐在书堆上写稿",
+      "usage": "只在真实处理/写作状态使用",
+      "master": "master/writing.png",
+      "web": "web/writing.png",
+      "width": 512,
+      "height": 512,
+      "hasAlpha": true,
+      "source": "ImageGen 图生图（master 参考）+ chroma key",
+      "webBytes": 44738
+    },
+    "handoff": {
+      "label": "递出项目夹",
+      "usage": "交回意见、成果交接",
+      "master": "master/handoff.png",
+      "web": "web/handoff.png",
+      "width": 512,
+      "height": 512,
+      "hasAlpha": true,
+      "source": "ImageGen 图生图（master 参考）+ chroma key",
+      "webBytes": 49285
+    },
+    "success": {
+      "label": "夹好新页、轻微开心",
+      "usage": "有对应成功回执后短暂显示",
+      "master": "master/success.png",
+      "web": "web/success.png",
+      "width": 512,
+      "height": 512,
+      "hasAlpha": true,
+      "source": "ImageGen 图生图（master 参考）+ chroma key",
+      "webBytes": 59484
+    },
+    "avatar": {
+      "label": "清晰的小头像",
+      "usage": "角色入口与提示，不替换品牌 Logo",
+      "master": "master/avatar.png",
+      "web": "web/avatar.png",
+      "width": 256,
+      "height": 256,
+      "hasAlpha": true,
+      "source": "ImageGen 图生图（master 参考）+ chroma key",
+      "webBytes": 17953
+    }
+  }
+}

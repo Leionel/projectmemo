@@ -6,6 +6,7 @@ import { json } from "@/lib/mission/contracts";
 import { createMission } from "@/lib/mission/missionService";
 import { readProjectMaterial } from "@/lib/mission/sourceSignals";
 import { startChallenge, commandChallenge, readChallenge } from "@/lib/challenges/service";
+import { sourceUse } from "@/lib/continuity/sourcePolicy";
 
 Object.assign(process.env, { MISSION_V2_ENABLED: "true", MISSION_CHALLENGES_ENABLED: "true" });
 afterAll(async () => { await db.$disconnect(); fs.rmSync(isolated.dir, { recursive: true, force: true }); });
@@ -60,6 +61,22 @@ test("no metric records or only one record refuses to invent a comparability que
   expect(session.questions).toHaveLength(3);
 });
 
+test("duplicate source references do not turn one metric record into two", async () => {
+  const f = await fixture([metric("a", 80)]);
+  const ref = (await readProjectMaterial(f.project.id, "capture:" + f.capture.id))!;
+  await db.agentMissionOutput.update({ where: { id: f.output.id }, data: { sourceRefsJson: json([ref, ref]) } });
+  await expect(f.begin()).rejects.toMatchObject({ code: "CHALLENGE_NOT_READY" });
+});
+
+test("retention expiry clears online answers on access", async () => {
+  const f = await fixture([]), s = await f.begin("REHEARSAL");
+  await commandChallenge(f.user.id, f.mission.id, s.id, { action: "ANSWER", requestId: "answer", questionKey: "evidence", text: "retention-canary" });
+  await db.agentMissionEvent.update({ where: { id: s.id }, data: { createdAt: new Date(Date.now() - 31 * 86400000) } });
+  expect(await readChallenge(f.user.id, f.mission.id, s.id)).toMatchObject({ status: "STALE", answers: [] });
+  const rows = await db.agentMissionEvent.findMany({ where: { missionId: f.mission.id, type: "CHALLENGE_ANSWERED" } });
+  expect(JSON.stringify(rows)).not.toContain("retention-canary");
+});
+
 test("deleting an attempt is logical, exposes no answer copy, and allows a fresh answer", async () => {
   const f = await fixture([], "REHEARSAL");
   const session = await f.begin("REHEARSAL");
@@ -79,11 +96,44 @@ test("deleting an attempt is logical, exposes no answer copy, and allows a fresh
   expect(await readChallenge(f.user.id, f.mission.id)).toMatchObject({ status: "ACTIVE" });
 });
 
-test("deleting an attempt after STOP or with changed content is rejected", async () => {
+test("deleting after STOP remains available and does not restart the challenge", async () => {
   const f = await fixture([], "REHEARSAL");
   const session = await f.begin("REHEARSAL");
   await commandChallenge(f.user.id, f.mission.id, session.id, { action: "ANSWER", requestId: "x", questionKey: session.questions[0].key, text: "原回答" });
   await commandChallenge(f.user.id, f.mission.id, session.id, { action: "STOP", requestId: "stop" });
-  await expect(commandChallenge(f.user.id, f.mission.id, session.id, { action: "DELETE_ATTEMPT", requestId: "del" })).rejects.toMatchObject({ code: "CHALLENGE_STOPPED" });
-  await expect(commandChallenge(f.user.id, f.mission.id, session.id, { action: "DELETE_ATTEMPT", requestId: "x" })).rejects.toMatchObject({ code: "REQUEST_ID_REUSED" }).catch(() => undefined);
+  const result = await commandChallenge(f.user.id, f.mission.id, session.id, { action: "DELETE_ATTEMPT", requestId: "del" });
+  expect(result.session).toMatchObject({ status: "STOPPED", answers: [] });
+  await expect(commandChallenge(f.user.id, f.mission.id, session.id, { action: "DELETE_ATTEMPT", requestId: "x" })).rejects.toMatchObject({ code: "REQUEST_ID_REUSED" });
+});
+
+test("replay beyond 24 events preserves deletion and stop", async () => {
+  const f = await fixture([]);
+  const s = await f.begin("REHEARSAL");
+  for (let i = 0; i < 13; i++) {
+    await commandChallenge(f.user.id, f.mission.id, s.id, { action: "ANSWER", requestId: "answer-" + i, questionKey: "evidence", text: "核查意见" });
+    await commandChallenge(f.user.id, f.mission.id, s.id, { action: "DELETE_ATTEMPT", requestId: "delete-" + i });
+  }
+  await commandChallenge(f.user.id, f.mission.id, s.id, { action: "STOP", requestId: "stop" });
+  expect(await readChallenge(f.user.id, f.mission.id, s.id)).toMatchObject({ status: "STOPPED", answers: [] });
+});
+
+test("metric answers require exactly one option and no free text", async () => {
+  const f = await fixture([metric("a", 80), metric("b", 84)]), s = await f.begin();
+  for (const answer of [{ selected: [] }, { selected: ["CONDITIONS_MATCH", "CONDITIONS_MATCH"] }, { selected: ["CONDITIONS_MATCH"], text: "hidden-answer" }]) {
+    await expect(commandChallenge(f.user.id, f.mission.id, s.id, { action: "ANSWER", requestId: crypto.randomUUID(), questionKey: "compare", ...answer }))
+      .rejects.toMatchObject({ code: "CHALLENGE_ANSWER_REQUIRED" });
+  }
+});
+
+test("deletion after handoff clears online text and suppresses feedback descendants", async () => {
+  const f = await fixture([]), s = await f.begin("REHEARSAL");
+  for (const q of s.questions) await commandChallenge(f.user.id, f.mission.id, s.id, { action: "ANSWER", requestId: q.key, questionKey: q.key, text: "private-delete-canary" });
+  const handoff = await commandChallenge(f.user.id, f.mission.id, s.id, { action: "HANDOFF", requestId: "handoff" });
+  const sourceId = handoff.session.handoffSourceId!;
+  expect((await sourceUse(f.user.id, f.project.id, sourceId, db, { missionId: f.mission.id })).state).toBe("ALLOWED");
+  await commandChallenge(f.user.id, f.mission.id, s.id, { action: "DELETE_ATTEMPT", requestId: "delete" });
+  expect((await sourceUse(f.user.id, f.project.id, sourceId, db, { missionId: f.mission.id })).state).toBe("SUPPRESSED");
+  const capture = await db.capture.findUniqueOrThrow({ where: { id: sourceId.slice(8) } });
+  const events = await db.agentMissionEvent.findMany({ where: { missionId: f.mission.id } });
+  expect(JSON.stringify({ capture, events })).not.toContain("private-delete-canary");
 });

@@ -48,7 +48,7 @@ test("brief shows at most three changes since the last read; read and handled ar
   expect(next.items.some(item => item.kind === "OUTPUT_UPDATED" && item.revision === 2)).toBe(true);
   expect(await db.actionItem.count({ where: { projectId: f.project.id } })).toBe(0);
   const replay = await acknowledgeReentryBrief(f.user.id, f.mission.id, { requestId: "seen-1", seenSeq: first.cursor.seq, seenOutputRevision: 1, handledItemIds: [first.items[0].id] });
-  expect(replay.readState).toBe("SEEN");
+  expect(replay.readState).toBe("UNREAD");
   await expect(acknowledgeReentryBrief(f.user.id, f.mission.id, { requestId: "seen-1", seenSeq: 999, seenOutputRevision: 2 })).rejects.toMatchObject({ code: "REQUEST_ID_REUSED" });
 });
 
@@ -70,4 +70,23 @@ test("other users cannot read or acknowledge the brief", async () => {
   const outsider = await db.user.create({ data: { username: "outsider-" + crypto.randomUUID(), displayName: "外部", passwordHash: "unused" } });
   await expect(readReentryBrief(outsider.id, f.mission.id)).rejects.toMatchObject({ code: "MISSION_NOT_FOUND" });
   await expect(acknowledgeReentryBrief(outsider.id, f.mission.id, { requestId: "x", seenSeq: 0, seenOutputRevision: 0 })).rejects.toMatchObject({ code: "MISSION_NOT_FOUND" });
+});
+
+test("late acknowledgements cannot rewind and future cursors are rejected", async () => {
+  const f = await fixture(); await f.output(1);
+  const old = await readReentryBrief(f.user.id, f.mission.id);
+  await f.output(2);
+  const latest = await readReentryBrief(f.user.id, f.mission.id);
+  await acknowledgeReentryBrief(f.user.id, f.mission.id, { requestId: "new", seenSeq: latest.cursor.seq, seenOutputRevision: 2 });
+  const late = await acknowledgeReentryBrief(f.user.id, f.mission.id, { requestId: "late", seenSeq: old.cursor.seq, seenOutputRevision: 1 });
+  expect(late.items).toEqual([]);
+  await expect(acknowledgeReentryBrief(f.user.id, f.mission.id, { requestId: "future", seenSeq: 999999, seenOutputRevision: 999 }))
+    .rejects.toMatchObject({ code: "REENTRY_CURSOR_INVALID" });
+});
+
+test("handling one change preserves the other unread change", async () => {
+  const f = await fixture(); await f.output(1); await f.output(2);
+  const brief = await readReentryBrief(f.user.id, f.mission.id);
+  const result = await acknowledgeReentryBrief(f.user.id, f.mission.id, { requestId: "handle-one", seenSeq: brief.cursor.seq, seenOutputRevision: 2, handledItemIds: [brief.items[0].id] });
+  expect(result.items).toHaveLength(1); expect(result.items[0].revision).toBe(2); expect(result.readState).toBe("UNREAD");
 });

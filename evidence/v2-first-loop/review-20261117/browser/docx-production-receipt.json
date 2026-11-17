@@ -1,0 +1,24 @@
+{
+  "at": "2026-11-17T10:56:27.230Z",
+  "docx": {
+    "status": 200,
+    "body": {
+      "text": "干净生产构建 DOCX 核对：分享入口未验证。",
+      "name": "核对.docx",
+      "format": "DOCX_TEXT",
+      "limitations": "仅提取正文和表格文字，不保留排版、图片或嵌入附件"
+    }
+  },
+  "invalidUtf8": {
+    "status": 422,
+    "body": {
+      "error": {
+        "code": "MATERIAL_ENCODING",
+        "message": "文本不是有效的 UTF-8，请另存为 UTF-8 后重试"
+      }
+    }
+  },
+  "missionUnchanged": true,
+  "provider": "localhost HTTP mock",
+  "cleanProductionBuild": true
+}

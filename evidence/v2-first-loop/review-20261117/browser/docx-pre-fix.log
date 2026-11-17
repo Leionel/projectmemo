@@ -1,0 +1,2 @@
+### Error
+Error: {"error":{"code":"DOCX_EXTRACTION_FAILED","message":"DOCX 无法提取文字：请检查文件是否损坏、加密、含宏或内容过大；提取后需在 2 万字以内"}}

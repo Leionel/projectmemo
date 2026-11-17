@@ -16,7 +16,8 @@ export default function nativeMaterialContractTest() {
     });
     it('share_route_accepts_one_file_uri_only', 0, () => {
       expect(nativeShareFileUri('file://docs/a.txt', undefined)).assertEqual('file://docs/a.txt');
-      expect(nativeShareFileUri('', { 'uris': ['file://docs/a.txt', 'file://docs/b.txt'] })).assertEqual('file://docs/a.txt');
+      expect(nativeShareFileUri('', { 'uris': ['file://docs/a.txt', 'file://docs/b.txt'] })).assertEqual('');
+      expect(nativeShareFileUri('file://docs/a.txt', { 'uris': ['file://docs/a.txt'] })).assertEqual('file://docs/a.txt');
       expect(nativeShareFileUri('https://evil.example/a.txt', undefined)).assertEqual('');
       expect(nativeShareFileUri('file://docs/dir/', undefined)).assertEqual('');
       expect(nativeFileDisplayName('file://docs/%E7%AC%94%E8%AE%B0.md', 'fallback')).assertEqual('笔记.md');
@@ -32,6 +33,8 @@ export default function nativeMaterialContractTest() {
       const first = nativeMaterialRequestId('mission-a', '客户.txt', '客户希望周五前看到第二版');
       expect(first).assertEqual(nativeMaterialRequestId('mission-a', '客户.txt', '客户希望周五前看到第二版'));
       expect(first === nativeMaterialRequestId('mission-b', '客户.txt', '客户希望周五前看到第二版')).assertFalse();
+      const prefix = 'x'.repeat(80);
+      expect(nativeMaterialRequestId('m', 'a.txt', prefix + 'a') === nativeMaterialRequestId('m', 'a.txt', prefix + 'b')).assertFalse();
     });
     it('preview_is_bounded_and_hides_whitespace', 0, () => {
       expect(nativeMaterialPreview('  a\n\n b  ', 10)).assertEqual('a b');

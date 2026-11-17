@@ -112,6 +112,7 @@ struct OutcomeWorkbenchPage {
 
   private shareArrived(): void { if (this.visible && this.appActive) this.consumeShare(); }
   private consumeShare(): void {
+    if (this.busy || this.nativeBusy || this.nativeDraft !== null || this.materialPending) return;
     if (this.shareConsumed >= this.shareSeq) return;
     const uri = AppStorage.get<string>('pendingShareUri') ?? '';
     const name = AppStorage.get<string>('pendingShareName') ?? '分享的材料';
@@ -145,20 +146,17 @@ struct OutcomeWorkbenchPage {
       if (name === '') { const parts = uri.split('?')[0].split('/'); name = decodeURIComponent(parts[parts.length - 1] ?? '材料'); }
       const format = nativeMaterialFormat(name);
       if (format === 'UNSUPPORTED') throw new ApiError('MATERIAL_FORMAT', '请选择 TXT、Markdown、普通 CSV 或 DOCX 文件');
-      localPath = copyPickedFile(context.cacheDir, uri);
+      localPath = copyPickedFile(context.cacheDir, uri, nativeMaterialLimit(format));
       const size = fileIo.statSync(localPath).size;
       if (size === 0 || size > nativeMaterialLimit(format)) throw new ApiError('MATERIAL_SIZE_LIMIT', format === 'DOCX' ? 'Word 文件需在 2MB 以内' : '文本材料需在 64KB 以内');
-      let text = '';
-      let limitations = '';
-      if (format === 'DOCX') {
-        const extracted = await this.nativeService.extract(this.projectId, localPath, name, nativeMaterialMime(format));
-        text = extracted.text; limitations = extracted.limitations;
-      } else {
-        text = fileIo.readTextSync(localPath);
-        limitations = format === 'CSV' ? '按普通文本读取，不当作实验指标。' : '按 UTF-8 文本读取，不识别排版或图片。';
-      }
+      // All formats share server byte/UTF-8 validation; decoding locally could silently replace
+      // malformed input before the strict parser sees the original bytes.
+      const extracted = await this.nativeService.extract(this.projectId, localPath, name, nativeMaterialMime(format));
+      const text = extracted.text;
+      const limitations = extracted.limitations;
       if (!this.current(generation, token)) return;
       const preview: NativeMaterialPreview = await this.nativeService.preview(this.missionId, name, text);
+      preview.limitations = limitations;
       if (!this.current(generation, token)) return;
       this.nativeDraft = NativeMaterialDraft.fromPreview(this.missionId, uri, preview, format, size);
       this.notice = '已解析，先核对预览和目标，再确认加入。';
@@ -230,6 +228,7 @@ struct OutcomeWorkbenchPage {
       const reply = this.challengeTarget === '' ? await this.service.startChallenge(this.missionId, this.challengeRequest) : await this.service.challengeCommand(this.missionId, this.challengeTarget, this.challengeRequest);
       if (!this.current(generation, token)) return;
       if (this.challengeRequest.action === 'OPEN_SOURCE') this.sourceKey = this.challengeRequest.sourceKey ?? '';
+      if (this.challengeRequest.action === 'DELETE_ATTEMPT') { this.challengeText = ''; this.selected = []; }
       this.challengeRequest = null; this.challengePending = false; this.setChallenge(reply.session);
     } catch (e) { if (this.current(generation, token)) { if (this.definite(e)) { this.challengeRequest = null; this.challengePending = false; } this.fail(e); } }
     finally { this.busy = false; this.read(); }
@@ -314,6 +313,10 @@ struct OutcomeWorkbenchPage {
                 PMButton({ label: '证据侦探 · 引用追溯', secondary: true, disabled: this.busy || !this.fresh || this.view.outputs.length === 0, onAction: (): void => { this.play('', 'EVIDENCE'); } })
               }
               if (this.challenge !== null && this.challenge.status !== 'STOPPED') { this.Challenge(this.challenge) }
+              if (this.challenge !== null) {
+                PMButton({ label: '删除本轮回答及交回反馈', secondary: true, disabled: this.busy || this.challengePending,
+                  onAction: (): void => { this.play('DELETE_ATTEMPT'); } })
+              }
             }
             Text('补材料').fontSize(18).fontWeight(FontWeight.Medium)
             if (this.nativeDraft !== null) {

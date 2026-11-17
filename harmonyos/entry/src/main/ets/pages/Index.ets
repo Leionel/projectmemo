@@ -157,6 +157,8 @@ struct Index {
   @State expandedEvidenceCardId: string = '';
   // 卡片/通知在 App 已在前台时通过 onNewWant 投递；页面存活但不会触发 onPageShow，用序号驱动消费。
   @StorageProp('pm.handoffSeq') @Watch('onHandoffIntent') handoffSeq: number = 0;
+  @StorageProp('pendingShareUri') pendingShareUri: string = '';
+  @StorageProp('pendingShareName') pendingShareName: string = '';
   private indexVisible: boolean = true;
 
   // 新建项目弹窗状态
@@ -2968,6 +2970,16 @@ struct Index {
               Text(this.projectDeletionNotice).fontSize(12).fontColor(PMColors.INK_SECONDARY)
                 .padding(12).onClick(() => { this.loadAllData(true); })
                 .accessibilityText(`项目清除进度：${this.projectDeletionNotice}，点击刷新`)
+            }
+            if (this.pendingShareUri !== '') {
+              Row({ space: 10 }) {
+                Column({ space: 4 }) {
+                  Text(`收到材料：${this.pendingShareName}`).fontSize(14).fontColor(PMColors.INK_PRIMARY).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
+                  Text('选择项目，进入原委托的成果页预览后加入').fontSize(12).fontColor(PMColors.INK_SECONDARY)
+                }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+                Button('选择项目').onClick(() => { this.currentMainTabIndex = 0; })
+                Button('取消').onClick(() => { AppStorage.setOrCreate<string>('pendingShareUri', ''); AppStorage.setOrCreate<string>('pendingShareName', ''); })
+              }.padding(12).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(12).margin({ left: 14, right: 14, bottom: 10 })
             }
             if (this.searchOpen && this.currentMainTabIndex < 3) {
               Row() {

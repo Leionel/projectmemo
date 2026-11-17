@@ -31,7 +31,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     try { data = await new Response(Buffer.concat(chunks), { headers: { "Content-Type": request.headers.get("content-type") ?? "" } }).formData(); }
     catch { throw new AppError("MATERIAL_FORMAT", "文件上传内容不完整，请重新选择文件", 422); }
     const file = data.get("file");
-    if (!(file instanceof File) || file.name.length > 180) throw new AppError("MATERIAL_FORMAT", "请选择一个材料文件", 422);
+    if (data.getAll("file").length !== 1 || !(file instanceof File) || file.name.length > 180) throw new AppError("MATERIAL_FORMAT", "请选择一个材料文件", 422);
     const format = plainMaterialFormat(file.name);
     if (!format) throw new AppError("MATERIAL_FORMAT", "请选择 TXT、Markdown、普通 CSV 或 DOCX 文件", 422);
     const bytes = new Uint8Array(await file.arrayBuffer());

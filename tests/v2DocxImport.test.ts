@@ -5,11 +5,25 @@ import { strToU8 } from "fflate";
 import { db } from "@/lib/db";
 import { extractDocxText } from "@/lib/intake/docx";
 import { docxMaterial } from "../scripts/fixtures/docx-material";
+import { Worker } from "node:worker_threads";
+import path from "node:path";
 import { createSession } from "@/lib/auth/session";
 import { POST } from "@/app/api/projects/[id]/material-extract/route";
 import { previewV2Delegation, confirmV2Delegation } from "@/lib/mission/v2DelegationService";
 Object.assign(process.env, { MISSION_V2_ENABLED: "true", MISSION_INVESTIGATION_DELEGATION_ENABLED: "true" });
 afterAll(async () => { await db.$disconnect(); fs.rmSync(isolated.dir, { recursive: true, force: true }); });
+
+test("worker bytes survive bundler metadata being added to workerData", async () => {
+  const result = await new Promise<{ ok: boolean; text: string }>((resolve, reject) => {
+    const worker = new Worker(path.resolve("lib/intake/docxWorker.cjs"), {
+      workerData: { schemaVersion: 1, bytes: docxMaterial("打包后仍保留原文"), __turbopack_globals__: {} },
+      resourceLimits: { maxOldGenerationSizeMb: 96, maxYoungGenerationSizeMb: 16, stackSizeMb: 4 },
+    });
+    worker.once("message", value => { void worker.terminate(); resolve(value); });
+    worker.once("error", reject);
+  });
+  expect(result.ok).toBe(true); expect(result.text).toContain("打包后仍保留原文");
+});
 
 test("DOCX imports Chinese body and table cells as text, preserving leading zeroes", async () => {
   const text = await extractDocxText(docxMaterial());

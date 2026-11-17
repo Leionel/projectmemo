@@ -42,12 +42,20 @@ export function metricChallengeQuestions(sources: Source[]): FrozenQuestion[] {
       try { records.push(...parseMetricRecords(source.text, format)); } catch { /* not this format */ }
     }
   }
-  const picked = records.slice(0, 2);
+  const unique = new Map<string, MetricRecord>();
+  for (const row of records) {
+    const key = JSON.stringify([row.runId, row.metric]), previous = unique.get(key);
+    if (previous && JSON.stringify(previous) !== JSON.stringify(row)) throw new AppError("CHALLENGE_NOT_READY", "同一指标记录有冲突版本，请先核对来源", 409);
+    unique.set(key, row);
+  }
+  const picked = [...unique.values()].slice(0, 2);
   if (picked.length < 2) throw new AppError("CHALLENGE_NOT_READY", "当前来源里没有两条可对照的指标记录，暂时不能出指标可比性题", 409);
   const comparison = compareMetricRecords(picked[0], picked[1]);
   const expected = comparison.state === "SAME_CONDITIONS" ? "CONDITIONS_MATCH"
     : (comparison as { unknown?: string[] }).unknown?.length ? "CONDITIONS_UNKNOWN" : "CONDITIONS_DIFFER";
-  const summarize = (record: MetricRecord) => record.metric + " " + record.value + " " + record.unit + "（" + record.period + "，" + record.method + "）";
+  const summarize = (record: MetricRecord) => record.metric + " " + record.value + " " + (record.unit ?? "单位未知") + "（" + (record.period ?? "周期未知") + "，" + record.method + "）\n" +
+    ([ ["数据集", record.dataset], ["划分", record.split], ["种子", record.seed], ["评估代码", record.evaluationCode], ["环境", record.environment], ["阶段", record.phase], ["批量", record.batchSize], ["方向", record.direction] ] as const)
+      .map(([label, value]) => label + "：" + (value ?? "未知")).join("；");
   return [{
     key: "compare",
     title: "这两条指标记录能否直接比较？",

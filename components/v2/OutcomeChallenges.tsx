@@ -12,13 +12,15 @@ export function OutcomeChallenges({ missionId, outputId, onSource, onHandoff }: 
   const [drafts, setDrafts] = useState<Record<string, string>>({}), [choices, setChoices] = useState<Record<string, string[]>>({});
   const [busy, setBusy] = useState(false), [uncertain, setUncertain] = useState(false), [error, setError] = useState("");
   const pending = useRef<Pending | null>(null);
+  const mutationEpoch = useRef(0);
   useEffect(() => {
     let active = true;
     const read = async () => {
       if (pending.current) return;
+      const epoch = mutationEpoch.current;
       try {
         const response = await fetch(base, { cache: "no-store" }), value = await response.json();
-        if (!active) return;
+        if (!active || epoch !== mutationEpoch.current) return;
         if (!response.ok) {
           if ([401, 403, 404].includes(response.status)) setSession(null);
           throw new Error(value.error?.message ?? "挑战读取失败，可刷新重试");
@@ -31,6 +33,7 @@ export function OutcomeChallenges({ missionId, outputId, onSource, onHandoff }: 
   }, [base, outputId]);
   async function send(body: Record<string, unknown>, starting = false) {
     if (busy) return;
+    mutationEpoch.current++;
     pending.current ??= { url: starting ? base : base + "/" + session!.id, body: { ...body, requestId: crypto.randomUUID() } };
     setBusy(true); setUncertain(true); setError("");
     const request = pending.current;
@@ -46,6 +49,7 @@ export function OutcomeChallenges({ missionId, outputId, onSource, onHandoff }: 
         throw new Error(value.error?.message ?? "提交尚未确认，请重试原请求");
       }
       pending.current = null; setUncertain(false); setSession(value.session); setVisible(request.body.action !== "STOP");
+      if (request.body.action === "DELETE_ATTEMPT") { setDrafts({}); setChoices({}); }
       if (request.body.action === "OPEN_SOURCE") onSource(String(request.body.sourceKey));
       if (request.body.action === "HANDOFF") await onHandoff();
     } catch (cause) { setError(cause instanceof Error ? cause.message : "提交尚未确认，请重试原请求"); }
@@ -74,20 +78,21 @@ export function OutcomeChallenges({ missionId, outputId, onSource, onHandoff }: 
             <h3>{question.title}</h3><blockquote>{question.excerpt}</blockquote>
             {session.kind === "REHEARSAL" ? <label>本轮核查意见<textarea rows={3} maxLength={1200} disabled={busy || uncertain}
               value={drafts[question.key] ?? ""} onChange={event => setDrafts({ ...drafts, [question.key]: event.target.value })} required /></label> :
-              <fieldset><legend>选择这段稿件实际使用的来源</legend>{question.options.map(option => <label className={styles.option} key={option.key}>
+              <fieldset><legend>{session.kind === "METRIC" ? "选择一项条件判断" : "选择这段稿件实际使用的来源"}</legend>{question.options.map(option => <label className={styles.option} key={option.key}>
                 <input type="checkbox" disabled={busy || uncertain} checked={selected.includes(option.key)} onChange={event => setChoices({ ...choices,
                   [question.key]: event.target.checked ? [...selected, option.key] : selected.filter(key => key !== option.key) })} />{option.label}</label>)}</fieldset>}
             <div className={styles.actions}><button type="submit" disabled={busy || uncertain || (session.kind === "REHEARSAL" ? !drafts[question.key]?.trim() : session.kind === "METRIC" ? selected.length !== 1 : !selected.length)}>保存本轮回答</button></div>
           </form> : <p role="status">{session.kind === "REHEARSAL" ? "三项核查意见已保存；交回原委托后再修订稿件。" :
+            session.kind === "METRIC" ? (session.answers[0]?.verdict === "LINK_MATCH" ? "判断与已提供的指标条件一致；实验结果仍待独立核验。" : "判断与记录条件有差异，请核对未知项与口径。") :
             session.answers[0]?.verdict === "LINK_MATCH" ? "已找到这段稿件的全部引用；还可以核对来源是否支持这段表述。" : "选择与稿件引用有差异，可以打开原记录继续核对。"}</p>}
           <div className={styles.sources}>{session.sourceKeys.map((key, index) => <button type="button" key={key} disabled={busy || uncertain}
             onClick={() => void send({ action: "OPEN_SOURCE", sourceKey: key })}>查看资料 {index + 1}{session.openedSourceKeys.includes(key) ? " · 已打开" : ""}</button>)}</div>
-          {session.answers.length > 0 && <div className={styles.actions}><button type="button" disabled={busy || uncertain} onClick={() => void send({ action: "DELETE_ATTEMPT" })}>删除本轮回答</button></div>}
           {session.answers.length > 0 && <details><summary>已保存的回答（{session.answers.length}）</summary>{session.answers.map(answer =>
             <p key={answer.questionKey}>{answer.text || (answer.verdict === "LINK_MATCH" ? "已定位引用" : "引用仍待核对")}</p>)}</details>}
           {session.status === "COMPLETED" && <button type="button" className={styles.handoff} disabled={busy || uncertain}
             onClick={() => void send({ action: "HANDOFF" })}>把核查缺口交回原委托</button>}
         </>}
+      <div className={styles.actions}><button type="button" disabled={busy || uncertain} onClick={() => void send({ action: "DELETE_ATTEMPT" })}>删除本轮回答及交回反馈</button></div>
     </div>}
   </section>;
 }

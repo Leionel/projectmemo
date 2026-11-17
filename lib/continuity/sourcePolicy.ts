@@ -123,10 +123,20 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
     known = !!capture;
     if (capture?.sourceType === "CHALLENGE_FEEDBACK") {
       const receipts = await tx.agentMissionEvent.findMany({ where: { type: "CHALLENGE_HANDED_OFF", mission: { projectId },
-        payloadJson: { path: "$.sourceId", equals: id } }, take: 2, select: { payloadJson: true } });
+        payloadJson: { path: "$.sourceId", equals: id } }, take: 2, select: { payloadJson: true, missionId: true, seq: true } });
       const outputId = record(receipts[0]?.payloadJson).outputId;
       derived = true; known &&= receipts.length === 1 && typeof outputId === "string";
       if (typeof outputId === "string") childIds.push("mission-output:" + outputId);
+      const receipt = receipts[0], challengeId = record(receipt?.payloadJson).challengeId;
+      if (receipt && typeof challengeId === "string") {
+        const [deleted, start] = await Promise.all([
+          tx.agentMissionEvent.findFirst({ where: { missionId: receipt.missionId, type: "CHALLENGE_ATTEMPT_DELETED", seq: { gt: receipt.seq }, payloadJson: { path: "$.challengeId", equals: challengeId } } }),
+          tx.agentMissionEvent.findFirst({ where: { id: challengeId, missionId: receipt.missionId, type: "CHALLENGE_STARTED" }, select: { createdAt: true } }),
+        ]);
+        if (deleted || !start || Date.now() - start.createdAt.getTime() > 30 * 86400000) {
+          blocked = true; blockedReason = "核查回答已删除或超过保留期限";
+        }
+      } else known = false;
     }
     const signals = await tx.externalSignal.findMany({ where: { adoptedCaptureId: id.slice(8), projectId }, select: { id: true } });
     childIds.push(...signals.map(s => "signal:" + s.id));

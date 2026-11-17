@@ -46,12 +46,13 @@ export function nativeShareFileUri(uri: string, parameters: Record<string, Objec
       }
     });
   }
+  const files: string[] = [];
   for (let i = 0; i < candidates.length; i++) {
     const value = candidates[i].trim();
     // Only app-readable file URIs are accepted; http(s), content and relative paths are ignored.
-    if (value.startsWith('file://') && value.length <= 2048 && !value.endsWith('/')) return value;
+    if (value.startsWith('file://') && value.length <= 2048 && !value.endsWith('/') && files.indexOf(value) < 0) files.push(value);
   }
-  return '';
+  return files.length === 1 ? files[0] : '';
 }
 
 export function nativeDraftError(text: string, format: NativeMaterialFormat, bytes: number): string {
@@ -67,7 +68,7 @@ export function nativeDraftError(text: string, format: NativeMaterialFormat, byt
 /** Stable per-draft request id: a retry after a lost response reuses the same id. */
 export function nativeMaterialRequestId(missionId: string, fileName: string, text: string): string {
   let hash = 2166136261;
-  const seed = missionId + '|' + fileName + '|' + text.length + '|' + text.slice(0, 64);
+  const seed = missionId + '|' + fileName + '|' + text.length + '|' + text;
   for (let i = 0; i < seed.length; i++) {
     hash ^= seed.charCodeAt(i);
     hash = Math.imul(hash, 16777619) >>> 0;

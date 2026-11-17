@@ -1,0 +1,13 @@
+async (page) => {
+const origin='http://127.0.0.1:4490', base='/api/missions/'+new URL(page.url()).searchParams.get('missionId');
+const before=await (await page.request.get(origin+base+'/workbench')).json();
+const url=origin+'/api/projects/'+before.projectId+'/material-extract';
+const docx=await page.request.post(url,{multipart:{file:{name:'核对.docx',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',buffer:Buffer.from('UEsDBBQAAAAIAOOUcV33S4B1xgAAAHYBAAATAAAAW0NvbnRlbnRfVHlwZXNdLnhtbH2QTU7DQAyFrxLNFnVcsWCBmm6ALbDgAtbESUaM7dHYLeH2KKV0gQrr9/M9vd3bZyXrFi5ifZjd6z2ApZkYLWolWbiM2hjdorYJKqZ3nAhut9s7SCpO4htfO8J+90gjHop3T4uTWFbpQ6NioXv4Nq6sPmCtJSf0rAJHGX5RNmdCbFROHptztZuFS4CrhFX5G3DOvRyptTxQ94rNn5GpD/ChbYBB04FJPP5fc2WnjmNOdMmvbbVpIrMsE5d4URiz/OyH0937L1BLAwQUAAAACADjlHFdSx6+94gAAADwAAAACwAAAF9yZWxzLy5yZWxzjc8xDgIhEAXQq5A5wM5qYWGWrWxszV6AwLAQgSHARry9jcVqLGx/ft7Pn24UVPOcqvO5ih5DqhJca/mMWLWjqOrAmVKPwXKJqtWBy4pZ6btaCY/jeMKyN2Ce9qa4GgnlAGJ5ZvpHZmu9pgvrLVJqPwa+GiAWVVZqEh5cDJp3PPQYAOcJPw7OL1BLAwQUAAAACADjlHFdWBNFtrQAAADLAAAAEQAAAHdvcmQvZG9jdW1lbnQueG1ssym3SslPLs1NzStRqMjNySu2KrdVyigpKbDS1y9OzkjNTSzWyy9IzavIzUnLL8pNLCnWyy9K1y/PL0opKMpPTi0uzsxLz83RNzIwMNPPTczMU7KzKbdKyk+pBNEFIKIIRJTYPd256Wl7w/Mp85/sWv5sXsvT3bsUXPydIxSeLdjxdP3O93tmPe1oe7Jr9dPWpU/7Fz+bs+rlqp4X6xsfNzTZ6IO0g8giMFkAJiFW6COcbwcAUEsBAhQAFAAAAAgA45RxXfdLgHXGAAAAdgEAABMAAAAAAAAAAAAAAIABAAAAAFtDb250ZW50X1R5cGVzXS54bWxQSwECFAAUAAAACADjlHFdSx6+94gAAADwAAAACwAAAAAAAAAAAAAAgAH3AAAAX3JlbHMvLnJlbHNQSwECFAAUAAAACADjlHFdWBNFtrQAAADLAAAAEQAAAAAAAAAAAAAAgAGoAQAAd29yZC9kb2N1bWVudC54bWxQSwUGAAAAAAMAAwC5AAAAiwIAAAAA','base64')}}});
+const docxBody=await docx.json();
+if(docx.status()!==200 || !docxBody.text.includes('分享入口未验证'))throw new Error(JSON.stringify(docxBody));
+const invalid=await page.request.post(url,{multipart:{file:{name:'invalid.txt',mimeType:'text/plain',buffer:Buffer.from([0xc3,0x28])}}});
+if(invalid.status()!==422)throw new Error('Invalid UTF-8 accepted: '+invalid.status());
+const after=await (await page.request.get(origin+base+'/workbench')).json();
+if(before.version!==after.version || before.outputs.length!==after.outputs.length)throw new Error('Parser preview changed Mission');
+return {at:new Date().toISOString(),docx:{status:docx.status(),body:docxBody},invalidUtf8:{status:invalid.status(),body:await invalid.json()},missionUnchanged:true,provider:'localhost HTTP mock',cleanProductionBuild:true};
+}

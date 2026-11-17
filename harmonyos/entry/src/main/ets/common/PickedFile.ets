@@ -12,11 +12,14 @@ export function pickedFileName(uri: string, fallback: string): string {
  * 直接传会在发出请求前失败。上传前先复制到缓存目录，用完由调用方 removePickedCopy 删除。
  * 已经是沙箱路径（如拍照结果）时原样返回。
  */
-export function copyPickedFile(cacheDir: string, uri: string): string {
+export function copyPickedFile(cacheDir: string, uri: string, maxBytes: number = 0): string {
   if (!uri.startsWith('file://')) { return uri; }
   const localPath = `${cacheDir}/upload-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
   const source = fileIo.openSync(uri, fileIo.OpenMode.READ_ONLY);
-  try { fileIo.copyFileSync(source.fd, localPath); } finally { fileIo.closeSync(source); }
+  try {
+    if (maxBytes > 0 && fileIo.statSync(source.fd).size > maxBytes) throw new Error('文件超过本次导入大小限制');
+    fileIo.copyFileSync(source.fd, localPath);
+  } finally { fileIo.closeSync(source); }
   return localPath;
 }
 

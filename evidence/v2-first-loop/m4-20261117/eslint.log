@@ -1,0 +1,7 @@
+
+D:\Projects\hongmen-worktrees\v2-first-loop\scripts\v2-load.ts
+  40:7   warning  'project' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  91:13  warning  'begin' is assigned a value but never used    @typescript-eslint/no-unused-vars
+
+✖ 2 problems (0 errors, 2 warnings)
+

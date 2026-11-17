@@ -1,0 +1,16 @@
+{
+  "out": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\evidence\\v2-first-loop\\m4-20261117\\env\\report.json",
+  "node": "v24.16.0",
+  "npm": "unavailable",
+  "mismatches": 29,
+  "docxRuntime": [
+    "mammoth@1.13.0",
+    "fflate@0.8.3",
+    "better-sqlite3@12.11.1",
+    "next@16.2.11",
+    "react@19.2.7",
+    "react-dom@19.2.7",
+    "prisma@7.8.0",
+    "@prisma/client@7.8.0"
+  ]
+}

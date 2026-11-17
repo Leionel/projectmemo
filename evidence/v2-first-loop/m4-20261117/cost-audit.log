@@ -1,0 +1,15 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2M4CostAudit.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ✓ tests/v2M4CostAudit.test.ts (3 tests) 778ms
+   ✓ model hard gate blocks dispatch before the provider is called and never resets usage  448ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  15:21:44
+   Duration  4.49s (transform 2.03s, setup 0ms, import 3.35s, tests 778ms, environment 0ms)
+

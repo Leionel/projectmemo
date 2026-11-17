@@ -29,9 +29,14 @@ const evidencePath = path.join(outDir, "evidence.jsonl");
 const logPath = path.join(outDir, "worker.log");
 const dbPath = path.join(outDir, "long-run.db");
 
-type RunConfig = { schemaVersion: 1; createdAt: string; dbPath: string; ownerUserId: string; projectId: string;
-  captureId: string; missionId: string; intervalMs: number; cycles: number; materialEvery: number;
-  workerPid?: number; stoppedAt?: string; stopRequestedAt?: string };
+type RunConfig = { schemaVersion: 1; createdAt: string; startedAt: string; dbPath: string; ownerUserId: string; projectId: string;
+  captureId: string; missionId: string; intervalMs: number; cycles: number; materialEvery: number; durationHours: number;
+  workerPid?: number; stoppedAt?: string; stopRequestedAt?: string; resumedAt?: string; resumeCount?: number };
+function isAlive(pid?: number): boolean { if (!pid) return false; try { process.kill(pid, 0); return true; } catch { return false; } }
+function readEvidence(): Array<Record<string, number | string | boolean>> {
+  return fs.existsSync(evidencePath) ? fs.readFileSync(evidencePath, "utf8").trim().split("\n").filter(Boolean)
+    .map(line => JSON.parse(line) as Record<string, number | string | boolean>) : [];
+}
 function readConfig(): RunConfig { return JSON.parse(fs.readFileSync(configPath, "utf8")) as RunConfig; }
 function writeConfig(config: RunConfig) { fs.writeFileSync(configPath, JSON.stringify(config, null, 2)); }
 function databaseUrl(file: string) { return "file:" + file.replaceAll("\\", "/"); }
@@ -67,9 +72,10 @@ async function start() {
       checkEveryMinutes: 1, maxModels: 240, maxTools: 640, maxMetadataRequests: 0,
       allowedTools: ["read_project_material", "save_mission_output"], connectionIds: [], timezone: "Asia/Shanghai" } });
     await db.$disconnect();
-    const config: RunConfig = { schemaVersion: 1, createdAt: stamp(), dbPath, ownerUserId: user.id, projectId: project.id,
+    const config: RunConfig = { schemaVersion: 1, createdAt: stamp(), startedAt: stamp(), dbPath, ownerUserId: user.id, projectId: project.id,
       captureId: capture.id, missionId: mission.id, intervalMs: Number(flag("interval-ms") ?? 5000),
-      cycles: Number(flag("cycles") ?? 720), materialEvery: Number(flag("material-every") ?? 12) };
+      cycles: Number(flag("cycles") ?? 0), materialEvery: Number(flag("material-every") ?? 12),
+      durationHours: Number(flag("duration-hours") ?? 72) };
     writeConfig(config);
   }
   const config = readConfig();
@@ -80,7 +86,8 @@ async function start() {
       windowsHide: true });
   if (!wait) {
     config.workerPid = child.pid; writeConfig(config); child.unref();
-    console.log(JSON.stringify({ started: true, workerPid: child.pid, out: outDir, db: dbPath, intervalMs: config.intervalMs, cycles: config.cycles }, null, 2));
+    console.log(JSON.stringify({ started: true, workerPid: child.pid, out: outDir, db: dbPath, intervalMs: config.intervalMs,
+      cycles: config.cycles, durationHours: config.durationHours, expectedEndAt: new Date(Date.now() + config.durationHours * 3600000).toISOString() }, null, 2));
   } else {
     const code = await new Promise<number | null>(resolve => child.on("exit", code => resolve(code)));
     console.log(JSON.stringify({ wait: true, exitCode: code, out: outDir }));
@@ -103,8 +110,12 @@ async function worker() {
     const source = capture ? await readProjectMaterial(config.projectId, "capture:" + capture.id) : null;
     return { sourceId: source!.id, sourceHash: source!.hash };
   });
-  for (let cycle = 0; cycle < config.cycles; cycle++) {
+  if (config.resumedAt === undefined) { config.resumeCount = config.resumeCount ?? 0; }
+  let cycle = readEvidence().length;
+  while (true) {
     if (fs.existsSync(stopFile)) break;
+    if (config.cycles > 0 && cycle >= config.cycles) break;
+    if (config.durationHours > 0 && Date.now() - Date.parse(config.startedAt) >= config.durationHours * 3600000) break;
     const row = await db.agentMission.findUniqueOrThrow({ where: { id: config.missionId } });
     let woken = 0, materialAdded = false;
     if (config.materialEvery > 0 && cycle % config.materialEvery === 0) {
@@ -122,12 +133,14 @@ async function worker() {
     }
     const after = await db.agentMission.findUniqueOrThrow({ where: { id: config.missionId } });
     const usage = after.budgetUsedJson as Record<string, number>;
-    fs.appendFileSync(evidencePath, JSON.stringify({ at: stamp(), cycle, materialAdded, woken, status: after.status,
+    fs.appendFileSync(evidencePath, JSON.stringify({ at: stamp(), cycle, startedAt: config.startedAt,
+      elapsedHours: (Date.now() - Date.parse(config.startedAt)) / 3600000, resumeCount: config.resumeCount ?? 0, materialAdded, woken, status: after.status,
       pauseReason: after.pauseReason, outputs: await db.agentMissionOutput.count({ where: { missionId: config.missionId } }),
       artifacts: elapsedArtifacts(after.planJson), models: usage.models ?? 0, tools: usage.tools ?? 0,
       reservedOutputTokens: usage.reservedOutputTokens ?? 0, inputTokens: usage.inputTokens ?? 0, outputTokens: usage.outputTokens ?? 0,
       unknownCalls: usage.unknownCalls ?? 0 }) + "\n");
     await new Promise(resolve => setTimeout(resolve, config.intervalMs));
+    cycle++;
   }
   await db.$disconnect();
 }
@@ -142,11 +155,15 @@ function status() {
   const mission = sql?.prepare('SELECT status,pauseReason,budgetUsedJson,version,contextVersion,planRevision,updatedAt FROM "AgentMission" WHERE id=?').get(config.missionId) as Record<string, unknown> | undefined;
   const outputs = sql ? (sql.prepare('SELECT COUNT(*) c, MAX(revision) latest FROM "AgentMissionOutput" WHERE missionId=?').get(config.missionId) as { c: number; latest: number | null }) : null;
   const checkpoints = sql ? (sql.prepare('SELECT COUNT(*) c FROM "AgentMissionEvent" WHERE missionId=? AND type=?').get(config.missionId, "CHECKPOINT_REACHED") as { c: number }) : null;
-  const lines = fs.existsSync(evidencePath) ? fs.readFileSync(evidencePath, "utf8").trim().split("\n").filter(Boolean).map(line => JSON.parse(line)) : [];
-  const last = lines.at(-1) as Record<string, unknown> | undefined;
   sql?.close();
-  console.log(JSON.stringify({ out: outDir, workerPid: config.workerPid ?? null, stopRequestedAt: config.stopRequestedAt ?? null,
-    mission: mission ?? null, outputs, checkpoints, evidenceLines: lines.length, lastEvidence: last ?? null }, null, 2));
+  const lines = readEvidence();
+  const last = lines.at(-1), gaps = lines.slice(1).map((line, index) => (Date.parse(String(line.at)) - Date.parse(String(lines[index].at))) / 1000)
+    .filter(seconds => seconds > Math.max(120, config.intervalMs / 1000 * 2.5));
+  console.log(JSON.stringify({ out: outDir, workerPid: config.workerPid ?? null, workerAlive: isAlive(config.workerPid),
+    stopRequestedAt: config.stopRequestedAt ?? null, startedAt: config.startedAt, durationHours: config.durationHours,
+    elapsedHours: (Date.now() - Date.parse(config.startedAt)) / 3600000,
+    resumeCount: config.resumeCount ?? 0, mission: mission ?? null, outputs, checkpoints, evidenceLines: lines.length,
+    gapsOverLimit: gaps.length, lastEvidenceAt: last ? String(last.at) : null, lastEvidence: last ?? null }, null, 2));
 }
 
 function material() {
@@ -158,6 +175,17 @@ function material() {
   sql.prepare('UPDATE "AgentMission" SET "nextAttemptAt"=?, "updatedAt"=? WHERE "id"=?').run(0, stamp(), config.missionId);
   sql.close();
   console.log(JSON.stringify({ addedCapture: capture.changes === 1, missionId: config.missionId, text }, null, 2));
+}
+
+function resume() {
+  const config = readConfig();
+  if (isAlive(config.workerPid)) { console.log(JSON.stringify({ resumed: false, reason: "ALREADY_RUNNING", workerPid: config.workerPid }, null, 2)); return; }
+  fs.rmSync(path.join(outDir, "stop.flag"), { force: true });
+  const child = spawn(process.execPath, ["--import", "tsx", path.resolve("scripts/v2-long-run.ts"), "worker", "--out", outDir],
+    { cwd: process.cwd(), env: { ...process.env, ...flags(), DATABASE_URL: databaseUrl(config.dbPath) },
+      detached: true, stdio: ["ignore", fs.openSync(logPath, "a"), fs.openSync(logPath, "a")], windowsHide: true });
+  config.workerPid = child.pid; config.resumedAt = stamp(); config.resumeCount = (config.resumeCount ?? 0) + 1; writeConfig(config); child.unref();
+  console.log(JSON.stringify({ resumed: true, workerPid: child.pid, resumeCount: config.resumeCount, out: outDir }, null, 2));
 }
 
 function stop() {
@@ -175,14 +203,25 @@ function stop() {
 
 function report() {
   const config = readConfig();
-  const lines = fs.existsSync(evidencePath) ? fs.readFileSync(evidencePath, "utf8").trim().split("\n").filter(Boolean).map(line => JSON.parse(line)) as Array<Record<string, number | string | boolean>> : [];
+  const lines = readEvidence();
   const statuses = lines.reduce<Record<string, number>>((counts, line) => { const key = String(line.status); counts[key] = (counts[key] ?? 0) + 1; return counts; }, {});
   const models = lines.map(line => Number(line.models ?? 0)), reserved = lines.map(line => Number(line.reservedOutputTokens ?? 0));
-  const report = { out: outDir, db: config.dbPath, missionId: config.missionId, createdAt: config.createdAt, stoppedAt: config.stoppedAt ?? null,
+  const gaps = lines.slice(1).map((line, index) => (Date.parse(String(line.at)) - Date.parse(String(lines[index].at))) / 1000)
+    .filter(seconds => seconds > Math.max(120, config.intervalMs / 1000 * 2.5));
+  const dayBuckets = lines.reduce<Record<string, { cycles: number; outputs: number; models: number; materials: number }>>((buckets, line) => {
+    const day = String(line.at).slice(0, 10); const bucket = buckets[day] ?? { cycles: 0, outputs: 0, models: 0, materials: 0 };
+    bucket.cycles++; bucket.outputs = Math.max(bucket.outputs, Number(line.outputs ?? 0)); bucket.models = Number(line.models ?? 0);
+    if (line.materialAdded) bucket.materials++; buckets[day] = bucket; return buckets;
+  }, {});
+  const report = { out: outDir, db: config.dbPath, missionId: config.missionId, createdAt: config.createdAt, startedAt: config.startedAt,
+    stoppedAt: config.stoppedAt ?? null, resumeCount: config.resumeCount ?? 0,
+    expectedHours: config.durationHours, actualHours: (Date.now() - Date.parse(config.startedAt)) / 3600000,
     cycles: lines.length, durationMs: lines.length > 1 ? Date.parse(String(lines.at(-1)?.at)) - Date.parse(String(lines[0]?.at)) : 0,
+    gapsOverLimit: gaps.length, longestGapSeconds: gaps.length ? Math.max(...gaps) : 0, dayBuckets,
     statuses, maxOutputs: Math.max(0, ...lines.map(line => Number(line.outputs ?? 0))), maxArtifacts: Math.max(0, ...lines.map(line => Number(line.artifacts ?? 0))),
     budgetMonotonic: models.every((value, index) => index === 0 || value >= models[index - 1]),
     reservedReleased: reserved.every(value => value === 0), finalUnknownCalls: Number(lines.at(-1)?.unknownCalls ?? 0),
+    wallClockComplete: (Date.now() - Date.parse(config.startedAt)) >= config.durationHours * 3600000,
     note: "This report covers only the wall-clock window actually executed; it is not a claim of 72h uptime." };
   fs.writeFileSync(path.join(outDir, "report.json"), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
@@ -193,6 +232,7 @@ try {
   else if (command === "worker") await worker();
   else if (command === "status") status();
   else if (command === "material") material();
+  else if (command === "resume") resume();
   else if (command === "stop") stop();
   else if (command === "report") report();
   else { console.error("用法：start|status|material|stop|report --out <dir>"); process.exitCode = 2; }

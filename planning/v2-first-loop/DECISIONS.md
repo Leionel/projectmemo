@@ -131,3 +131,12 @@
 - 来源默认显示名称、记录/引用时间和版本状态，哈希/内部 ID 移至折叠技术信息；版本和过程补时间及语义图标。同步旧委托、文档、来源抽屉、成果归入和鸿蒙页。
 - 字段与显示分离，保留原身份与版本守卫；无迁移。55 条定向回归、160 条鸿蒙测试、类型/lint、Web 与 unsigned HAP 构建、360px 展开/收起与旧页浏览器验收通过。
 - 回执 READABLE_SOURCES_20261117.md，证据 evidence/v2-first-loop/readable-sources-20261117；未重跑全量，未部署或做真机安装。
+
+## 2026-11-17 M3 剩余与 M4 推进（接手 HEAD 95fcc4f）
+
+- 原生材料：服务端解析统一覆盖 TXT/MD/普通 CSV/DOCX（严格 UTF-8、64KB/2MB、20k 字；CSV 不当实验指标），新增只读 Mission 材料预览；鸿蒙选择器/预览/确认复用同一 V2 材料接口与 requestId 重试。系统分享只接受一个 file:// URI，module skill 注册 MIME，冷/热启动与重复分享由 shareSeq 消费一次；未做真机，分享可用性 UNVERIFIED。
+- 挑战隐私：DELETE_ATTEMPT 只写题号 tombstone 并按序重放，回答可重新提交；返回 30 天逻辑删除说明，不宣称物理擦除。指标题复用 compareMetricRecords，只在真实 MetricRecord 上出可比性题，缺少两条记录拒绝出题。
+- 冻结集：20 条规则 + 12 条报告情境，全部 SYNTHETIC_ONLY、realAuthorizedSources=0，测试锁定 SHA256；真实授权来源与人工复核 UNVERIFIED。
+- 回访简报：reentry-brief GET/POST；最多三项、判断优先、发生/记录时间分开、已读/已处理/已批准分开；已读回执不增加 Mission version、不写 Output；浏览器验收通过。
+- 双人冲刺未实现；M3 出口仍不完整，未把静态入口写成完成。
+- M4：干净安装 FAIL（lock 与 package.json 不同步，缺 lie/immediate/duck/underscore；现有安装 29 项与声明不一致，含 next/Prisma）；现有环境 Web 构建通过但不能作为可复现证据。成本审计通过（模型/工具硬闸、Unknown 预留隔离）；本地 10/30 负载目标内，mock 非云容量。72h 真实墙钟已启动，RUNNING 未满；未调时钟。Gate 未通过，见 M3_M4_GATE_STATUS.md。

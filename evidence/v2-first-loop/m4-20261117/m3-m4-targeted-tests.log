@@ -1,0 +1,34 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2NativeMaterials.test.ts tests/v2ChallengeMetricPrivacy.test.ts tests/v2ReentryBrief.test.ts tests/v2FrozenChallengeSets.test.ts tests/v2M4CostAudit.test.ts tests/v2Challenges.test.ts tests/v2MaterialsJourney.test.ts tests/missionWorkspaceSummary.test.ts tests/missionNativeContract.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ✓ tests/v2MaterialsJourney.test.ts (7 tests) 6483ms
+   ✓ '发布准备': original CSV → first draft → user feedback → same Mission revision  1724ms
+   ✓ '客户交付': original CSV → first draft → user feedback → same Mission revision  932ms
+   ✓ '科研汇报': original CSV → first draft → user feedback → same Mission revision  1322ms
+   ✓ '课程项目': original CSV → first draft → user feedback → same Mission revision  998ms
+   ✓ new material cannot resume paused work or access another owner's project  496ms
+   ✓ feedback added after a read is not silently consumed by the old draft checkpoint  974ms
+ ✓ tests/v2Challenges.test.ts (17 tests) 3680ms
+   ✓ source suppression after a completed attempt redacts both original questions and submitted answers  920ms
+   ✓ genuine rehearsal → original scanner → same Mission new private revision  1599ms
+ ✓ tests/missionNativeContract.test.ts (15 tests) 2585ms
+     ✓ 原生项目摘要与Web读取同一等待问题，且不改变Mission状态  344ms
+     ✓ 原生预览确认材料保持Mission，固定Output归入回执可重试  332ms
+     ✓ 原生读回指定草稿修订与归入回执，和Web读同一outputId/revision/receiptId  311ms
+ ✓ tests/v2M4CostAudit.test.ts (3 tests) 710ms
+   ✓ model hard gate blocks dispatch before the provider is called and never resets usage  387ms
+ ✓ tests/v2ChallengeMetricPrivacy.test.ts (5 tests) 550ms
+ ✓ tests/v2ReentryBrief.test.ts (3 tests) 254ms
+ ✓ tests/missionWorkspaceSummary.test.ts (4 tests) 239ms
+ ✓ tests/v2NativeMaterials.test.ts (3 tests) 229ms
+ ✓ tests/v2FrozenChallengeSets.test.ts (3 tests) 19ms
+
+ Test Files  9 passed (9)
+      Tests  60 passed (60)
+   Start at  16:06:35
+   Duration  32.16s (transform 4.80s, setup 0ms, import 14.75s, tests 14.75s, environment 1ms)
+

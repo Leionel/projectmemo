@@ -1,0 +1,48 @@
+{
+  "out": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\evidence\\v2-first-loop\\m4-20261117\\long-run-72h",
+  "workerPid": 24428,
+  "workerAlive": true,
+  "stopRequestedAt": null,
+  "startedAt": "2026-11-17T07:25:25.249Z",
+  "durationHours": 72,
+  "elapsedHours": 0.23225555555555555,
+  "resumeCount": 0,
+  "mission": {
+    "status": "WAITING_INPUT",
+    "pauseReason": null,
+    "budgetUsedJson": "{\"models\":3,\"tools\":2,\"searches\":0,\"fetches\":0,\"browserRequests\":0,\"browserBytes\":0,\"calendarRequests\":0,\"externalWrites\":0,\"metadataRequests\":0,\"activeMs\":7,\"reservedOutputTokens\":0,\"inputTokens\":30,\"outputTokens\":15,\"unknownCalls\":0}",
+    "version": 8,
+    "contextVersion": 2,
+    "planRevision": 2,
+    "updatedAt": "2026-11-17T07:38:27.885+00:00"
+  },
+  "outputs": {
+    "c": 1,
+    "latest": 1
+  },
+  "checkpoints": {
+    "c": 1
+  },
+  "evidenceLines": 14,
+  "gapsOverLimit": 0,
+  "lastEvidenceAt": "2026-11-17T07:38:27.894Z",
+  "lastEvidence": {
+    "at": "2026-11-17T07:38:27.894Z",
+    "cycle": 13,
+    "startedAt": "2026-11-17T07:25:25.249Z",
+    "elapsedHours": 0.21740138888888888,
+    "resumeCount": 0,
+    "materialAdded": false,
+    "woken": 0,
+    "status": "WAITING_INPUT",
+    "pauseReason": null,
+    "outputs": 1,
+    "artifacts": 0,
+    "models": 3,
+    "tools": 2,
+    "reservedOutputTokens": 0,
+    "inputTokens": 30,
+    "outputTokens": 15,
+    "unknownCalls": 0
+  }
+}

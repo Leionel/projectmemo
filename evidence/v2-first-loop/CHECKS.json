@@ -1,14 +1,14 @@
 {
-  "checkedAt": "2026-11-16T10:49:50.334855+00:00",
+  "checkedAt": "2026-11-17T00:30:00.000Z",
   "branch": "codex/v2-first-loop",
   "baseline": "00e250bb7c11da24807b74b6239ff7aa3b46b07c",
   "uniqueSchemaOwner": "Codex /root",
   "checks": {
     "regression": {
-      "files": 19,
-      "tests": 174,
+      "files": 268,
+      "tests": 2099,
       "result": "PASS",
-      "command": "see final-regression.log"
+      "command": "npm.cmd test"
     },
     "types": {
       "command": "npm.cmd exec tsc -- --noEmit",
@@ -31,7 +31,11 @@
     "frozenCases": {
       "cases": 64,
       "selfCheck": "PASS",
-      "routerExecuted": false
+      "routerExecuted": true,
+      "modePrimarySequence": "64/64",
+      "safetyViolations": 0,
+      "criticalFailed": 0,
+      "fullPass": "39/64（25 条内容语义判据按设计判失败）"
     }
   },
   "migration": {
@@ -39,8 +43,7 @@
       "prisma/migrations/20261116093000_mission_runtime_protocol_v2/migration.sql"
     ],
     "effect": "AgentMission.runtimeProtocolVersion NOT NULL DEFAULT 1",
-    "emptyReplay": "PASS",
-    "legacyUpgrade": "PASS",
+    "newThisRound": 0,
     "developmentOrProductionDbChanged": false
   },
   "data": {
@@ -73,5 +76,6 @@
     "production browser reader warning path",
     "large observation-queue window coverage",
     "mixed old Worker binaries must not consume v2 rows; upgrade all API/Workers before enabling V2"
-  ]
+  ],
+  "round": "2026-11-17 修复 + 非创作交付 + 质量评分"
 }

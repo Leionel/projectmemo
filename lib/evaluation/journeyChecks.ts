@@ -1,9 +1,9 @@
 import type { JourneyRecord } from "./journey";
+import { assessRevision, semanticReviewChecks, type DraftView, type QualityCheck } from "./contentQuality";
 
 export type JourneyCheck = { name: string; passed: boolean; judge: "DETERMINISTIC" | "UNPROVEN"; detail: string; evidenceRef: string };
 
 const text = (version: { blockTexts: string[] } | undefined) => version?.blockTexts.join("\n") ?? "";
-const refs = (version: { sourceRefs: Array<{ id: string }> } | undefined) => new Set((version?.sourceRefs ?? []).map(ref => ref.id));
 const budget = (value: unknown) => value as { models?: number; tools?: number; inputTokens?: number; outputTokens?: number } | null;
 
 function check(name: string, passed: boolean, detail: string, evidenceRef: string): JourneyCheck {
@@ -46,38 +46,63 @@ export function protocolChecks(run: JourneyRecord): JourneyCheck[] {
 }
 
 /**
- * Content-quality checks. In offline injected mode they prove the pipeline propagates material,
- * evidence and controls into persisted drafts; they are not evidence of real-model writing quality.
+ * Content-quality checks are deterministic structural checks over persisted drafts.
+ * They reject copies of the user request, title-only changes, unrelated citations, trivial edits
+ * and dropped unknowns. Semantic truth is intentionally left UNVERIFIED (see semanticChecks).
  */
 export function contentChecks(run: JourneyRecord): JourneyCheck[] {
   const checks: JourneyCheck[] = [];
   const [first, second, third] = run.versions;
-  const firstId = run.versionIds[0], secondId = run.versionIds[1];
-  const secondRefs = refs(second), allText = run.versions.map(version => text(version)).join("\n");
-  checks.push(check("NEW_MATERIAL_CHANGED_DRAFT", !!second && !!first && second.textHash !== first.textHash
-    && secondRefs.has(secondId) && (second.blockTexts.join("\n") !== first.blockTexts.join("\n")),
-    "新增材料进入第 2 版且正文变化（hash=" + (first?.textHash.slice(0, 8) ?? "-") + "→" + (second?.textHash.slice(0, 8) ?? "-") + "；refs=" + [...secondRefs].join(",") + "）", "mission:" + run.missionId + ":output:" + (second?.outputId ?? "none")));
-  checks.push(check("OLD_EVIDENCE_RETAINED", !!second && (secondRefs.has(firstId) || secondRefs.size > 1),
-    "第 2 版仍保留旧依据：" + [...secondRefs].join(","), "mission:" + run.missionId + ":output:" + (second?.outputId ?? "none")));
-  const unknownKept = run.versions.some(version => /未知|未(?:独立)?(?:复现|确认|验证|写明)|仍缺|尚未/.test(text(version)));
+  const sources = [...new Map(Object.entries(run.sourceTexts ?? {}).map(([id, text]) => [id, { id, text }])).values()];
+  const toDraft = (version: typeof run.versions[number]): DraftView => ({
+    text: version.blockTexts.join("\n"), blocks: version.blocks, sourceIds: version.sourceRefs.map(ref => ref.id), missingInformation: [],
+  });
+  const quality = (input: Omit<Parameters<typeof assessRevision>[0], "sources">) => assessRevision({ ...input, sources });
+  const failed = (items: QualityCheck[], names: string[]) => {
+    const set = new Map(items.map(item => [item.name, item.status]));
+    return names.filter(name => set.get(name) !== "PASS");
+  };
+  const first2 = first && second ? quality({ previous: toDraft(first), current: toDraft(second), userRequest: run.definition.newMaterialCondition,
+    requiredUnknowns: [run.definition.newMaterialCondition] }) : [];
+  const first2Status = new Map(first2.map(item => [item.name, item.status]));
+  const materialEffective = first2Status.get("EFFECTIVE_REVISION") === "PASS" || first2Status.get("NEW_EVIDENCE_ADDED") === "PASS";
+  const materialFailed = [...(materialEffective ? [] : ["EFFECTIVE_REVISION_OR_NEW_EVIDENCE"]), ...failed(first2, ["EVIDENCE_BOUND"])];
+  checks.push(check("NEW_MATERIAL_CHANGED_DRAFT", !!second && materialFailed.length === 0,
+    "新增材料形成有效修订" + (materialFailed.length ? "；未通过：" + materialFailed.join(",") : "") + "（hash=" + (first?.textHash.slice(0, 8) ?? "-") + "→" + (second?.textHash.slice(0, 8) ?? "-") + "）",
+    "mission:" + run.missionId + ":output:" + (second?.outputId ?? "none")));
+  const oldFailed = failed(first2, ["OLD_EVIDENCE_RETAINED"]);
+  checks.push(check("OLD_EVIDENCE_RETAINED", !!second && oldFailed.length === 0,
+    "第 2 版保留旧依据" + (oldFailed.length ? "；未通过：" + oldFailed.join(",") : "") + "（refs=" + (second?.sourceRefs.map(ref => ref.id).join(",") ?? "") + "）",
+    "mission:" + run.missionId + ":output:" + (second?.outputId ?? "none")));
+  const allText = run.versions.map(version => text(version)).join("\n");
   const invented = /(?:已|已经)(?:独立复现|验证通过|部署成功|上线成功|通过验收|测量完成)/.test(allText);
-  checks.push(check("UNKNOWN_NOT_WRITTEN_AS_FACT", unknownKept && !invented,
-    unknownKept ? "未知条件按未知保留，没有写成已验证事实" : "没有保留未知条件", "mission:" + run.missionId + ":outputs"));
-  const focusTerms = run.definition.redirectQuote.replace(/今天|本周|这周|先|核对|对应|中的|的|资料|第二版/g, " ").split(/[\s，。]+/).filter(term => term.length >= 2);
-  const thirdText = text(third);
-  const focusHits = focusTerms.filter(term => thirdText.includes(term));
-  const redirectApplied = !!third && (focusHits.length > 0 || thirdText.includes("工作重点"));
-  checks.push(check("USER_REDIRECT_APPLIED", redirectApplied,
-    "第 3 版是否体现改道重点（命中=" + focusHits.join("|") + "，需至少一项）", "mission:" + run.missionId + ":output:" + (third?.outputId ?? "none")));
+  const unknownDropped = failed(first2, ["UNKNOWN_PRESERVED"]);
+  checks.push(check("UNKNOWN_NOT_WRITTEN_AS_FACT", !!second && unknownDropped.length === 0 && !invented,
+    invented ? "把未验证结果写成已验证事实" : unknownDropped.length ? "遗漏关键未知：" + run.definition.newMaterialCondition : "未知条件按未知保留",
+    "mission:" + run.missionId + ":outputs"));
+  const second3 = second && third ? quality({ previous: toDraft(second), current: toDraft(third), redirectQuote: run.definition.redirectQuote,
+    userRequest: run.definition.redirectQuote, requiredUnknowns: [run.definition.newMaterialCondition] }) : [];
+  const redirectFailed = failed(second3, ["REDIRECT_ADDRESSED", "EVIDENCE_BOUND", "NOT_COPY_OF_USER_REQUEST"]);
+  checks.push(check("USER_REDIRECT_APPLIED", !!third && redirectFailed.length === 0,
+    "第 3 版实质落实改道" + (redirectFailed.length ? "；未通过：" + redirectFailed.join(",") : "") + "（命中句/来源均校验）",
+    "mission:" + run.missionId + ":output:" + (third?.outputId ?? "none")));
   const hashes = run.versions.map(version => version.textHash);
   const consecutiveDistinct = hashes.every((hash, index) => index === 0 || hash !== hashes[index - 1]);
   checks.push(check("NO_MEANINGLESS_REPETITION", consecutiveDistinct && run.tools.filter(tool => tool.tool === "save_mission_output").length >= run.versions.length,
-    "相邻版本正文不重复，且每版都有创作保存（版本 " + hashes.length + "，保存 " + run.tools.filter(tool => tool.tool === "save_mission_output").length + "）", "mission:" + run.missionId + ":versions"));
-  const citationsResolve = run.versions.every(version => {
-    const output = version as unknown as { cited?: string[] };
-    return !output.cited || output.cited.every(id => version.sourceRefs.some(ref => ref.id === id));
-  });
-  checks.push(check("CITATIONS_RESOLVE", citationsResolve && run.versions.every(version => version.sourceRefs.length > 0),
-    "每版引用均落在该版来源清单内", "mission:" + run.missionId + ":outputs"));
+    "相邻版本正文不重复，且每版都有创作保存（版本 " + hashes.length + "，保存 " + run.tools.filter(tool => tool.tool === "save_mission_output").length + "）",
+    "mission:" + run.missionId + ":versions"));
+  const citationFailed = run.versions.some(version => failed(quality({ previous: null, current: toDraft(version) }), ["CITATIONS_RESOLVE", "CITATIONS_RELEVANT"]).length > 0);
+  checks.push(check("CITATIONS_RESOLVE", !citationFailed && run.versions.every(version => version.sourceRefs.length > 0),
+    citationFailed ? "存在无法解析或与正文无关的引用" : "每版引用均可解析且与所引段落相关", "mission:" + run.missionId + ":outputs"));
   return checks;
+}
+
+/** Semantic judgement is reported separately and never as a pass while only offline fixtures run. */
+export function semanticChecks(run: JourneyRecord): JourneyCheck[] {
+  void run;
+  return semanticReviewChecks().map(item => ({ name: item.name, passed: false, judge: "UNPROVEN" as const, detail: item.detail, evidenceRef: "" }));
+}
+
+export function deterministicContentPassed(checks: JourneyCheck[]): boolean {
+  return checks.every(check => check.passed);
 }

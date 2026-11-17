@@ -10,13 +10,14 @@
   PASS NO_LEGACY_FINISH
   PASS TOOL_BOUNDARY_PRIVATE_ONLY
   PASS PROVIDER_RECORDED
-  内容（注入/模拟管道级）：6/6
+  内容（结构确定性）：6/6
   PASS NEW_MATERIAL_CHANGED_DRAFT
   PASS OLD_EVIDENCE_RETAINED
   PASS UNKNOWN_NOT_WRITTEN_AS_FACT
   PASS USER_REDIRECT_APPLIED
   PASS NO_MEANINGLESS_REPETITION
   PASS CITATIONS_RESOLVE
+  语义审核（未验证，不计为通过）：4 项需真实模型/人工审核
 运行合成项目：客户交付（provider=fixture）
   协议：10/10
   PASS SAME_MISSION_CONTINUATION
@@ -29,13 +30,14 @@
   PASS NO_LEGACY_FINISH
   PASS TOOL_BOUNDARY_PRIVATE_ONLY
   PASS PROVIDER_RECORDED
-  内容（注入/模拟管道级）：6/6
+  内容（结构确定性）：6/6
   PASS NEW_MATERIAL_CHANGED_DRAFT
   PASS OLD_EVIDENCE_RETAINED
   PASS UNKNOWN_NOT_WRITTEN_AS_FACT
   PASS USER_REDIRECT_APPLIED
   PASS NO_MEANINGLESS_REPETITION
   PASS CITATIONS_RESOLVE
+  语义审核（未验证，不计为通过）：4 项需真实模型/人工审核
 运行合成项目：科研阶段汇报（provider=fixture）
   协议：10/10
   PASS SAME_MISSION_CONTINUATION
@@ -48,13 +50,14 @@
   PASS NO_LEGACY_FINISH
   PASS TOOL_BOUNDARY_PRIVATE_ONLY
   PASS PROVIDER_RECORDED
-  内容（注入/模拟管道级）：6/6
+  内容（结构确定性）：6/6
   PASS NEW_MATERIAL_CHANGED_DRAFT
   PASS OLD_EVIDENCE_RETAINED
   PASS UNKNOWN_NOT_WRITTEN_AS_FACT
   PASS USER_REDIRECT_APPLIED
   PASS NO_MEANINGLESS_REPETITION
   PASS CITATIONS_RESOLVE
+  语义审核（未验证，不计为通过）：4 项需真实模型/人工审核
 运行合成项目：学生课程项目（provider=fixture）
   协议：10/10
   PASS SAME_MISSION_CONTINUATION
@@ -67,22 +70,24 @@
   PASS NO_LEGACY_FINISH
   PASS TOOL_BOUNDARY_PRIVATE_ONLY
   PASS PROVIDER_RECORDED
-  内容（注入/模拟管道级）：6/6
+  内容（结构确定性）：6/6
   PASS NEW_MATERIAL_CHANGED_DRAFT
   PASS OLD_EVIDENCE_RETAINED
   PASS UNKNOWN_NOT_WRITTEN_AS_FACT
   PASS USER_REDIRECT_APPLIED
   PASS NO_MEANINGLESS_REPETITION
   PASS CITATIONS_RESOLVE
+  语义审核（未验证，不计为通过）：4 项需真实模型/人工审核
 {
   "provider": "fixture",
   "totals": {
     "protocolPassed": 40,
     "protocolTotal": 40,
     "contentPassed": 24,
-    "contentTotal": 24
+    "contentTotal": 24,
+    "semanticUnverified": 16
   },
   "tokensUsed": 1080,
-  "durationMs": 2555,
+  "durationMs": 2516,
   "report": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\evidence\\v2-first-loop\\eval-v2\\fixture\\report.json"
 }

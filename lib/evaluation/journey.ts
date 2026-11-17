@@ -32,7 +32,8 @@ export type JourneyDefinition = {
 
 export type JourneyVersion = {
   revision: number; outputId: string; createdAt: string; sourceRefs: Array<{ id: string; hash: string }>;
-  blockTexts: string[]; textHash: string; checkpointSeq: number | null; budgetUsed: unknown;
+  blockTexts: string[]; blocks: Array<{ blockId: string; text: string; kind: string; sourceIds: string[]; citations: Array<{ sourceId: string }> }>;
+  sourceTexts: Record<string, string>; textHash: string; checkpointSeq: number | null; budgetUsed: unknown;
 };
 export type JourneyRecord = {
   definition: JourneyDefinition;
@@ -51,6 +52,7 @@ export type JourneyRecord = {
     ending?: { action: string; status: string; extraDispatch: boolean; outputCountAfter: number };
   };
   failures: string[];
+  sourceTexts: Record<string, string>;
   budget: { before: unknown; after: unknown };
 };
 
@@ -85,13 +87,18 @@ async function snapshotVersion(missionId: string) {
   ]);
   const mission = await db.agentMission.findUniqueOrThrow({ where: { id: missionId } });
   return outputs.map(output => {
-    const content = output.contentJson as { blocks?: Array<{ text?: string }> };
+    const content = output.contentJson as { blocks?: Array<{ blockId?: string; text?: string; kind?: string; sourceIds?: string[]; citations?: Array<{ sourceId?: string }> }> };
     const text = (content.blocks ?? []).map(block => block.text ?? "").join("\n");
+    const refs = (output.sourceRefsJson as Source[] | null) ?? [];
     const checkpoint = checkpoints.find(event => (event.payloadJson as { outputId?: string }).outputId === output.id);
     return {
       revision: output.revision, outputId: output.id, createdAt: output.createdAt.toISOString(),
-      sourceRefs: ((output.sourceRefsJson as Source[] | null) ?? []).map(source => ({ id: source.id, hash: source.hash })),
-      blockTexts: (content.blocks ?? []).map(block => block.text ?? ""), textHash: textHash(text),
+      sourceRefs: refs.map(source => ({ id: source.id, hash: source.hash })),
+      blockTexts: (content.blocks ?? []).map(block => block.text ?? ""),
+      blocks: (content.blocks ?? []).map(block => ({ blockId: String(block.blockId ?? ""), text: String(block.text ?? ""), kind: String(block.kind ?? ""),
+        sourceIds: (block.sourceIds ?? []).map(String), citations: (block.citations ?? []).map(citation => ({ sourceId: String(citation.sourceId ?? "") })) })),
+      sourceTexts: Object.fromEntries(refs.filter(source => typeof source.text === "string").map(source => [source.id, source.text.slice(0, 4000)])),
+      textHash: textHash(text),
       checkpointSeq: checkpoint?.seq ?? null, budgetUsed: mission.budgetUsedJson,
     };
   });
@@ -163,7 +170,7 @@ export async function runJourney(definition: JourneyDefinition, providerMode: "f
     requestId: "journey-" + randomUUID(), goal: definition.goal, llmContextApproved: true });
   const mission = await editContinuationPolicy(user.id, created.id, { requestId: "journey-grant", expectedVersion: created.version, policy: policyValue });
   const record: JourneyRecord = {
-    definition, missionId: mission.id, projectId: project.id, versionIds: ["capture:" + firstCapture.id], phases: [], versions: [], tools: [], modelRuns: [],
+    definition, missionId: mission.id, projectId: project.id, versionIds: ["capture:" + firstCapture.id], phases: [], versions: [], tools: [], modelRuns: [], sourceTexts: {},
     events: [], wake: { woken: 0, sameMission: true, inputChanged: false }, control: {}, failures: [],
     budget: { before: mission.budgetUsedJson, after: null },
   };
@@ -251,6 +258,7 @@ export async function runJourney(definition: JourneyDefinition, providerMode: "f
   await phase(record, "ENDED", mission.id);
 
   record.versions = await snapshotVersion(mission.id);
+  record.sourceTexts = Object.assign({}, ...record.versions.map(version => version.sourceTexts));
   record.tools = (await db.agentMissionStep.findMany({ where: { missionId: mission.id }, orderBy: { ordinal: "asc" } }))
     .map(step => ({ tool: step.toolName, status: step.status, ordinal: step.ordinal }));
   record.modelRuns = (await db.agentRun.findMany({ where: { projectId: project.id }, orderBy: { createdAt: "asc" } }))

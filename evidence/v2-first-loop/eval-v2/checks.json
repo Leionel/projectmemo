@@ -20,7 +20,13 @@
       "modelCalls": "均为测试 transport，无付费",
       "exitCode": 0,
       "protocol": "40/40",
-      "content": "24/24"
+      "content": "24/24",
+      "latestResult": {
+        "protocol": "40/40",
+        "structuralContent": "24/24",
+        "semanticUnverified": 16,
+        "exitCode": 0
+      }
     },
     "mockHttp": {
       "command": "npm.cmd exec tsx -- scripts/eval-v2.ts --provider=http --out evidence/v2-first-loop/eval-v2/http",
@@ -29,7 +35,13 @@
       "tokensRecorded": 5760,
       "exitCode": 0,
       "protocol": "40/40",
-      "content": "24/24"
+      "content": "24/24",
+      "latestResult": {
+        "protocol": "40/40",
+        "structuralContent": "24/24",
+        "semanticUnverified": 16,
+        "exitCode": 0
+      }
     },
     "live": {
       "executed": true,
@@ -137,5 +149,11 @@
     "真实模型连续改稿质量：命令已建立但未授权执行；离线注入/模拟 HTTP 只证明执行器与管道，不证明写作质量",
     "72 小时真实时钟、真机/HAP、生产滚动升级未验证",
     "内容语义判据在真实模型下需人工抽检并与离线基线比较"
-  ]
+  ],
+  "qualityScoring": {
+    "module": "lib/evaluation/contentQuality.ts",
+    "negativeCases": "tests/contentQuality.test.ts 7/7",
+    "semanticPolicy": "UNVERIFIED/HUMAN_REVIEW 单独报告，不计为通过",
+    "frozenOracleSha256": "1b71452899c586e4e893477be68301a90dac23e57ad4d4d80258f59b16fce89a"
+  }
 }

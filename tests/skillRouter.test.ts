@@ -1,6 +1,7 @@
 import { afterAll, expect, test, vi } from "vitest";
 const isolated = await vi.hoisted(async () => (await import("./helpers/continuityDatabase")).continuityDatabase("v2-router"));
 import fs from "node:fs";
+import { createHash } from "node:crypto";
 import { db } from "@/lib/db";
 import { extractRestrictions, planSkillSequence, routeSkillRequest, splitRequestClauses } from "@/lib/skills/router";
 
@@ -55,6 +56,11 @@ test("the router only narrows authority and never returns a tool set", () => {
   expect(decision.sequence).toEqual(["project-planning"]);
   expect(decision.reuseMissionId).toBe("m1");
   expect(decision.restrictions.noOutputRevision).toBe(true);
+});
+
+test("the frozen 64-case oracle keeps its published fingerprint", () => {
+  const dataset = fs.readFileSync("docs/v2/evaluation/skill-routing.v1.json");
+  expect(createHash("sha256").update(dataset).digest("hex")).toBe("1b71452899c586e4e893477be68301a90dac23e57ad4d4d80258f59b16fce89a");
 });
 
 test("frozen 64 routing cases are answered from real isolated fixture records", async () => {

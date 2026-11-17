@@ -1,0 +1,43 @@
+{
+  "item": "质量评分加强",
+  "baseline": "9776f9b",
+  "generatedAt": "2026-11-17T08:25:00+08:00",
+  "deterministicChecks": [
+    "CURRENT_HAS_CONTENT", "EFFECTIVE_REVISION", "NEW_EVIDENCE_ADDED", "EVIDENCE_BOUND",
+    "CITATIONS_RESOLVE", "CITATIONS_RELEVANT", "OLD_EVIDENCE_RETAINED", "NOT_COPY_OF_USER_REQUEST",
+    "REDIRECT_ADDRESSED", "UNKNOWN_PRESERVED"
+  ],
+  "semanticReview": ["SEMANTIC_CLAIM_SUPPORT", "SEMANTIC_COMPARABILITY", "SEMANTIC_REDIRECT", "SEMANTIC_USER_VALUE"],
+  "semanticPolicy": "始终 UNVERIFIED/HUMAN_REVIEW，不计为通过；离线报告单独列出",
+  "negativeCases": {
+    "test": "tests/contentQuality.test.ts",
+    "tests": 7,
+    "exitCode": 0,
+    "cases": ["仅复制用户要求", "无关正文加标题", "无关引用冒充保留旧依据", "改几个字冒充修订", "遗漏关键未知", "真实有据修订通过", "语义项保持未验证"]
+  },
+  "frozenOracle": {
+    "file": "docs/v2/evaluation/skill-routing.v1.json",
+    "sha256": "1b71452899c586e4e893477be68301a90dac23e57ad4d4d80258f59b16fce89a",
+    "enforcedBy": "tests/skillRouter.test.ts",
+    "modifiedThisRound": false
+  },
+  "offlineResults": {
+    "fixture": { "protocol": "40/40", "structuralContent": "24/24", "semanticUnverified": 16 },
+    "mockHttp": { "protocol": "40/40", "structuralContent": "24/24", "semanticUnverified": 16 },
+    "frozenRouting": { "modePrimarySequence": "64/64", "safetyViolations": 0, "criticalFailed": 0, "fullPass": "39/64（25 条内容语义判据按设计判失败）" }
+  },
+  "validation": {
+    "tests": { "command": "npm.cmd test -- tests/contentQuality.test.ts tests/skillRouter.test.ts tests/v2SkillArtifacts.test.ts tests/v2DelegationIdempotency.test.ts tests/v2FirstSlice.test.ts", "tests": 38, "exitCode": 0, "log": "tests.log" },
+    "types": { "command": "npm.cmd exec tsc -- --noEmit", "exitCode": 0, "log": "tsc.log" },
+    "lint": { "command": "npm.cmd exec eslint -- lib/skills lib/evaluation lib/mission tests/contentQuality.test.ts tests/skillRouter.test.ts tests/v2SkillArtifacts.test.ts scripts/eval-v2.ts components/v2", "exitCode": 0, "log": "eslint.log" }
+  },
+  "reports": {
+    "fixture": "../eval-v2/fixture/report.json",
+    "mockHttp": "../eval-v2/http/report.json",
+    "routing": "../slice-b-routing/score.json"
+  },
+  "remaining": [
+    "语义四项需真实模型输出 + 人工审核；本轮无付费授权，未执行真实模型复验",
+    "启发式评分不替代人工事实判断"
+  ]
+}

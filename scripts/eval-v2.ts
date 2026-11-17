@@ -66,7 +66,7 @@ const { db } = await import("@/lib/db");
 const { startMockModelServer } = await import("@/lib/evaluation/mockModelServer");
 const { AppError } = await import("@/lib/api");
 const { JOURNEYS, runJourney } = await import("@/lib/evaluation/journey");
-const { protocolChecks, contentChecks } = await import("@/lib/evaluation/journeyChecks");
+const { protocolChecks, contentChecks, semanticChecks } = await import("@/lib/evaluation/journeyChecks");
 
 let mock: Awaited<ReturnType<typeof startMockModelServer>> | null = null;
 if (providerMode === "http") {
@@ -106,13 +106,16 @@ for (const definition of journeys) {
   const record = await runJourney(definition, providerMode, { tokenCeiling: maxTokens, modelCeiling: maxModels, ...hooks });
   const protocol = protocolChecks(record);
   const content = contentChecks(record);
-  records.push({ definition, record, protocol, content, journeyTokens });
+  const semantic = semanticChecks(record);
+  records.push({ definition, record, protocol, content, semantic, journeyTokens });
   const summarize = (checks: Array<{ name: string; passed: boolean; detail: string }>) =>
     checks.map(check => (check.passed ? "PASS " : "FAIL ") + check.name + (check.passed ? "" : "：" + check.detail)).join("\n  ");
   process.stdout.write("  协议：" + protocol.filter(check => check.passed).length + "/" + protocol.length + "\n  " + summarize(protocol) + "\n");
-  process.stdout.write("  内容（注入/模拟管道级）：" + content.filter(check => check.passed).length + "/" + content.length + "\n  " + summarize(content) + "\n");
+  process.stdout.write("  内容（结构确定性）：" + content.filter(check => check.passed).length + "/" + content.length + "\n  " + summarize(content) + "\n");
+  process.stdout.write("  语义审核（未验证，不计为通过）：" + semantic.length + " 项需真实模型/人工审核\n");
 }
-const allProtocol = records.flatMap(item => item.protocol), allContent = records.flatMap(item => item.content);
+const allProtocol = records.flatMap(item => item.protocol), allContent = records.flatMap(item => item.content),
+  allSemantic = records.flatMap(item => item.semantic);
 const report = {
   provider: providerMode,
   providerLabel: providerMode === "fixture" ? "INJECTED_V2_JOURNEY（离线注入，确定性）" : providerMode === "http" ? "MOCK_HTTP_LOCAL（真实 chooseNext HTTP 适配器）" : "LIVE_MODEL",
@@ -121,6 +124,7 @@ const report = {
     id: item.definition.id, label: item.definition.label,
     protocol: { passed: item.protocol.filter(check => check.passed).length, total: item.protocol.length, checks: item.protocol },
     content: { passed: item.content.filter(check => check.passed).length, total: item.content.length, checks: item.content },
+    semantic: { unverified: item.semantic.length, checks: item.semantic },
     missionId: item.record.missionId, versions: item.record.versions.map(version => ({ revision: version.revision, outputId: version.outputId, checkpointSeq: version.checkpointSeq, sourceRefs: version.sourceRefs })),
     phases: item.record.phases, tools: item.record.tools,
     modelRuns: item.record.modelRuns, wake: item.record.wake, control: item.record.control, failures: item.record.failures,
@@ -128,7 +132,9 @@ const report = {
     tokens: (item as { journeyTokens?: number }).journeyTokens ?? null,
   })),
   totals: { protocolPassed: allProtocol.filter(check => check.passed).length, protocolTotal: allProtocol.length,
-    contentPassed: allContent.filter(check => check.passed).length, contentTotal: allContent.length },
+    contentPassed: allContent.filter(check => check.passed).length, contentTotal: allContent.length,
+    semanticUnverified: allSemantic.length },
+  unverified: allSemantic.map(check => ({ name: check.name, detail: check.detail })),
   tokensUsed: spentTokens,
   decisionCalls,
   tracedTokens: records.flatMap(item => item.record.modelRuns).reduce((total, run) => {
@@ -138,7 +144,7 @@ const report = {
   limits: { maxModels, maxTokens },
   pendingRealModelCommand: providerMode === "live" ? null
     : "npm.cmd exec tsx -- scripts/eval-v2.ts --provider=live --confirm-paid --max-models=12 --max-tokens=60000（需用户明确授权调用范围与上限）",
-  note: "内容维度在 fixture/http 模式下证明材料、证据与用户控制确实进入持久草稿；不代表真实模型写作质量，真实模型质量需 --provider=live 单独验收。",
+  note: "结构确定性检查与语义审核分开报告：语义项始终为未验证，不能计为通过；离线 fixture/http 只证明材料、证据与控制进入持久草稿，不代表真实模型写作质量。",
 };
 fs.writeFileSync(path.join(outDir, "report.json"), JSON.stringify(report, null, 2));
 fs.writeFileSync(path.join(outDir, "journeys.jsonl"), records.map(item => JSON.stringify({ id: item.definition.id, record: item.record, protocol: item.protocol, content: item.content })).join("\n") + "\n");

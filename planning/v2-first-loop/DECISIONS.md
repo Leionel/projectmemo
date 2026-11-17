@@ -79,3 +79,10 @@
 - 最终结果：四条旅程协议 **40/40**、内容 **24/24**，真实模型 v3/v4 正文首段均写明本轮工作重点，未知条件与未验证项保留，工具边界全私有。developer/freelancer 3 版，research/course 4 版（中途保存经去重或为多稿版本），改道后同一 Mission 均产出新版本，暂停/取消后零派发。
 - 验证：离线 fixture/http 仍 40/40+24/24；全量测试、tsc、lint 结果见 `evidence/v2-first-loop/eval-v2/live4/`。证据：`eval-v2/live4/`（README、checks、report、journeys、测试日志）。
 - 边界：单次通过不等同于所有场景稳定（模型仍有随机性）；预算展示口径变化但实际模型/工具总量限制未放宽；72h 时钟/断电、真机/HAP、生产滚动升级仍未验证，V2 保持关闭。
+
+## 2026-11-17 三位一体回执（修复 + 非创作交付 + 质量评分）
+
+- `c1b185b` 修复 confirmV2Delegation 幂等绑定：确认事务先按 `ownerUserId+createRequestId` 查原 Mission，再从 `planJson.v2DelegationReceipt` 校验项目/目标/材料/预览/期限并返回原回执；一致重试优先于期限与预览校验（过期后仍返回原回执），同编号换任何一项均 `409 DELEGATION_IDEMPOTENCY_CONFLICT`；并发确认经唯一键/写冲突重试收敛为一个 Mission；Capture/Mission/许可/事件/回执仍单事务。6 条回归 + 原入口 4 条通过。
+- `d403734` 补齐非创作 Skill 交付：终态规划/研究/复盘把 `save_mission_output` 解释为阶段成果，写入 `planJson.skillArtifacts`，不写报告 Output、不创建行动；必须经原输出/来源校验（至少一段真实来源，引用可解析）。交付后 `PAUSED + SKILL_DELIVERABLE_READY`，工作台显示阶段成果/依据/未知项；恢复进入 `WAITING_INPUT+OBSERVATION`，不重复跑同一阶段。路由修正否定动作（“不开始写报告”）与研究动词。单测 4/4、正常入口浏览器 4 项、全量 268 文件 2099 条、构建通过。
+- 质量评分：新增 `lib/evaluation/contentQuality.ts`；替换宽松的“出现工作重点即算落实改道”，加入差异率/新增来源/来源与引用相关性/旧依据保留/复制用户要求/关键未知等确定性判据；语义四项固定 `UNVERIFIED/HUMAN_REVIEW` 并单独报告。负例 7/7（复制要求、标题伪装、无关引用、改几个字、遗漏未知全部失败）。冻结 64 条指纹 `1b7145…` 由测试锁定，未修改 oracle。
+- 离线评测：fixture/http 均协议 40/40、结构内容 24/24、语义未验证 16；路由 64/64、安全 0、关键 0。无新增迁移；无真实模型付费调用；V2 仍关闭。

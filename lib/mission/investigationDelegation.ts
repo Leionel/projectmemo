@@ -128,7 +128,16 @@ export async function investigationInputHash(m: AgentMission, tx: Tx = db) {
     const hash = await sourceHash(m.projectId, id, tx);
     if (hash) pointers.push({ sourceId: id, sourceHash: hash });
   }
-  return { hash: jsonHash({ captures: allowed, attachments: allowedAttachments, actions: allowedActions, signals, hypotheses: hypotheses.readSet }), pointers, truncated: [captures, attachments, actions, signals].some(a => a.length > 100) };
+  // Structural identity includes ids (a new source row); content identity deliberately ignores ids so an
+  // identical re-upload is observable as "same content" and cannot wake a model cycle.
+  const contentHash = jsonHash({
+    captures: [...new Set(allowed.map(c => jsonHash(c.rawText.replace(/\s+/g, " ").trim())))].sort(),
+    attachments: [...new Set(allowedAttachments.map(a => jsonHash({ status: a.extractionStatus, text: a.revisions[0]?.text ?? "" })))].sort(),
+    actions: [...new Set(allowedActions.map(a => jsonHash({ status: a.status, resultCardId: a.resultCardId, dependencyVersion: a.dependencyVersion })))].sort(),
+    signals: [...new Set(signals.map(sg => jsonHash({ sha: sg.sha, status: sg.status })))].sort(),
+    hypotheses: hypotheses.readSet,
+  });
+  return { hash: jsonHash({ captures: allowed, attachments: allowedAttachments, actions: allowedActions, signals, hypotheses: hypotheses.readSet }), contentHash, pointers, truncated: [captures, attachments, actions, signals].some(a => a.length > 100) };
 }
 
 export async function initializeDelegation(tx: Tx, m: AgentMission, raw: unknown) {
@@ -202,6 +211,7 @@ export async function initializeDelegation(tx: Tx, m: AgentMission, raw: unknown
     grantBindings,
     grantRunIds,
     inputHash: input.hash,
+    contentHash: input.contentHash,
     grantedAt: new Date().toISOString(),
     attention: null,
     trigger: "PROJECT_INPUT_OR_AUTHORIZED_PINNED_CI",
@@ -330,8 +340,18 @@ export async function processInvestigationDelegations(limit = 8) {
           woken++;return;
         }
 
+        // 1b. Identical content under a new source id: record once, reschedule, never wake a model cycle.
+        if (input.hash !== state.inputHash && state.contentHash && input.contentHash === state.contentHash) {
+          const duplicateKey = "dup:" + input.contentHash.slice(0, 32);
+          const already = await tx.agentMissionEvent.findUnique({ where: { missionId_commandRequestId: { missionId: m.id, commandRequestId: duplicateKey } } });
+          if (!already)
+            await event(tx, m.id, "INVESTIGATION_DUPLICATE_IGNORED", { reason: "IDENTICAL_CONTENT", contentHash: input.contentHash, previousHash: state.inputHash, currentHash: input.hash }, { id: duplicateKey, hash: input.hash });
+          await tx.agentMission.update({ where: { id: m.id }, data: { nextAttemptAt, planJson: json({ ...record(m.planJson), delegation: { ...state, inputHash: input.hash, contentHash: input.contentHash, lastCheckedAt: now.toISOString(), attention: await scopedDelegationAttention(tx, m, "WAITING_INPUT") } }) } });
+          return;
+        }
         // 2. Fixed SHA CI observation
         if (input.hash === state.inputHash) {
+          if (!state.contentHash) await tx.agentMission.update({ where: { id: m.id }, data: { planJson: json({ ...record(m.planJson), delegation: { ...state, contentHash: input.contentHash } }) } });
           if (p.connectionIds.length && (p.allowedTools.includes("read_repository_ci")||p.allowedTools.includes("inspect_deployment"))) {
             const targets = [];
             for (const connectionId of p.connectionIds) {
@@ -415,6 +435,7 @@ export async function processInvestigationDelegations(limit = 8) {
                 wakeSeq,
                 pendingWake: { seq: wakeSeq, reason: "SOURCE_CHANGED" as WakeReason, key: wakeKey, requestedAt: now.toISOString(), fingerprint: input.hash },
                 inputHash: input.hash,
+                contentHash: input.contentHash,
                 candidateSources: input.pointers,
                 lastWakeAt: now.toISOString(),
                 attention: null,

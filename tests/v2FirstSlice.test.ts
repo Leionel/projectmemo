@@ -223,6 +223,8 @@ test("workbench reads frozen versions without writes, rejects outsiders and with
   expect(view.outputs).toHaveLength(2);
   expect(view.sources).toHaveLength(2);
   expect(view.sources.map(s => s.hash)[0]).not.toBe(view.sources.map(s => s.hash)[1]);
+  const originalSources = original.sourceRefsJson as unknown as Array<{ id: string; hash: string; observedAt: string }>;
+  for (const frozen of originalSources) expect(view.sources.find(source => source.id === frozen.id && source.hash === frozen.hash)?.observedAt).toBe(frozen.observedAt);
   const old = view.outputs.find(o => o.id === original.id)!;
   expect(view.sources.find(s => old.sourceKeys.includes(s.key))).toMatchObject({ current: false, text: expect.stringContaining("第一版资料") });
   expect(view.outputs.every(o => o.presentation.schemaVersion === 1 && !o.presentation.allowedActions.length)).toBe(true);

@@ -1,0 +1,7 @@
+{
+  "url": "http://127.0.0.1:4451/open?mission=cmwkbcc0h0001q48o1d1tx643",
+  "missionId": "cmwkbcc0h0001q48o1d1tx643",
+  "at": "2026-11-17T06:30:23.375Z",
+  "data": "new isolated synthetic SQLite; original demo untouched",
+  "provider": "localhost HTTP mock"
+}

@@ -1,0 +1,18 @@
+.provenance { font-size: 13px; margin: 18px 0; }
+.provenance header { display: flex; align-items: flex-start; gap: 8px; }
+.provenance header strong { line-height: 1.6; overflow-wrap: anywhere; min-width: 0; font-weight: 600; }
+.provenance svg { flex-shrink: 0; color: var(--muted); margin-top: 2px; }
+.status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); margin: 10px 0 14px; }
+.status[data-current=true] { color: var(--teal-strong); }.status[data-current=true] svg { color: var(--teal-strong); }
+.provenance>dl { display: grid; gap: 12px; padding-block: 14px; border-block: .5px solid var(--rule); margin-top: 12px; }
+.provenance>dl>div { display: grid; gap: 3px; }
+.provenance>dl dt { display: flex; gap: 8px; align-items: center; }.provenance>dl dd { padding-left: 24px; }
+.provenance dt { color: var(--muted); font-size: 12px; margin: 0 0 3px; }
+.provenance dd { margin: 0; font-size: 13px; color: var(--ink-soft); overflow-wrap: anywhere; }
+.provenance details { padding-block: 12px; color: var(--muted); font-size: 12px; }
+.provenance summary { cursor: pointer; display: flex; gap: 6px; align-items: center; min-height: 32px; }
+.provenance summary:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+.provenance details dl { margin-top: 10px; display: grid; gap: 10px; }
+.provenance details dd { font-size: 12px; }
+.provenance details[open] summary svg { transform: rotate(90deg); }
+@media(pointer:coarse) { .provenance summary { min-height: 48px; } }

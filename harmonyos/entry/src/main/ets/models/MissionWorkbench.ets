@@ -1,6 +1,6 @@
 export interface WorkbenchBlock { blockId: string; text: string; kind: string; sourceIds: string[]; }
 export interface WorkbenchOutput { id: string; revision: number; createdAt: string; blocks: WorkbenchBlock[]; sourceKeys: string[]; }
-export interface WorkbenchSource { key: string; id: string; hash: string; revision: string; text: string; current: boolean; kind: string; name?: string; }
+export interface WorkbenchSource { key: string; id: string; hash: string; revision: string; text: string; current: boolean; kind: string; name?: string; observedAt?: string; }
 export interface WorkbenchEvent { id: string; label: string; at: string; }
 export class MissionWorkbench {
   id: string = ''; projectId: string = ''; projectTitle: string = ''; goal: string = ''; workingObjective: string = '';
@@ -33,4 +33,9 @@ export function workbenchSource(view: MissionWorkbench, key: string): WorkbenchS
 export function challengeQuestion(session: OutcomeChallenge | null): ChallengeQuestion | undefined {
   if (session === null || session.status !== 'ACTIVE') return undefined;
   return session.questions[session.answers.length];
+}
+export function workbenchTime(value?: string): string {
+  if (!value || !Number.isFinite(Date.parse(value))) return '时间未记录';
+  const date = new Date(Date.parse(value) + 8 * 3600000);
+  return `${date.getUTCFullYear()}/${String(date.getUTCMonth() + 1).padStart(2, '0')}/${String(date.getUTCDate()).padStart(2, '0')} ${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}`;
 }

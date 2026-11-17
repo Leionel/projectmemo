@@ -19,7 +19,7 @@ export function workbenchFixture(revision = 1, research = false): WorkbenchSnaps
     status: "WAITING_INPUT", phase: "WAITING_OBSERVATION", reason: "草稿已备好，等待获准新资料", checkedAt: "2026-11-16T08:00:02Z",
     provider: "交互样例 · 未运行模型", version: 1, reasonCode: "OBSERVATION_PENDING", models: 0, tools: 0, outputs, stageArtifacts: [],
     sources: texts.slice(0, revision).map((text, i) => ({ key: "sample-" + i, id: "capture:sample-" + (i + 1), revision: String(i + 1),
-      hash: "sample-fingerprint-" + i, text, current: true, kind: "PROJECT" })),
+      hash: "sample-fingerprint-" + i, text, current: true, kind: "PROJECT", observedAt: "2026-11-16T07:30:00Z" })),
     events: [{ id: "sample-read", label: "样例：读取原项目记录", at: "2026-11-16T08:00:00Z" },
       { id: "sample-handoff", label: "样例：研究交给创作", at: "2026-11-16T08:00:01Z" },
       { id: "sample-output", label: "样例：成果等待新变化", at: "2026-11-16T08:00:02Z" }] };

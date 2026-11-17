@@ -47,7 +47,7 @@ export async function readMissionWorkbench(userId: string, id: string): Promise<
         if (sources.some(item => item.key === key)) continue;
         let current = true;
         try { await validateSources(m.projectId, [source], tx, id); } catch { current = false; }
-        sources.push({ key, id: source.id, revision: source.revision, hash: source.hash, text: source.text.slice(0, 4000), current, kind: source.kind,
+        sources.push({ key, id: source.id, revision: source.revision, hash: source.hash, text: source.text.slice(0, 4000), current, kind: source.kind, observedAt: source.observedAt,
           ...(sourceNames.has(source.id) ? { name: sourceNames.get(source.id) } : {}) });
       }
       return allowed;
@@ -102,6 +102,6 @@ export async function readMissionWorkbench(userId: string, id: string): Promise<
       workingObjective: continuity.workingObjective ?? m.goal, status: m.status, phase: state.phase, reason: state.reasonText, reasonCode: state.reasonCode, version: m.version,
       checkedAt: new Date().toISOString(), provider: run?.provider ?? "尚无模型调用",
       models: Number(usage.models ?? 0), tools: Number(usage.tools ?? 0), outputs, stageArtifacts, sources,
-      events: events.filter(e => labels[e.type]).map(e => ({ id: e.id, label: labels[e.type], at: e.createdAt.toISOString() })) };
+      events: events.filter(e => labels[e.type]).map(e => ({ id: e.id, label: labels[e.type], at: e.createdAt.toISOString(), kind: e.type })) };
   });
 }

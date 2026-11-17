@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { ArrowUpRight, BookOpen, Check, ChevronRight, FileText, GitCompareArrows, RefreshCw } from "lucide-react";
+import { ArrowUpRight, BookOpen, Check, ChevronRight, Clock3, FileCheck2, FileText, GitCompareArrows, MessageSquareText, RefreshCw, Search } from "lucide-react";
+import { SourceProvenance } from "@/components/SourceProvenance";
+import { evidenceTime, sourceDisplayName } from "@/lib/client/sourceDisplay";
 import { AgentMessageBlocks } from "@/components/AgentMessageBlocks";
 import { workbenchFixture } from "@/lib/experience/workbenchFixture";
 import { workbenchArtifactMessage, workbenchMessage, type WorkbenchSnapshot } from "@/lib/types/workbench";
@@ -123,8 +125,8 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
     <div className={styles.workspace}>
       <aside className={styles.progress} aria-label="Agent过程反馈"><h2>这份成果的进展</h2>
         <p className={styles.objective}>{snapshot.workingObjective}</p>
-        <ol>{snapshot.events.slice(0, 8).map(event => <li key={event.id}><Check size={13} aria-hidden="true" /><div>{event.label}
-          <time dateTime={event.at}>{new Date(event.at).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Shanghai" })}</time></div></li>)}</ol>
+        <ol>{snapshot.events.slice(0, 8).map(event => { const Icon = event.kind === "TOOL_STARTED" || event.kind === "CLAIMED" ? Clock3 : event.kind === "SKILL_ENTERED" ? Search : event.kind === "SKILL_HANDOFF" ? ArrowUpRight : event.kind === "OUTPUT_SAVED" ? FileCheck2 : event.kind?.startsWith("USER_") ? MessageSquareText : Check;
+          return <li key={event.id}><Icon size={14} aria-hidden="true" /><div>{event.label}<time dateTime={event.at}>{evidenceTime(event.at, true)}</time></div></li>; })}</ol>
         <div className={styles.usage}>{live ? <><span>模型调用 {snapshot.models}</span><span>工具调用 {snapshot.tools}</span></> : "样例操作不会调用模型"}
           <small>{live ? "读取时间" : "样例时点"} {new Date(snapshot.checkedAt).toLocaleTimeString("zh-CN", { timeZone: "Asia/Shanghai" })}（北京时间）</small></div>
       </aside>
@@ -145,10 +147,10 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
           <button aria-pressed={view === "draft"} onClick={() => setView("draft")}><FileText size={15} aria-hidden="true" />成果</button>
           <button aria-pressed={view === "diff"} onClick={() => setView("diff")}><GitCompareArrows size={15} aria-hidden="true" />修改对照</button></div>
           <div className={styles.versions} aria-label="成果版本">{snapshot.outputs.map(o => <button key={o.id}
-            aria-pressed={output?.id === o.id} onClick={() => { setSelectedRevision(o.revision); setSourceKey(null); }}>第 {o.revision} 版</button>)}</div>
+            aria-pressed={output?.id === o.id} aria-label={"第 " + o.revision + " 版"} onClick={() => { setSelectedRevision(o.revision); setSourceKey(null); }}><Clock3 size={14} aria-hidden="true" /><span><strong>第 {o.revision} 版</strong><time dateTime={o.createdAt}>{evidenceTime(o.createdAt, true)}</time></span></button>)}</div>
         </div>
         {output ? <div className={styles.paper}>
-          <p className={styles.paperLabel}>私有工作稿 · 第 {output.revision} 版</p>
+          <p className={styles.paperLabel}><FileText size={14} aria-hidden="true" /><span>私有工作稿</span><time dateTime={output.createdAt}>{evidenceTime(output.createdAt)}</time></p>
           {view === "draft" ? <AgentMessageBlocks message={workbenchMessage(output, snapshot.projectId, snapshot.provider)}
             conversationId={"workbench-view-" + snapshot.id} busy={busy} onAction={async () => { /* Read-only presentation has no business actions. */ }} /> :
             previous ? <div className={styles.diff}><h2>第 {previous.revision} 版 → 第 {output.revision} 版</h2>
@@ -195,9 +197,10 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
         {notice && <p role="status" className={styles.notice}>{notice}</p>}
       </section>
       <aside className={styles.source} aria-label="证据定位"><div><BookOpen size={17} aria-hidden="true" /><h2>原始依据</h2></div>
-        {source ? <><p className={styles.sourceKind}>{source.name ?? (source.kind === "PROJECT" ? "项目记录" : "外部参考")} · {source.current ? "当前引用版本" : "历史冻结版本"}</p>
-          <blockquote data-testid="source-excerpt">{source.text}</blockquote><details><summary>来源与版本</summary><dl><dt>来源</dt><dd>{source.id}</dd>
-            <dt>版本</dt><dd>{source.revision}</dd><dt>指纹</dt><dd>{source.hash}</dd></dl></details></> : <p>尚无可用引用，或来源使用许可需要重新核对。</p>}
+        {source ? <><SourceProvenance name={sourceDisplayName(source.id, source.name)} observedAt={source.observedAt} current={source.current} external={source.kind === "EXTERNAL"}
+          referencedAt={output?.sourceKeys.includes(source.key) ? output.createdAt : artifact?.sourceKeys.includes(source.key) ? artifact.createdAt : undefined}
+          technical={[{ label: "来源标识", value: source.id }, { label: "修订标识", value: source.revision }, ...(source.revision !== source.hash ? [{ label: "内容校验", value: source.hash }] : [])]} />
+          <blockquote data-testid="source-excerpt">{source.text}</blockquote></> : <p>尚无可用引用，或来源使用许可需要重新核对。</p>}
       </aside>
     </div>
   </main>;

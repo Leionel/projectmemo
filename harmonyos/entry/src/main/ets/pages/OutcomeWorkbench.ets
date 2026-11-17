@@ -1,13 +1,14 @@
 import router from '@ohos.router';
 import { PMAppBar } from '../components/PMAppBar';
 import { PMButton } from '../components/PMReferencePrimitives';
+import { ClockIcon, PaperclipIcon, CheckIcon } from '../components/PMIcons';
 import { PMColors, PMSpacing, PMRadius } from '../common/DesignTokens';
 import { MissionService } from '../services/MissionService';
 import { SessionStore } from '../services/SessionStore';
 import { MissionCommand } from '../models/Mission';
 import { ApiError } from '../models/Project';
 import { MissionWorkbench, WorkbenchOutput, WorkbenchBlock, WorkbenchSource, WorkbenchEvent, WorkbenchMaterial,
-  OutcomeChallenge, OutcomeChallengeCommand, ChallengeQuestion, ChallengeOption, workbenchOutput, workbenchSource, challengeQuestion } from '../models/MissionWorkbench';
+  OutcomeChallenge, OutcomeChallengeCommand, ChallengeQuestion, ChallengeOption, workbenchOutput, workbenchSource, challengeQuestion, workbenchTime } from '../models/MissionWorkbench';
 
 @Entry
 @Component
@@ -149,7 +150,18 @@ struct OutcomeWorkbenchPage {
   }
   @Builder private Source(source: WorkbenchSource) {
     Column({ space: 8 }) {
-      Text(`${source.name ?? '原始依据'} · ${source.current ? '当前引用版本' : '历史冻结版本'}`).fontColor(PMColors.INK_SECONDARY).fontSize(13)
+      Row({ space: 8 }) {
+        PaperclipIcon({ iconSize: 16, color: PMColors.INK_SECONDARY })
+        Text(source.name ?? '项目记录').fontSize(16).fontWeight(FontWeight.Medium).layoutWeight(1)
+      }.width('100%')
+      Row({ space: 8 }) {
+        ClockIcon({ iconSize: 16, color: PMColors.INK_TERTIARY })
+        Text(workbenchTime(source.observedAt)).fontColor(PMColors.INK_SECONDARY).fontSize(13)
+      }
+      Row({ space: 8 }) {
+        if (source.current) { CheckIcon({ iconSize: 14, color: PMColors.BRAND }) }
+        Text(source.current ? '当前引用版本' : '此前引用的版本').fontColor(PMColors.INK_TERTIARY).fontSize(13)
+      }
       Text(source.text).fontSize(16).fontColor(PMColors.INK_PRIMARY).copyOption(CopyOptions.InApp)
     }.alignItems(HorizontalAlign.Start).padding(14).width('100%').backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(PMRadius.MD)
   }
@@ -184,7 +196,10 @@ struct OutcomeWorkbenchPage {
     }
   }
   @Builder private Draft(output: WorkbenchOutput) {
-    Text(`私有工作稿 · 第 ${output.revision} 版`).fontSize(14).fontColor(PMColors.INK_SECONDARY)
+    Row({ space: 8 }) {
+      ClockIcon({ iconSize: 16, color: PMColors.INK_SECONDARY })
+      Text(`私有工作稿 ${workbenchTime(output.createdAt)}`).fontSize(14).fontColor(PMColors.INK_SECONDARY)
+    }
     ForEach(output.blocks, (block: WorkbenchBlock) => { Text(block.text).fontSize(16).lineHeight(26).fontColor(PMColors.INK_PRIMARY).copyOption(CopyOptions.InApp) }, (block: WorkbenchBlock) => block.blockId)
     ForEach(output.sourceKeys, (key: string, index: number) => { PMButton({ label: `定位原记录 ${index + 1}`, secondary: true, disabled: !this.fresh, onAction: (): void => { this.sourceKey = key; } }) }, (key: string) => key)
   }
@@ -202,7 +217,7 @@ struct OutcomeWorkbenchPage {
             if (this.controlPending) { PMButton({ label: '重试原控制请求', secondary: true, disabled: this.busy, onAction: (): void => { this.control(this.controlAction); } }) }
             else { PMButton({ label: this.view.status === 'PAUSED' ? '恢复原委托' : '暂停原委托', secondary: true,
               disabled: this.busy || !this.fresh || this.materialPending || this.challengePending || ['SUCCEEDED', 'CANCELLED'].includes(this.view.status), onAction: (): void => { this.control(this.view.status === 'PAUSED' ? 'resume' : 'pause'); } }) }
-            ForEach(this.view.outputs, (output: WorkbenchOutput) => { PMButton({ label: `查看第 ${output.revision} 版`, secondary: true, onAction: (): void => { this.outputId = output.id; this.sourceKey = ''; } }) }, (output: WorkbenchOutput) => output.id)
+            ForEach(this.view.outputs, (output: WorkbenchOutput) => { PMButton({ label: `第 ${output.revision} 版  ${workbenchTime(output.createdAt)}`, secondary: true, onAction: (): void => { this.outputId = output.id; this.sourceKey = ''; } }) }, (output: WorkbenchOutput) => output.id)
             if (workbenchOutput(this.view, this.outputId) !== undefined) { this.Draft(workbenchOutput(this.view, this.outputId) as WorkbenchOutput) }
             else { Text('原委托尚未交付报告稿，已有阶段成果可返回委托查看。') }
             if (workbenchSource(this.view, this.sourceKey) !== undefined && this.fresh) { this.Source(workbenchSource(this.view, this.sourceKey) as WorkbenchSource) }

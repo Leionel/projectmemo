@@ -1,0 +1,21 @@
+{
+  "baseline": "9608e00",
+  "scope": "readable provenance, version times and visual hierarchy on Web/HarmonyOS",
+  "data": "new isolated synthetic SQLite; original demo unchanged",
+  "schemaMigration": "NONE",
+  "paidCalls": 0,
+  "deployed": false,
+  "checks": [
+    { "command": "npm.cmd test -- tests/v2FirstSlice.test.ts tests/v2SkillArtifacts.test.ts tests/missionPanel.test.ts tests/missionArtifactAdoptionPanel.test.ts tests/missionNativeContract.test.ts", "files": 5, "tests": 55, "result": "PASS", "log": "targeted-tests.log" },
+    { "command": "npm.cmd exec tsc -- --noEmit", "result": "PASS", "log": "types.log" },
+    { "command": "npm.cmd exec eslint -- <changed/new TS/TSX excluding generated next-env.d.ts>", "result": "PASS", "log": "lint.log" },
+    { "command": "npm.cmd exec eslint -- scripts/verify-readable-sources.ts", "result": "PASS", "log": "script-lint.log" },
+    { "command": "$env:NEXT_DIST_DIR='.next-readable-sources'; npm.cmd run build -- --webpack", "result": "PASS", "log": "build.log" },
+    { "command": "npm.cmd run harmony:test", "tests": 160, "result": "PASS", "log": "harmony-test.log" },
+    { "command": "npm.cmd run harmony:build", "result": "PASS", "signed": false, "log": "harmony-build.log" },
+    { "command": "npm.cmd exec tsx -- scripts/verify-readable-sources.ts", "result": "PASS", "log": "browser-final.log", "receipt": "browser/receipt.json" }
+  ],
+  "fullSuiteRerun": false,
+  "notVerified": ["physical HarmonyOS installation", "production rollout"],
+  "history": "First browser assertion inspected visibility before the details transition settled; final check waits for visible/hidden state and passes."
+}

@@ -990,7 +990,7 @@ struct MissionDetail {
               Text(`${this.claimStatus(claim.status)}：${claim.text ?? '该段尚未逐句核验'}`).fontSize(13)
             }, (claim: MissionClaim, index: number) => claim.claimId ?? `${claim.blockId}-${index}`)
             ForEach(this.adoption.sourceManifest, (source: MissionSource) => {
-              Text(`${this.knowledge(source.knowledgeClass ?? source.kind)} · ${source.id}\n${(source.excerpts ?? []).join('\n')}`).fontSize(13)
+              Text(`${this.knowledge(source.knowledgeClass ?? source.kind)}  ${MissionProgressPresentation.sourceTitle(source)}\n${(source.excerpts ?? []).join('\n')}`).fontSize(13)
             }, (source: MissionSource) => source.id)
             Text('归入后，后续任务可以检索到这份成果；其中的结论仍需按原流程确认。')
             Button('确认归入项目成果').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.adopt(); })

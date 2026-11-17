@@ -1,0 +1,18 @@
+.brief { display: grid; gap: 10px; padding: 14px 16px; border: 1px solid #d9e4df; border-radius: 12px; background: #f7fbf9; }
+.brief header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brief h2 { margin: 0; font-size: 15px; }
+.brief h2 small { margin-left: 6px; color: #5d6f68; font-size: 12px; font-weight: 400; }
+.brief button { border: 1px solid #bfd6cc; border-radius: 8px; background: #fff; color: #145c4e; padding: 5px 10px; cursor: pointer; }
+.brief button:disabled { opacity: .55; cursor: default; }
+.brief ol { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.brief li { display: grid; gap: 5px; padding-top: 10px; border-top: 1px solid #e3ece8; }
+.brief li:first-child { padding-top: 0; border-top: 0; }
+.brief p { margin: 0; color: #35463f; font-size: 13px; line-height: 1.5; }
+.heading { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+.heading span { color: #6c7f77; font-size: 12px; }
+.meta { display: flex; flex-wrap: wrap; gap: 12px; color: #6c7f77; font-size: 12px; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.done { color: #2f7a5f; font-size: 12px; }
+.brief details { color: #5d6f68; font-size: 12px; }
+.brief details p { margin-top: 6px; }
+@media (max-width: 700px) { .brief header { align-items: flex-start; flex-direction: column; } }

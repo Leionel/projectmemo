@@ -57,12 +57,13 @@ export function OutcomeChallenges({ missionId, outputId, onSource, onHandoff }: 
   return <section className={styles.challenge} aria-label="成果挑战">
     <div className={styles.entry}><span>交付前，核对一处真实缺口</span>
       <button type="button" disabled={busy || uncertain || !outputId || session?.status === "ACTIVE"} onClick={() => start("REHEARSAL")}>严格导师 · 三轮彩排</button>
-      <button type="button" disabled={busy || uncertain || !outputId || session?.status === "ACTIVE"} onClick={() => start("EVIDENCE")}>证据侦探 · 引用追溯</button></div>
+      <button type="button" disabled={busy || uncertain || !outputId || session?.status === "ACTIVE"} onClick={() => start("EVIDENCE")}>证据侦探 · 引用追溯</button>
+      <button type="button" disabled={busy || uncertain || !outputId || session?.status === "ACTIVE"} onClick={() => start("METRIC")}>指标核对 · 可比性</button></div>
     {!outputId && <p>先准备一版有来源的成果，再开始。</p>}
     {error && <p role="alert">{error}</p>}
     {uncertain && !busy && <button type="button" onClick={() => void send({})}>重试原挑战请求</button>}
     {open && session && <div className={styles.body}>
-      <header><h2>{session.kind === "REHEARSAL" ? "交付彩排" : "引用追溯"} · 第 {session.revision} 版</h2>
+      <header><h2>{session.kind === "REHEARSAL" ? "交付彩排" : session.kind === "METRIC" ? "指标可比性" : "引用追溯"} · 第 {session.revision} 版</h2>
         <button type="button" disabled={busy || uncertain} onClick={() => { if (["ACTIVE", "COMPLETED"].includes(session.status)) void send({ action: "STOP" }); else setVisible(false); }}>退出本轮</button></header>
       {session.handoffSourceId ? <p role="status">核查意见已保存，原委托会按现有许可继续。新版本会显示在上方。</p> :
         session.status === "STALE" ? <p role="status">{session.reason}。可保留已输入的文字，从当前版本重新开始。</p> :
@@ -76,11 +77,12 @@ export function OutcomeChallenges({ missionId, outputId, onSource, onHandoff }: 
               <fieldset><legend>选择这段稿件实际使用的来源</legend>{question.options.map(option => <label className={styles.option} key={option.key}>
                 <input type="checkbox" disabled={busy || uncertain} checked={selected.includes(option.key)} onChange={event => setChoices({ ...choices,
                   [question.key]: event.target.checked ? [...selected, option.key] : selected.filter(key => key !== option.key) })} />{option.label}</label>)}</fieldset>}
-            <div className={styles.actions}><button type="submit" disabled={busy || uncertain || (session.kind === "REHEARSAL" ? !drafts[question.key]?.trim() : !selected.length)}>保存本轮回答</button></div>
+            <div className={styles.actions}><button type="submit" disabled={busy || uncertain || (session.kind === "REHEARSAL" ? !drafts[question.key]?.trim() : session.kind === "METRIC" ? selected.length !== 1 : !selected.length)}>保存本轮回答</button></div>
           </form> : <p role="status">{session.kind === "REHEARSAL" ? "三项核查意见已保存；交回原委托后再修订稿件。" :
             session.answers[0]?.verdict === "LINK_MATCH" ? "已找到这段稿件的全部引用；还可以核对来源是否支持这段表述。" : "选择与稿件引用有差异，可以打开原记录继续核对。"}</p>}
           <div className={styles.sources}>{session.sourceKeys.map((key, index) => <button type="button" key={key} disabled={busy || uncertain}
             onClick={() => void send({ action: "OPEN_SOURCE", sourceKey: key })}>查看资料 {index + 1}{session.openedSourceKeys.includes(key) ? " · 已打开" : ""}</button>)}</div>
+          {session.answers.length > 0 && <div className={styles.actions}><button type="button" disabled={busy || uncertain} onClick={() => void send({ action: "DELETE_ATTEMPT" })}>删除本轮回答</button></div>}
           {session.answers.length > 0 && <details><summary>已保存的回答（{session.answers.length}）</summary>{session.answers.map(answer =>
             <p key={answer.questionKey}>{answer.text || (answer.verdict === "LINK_MATCH" ? "已定位引用" : "引用仍待核对")}</p>)}</details>}
           {session.status === "COMPLETED" && <button type="button" className={styles.handoff} disabled={busy || uncertain}

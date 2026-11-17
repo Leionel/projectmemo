@@ -1,0 +1,14 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2ChallengeMetricPrivacy.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ✓ tests/v2ChallengeMetricPrivacy.test.ts (5 tests) 556ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  15:12:10
+   Duration  3.15s (transform 1.19s, setup 0ms, import 2.12s, tests 556ms, environment 0ms)
+

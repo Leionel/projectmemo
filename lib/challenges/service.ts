@@ -12,15 +12,17 @@ import type { ChallengeSession, ChallengeAnswer, ChallengeKind } from "@/lib/typ
 import { challengeQuestions, linkVerdict, type FrozenQuestion } from "./rules";
 
 const requestId = z.string().min(1).max(100);
-const startInput = z.object({ requestId, kind: z.enum(["EVIDENCE", "REHEARSAL"]), outputId: z.string().min(1).max(160) }).strict();
+const startInput = z.object({ requestId, kind: z.enum(["EVIDENCE", "REHEARSAL", "METRIC"]), outputId: z.string().min(1).max(160) }).strict();
 const commandInput = z.discriminatedUnion("action", [
   z.object({ action: z.literal("ANSWER"), requestId, questionKey: z.string().max(50), text: z.string().trim().max(1200).default(""), selected: z.array(z.string().max(180)).max(17).default([]) }).strict(),
   z.object({ action: z.literal("OPEN_SOURCE"), requestId, sourceKey: z.string().max(240) }).strict(),
   z.object({ action: z.literal("HANDOFF"), requestId }).strict(),
   z.object({ action: z.literal("STOP"), requestId }).strict(),
+  z.object({ action: z.literal("DELETE_ATTEMPT"), requestId }).strict(),
 ]);
 type Frozen = { kind: ChallengeKind; outputId: string; revision: number; contextVersion: number; inputHash: string;
   outputHash: string; questions: FrozenQuestion[]; sourceKeys: string[] };
+const CHALLENGE_RETENTION_DAYS = 30;
 function enabled() {
   if (!isFeatureEnabled("MISSION_V2_ENABLED", false) || !isFeatureEnabled("MISSION_CHALLENGES_ENABLED", false))
     throw new AppError("CHALLENGE_DISABLED", "成果挑战尚未开启", 404);
@@ -35,9 +37,18 @@ async function sessionState(tx: Tx, m: AgentMission, id: string) {
   if (!start) throw new AppError("CHALLENGE_NOT_FOUND", "没有可访问的挑战", 404);
   const frozen = start.payloadJson as unknown as Frozen;
   const events = await tx.agentMissionEvent.findMany({ where: { missionId: m.id, seq: { gt: start.seq },
-    type: { in: ["CHALLENGE_ANSWERED", "CHALLENGE_SOURCE_OPENED", "CHALLENGE_STOPPED", "CHALLENGE_HANDED_OFF"] },
+    type: { in: ["CHALLENGE_ANSWERED", "CHALLENGE_SOURCE_OPENED", "CHALLENGE_STOPPED", "CHALLENGE_HANDED_OFF", "CHALLENGE_ATTEMPT_DELETED"] },
     payloadJson: { path: "$.challengeId", equals: id } }, orderBy: { seq: "asc" }, take: 24 });
-  const answers = events.filter(e => e.type === "CHALLENGE_ANSWERED").map(e => record(e.payloadJson).answer as ChallengeAnswer);
+  // Replay in order: a deletion removes only answers that existed before that tombstone; later
+  // re-answers stay visible. The tombstone never contains the deleted answer text.
+  const answers: ChallengeAnswer[] = [];
+  for (const item of events) {
+    if (item.type === "CHALLENGE_ANSWERED") answers.push(record(item.payloadJson).answer as ChallengeAnswer);
+    else if (item.type === "CHALLENGE_ATTEMPT_DELETED") {
+      const keys = new Set(Array.isArray(record(item.payloadJson).deletedQuestionKeys) ? record(item.payloadJson).deletedQuestionKeys as string[] : []);
+      for (let index = answers.length - 1; index >= 0; index--) if (keys.has(answers[index].questionKey)) answers.splice(index, 1);
+    }
+  }
   const handoff = events.find(e => e.type === "CHALLENGE_HANDED_OFF");
   let reason: string | null = null;
   const output = await tx.agentMissionOutput.findFirst({ where: { id: frozen.outputId, missionId: m.id } });
@@ -56,7 +67,9 @@ async function sessionState(tx: Tx, m: AgentMission, id: string) {
     questions: reason ? [] : frozen.questions.map(({ key, title, excerpt, options }) => ({ key, title, excerpt, options })), answers: reason ? [] : answers,
     sourceKeys: reason ? [] : frozen.sourceKeys,
     openedSourceKeys: reason ? [] : events.filter(e => e.type === "CHALLENGE_SOURCE_OPENED").map(e => String(record(e.payloadJson).sourceKey)),
-    handoffSourceId: handoff ? String(record(handoff.payloadJson).sourceId) : null, createdAt: start.createdAt.toISOString() };
+    handoffSourceId: handoff ? String(record(handoff.payloadJson).sourceId) : null, createdAt: start.createdAt.toISOString(),
+    retentionDays: CHALLENGE_RETENTION_DAYS,
+    logicalDeletionNote: "删除仅使本轮回答不再展示，审计事件仍按保留期限保存；不宣称已物理擦除。" };
   return { session, frozen };
 }
 export async function readChallenge(userId: string, missionId: string, id?: string): Promise<ChallengeSession | null> {
@@ -99,6 +112,11 @@ export async function commandChallenge(userId: string, missionId: string, id: st
     const command = { id: key, hash }, base = { challengeId: id };
     if (body.action === "STOP") {
       if (session.status !== "STOPPED") await event(tx, missionId, "CHALLENGE_STOPPED", base, command);
+    } else if (body.action === "DELETE_ATTEMPT") {
+      if (session.status === "STALE") throw new AppError("CHALLENGE_STALE", session.reason!, 409);
+      if (session.status === "STOPPED") throw new AppError("CHALLENGE_STOPPED", "本轮已退出，不再接受新操作", 409);
+      // Tombstone only the answer keys; deleted text is not copied into another event payload.
+      await event(tx, missionId, "CHALLENGE_ATTEMPT_DELETED", { ...base, deletedQuestionKeys: session.answers.map(answer => answer.questionKey), deletedCount: session.answers.length }, command);
     } else {
       if (session.status === "STALE") throw new AppError("CHALLENGE_STALE", session.reason!, 409);
       if (session.status === "STOPPED" || ["CANCELLED", "SUCCEEDED"].includes(m.status)) throw new AppError("CHALLENGE_STOPPED", "本轮或原委托已结束，不再接受新操作", 409);

@@ -1,0 +1,1560 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-11-17",
+  "sourceTruth": "SYNTHETIC_ONLY",
+  "realAuthorizedSources": 0,
+  "note": "All cases are synthetic. No real authorized project source is claimed; real-source validation remains UNVERIFIED.",
+  "cases": [
+    {
+      "id": "rule-evidence-1",
+      "kind": "EVIDENCE",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:e1-0",
+          "hash": "capture:e1-00000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e1-0",
+          "revision": "1",
+          "text": "来源 0 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b1",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b1",
+            "sourceIds": [
+              "capture:e1-0"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:e1-0"
+              }
+            ]
+          },
+          {
+            "blockId": "note",
+            "kind": "INFERENCE",
+            "text": "推断段",
+            "sourceIds": []
+          }
+        ]
+      },
+      "expectedError": false,
+      "expected": [
+        "capture:e1-0"
+      ]
+    },
+    {
+      "id": "rule-evidence-2",
+      "kind": "EVIDENCE",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:e2-0",
+          "hash": "capture:e2-00000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e2-0",
+          "revision": "1",
+          "text": "来源 0 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e2-1",
+          "hash": "capture:e2-10000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e2-1",
+          "revision": "1",
+          "text": "来源 1 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b2",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b2",
+            "sourceIds": [
+              "capture:e2-0",
+              "capture:e2-1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:e2-0"
+              },
+              {
+                "sourceId": "capture:e2-1"
+              }
+            ]
+          },
+          {
+            "blockId": "note",
+            "kind": "INFERENCE",
+            "text": "推断段",
+            "sourceIds": []
+          }
+        ]
+      },
+      "expectedError": false,
+      "expected": [
+        "capture:e2-0",
+        "capture:e2-1"
+      ]
+    },
+    {
+      "id": "rule-evidence-3",
+      "kind": "EVIDENCE",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:e3-0",
+          "hash": "capture:e3-00000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e3-0",
+          "revision": "1",
+          "text": "来源 0 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e3-1",
+          "hash": "capture:e3-10000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e3-1",
+          "revision": "1",
+          "text": "来源 1 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e3-2",
+          "hash": "capture:e3-20000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e3-2",
+          "revision": "1",
+          "text": "来源 2 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b3",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b3",
+            "sourceIds": [
+              "capture:e3-0",
+              "capture:e3-1",
+              "capture:e3-2"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:e3-0"
+              },
+              {
+                "sourceId": "capture:e3-1"
+              },
+              {
+                "sourceId": "capture:e3-2"
+              }
+            ]
+          },
+          {
+            "blockId": "note",
+            "kind": "INFERENCE",
+            "text": "推断段",
+            "sourceIds": []
+          }
+        ]
+      },
+      "expectedError": false,
+      "expected": [
+        "capture:e3-0",
+        "capture:e3-1",
+        "capture:e3-2"
+      ]
+    },
+    {
+      "id": "rule-evidence-4",
+      "kind": "EVIDENCE",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:e4-0",
+          "hash": "capture:e4-00000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e4-0",
+          "revision": "1",
+          "text": "来源 0 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e4-1",
+          "hash": "capture:e4-10000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e4-1",
+          "revision": "1",
+          "text": "来源 1 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e4-2",
+          "hash": "capture:e4-20000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e4-2",
+          "revision": "1",
+          "text": "来源 2 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e4-3",
+          "hash": "capture:e4-30000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e4-3",
+          "revision": "1",
+          "text": "来源 3 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b4",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b4",
+            "sourceIds": [
+              "capture:e4-0",
+              "capture:e4-1",
+              "capture:e4-2",
+              "capture:e4-3"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:e4-0"
+              },
+              {
+                "sourceId": "capture:e4-1"
+              },
+              {
+                "sourceId": "capture:e4-2"
+              },
+              {
+                "sourceId": "capture:e4-3"
+              }
+            ]
+          },
+          {
+            "blockId": "note",
+            "kind": "INFERENCE",
+            "text": "推断段",
+            "sourceIds": []
+          }
+        ]
+      },
+      "expectedError": false,
+      "expected": [
+        "capture:e4-0",
+        "capture:e4-1",
+        "capture:e4-2",
+        "capture:e4-3"
+      ]
+    },
+    {
+      "id": "rule-evidence-5",
+      "kind": "EVIDENCE",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:e5-0",
+          "hash": "capture:e5-00000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e5-0",
+          "revision": "1",
+          "text": "来源 0 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e5-1",
+          "hash": "capture:e5-10000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e5-1",
+          "revision": "1",
+          "text": "来源 1 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e5-2",
+          "hash": "capture:e5-20000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e5-2",
+          "revision": "1",
+          "text": "来源 2 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e5-3",
+          "hash": "capture:e5-30000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e5-3",
+          "revision": "1",
+          "text": "来源 3 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e5-4",
+          "hash": "capture:e5-40000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e5-4",
+          "revision": "1",
+          "text": "来源 4 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b5",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b5",
+            "sourceIds": [
+              "capture:e5-0",
+              "capture:e5-1",
+              "capture:e5-2",
+              "capture:e5-3",
+              "capture:e5-4"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:e5-0"
+              },
+              {
+                "sourceId": "capture:e5-1"
+              },
+              {
+                "sourceId": "capture:e5-2"
+              },
+              {
+                "sourceId": "capture:e5-3"
+              },
+              {
+                "sourceId": "capture:e5-4"
+              }
+            ]
+          },
+          {
+            "blockId": "note",
+            "kind": "INFERENCE",
+            "text": "推断段",
+            "sourceIds": []
+          }
+        ]
+      },
+      "expectedError": false,
+      "expected": [
+        "capture:e5-0",
+        "capture:e5-1",
+        "capture:e5-2",
+        "capture:e5-3",
+        "capture:e5-4"
+      ]
+    },
+    {
+      "id": "rule-evidence-6",
+      "kind": "EVIDENCE",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:e6-0",
+          "hash": "capture:e6-00000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e6-0",
+          "revision": "1",
+          "text": "来源 0 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e6-1",
+          "hash": "capture:e6-10000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e6-1",
+          "revision": "1",
+          "text": "来源 1 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e6-2",
+          "hash": "capture:e6-20000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e6-2",
+          "revision": "1",
+          "text": "来源 2 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e6-3",
+          "hash": "capture:e6-30000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e6-3",
+          "revision": "1",
+          "text": "来源 3 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e6-4",
+          "hash": "capture:e6-40000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e6-4",
+          "revision": "1",
+          "text": "来源 4 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e6-5",
+          "hash": "capture:e6-50000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e6-5",
+          "revision": "1",
+          "text": "来源 5 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b6",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b6",
+            "sourceIds": [
+              "capture:e6-0",
+              "capture:e6-1",
+              "capture:e6-2",
+              "capture:e6-3",
+              "capture:e6-4",
+              "capture:e6-5"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:e6-0"
+              },
+              {
+                "sourceId": "capture:e6-1"
+              },
+              {
+                "sourceId": "capture:e6-2"
+              },
+              {
+                "sourceId": "capture:e6-3"
+              },
+              {
+                "sourceId": "capture:e6-4"
+              },
+              {
+                "sourceId": "capture:e6-5"
+              }
+            ]
+          },
+          {
+            "blockId": "note",
+            "kind": "INFERENCE",
+            "text": "推断段",
+            "sourceIds": []
+          }
+        ]
+      },
+      "expectedError": false,
+      "expected": [
+        "capture:e6-0",
+        "capture:e6-1",
+        "capture:e6-2",
+        "capture:e6-3",
+        "capture:e6-4",
+        "capture:e6-5"
+      ]
+    },
+    {
+      "id": "rule-evidence-7",
+      "kind": "EVIDENCE",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:e7-0",
+          "hash": "capture:e7-00000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e7-0",
+          "revision": "1",
+          "text": "来源 0 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e7-1",
+          "hash": "capture:e7-10000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e7-1",
+          "revision": "1",
+          "text": "来源 1 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e7-2",
+          "hash": "capture:e7-20000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e7-2",
+          "revision": "1",
+          "text": "来源 2 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e7-3",
+          "hash": "capture:e7-30000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e7-3",
+          "revision": "1",
+          "text": "来源 3 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e7-4",
+          "hash": "capture:e7-40000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e7-4",
+          "revision": "1",
+          "text": "来源 4 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e7-5",
+          "hash": "capture:e7-50000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e7-5",
+          "revision": "1",
+          "text": "来源 5 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e7-6",
+          "hash": "capture:e7-60000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e7-6",
+          "revision": "1",
+          "text": "来源 6 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b7",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b7",
+            "sourceIds": [
+              "capture:e7-0",
+              "capture:e7-1",
+              "capture:e7-2",
+              "capture:e7-3",
+              "capture:e7-4",
+              "capture:e7-5",
+              "capture:e7-6"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:e7-0"
+              },
+              {
+                "sourceId": "capture:e7-1"
+              },
+              {
+                "sourceId": "capture:e7-2"
+              },
+              {
+                "sourceId": "capture:e7-3"
+              },
+              {
+                "sourceId": "capture:e7-4"
+              },
+              {
+                "sourceId": "capture:e7-5"
+              },
+              {
+                "sourceId": "capture:e7-6"
+              }
+            ]
+          },
+          {
+            "blockId": "note",
+            "kind": "INFERENCE",
+            "text": "推断段",
+            "sourceIds": []
+          }
+        ]
+      },
+      "expectedError": false,
+      "expected": [
+        "capture:e7-0",
+        "capture:e7-1",
+        "capture:e7-2",
+        "capture:e7-3",
+        "capture:e7-4",
+        "capture:e7-5",
+        "capture:e7-6"
+      ]
+    },
+    {
+      "id": "rule-evidence-8",
+      "kind": "EVIDENCE",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:e8-0",
+          "hash": "capture:e8-00000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e8-0",
+          "revision": "1",
+          "text": "来源 0 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e8-1",
+          "hash": "capture:e8-10000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e8-1",
+          "revision": "1",
+          "text": "来源 1 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e8-2",
+          "hash": "capture:e8-20000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e8-2",
+          "revision": "1",
+          "text": "来源 2 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e8-3",
+          "hash": "capture:e8-30000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e8-3",
+          "revision": "1",
+          "text": "来源 3 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e8-4",
+          "hash": "capture:e8-40000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e8-4",
+          "revision": "1",
+          "text": "来源 4 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e8-5",
+          "hash": "capture:e8-50000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e8-5",
+          "revision": "1",
+          "text": "来源 5 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e8-6",
+          "hash": "capture:e8-60000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e8-6",
+          "revision": "1",
+          "text": "来源 6 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e8-7",
+          "hash": "capture:e8-70000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e8-7",
+          "revision": "1",
+          "text": "来源 7 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b8",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b8",
+            "sourceIds": [
+              "capture:e8-0",
+              "capture:e8-1",
+              "capture:e8-2",
+              "capture:e8-3",
+              "capture:e8-4",
+              "capture:e8-5",
+              "capture:e8-6",
+              "capture:e8-7"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:e8-0"
+              },
+              {
+                "sourceId": "capture:e8-1"
+              },
+              {
+                "sourceId": "capture:e8-2"
+              },
+              {
+                "sourceId": "capture:e8-3"
+              },
+              {
+                "sourceId": "capture:e8-4"
+              },
+              {
+                "sourceId": "capture:e8-5"
+              },
+              {
+                "sourceId": "capture:e8-6"
+              },
+              {
+                "sourceId": "capture:e8-7"
+              }
+            ]
+          },
+          {
+            "blockId": "note",
+            "kind": "INFERENCE",
+            "text": "推断段",
+            "sourceIds": []
+          }
+        ]
+      },
+      "expectedError": false,
+      "expected": [
+        "capture:e8-0",
+        "capture:e8-1",
+        "capture:e8-2",
+        "capture:e8-3",
+        "capture:e8-4",
+        "capture:e8-5",
+        "capture:e8-6",
+        "capture:e8-7"
+      ]
+    },
+    {
+      "id": "rule-evidence-9",
+      "kind": "EVIDENCE",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:e9-0",
+          "hash": "capture:e9-00000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e9-0",
+          "revision": "1",
+          "text": "来源 0 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e9-1",
+          "hash": "capture:e9-10000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e9-1",
+          "revision": "1",
+          "text": "来源 1 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e9-2",
+          "hash": "capture:e9-20000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e9-2",
+          "revision": "1",
+          "text": "来源 2 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e9-3",
+          "hash": "capture:e9-30000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e9-3",
+          "revision": "1",
+          "text": "来源 3 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e9-4",
+          "hash": "capture:e9-40000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e9-4",
+          "revision": "1",
+          "text": "来源 4 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e9-5",
+          "hash": "capture:e9-50000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e9-5",
+          "revision": "1",
+          "text": "来源 5 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e9-6",
+          "hash": "capture:e9-60000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e9-6",
+          "revision": "1",
+          "text": "来源 6 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e9-7",
+          "hash": "capture:e9-70000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e9-7",
+          "revision": "1",
+          "text": "来源 7 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e9-8",
+          "hash": "capture:e9-80000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e9-8",
+          "revision": "1",
+          "text": "来源 8 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "inference",
+            "kind": "INFERENCE",
+            "text": "只有推断，没有引用",
+            "sourceIds": []
+          }
+        ]
+      },
+      "expectedError": true,
+      "expected": []
+    },
+    {
+      "id": "rule-evidence-10",
+      "kind": "EVIDENCE",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:e10-0",
+          "hash": "capture:e10-0000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e10-0",
+          "revision": "1",
+          "text": "来源 0 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e10-1",
+          "hash": "capture:e10-1000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e10-1",
+          "revision": "1",
+          "text": "来源 1 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e10-2",
+          "hash": "capture:e10-2000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e10-2",
+          "revision": "1",
+          "text": "来源 2 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e10-3",
+          "hash": "capture:e10-3000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e10-3",
+          "revision": "1",
+          "text": "来源 3 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e10-4",
+          "hash": "capture:e10-4000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e10-4",
+          "revision": "1",
+          "text": "来源 4 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e10-5",
+          "hash": "capture:e10-5000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e10-5",
+          "revision": "1",
+          "text": "来源 5 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e10-6",
+          "hash": "capture:e10-6000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e10-6",
+          "revision": "1",
+          "text": "来源 6 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e10-7",
+          "hash": "capture:e10-7000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e10-7",
+          "revision": "1",
+          "text": "来源 7 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e10-8",
+          "hash": "capture:e10-8000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e10-8",
+          "revision": "1",
+          "text": "来源 8 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        },
+        {
+          "id": "capture:e10-9",
+          "hash": "capture:e10-9000000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "e10-9",
+          "revision": "1",
+          "text": "来源 9 的原文记录",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b10",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b10",
+            "sourceIds": [
+              "capture:e10-0",
+              "capture:e10-1",
+              "capture:e10-2"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:e10-0"
+              },
+              {
+                "sourceId": "capture:e10-1"
+              },
+              {
+                "sourceId": "capture:e10-2"
+              }
+            ]
+          },
+          {
+            "blockId": "note",
+            "kind": "INFERENCE",
+            "text": "推断段",
+            "sourceIds": []
+          }
+        ]
+      },
+      "expectedError": false,
+      "expected": [
+        "capture:e10-0",
+        "capture:e10-1",
+        "capture:e10-2"
+      ]
+    },
+    {
+      "id": "rule-metric-same",
+      "kind": "METRIC",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:m-same",
+          "hash": "capture:m-same00000000000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "m-same",
+          "revision": "1",
+          "text": "[{\"runId\":\"a\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":80,\"unit\":\"%\",\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"},{\"runId\":\"b\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":84,\"unit\":\"%\",\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"}]",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b",
+            "sourceIds": [
+              "capture:m-same"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:m-same"
+              }
+            ]
+          }
+        ]
+      },
+      "expectedError": false,
+      "expected": [
+        "CONDITIONS_MATCH"
+      ]
+    },
+    {
+      "id": "rule-metric-unknown-dataset",
+      "kind": "METRIC",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:m-unknown-dataset",
+          "hash": "capture:m-unknown-dataset000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "m-unknown-dataset",
+          "revision": "1",
+          "text": "[{\"runId\":\"a\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":80,\"unit\":\"%\",\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":null,\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"},{\"runId\":\"b\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":84,\"unit\":\"%\",\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"}]",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b",
+            "sourceIds": [
+              "capture:m-unknown-dataset"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:m-unknown-dataset"
+              }
+            ]
+          }
+        ]
+      },
+      "expectedError": false,
+      "expected": [
+        "CONDITIONS_UNKNOWN"
+      ]
+    },
+    {
+      "id": "rule-metric-unknown-unit",
+      "kind": "METRIC",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:m-unknown-unit",
+          "hash": "capture:m-unknown-unit000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "m-unknown-unit",
+          "revision": "1",
+          "text": "[{\"runId\":\"a\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":80,\"unit\":\"%\",\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"},{\"runId\":\"b\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":84,\"unit\":null,\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"}]",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b",
+            "sourceIds": [
+              "capture:m-unknown-unit"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:m-unknown-unit"
+              }
+            ]
+          }
+        ]
+      },
+      "expectedError": false,
+      "expected": [
+        "CONDITIONS_UNKNOWN"
+      ]
+    },
+    {
+      "id": "rule-metric-unit-mismatch",
+      "kind": "METRIC",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:m-unit-mismatch",
+          "hash": "capture:m-unit-mismatch00000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "m-unit-mismatch",
+          "revision": "1",
+          "text": "[{\"runId\":\"a\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":80,\"unit\":\"%\",\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"},{\"runId\":\"b\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":0.84,\"unit\":\"ratio\",\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"}]",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b",
+            "sourceIds": [
+              "capture:m-unit-mismatch"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:m-unit-mismatch"
+              }
+            ]
+          }
+        ]
+      },
+      "expectedError": false,
+      "expected": [
+        "CONDITIONS_DIFFER"
+      ]
+    },
+    {
+      "id": "rule-metric-seed-mismatch",
+      "kind": "METRIC",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:m-seed-mismatch",
+          "hash": "capture:m-seed-mismatch00000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "m-seed-mismatch",
+          "revision": "1",
+          "text": "[{\"runId\":\"a\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":80,\"unit\":\"%\",\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"},{\"runId\":\"b\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":84,\"unit\":\"%\",\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"7\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"}]",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b",
+            "sourceIds": [
+              "capture:m-seed-mismatch"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:m-seed-mismatch"
+              }
+            ]
+          }
+        ]
+      },
+      "expectedError": false,
+      "expected": [
+        "CONDITIONS_DIFFER"
+      ]
+    },
+    {
+      "id": "rule-metric-direction-mismatch",
+      "kind": "METRIC",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:m-direction-mismatch",
+          "hash": "capture:m-direction-mismatch000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "m-direction-mismatch",
+          "revision": "1",
+          "text": "[{\"runId\":\"a\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":80,\"unit\":\"%\",\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"},{\"runId\":\"b\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":84,\"unit\":\"%\",\"period\":\"2026-11\",\"direction\":\"LOWER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"}]",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b",
+            "sourceIds": [
+              "capture:m-direction-mismatch"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:m-direction-mismatch"
+              }
+            ]
+          }
+        ]
+      },
+      "expectedError": false,
+      "expected": [
+        "CONDITIONS_DIFFER"
+      ]
+    },
+    {
+      "id": "rule-metric-metric-mismatch",
+      "kind": "METRIC",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:m-metric-mismatch",
+          "hash": "capture:m-metric-mismatch000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "m-metric-mismatch",
+          "revision": "1",
+          "text": "[{\"runId\":\"a\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":80,\"unit\":\"%\",\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"},{\"runId\":\"b\",\"method\":\"baseline\",\"metric\":\"f1\",\"value\":84,\"unit\":\"%\",\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"}]",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b",
+            "sourceIds": [
+              "capture:m-metric-mismatch"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:m-metric-mismatch"
+              }
+            ]
+          }
+        ]
+      },
+      "expectedError": false,
+      "expected": [
+        "CONDITIONS_DIFFER"
+      ]
+    },
+    {
+      "id": "rule-metric-missing-row",
+      "kind": "METRIC",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:m-missing-row",
+          "hash": "capture:m-missing-row0000000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "m-missing-row",
+          "revision": "1",
+          "text": "[{\"runId\":\"a\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":80,\"unit\":\"%\",\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"}]",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b",
+            "sourceIds": [
+              "capture:m-missing-row"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:m-missing-row"
+              }
+            ]
+          }
+        ]
+      },
+      "expectedError": true,
+      "expected": []
+    },
+    {
+      "id": "rule-metric-duplicate-row",
+      "kind": "METRIC",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:m-duplicate-row",
+          "hash": "capture:m-duplicate-row00000000000000000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "m-duplicate-row",
+          "revision": "1",
+          "text": "[{\"runId\":\"a\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":80,\"unit\":\"%\",\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"},{\"runId\":\"a\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":84,\"unit\":\"%\",\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"}]",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b",
+            "sourceIds": [
+              "capture:m-duplicate-row"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:m-duplicate-row"
+              }
+            ]
+          }
+        ]
+      },
+      "expectedError": true,
+      "expected": []
+    },
+    {
+      "id": "rule-metric-unknown-condition-and-unit",
+      "kind": "METRIC",
+      "synthetic": true,
+      "realAuthorized": false,
+      "sources": [
+        {
+          "id": "capture:m-unknown-condition-and-unit",
+          "hash": "capture:m-unknown-condition-and-unit0000000000000000000000000000",
+          "projectId": "p",
+          "conversationId": null,
+          "kind": "capture",
+          "entityType": "capture",
+          "entityId": "m-unknown-condition-and-unit",
+          "revision": "1",
+          "text": "[{\"runId\":\"a\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":80,\"unit\":\"%\",\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":null,\"batchSize\":\"16\"},{\"runId\":\"b\",\"method\":\"baseline\",\"metric\":\"accuracy\",\"value\":84,\"unit\":null,\"period\":\"2026-11\",\"direction\":\"HIGHER_BETTER\",\"dataset\":\"classroom-v1\",\"split\":\"test\",\"seed\":\"42\",\"evaluationCode\":\"eval-v1\",\"environment\":\"local\",\"phase\":\"final\",\"batchSize\":\"16\"}]",
+          "observedAt": "2026-11-17T00:00:00.000Z"
+        }
+      ],
+      "content": {
+        "blocks": [
+          {
+            "blockId": "b",
+            "kind": "PROJECT_OBSERVATION",
+            "text": "稿件段落 b",
+            "sourceIds": [
+              "capture:m-unknown-condition-and-unit"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:m-unknown-condition-and-unit"
+              }
+            ]
+          }
+        ]
+      },
+      "expectedError": false,
+      "expected": [
+        "CONDITIONS_UNKNOWN"
+      ]
+    }
+  ]
+}

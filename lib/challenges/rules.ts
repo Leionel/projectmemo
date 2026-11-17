@@ -2,10 +2,12 @@ import { AppError } from "@/lib/api";
 import { record } from "@/lib/conversation/repository";
 import type { Source } from "@/lib/mission/contracts";
 import type { ChallengeKind, ChallengeQuestion, ChallengeOption } from "@/lib/types/challenge";
+import { compareMetricRecords, parseMetricRecords, type MetricRecord } from "@/lib/experiments/metrics";
 
 export type FrozenQuestion = ChallengeQuestion & { expected: string[] };
 /** Deterministic citation tracing only. A link match never establishes the truth of a claim. */
 export function challengeQuestions(kind: ChallengeKind, content: unknown, sources: Source[]): FrozenQuestion[] {
+  if (kind === "METRIC") return metricChallengeQuestions(sources);
   const body = record(content), blocks = Array.isArray(body.blocks) ? body.blocks.map(record) : [];
   const block = blocks.find(b => b.kind !== "INFERENCE" && typeof b.text === "string" && Array.isArray(b.sourceIds) && b.sourceIds.length > 0);
   if (kind === "EVIDENCE") {
@@ -30,4 +32,31 @@ export function challengeQuestions(kind: ChallengeKind, content: unknown, source
 export function linkVerdict(question: FrozenQuestion, selected: string[]) {
   if (selected.some(key => !question.options.some(option => option.key === key))) throw new AppError("CHALLENGE_OPTION_INVALID", "选项不属于本题，请重新读取", 422);
   return question.expected.length === selected.length && question.expected.every(key => selected.includes(key)) ? "LINK_MATCH" as const : "REVIEW" as const;
+}
+
+/** Deterministic comparability question over real MetricRecord rows in approved sources. */
+export function metricChallengeQuestions(sources: Source[]): FrozenQuestion[] {
+  const records: MetricRecord[] = [];
+  for (const source of sources) {
+    for (const format of ["JSON", "CSV"] as const) {
+      try { records.push(...parseMetricRecords(source.text, format)); } catch { /* not this format */ }
+    }
+  }
+  const picked = records.slice(0, 2);
+  if (picked.length < 2) throw new AppError("CHALLENGE_NOT_READY", "当前来源里没有两条可对照的指标记录，暂时不能出指标可比性题", 409);
+  const comparison = compareMetricRecords(picked[0], picked[1]);
+  const expected = comparison.state === "SAME_CONDITIONS" ? "CONDITIONS_MATCH"
+    : (comparison as { unknown?: string[] }).unknown?.length ? "CONDITIONS_UNKNOWN" : "CONDITIONS_DIFFER";
+  const summarize = (record: MetricRecord) => record.metric + " " + record.value + " " + record.unit + "（" + record.period + "，" + record.method + "）";
+  return [{
+    key: "compare",
+    title: "这两条指标记录能否直接比较？",
+    excerpt: "记录 A：" + summarize(picked[0]) + "；记录 B：" + summarize(picked[1]),
+    options: [
+      { key: "CONDITIONS_MATCH", label: "条件与口径相同，可以直接比较" },
+      { key: "CONDITIONS_UNKNOWN", label: "条件或口径有未知项，不能直接比较" },
+      { key: "CONDITIONS_DIFFER", label: "条件、单位、周期或方向不同，不能直接比较" },
+    ],
+    expected: [expected],
+  }];
 }

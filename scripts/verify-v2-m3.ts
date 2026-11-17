@@ -29,6 +29,12 @@ try {
   const readWorkbench = () => get<WorkbenchSnapshot>(base + "/workbench");
   const readSession = async () => (await get<{ session: ChallengeSession }>(base + "/challenges")).session;
   const first = await eventually(readWorkbench, value => value.outputs.length === 1 && value.phase === "WAITING_OBSERVATION");
+  const reentryBrief = page.getByRole("region", { name: "回访变化" });
+  await reentryBrief.waitFor({ timeout: 30000 });
+  await reentryBrief.getByText("私有稿更新到第 1 版").waitFor();
+  await reentryBrief.getByRole("button", { name: "我已看过" }).click();
+  await reentryBrief.getByText("已记录你看到了这次变化；任务进度没有因此前进。").waitFor();
+  checks.push("reentry brief shows the real first revision, keeps occurred/recorded times, and read does not advance the Mission");
   const area = page.getByRole("region", { name: "成果挑战" });
   await area.getByRole("button", { name: "严格导师 · 三轮彩排" }).click();
   await area.getByRole("heading", { name: /交付彩排/ }).waitFor();

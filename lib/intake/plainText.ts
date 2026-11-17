@@ -1,15 +1,16 @@
 import { AppError } from "@/lib/api";
 
-/** Plain-text material accepted from Web or native file pickers. DOCX is parsed separately. */
+/** Plain-text material accepted from Web or native file pickers. DOCX/XLSX are parsed separately. */
 export type PlainMaterialFormat = "TEXT" | "MARKDOWN" | "CSV";
 export type PlainMaterial = { name: string; format: PlainMaterialFormat; text: string; limitations: string };
 
 export const PLAIN_MATERIAL_MAX_BYTES = 64 * 1024;
 export const MATERIAL_MAX_CHARS = 20_000;
 
-export function plainMaterialFormat(name: string): PlainMaterialFormat | "DOCX" | null {
+export function plainMaterialFormat(name: string): PlainMaterialFormat | "DOCX" | "XLSX" | null {
   const lower = name.toLowerCase();
   if (lower.endsWith(".docx")) return "DOCX";
+  if (lower.endsWith(".xlsx")) return "XLSX";
   if (lower.endsWith(".md") || lower.endsWith(".markdown")) return "MARKDOWN";
   if (lower.endsWith(".csv")) return "CSV";
   if (lower.endsWith(".txt")) return "TEXT";
@@ -25,7 +26,7 @@ const LIMITATIONS: Record<PlainMaterialFormat, string> = {
 /** Bounded, strict UTF-8 decode; rejects binary payloads instead of guessing. */
 export function extractPlainText(bytes: Uint8Array, name: string): PlainMaterial {
   const format = plainMaterialFormat(name);
-  if (!format || format === "DOCX") throw new AppError("MATERIAL_FORMAT", "请选择 TXT、Markdown、普通 CSV 或 DOCX 文件", 422);
+  if (!format || format === "DOCX" || format === "XLSX") throw new AppError("MATERIAL_FORMAT", "请选择 TXT、Markdown、普通 CSV、DOCX 或 XLSX 文件", 422);
   if (bytes.byteLength === 0) throw new AppError("MATERIAL_EMPTY", "文件为空，请重新选择", 422);
   if (bytes.byteLength > PLAIN_MATERIAL_MAX_BYTES) throw new AppError("MATERIAL_SIZE_LIMIT", "文本材料需在 64KB 以内", 413);
   if (bytes.includes(0)) throw new AppError("MATERIAL_BINARY", "这个文件不是可读文本，请选择文本文件", 422);

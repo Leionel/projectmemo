@@ -11,14 +11,14 @@ export function MaterialInput({ value, name, projectId, onChange, onReadingChang
     if (!file) return;
     setReading(true); onReadingChange?.(true);
     try {
-      const docx = /\.docx$/i.test(file.name);
-      if (!/\.(txt|md|csv|docx)$/i.test(file.name) || file.size > (docx ? 2 * 1024 * 1024 : 65536)) throw new Error("支持 2MB 以内的 DOCX，以及 64KB 以内的 TXT、Markdown、CSV");
+      const rich = /\.(docx|xlsx)$/i.test(file.name);
+      if (!/\.(txt|md|csv|docx|xlsx)$/i.test(file.name) || file.size > (rich ? 2 * 1024 * 1024 : 65536)) throw new Error("支持 2MB 以内的 DOCX/XLSX，以及 64KB 以内的 TXT、Markdown、CSV");
       let text: string;
-      if (docx) {
+      if (rich) {
         const body = new FormData(); body.append("file", file);
         const response = await fetch("/api/projects/" + encodeURIComponent(projectId) + "/material-extract", { method: "POST", body });
         const value = await response.json();
-        if (!response.ok) throw new Error(value.error?.message ?? "DOCX 提取失败，请重试");
+        if (!response.ok) throw new Error(value.error?.message ?? "文件提取失败，请重试");
         text = value.text;
       } else text = new TextDecoder("utf-8", { fatal: true }).decode(await file.arrayBuffer());
       if (text.length > 20000) throw new Error("材料不能超过 2 万字");
@@ -33,9 +33,9 @@ export function MaterialInput({ value, name, projectId, onChange, onReadingChang
   return <>
     <label>{label}<textarea value={value} maxLength={20000} disabled={disabled || reading} required rows={4}
       onChange={event => { revision.current++; setError(""); onChange(event.target.value, name); }} /></label>
-    <label>从文件导入<input type="file" aria-label="导入材料文件" accept=".txt,.md,.csv,.docx" disabled={disabled || reading} onChange={event => void importFile(event)} /></label>
+    <label>从文件导入<input type="file" aria-label="导入材料文件" accept=".txt,.md,.csv,.docx,.xlsx" disabled={disabled || reading} onChange={event => void importFile(event)} /></label>
     {reading && <p role="status">正在提取材料…</p>}
-    {name && <p>{name}{/\.docx$/i.test(name) ? " · 仅正文与表格文字，不含图片和排版" : ""}</p>}
+    {name && <p>{name}{/\.docx$/i.test(name) ? " · 仅正文与表格文字，不含图片和排版" : /\.xlsx$/i.test(name) ? " · 仅单元格文本，不含公式计算、图片或样式" : ""}</p>}
     {error && <p role="alert">{error}</p>}
   </>;
 }

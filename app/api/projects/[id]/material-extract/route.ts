@@ -2,6 +2,7 @@ import { authenticateUser } from "@/lib/auth/guard";
 import { AppError, apiError } from "@/lib/api";
 import { assertOwner } from "@/lib/mission/repository";
 import { extractDocxText } from "@/lib/intake/docx";
+import { extractXlsxText } from "@/lib/intake/xlsx";
 import { extractPlainText, plainMaterialFormat } from "@/lib/intake/plainText";
 import { isFeatureEnabled } from "@/lib/config/features";
 export const runtime = "nodejs";
@@ -33,12 +34,18 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     const file = data.get("file");
     if (data.getAll("file").length !== 1 || !(file instanceof File) || file.name.length > 180) throw new AppError("MATERIAL_FORMAT", "请选择一个材料文件", 422);
     const format = plainMaterialFormat(file.name);
-    if (!format) throw new AppError("MATERIAL_FORMAT", "请选择 TXT、Markdown、普通 CSV 或 DOCX 文件", 422);
+    if (!format) throw new AppError("MATERIAL_FORMAT", "请选择 TXT、Markdown、普通 CSV、DOCX 或 XLSX 文件", 422);
     const bytes = new Uint8Array(await file.arrayBuffer());
     if (format === "DOCX") {
       const text = await extractDocxText(bytes);
       if (text.length > 20_000) throw new AppError("MATERIAL_TEXT_LIMIT", "Word 正文超过 20,000 字，请拆分后导入", 413);
       return Response.json({ text, name: file.name, format: "DOCX_TEXT", limitations: "仅提取正文和表格文字，不保留排版、图片或嵌入附件" },
+        { headers: { "Cache-Control": "private, no-store" } });
+    }
+    if (format === "XLSX") {
+      const text = await extractXlsxText(bytes);
+      if (text.length > 20_000) throw new AppError("MATERIAL_TEXT_LIMIT", "表格文本超过 20,000 字，请拆分后导入", 413);
+      return Response.json({ text, name: file.name, format: "XLSX_TEXT", limitations: "读取单元格文本，不计算公式、不保留样式、图片或宏" },
         { headers: { "Cache-Control": "private, no-store" } });
     }
     const parsed = extractPlainText(bytes, file.name);

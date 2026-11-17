@@ -8,9 +8,9 @@ export function parseProjectMaterial(raw: string, name?: string) {
     throw new AppError("MATERIAL_SIZE_LIMIT", "材料需在 2 万字、64KB 以内", 422);
   if (/[\u0000\uFFFD]/u.test(text)) throw new AppError("MATERIAL_ENCODING", "请使用 UTF-8 编码的文本文件", 422);
   const extension = name?.split(".").at(-1)?.toLowerCase();
-  if (name && !["txt", "md", "csv", "docx"].includes(extension ?? ""))
-    throw new AppError("MATERIAL_FORMAT", "支持 TXT、Markdown、普通 CSV 和 DOCX 提取文本", 422);
-  const format = extension === "csv" ? "CSV" : extension === "md" ? "MARKDOWN" : extension === "docx" ? "DOCX_TEXT" : "TEXT";
+  if (name && !["txt", "md", "csv", "docx", "xlsx"].includes(extension ?? ""))
+    throw new AppError("MATERIAL_FORMAT", "支持 TXT、Markdown、普通 CSV、DOCX 和 XLSX 提取文本", 422);
+  const format = extension === "csv" ? "CSV" : extension === "md" ? "MARKDOWN" : extension === "docx" ? "DOCX_TEXT" : extension === "xlsx" ? "XLSX_TEXT" : "TEXT";
   let rows: number | undefined, columns: number | undefined;
   if (format === "CSV") {
     try {

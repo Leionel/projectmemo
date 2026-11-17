@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: path.resolve(import.meta.dirname),
   // Runtime state and private evidence belong on their configured volumes, never in the server bundle.
   outputFileTracingExcludes: { "/*": ["./.env*", "./.runtime/**", "./evidence/**", "./tmp/**", "./storage/**", "./prisma/*.db*"] },
-  outputFileTracingIncludes: { "/*": ["./skills/builtins/**/SKILL.md", "./lib/intake/docxWorker.cjs", "./node_modules/mammoth/**", "./node_modules/fflate/**"] },
+  outputFileTracingIncludes: { "/*": ["./skills/builtins/**/SKILL.md", "./lib/intake/docxWorker.cjs", "./lib/intake/xlsxWorker.cjs", "./node_modules/mammoth/**", "./node_modules/fflate/**"] },
   serverExternalPackages: ["better-sqlite3"],
   // 设置时跳过构建内并行 TypeScript 子进程，避免低内存机器在
   // "Running TypeScript" 阶段主进程与类型检查子进程同时驻留导致 OOM。

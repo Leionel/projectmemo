@@ -5,6 +5,7 @@ import { strToU8 } from "fflate";
 import { db } from "@/lib/db";
 import { extractDocxText } from "@/lib/intake/docx";
 import { docxMaterial } from "../scripts/fixtures/docx-material";
+import { xlsxMaterial } from "../scripts/fixtures/xlsx-material";
 import { Worker } from "node:worker_threads";
 import path from "node:path";
 import { createSession } from "@/lib/auth/session";
@@ -60,5 +61,27 @@ test("extraction API checks owner, writes nothing, and extracted text enters nor
   const preview = await previewV2Delegation(u.id, p.id, body);
   expect(preview.material.format).toBe("DOCX_TEXT");
   await confirmV2Delegation(u.id, p.id, { ...body, requestId: "docx-confirm", previewHash: preview.previewHash, expiresAt: preview.expiresAt });
+  expect((await db.capture.findFirstOrThrow({ where: { projectId: p.id } })).rawText).toBe(value.text);
+});
+
+test("XLSX extraction API returns bounded cell text and enters normal confirmation", async () => {
+  const u = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "合成表格导入", passwordHash: "unused" } });
+  const p = await db.project.create({ data: { title: "表格资料", goal: "发布说明", description: "合成", scenario: "RESEARCH", memberships: { create: { userId: u.id, role: "OWNER" } } } });
+  const token = (await createSession(u.id)).token;
+  const makeRequest = () => {
+    const form = new FormData(); form.append("file", new File([Buffer.from(xlsxMaterial())], "发布记录.xlsx"));
+    return new Request("http://localhost/api/projects/" + p.id + "/material-extract", { method: "POST", headers: { Authorization: "Bearer " + token }, body: form });
+  };
+  const result = await POST(makeRequest(), { params: Promise.resolve({ id: p.id }) });
+  expect(result.status).toBe(200);
+  const value = await result.json();
+  expect(value.format).toBe("XLSX_TEXT");
+  expect(value.text).toContain("工作表：发布记录");
+  expect(value.text).toContain("系统分享");
+  expect(await db.capture.count({ where: { projectId: p.id } })).toBe(0);
+  const body = { goal: "整理发布说明", presetId: "client", materialName: value.name, materialText: value.text, expiresInDays: 7 };
+  const preview = await previewV2Delegation(u.id, p.id, body);
+  expect(preview.material.format).toBe("XLSX_TEXT");
+  await confirmV2Delegation(u.id, p.id, { ...body, requestId: "xlsx-confirm", previewHash: preview.previewHash, expiresAt: preview.expiresAt });
   expect((await db.capture.findFirstOrThrow({ where: { projectId: p.id } })).rawText).toBe(value.text);
 });

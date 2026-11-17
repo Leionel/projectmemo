@@ -150,3 +150,13 @@
 - 64 冻结路由完整评分 39/64，25 项内容证明未补；四旅程 HTTP mock 的 40 项协议、24 项结构通过，16 项语义未验。
 - 原长跑存在 6,534 秒空档，保留中断；更新环境后 19:00:28 启动独立新 72h 窗口。任务计划权限被系统拒绝，使用当前用户隐藏后台宿主；无人值守存活未验。M4 不放行。
 - 详细回执 REVIEW_M3_M4_20261117.md，门禁 M3_M4_GATE_STATUS.md，新证据 evidence/v2-first-loop/review-20261117/。
+
+## 2026-11-17 Web 玩法与书签精灵（接手 e2d20ad0）
+
+- 书签精灵统一为同一角色的七个独立透明素材（头像 + 六姿态），产品素材在 `public/mascot/bookmark-spirit/v1/`，manifest 记录语义与来源；组件只接受白名单路径，支持安静模式与 reduced-motion，点击提示不发模型请求。
+- 证据侦探、严格导师、双人冲刺统一到同一 Mission 游戏工作区；证据侦探支持点选/拖入、原文定位、服务端 verdict、显式交回与同 Mission 新稿回执；导师回答可绑定本轮来源；冲刺只显示真实 Step/Output，结束本轮与暂停原委托分开。
+- 服务端增量：REHEARSAL `evidenceKeys`（服务端校验本轮来源）、`handoffAt`、交回后回答锁定、删除回答撤下回执并逻辑清除反馈；冲刺追加入轮最新稿、回执、来源打开数与待判断项。无新增 Schema/Migration。
+- 修复交回反馈材料把刚完成轮次误判为撤题的问题；来源撤权仍撤题，旧客户端不发送新字段时保持原语义。
+- 新增 Web XLSX 材料读取：独立 Worker、共享/内联字符串与多工作表、宏/DOCTYPE/损坏包拒绝、2 万字上限；DOCX/TXT 原路径不变；原生选择器未加 xlsx。
+- 验证：定向 51 条、素材完整性、XLSX/DOCX、tsc、scoped eslint、生产构建；生产包浏览器 29/29 与 17 张截图。全量测试结果另记回执。无真实模型/真机/部署。
+- 回执：[WEB_GAMES_RECEIPT.md](../../evidence/v2-first-loop/web-games-20261117/WEB_GAMES_RECEIPT.md)，证据 `evidence/v2-first-loop/web-games-20261117/`；本地入口与回退见回执。

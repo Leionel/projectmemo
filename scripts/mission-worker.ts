@@ -13,14 +13,31 @@ import { recordWorkerPresence } from "../lib/mission/workerPresence";
 import { processProjectDeletions } from "../lib/services/projectDeletionService";
 import { expireIntakeDrafts } from "../lib/services/projectIntakeService";
 import { isFeatureEnabled } from "../lib/config/features";
+import { WORKER_CAPABILITY_VERSION } from "../lib/mission/workerRelease";
 
+// Mixed-deployment gate: this build only claims rows it understands, and it refuses to run on an
+// un-migrated schema or with frozen v2 rows while MISSION_V2_ENABLED is off (old Worker binaries may be present).
+try {
+  const columns = await db.$queryRaw<Array<{ name: string }>>`PRAGMA table_info("AgentMission")`;
+  if (!columns.some(column => column.name === "runtimeProtocolVersion")) {
+    console.error("委托 Worker 启动中止：数据库缺少 runtimeProtocolVersion 迁移，请先完成迁移并升级全部 Worker。");
+    process.exit(1);
+  }
+  if (!isFeatureEnabled("MISSION_V2_ENABLED", false) && await db.agentMission.count({ where: { runtimeProtocolVersion: 2 } }) > 0) {
+    console.error("委托 Worker 启动中止：库中存在 v2 委托但 MISSION_V2_ENABLED 关闭，可能存在旧 Worker 混跑。请先升级全部 API/Worker 并核对 v2-rollout-check。");
+    process.exit(1);
+  }
+} catch (error) {
+  console.error("委托 Worker 启动检查失败，未继续消费任务：" + (error instanceof Error ? error.message : "unknown"));
+  process.exit(1);
+}
 const workerId = randomUUID();
 let stopping = false;
 const state: WorkerCycleState = { first: "CONVERSATION", nextScanAt: 0 };
 process.on("SIGTERM", () => { stopping = true; });
 process.on("SIGINT", () => { stopping = true; });
 
-recordWorkerPresence({workerId,version:"r4-ux3-worker"});
+recordWorkerPresence({workerId,version:WORKER_CAPABILITY_VERSION});
 const heartbeat=setInterval(()=>recordWorkerPresence({workerId,version:"r4-ux3-worker"}),10000);heartbeat.unref();
 try {
   do {

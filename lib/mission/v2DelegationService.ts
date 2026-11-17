@@ -7,6 +7,8 @@ import { record } from "@/lib/conversation/repository";
 import { assertOwner, event, type Tx } from "./repository";
 import { createMissionInTx, editContinuationPolicy } from "./missionService";
 import { boundedInvestigationPolicySchema } from "@/lib/types/mission";
+import { parseProjectMaterial } from "@/lib/intake/projectMaterial";
+import { PROJECT_PRESET_IDS } from "@/lib/intake/projectPresets";
 
 /**
  * Product entry for a V2 bounded continuous delegation.
@@ -20,6 +22,8 @@ const MAX_MATERIAL = 20000;
 const previewInput = z.object({
   goal: z.string().trim().min(3).max(300),
   materialText: z.string().trim().min(1).max(MAX_MATERIAL),
+  materialName: z.string().trim().min(1).max(180).optional(),
+  presetId: z.enum(PROJECT_PRESET_IDS).optional(),
   expiresInDays: z.number().int().min(1).max(30).default(7),
 }).strict();
 const confirmInput = previewInput.extend({
@@ -45,12 +49,13 @@ export function delegationPolicy(expiresAt: string) {
 
 function canonicalPreview(projectId: string, body: z.infer<typeof previewInput>, expiresAt: string) {
   const policy = delegationPolicy(expiresAt);
-  const materialText = body.materialText.replace(/\r\n/g, "\n").trim();
+  const material = parseProjectMaterial(body.materialText, body.materialName), materialText = material.text;
   const payload = {
     schemaVersion: 1 as const, projectId, goal: body.goal, materialTextHash: jsonHash(materialText),
     materialLength: materialText.length, expiresAt, policyHash: jsonHash(policy),
+    ...(body.materialName ? { materialName: body.materialName } : {}), ...(body.presetId ? { presetId: body.presetId } : {}),
   };
-  return { payload, previewHash: jsonHash(payload), policy, materialText };
+  return { payload, previewHash: jsonHash(payload), policy, materialText, material };
 }
 
 const CAPABILITIES = {
@@ -68,9 +73,11 @@ export async function previewV2Delegation(userId: string, projectId: string, raw
   const canonical = canonicalPreview(projectId, body, expiresAt);
   return {
     schemaVersion: 1 as const, projectId, goal: body.goal,
-    material: { length: canonical.materialText.length, preview: canonical.materialText.slice(0, 400) },
+    material: { length: canonical.materialText.length, preview: canonical.materialText.slice(0, 400),
+      format: canonical.material.format, name: canonical.material.name, rows: canonical.material.rows, columns: canonical.material.columns },
     expiresAt, policy: canonical.policy, capabilities: CAPABILITIES,
     previewHash: canonical.previewHash,
+    personalMemoryMode: body.presetId === "client" ? "PROJECT_ONLY" : "UNCHANGED",
     writeEffect: "NONE" as const,
     note: "确认前不会创建资料、委托或许可；确认后可在成果工作台查看版本、依据与过程。",
   };
@@ -85,6 +92,7 @@ type V2DelegationReceipt = {
   schemaVersion: 1; requestId: string; projectId: string; ownerUserId: string;
   goalHash: string; materialHash: string; previewHash: string; policyHash: string;
   expiresAt: string; materialSourceId: string; confirmedAt: string;
+  materialName?: string; presetId?: string;
 };
 
 function readReceipt(mission: { planJson: unknown }): V2DelegationReceipt | null {
@@ -94,6 +102,7 @@ function readReceipt(mission: { planJson: unknown }): V2DelegationReceipt | null
 
 function idempotentResult(mission: { id: string; projectId: string; planJson: unknown }, input: {
   projectId: string; goal: string; materialText: string; previewHash: string; expiresAt: string; requestId: string;
+  materialName?: string; presetId?: string;
 }): V2DelegationResult {
   const receipt = readReceipt(mission);
   const conflict = (reason: string) => new AppError("DELEGATION_IDEMPOTENCY_CONFLICT", reason, 409, { requestId: input.requestId });
@@ -101,7 +110,8 @@ function idempotentResult(mission: { id: string; projectId: string; planJson: un
   if (mission.projectId !== receipt.projectId || input.projectId !== receipt.projectId)
     throw conflict("该请求编号已用于另一个项目的确认，不能换项目重放");
   if (receipt.goalHash !== jsonHash(input.goal) || receipt.materialHash !== jsonHash(input.materialText)
-    || receipt.previewHash !== input.previewHash || receipt.expiresAt !== input.expiresAt)
+    || receipt.previewHash !== input.previewHash || receipt.expiresAt !== input.expiresAt
+    || receipt.materialName !== input.materialName || receipt.presetId !== input.presetId)
     throw conflict("该请求编号已用于内容不同的确认，不能更改目标、材料或许可重放");
   return {
     missionId: mission.id, projectId: mission.projectId, materialSourceId: receipt.materialSourceId,
@@ -113,7 +123,7 @@ function idempotentResult(mission: { id: string; projectId: string; planJson: un
 export async function confirmV2Delegation(userId: string, projectId: string, raw: unknown): Promise<V2DelegationResult> {
   requireDelegationEntry();
   const body = confirmInput.parse(raw);
-  const goal = body.goal, materialText = body.materialText.replace(/\r\n/g, "\n").trim();
+  const goal = body.goal, materialText = parseProjectMaterial(body.materialText, body.materialName).text;
   const createRequestId = "v2-delegation:" + body.requestId;
   const materialRequestId = "v2-material:" + body.requestId;
   for (let attempt = 0; ; attempt++) {
@@ -123,7 +133,8 @@ export async function confirmV2Delegation(userId: string, projectId: string, raw
         // Replay is decided against the persisted receipt before any period or preview revalidation:
         // an identical retry must survive preview expiry and later policy edits.
         const existing = await tx.agentMission.findUnique({ where: { ownerUserId_createRequestId: { ownerUserId: userId, createRequestId } } });
-        if (existing) return idempotentResult(existing, { projectId, goal, materialText, previewHash: body.previewHash, expiresAt: body.expiresAt, requestId: body.requestId });
+        if (existing) return idempotentResult(existing, { projectId, goal, materialText, previewHash: body.previewHash, expiresAt: body.expiresAt, requestId: body.requestId,
+          materialName: body.materialName, presetId: body.presetId });
         const expiresAtMs = Date.parse(body.expiresAt);
         if (!Number.isFinite(expiresAtMs) || expiresAtMs <= Date.now() || expiresAtMs > Date.now() + 30 * 86400000)
           throw new AppError("DELEGATION_PERIOD_CHANGED", "预览的跟进期限已失效，请重新预览", 409);
@@ -134,6 +145,10 @@ export async function confirmV2Delegation(userId: string, projectId: string, raw
           where: { projectId_requestId: { projectId, requestId: materialRequestId } },
           create: { projectId, requestId: materialRequestId, requestHash: jsonHash(canonical.materialText), rawText: canonical.materialText, sourceType: "TEXT" },
           update: {},
+        });
+        if (body.presetId === "client") await tx.projectMembership.updateMany({
+          where: { userId, projectId, personalMemoryMode: { not: "PROJECT_ONLY" } },
+          data: { personalMemoryMode: "PROJECT_ONLY", personalMemoryModeVersion: { increment: 1 } },
         });
         const created = await createMissionInTx(tx, userId, {
           runtimeProtocolVersion: 2, projectId, requestId: createRequestId,
@@ -146,6 +161,7 @@ export async function confirmV2Delegation(userId: string, projectId: string, raw
           goalHash: jsonHash(goal), materialHash: jsonHash(materialText), previewHash: body.previewHash,
           policyHash, expiresAt: canonical.policy.expiresAt, materialSourceId: "capture:" + capture.id,
           confirmedAt: new Date().toISOString(),
+          ...(body.materialName ? { materialName: body.materialName } : {}), ...(body.presetId ? { presetId: body.presetId } : {}),
         };
         const updated = await editContinuationPolicy(userId, created.id, {
           requestId: "v2-delegation-policy:" + body.requestId, expectedVersion: created.version, policy: canonical.policy,

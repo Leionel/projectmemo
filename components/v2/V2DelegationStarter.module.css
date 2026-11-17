@@ -1,7 +1,10 @@
 .panel { display: grid; gap: 14px; padding: 18px 20px; border: 1px solid var(--line, #d8d4c8); border-radius: 12px; background: var(--paper, #fbfaf6); }
+.materialSection { display: grid; gap: 14px; margin-top: 20px; }
+.materialPreview { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: .9rem; margin-top: 12px; }
 .heading { display: flex; align-items: center; gap: 8px; color: var(--teal, #145c4e); }
 .heading h3 { margin: 0; font-size: 1rem; font-weight: 600; }
 .form { display: grid; gap: 12px; }
+.form select { padding: 9px 11px; border: 1px solid var(--line, #d8d4c8); border-radius: 8px; background: var(--paper); color: var(--ink); font: inherit; }
 .form label { display: grid; gap: 6px; font-size: .9rem; color: var(--ink, #202725); }
 .form input, .form textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--line, #d8d4c8); border-radius: 8px; background: var(--paper-strong, #fff); font: inherit; font-size: .95rem; color: inherit; }
 .form textarea { resize: vertical; min-height: 6rem; }

@@ -1,0 +1,16 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('button', { name: '定位原记录 · 客户反馈.docx', exact: true })
+
+    at <anonymous> (D:\Projects\hongmen-worktrees\v2-first-loop\scripts\verify-v2-m2.ts:88:78) {
+  log: [
+    "  - waiting for getByRole('button', { name: '定位原记录 · 客户反馈.docx', exact: true })"
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.16.0

@@ -1,0 +1,1 @@
+DOCX_TRACE_PASS worker + 24 dependency package entries: mammoth, @xmldom/xmldom, argparse, sprintf-js, base64-js, dingbat-to-unicode, jszip, lie, immediate, pako, readable-stream, core-util-is, inherits, isarray, process-nextick-args, safe-buffer, util-deprecate, setimmediate, lop, duck, underscore, option, xmlbuilder, fflate

@@ -111,7 +111,19 @@ export async function settleCalendarUsage(lease:Lease,reserved:number,actual:num
 export async function release(tx:Tx,m:AgentMission,status:string,reason?:string){
  const p=boundedPolicy(m);let plan=m.planJson as object,nextAttemptAt:Date|null|undefined;
  if(p){const current=await tx.agentMission.findUniqueOrThrow({where:{id:m.id}});plan=current.planJson as object;const state=(current.planJson as {delegation?:object}).delegation??{};
-  if(status==="WAITING_INPUT"){const input=await investigationInputHash(current,tx);nextAttemptAt=new Date(Math.min(Date.parse(p.expiresAt),Date.now()+p.checkEveryMinutes*60000));plan={...current.planJson as object,delegation:{...state,inputHash:input.hash,contentHash:input.contentHash,attention:await scopedDelegationAttention(tx,current,"WAITING_INPUT")}};}
+  if(status==="WAITING_INPUT"){
+   const input=await investigationInputHash(current,tx),saved=record(current.planJson),cursor=record(saved.skillCursor);
+   const snapshot=cursor.contextVersion===current.contextVersion?record(cursor.inputSnapshot):{};
+   const previous=record(state);
+   // Delivery acknowledges only the input snapshot at this cycle's start. Material arriving
+   // during a read/model/save remains pending and must wake the original Mission after delivery.
+   const consumed=current.runtimeProtocolVersion===2?{
+    hash:typeof snapshot.hash==="string"?snapshot.hash:typeof previous.inputHash==="string"?previous.inputHash:input.hash,
+    contentHash:typeof snapshot.contentHash==="string"?snapshot.contentHash:typeof previous.contentHash==="string"?previous.contentHash:input.contentHash,
+   }:input;
+   nextAttemptAt=new Date(Math.min(Date.parse(p.expiresAt),consumed.hash!==input.hash?Date.now():Date.now()+p.checkEveryMinutes*60000));
+   plan={...saved,delegation:{...state,inputHash:consumed.hash,contentHash:consumed.contentHash,attention:await scopedDelegationAttention(tx,current,"WAITING_INPUT")}};
+  }
   else if(status==="PAUSED")plan={...current.planJson as object,delegation:{...state,attention:await scopedDelegationAttention(tx,current,reason??"REVIEW_REQUIRED")}};
  }
  return tx.agentMission.update({where:{id:m.id},data:{status,pauseReason:reason??null,...(p?{planJson:json({...plan,...(status==="PAUSED"?{resumeStatus:"READY"}:{})}),nextAttemptAt}:status==="PAUSED"&&reason!=="USER"?{planJson:json({...m.planJson as object,resumeStatus:"READY"})}:{}),executionSlot:null,leaseOwner:null,leaseUntil:null,version:{increment:1},...(status==="SUCCEEDED"||status==="CANCELLED"?{finishedAt:new Date()}:{})}});

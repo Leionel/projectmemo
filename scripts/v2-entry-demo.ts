@@ -49,7 +49,8 @@ const session = await createSession(user.id);
 const project = await db.project.create({ data: { title: "独立开发版本 · 发布准备", description: "本地合成资料，不含个人项目", goal: "整理下一版本发布说明",
   scenario: "RESEARCH", memberships: { create: { userId: user.id, role: "OWNER" } } } });
 
-const child = spawn(process.execPath, ["node_modules/next/dist/bin/next", "dev", "--webpack", "-H", "127.0.0.1", "-p", String(port)],
+const productionPreview = process.env.V2_ENTRY_PRODUCTION === "true";
+const child = spawn(process.execPath, ["node_modules/next/dist/bin/next", ...(productionPreview ? ["start"] : ["dev", "--webpack"]), "-H", "127.0.0.1", "-p", String(port)],
   { cwd: process.cwd(), env: process.env, windowsHide: true, stdio: "inherit" });
 let stopping = false, working = false;
 const tick = setInterval(async () => {

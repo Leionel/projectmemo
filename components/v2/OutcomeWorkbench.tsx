@@ -5,6 +5,7 @@ import { AgentMessageBlocks } from "@/components/AgentMessageBlocks";
 import { workbenchFixture } from "@/lib/experience/workbenchFixture";
 import { workbenchArtifactMessage, workbenchMessage, type WorkbenchSnapshot } from "@/lib/types/workbench";
 import styles from "./OutcomeWorkbench.module.css";
+import { MissionMaterialForm } from "./MissionMaterialForm";
 
 async function api(url: string, body?: unknown) {
   const response = await fetch(url, { method: body ? "POST" : "GET", cache: "no-store",
@@ -136,7 +137,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
             conversationId={"workbench-artifact-" + snapshot.id} busy={busy} onAction={async () => { /* Read-only presentation has no business actions. */ }} />
           <div className={styles.references}><span>本阶段依据</span>{[...new Set(artifact.blocks.flatMap(block => block.sourceIds))].map(id => {
             const found = snapshot.sources.find(item => item.id === id && artifact.sourceKeys.includes(item.key));
-            return found ? <button key={id} onClick={() => setSourceKey(found.key)}><BookOpen size={14} aria-hidden="true" />定位原记录</button> : null;
+            return found ? <button key={id} onClick={() => setSourceKey(found.key)}><BookOpen size={14} aria-hidden="true" />定位原记录{found.name ? " · " + found.name : ""}</button> : null;
           })}{artifact.unknowns.length > 0 && <p>仍未知：{artifact.unknowns.join("；")}</p>}</div>
         </section>}
         <div className={styles.documentHead}><div className={styles.views}>
@@ -159,7 +160,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
               })}</div> : <p className={styles.empty}>当前只有一版成果。新资料更新后，可在这里比较。</p>}
           <div className={styles.references}><span>本稿依据</span>{currentSourceIds.length ? [...new Set(currentSourceIds)].map(id => {
             const found = snapshot.sources.find(s => s.id === id && output.sourceKeys.includes(s.key));
-            return found ? <button key={id} onClick={() => setSourceKey(found.key)}><BookOpen size={14} aria-hidden="true" />定位原记录</button> : null;
+            return found ? <button key={id} onClick={() => setSourceKey(found.key)}><BookOpen size={14} aria-hidden="true" />定位原记录{found.name ? " · " + found.name : ""}</button> : null;
           }) : <p>这版内容仅为推断或来源需要重新核对。</p>}</div>
         </div> : <p className={styles.empty}>原委托还没有生成报告稿。阶段成果与后台过程保留在本次读取中。</p>}
         <div className={styles.games}><span>围绕这份成果试一试</span>
@@ -182,6 +183,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
             {sprinting && <label className={styles.checkbox}><input type="checkbox" checked={sprintChecked} onChange={e => setSprintChecked(e.target.checked)} />我已核对原记录</label>}
             {sprintChecked && <p>已记下你的自述；这不会把项目行动标记为完成。</p>}</>}
         </section>}
+        {live && <MissionMaterialForm missionId={snapshot.id} projectId={snapshot.projectId} onSaved={refresh} />}
         <form className={styles.composer} onSubmit={submit}><label htmlFor="workbench-message">接下来怎么做，直接告诉忆程</label>
           <textarea id="workbench-message" value={message} disabled={busy || hasPending} onChange={e => setMessage(e.target.value)}
             placeholder="例如：继续整理，但不要联网" maxLength={3000} required />
@@ -191,7 +193,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
         {notice && <p role="status" className={styles.notice}>{notice}</p>}
       </section>
       <aside className={styles.source} aria-label="证据定位"><div><BookOpen size={17} aria-hidden="true" /><h2>原始依据</h2></div>
-        {source ? <><p className={styles.sourceKind}>{source.kind === "PROJECT" ? "项目记录" : "外部参考"} · {source.current ? "当前引用版本" : "历史冻结版本"}</p>
+        {source ? <><p className={styles.sourceKind}>{source.name ?? (source.kind === "PROJECT" ? "项目记录" : "外部参考")} · {source.current ? "当前引用版本" : "历史冻结版本"}</p>
           <blockquote data-testid="source-excerpt">{source.text}</blockquote><details><summary>来源与版本</summary><dl><dt>来源</dt><dd>{source.id}</dd>
             <dt>版本</dt><dd>{source.revision}</dd><dt>指纹</dt><dd>{source.hash}</dd></dl></details></> : <p>尚无可用引用，或来源使用许可需要重新核对。</p>}
       </aside>

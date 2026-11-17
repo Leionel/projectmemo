@@ -1,0 +1,12 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/contentQuality.test.ts tests/v2Journey.test.ts tests/v2DocxImport.test.ts tests/v2MaterialsJourney.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+
+ Test Files  4 passed (4)
+      Tests  26 passed (26)
+   Start at  12:14:48
+   Duration  10.70s (transform 1.68s, setup 0ms, import 3.35s, tests 6.37s, environment 0ms)

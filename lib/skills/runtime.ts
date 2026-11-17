@@ -11,6 +11,7 @@ import { BUILTIN_SKILLS, type BuiltinSkillId } from "./registry";
 import { routeSkillRequest, type SkillRouteDecision } from "./router";
 import { buildRoutingInput } from "./routingContext";
 import { analyzeEvidence, mergeEvidencePack, type EvidencePack } from "./evidence";
+import { investigationInputHash } from "@/lib/mission/investigationDelegation";
 
 type Cursor = {
   schemaVersion: 2;
@@ -23,6 +24,7 @@ type Cursor = {
   digests: Record<string, string>;
   evidencePack?: EvidencePack;
   outputId?: string;
+  inputSnapshot?: { hash: string; contentHash: string };
 };
 function cursor(m: AgentMission): Cursor | undefined {
   const value = record(record(m.planJson).skillCursor) as unknown as Cursor;
@@ -60,9 +62,11 @@ export async function prepareSkillCursor(lease: Lease) {
     const seeded = decision.sequence[0] === "deliverable-creation" ? await seedEvidencePack(tx, m, input.activity.evidence)
       : old?.evidencePack && Object.values(old.digests).length ? old.evidencePack : undefined;
     const retained = seeded ?? undefined;
+    const observed = await investigationInputHash(m, tx);
     const next: Cursor = {
       schemaVersion: 2, contextVersion: m.contextVersion, planRevision: m.planRevision, route: decision,
       sequence: decision.sequence, stage: decision.sequence[0], stageIndex: 0, digests, ...(retained ? { evidencePack: retained } : {}),
+      inputSnapshot: { hash: observed.hash, contentHash: observed.contentHash },
     };
     await event(tx, m.id, "SKILL_ROUTE_DECIDED", {
       mode: decision.mode, primary: decision.primary, sequence: decision.sequence, reasonCode: decision.reasonCode,

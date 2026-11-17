@@ -8,7 +8,7 @@ export class MissionWorkbench {
   challengesEnabled?: boolean; outputs: WorkbenchOutput[] = []; sources: WorkbenchSource[] = []; events: WorkbenchEvent[] = [];
 }
 export class WorkbenchMaterial {
-  requestId: string = ''; text: string = ''; kind: string = 'FEEDBACK';
+  requestId: string = ''; text: string = ''; kind: string = 'FEEDBACK'; name?: string;
 }
 export interface WorkbenchMaterialReply { sourceId: string; replayed: boolean; kind: string; }
 export interface ChallengeOption { key: string; label: string; sourceKey?: string; }

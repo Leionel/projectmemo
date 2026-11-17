@@ -7,6 +7,24 @@ import { parseProjectMaterial } from "@/lib/intake/projectMaterial";
 import { jsonHash } from "./contracts";
 import { event, ownedMission, type Tx } from "./repository";
 
+
+const materialPreviewInput = z.object({ text: z.string().min(1).max(20000), name: z.string().trim().min(1).max(180).optional() }).strict();
+
+/** Read-only native/Web preview: validates scope and text without writing a Capture or waking the Mission. */
+export async function previewMissionMaterial(userId: string, missionId: string, raw: unknown) {
+  const body = materialPreviewInput.parse(raw);
+  if (!isFeatureEnabled("MISSION_V2_ENABLED", false)) throw new AppError("MISSION_V2_DISABLED", "持续成果试验尚未启用", 409);
+  return db.$transaction(async tx => {
+    const mission = await ownedMission(userId, missionId, tx);
+    if (mission.runtimeProtocolVersion !== 2) throw new AppError("MISSION_PROTOCOL_REQUIRED", "此入口用于 V2 原委托", 409);
+    const parsed = parseProjectMaterial(body.text, body.name);
+    return { name: parsed.name, format: parsed.format, text: parsed.text, length: parsed.text.length,
+      target: { missionId, projectId: mission.projectId, goal: mission.goal, status: mission.status },
+      authorization: mission.continuationPolicyJson ? "BOUNDED_POLICY_PRESENT" : "NO_CONTINUOUS_POLICY",
+      note: "预览不写入、不调用模型；确认后才作为用户材料保存，原许可与预算继续生效。" };
+  });
+}
+
 const materialInput = z.object({ requestId: z.string().min(1).max(128), text: z.string().min(1).max(20000),
   name: z.string().trim().min(1).max(180).optional(), kind: z.enum(["MATERIAL", "FEEDBACK"]).default("MATERIAL") }).strict();
 

@@ -1,9 +1,15 @@
 import router from '@ohos.router';
+import { common } from '@kit.AbilityKit';
+import { fileIo, picker } from '@kit.CoreFileKit';
 import { PMAppBar } from '../components/PMAppBar';
 import { PMButton } from '../components/PMReferencePrimitives';
 import { ClockIcon, PaperclipIcon, CheckIcon } from '../components/PMIcons';
 import { PMColors, PMSpacing, PMRadius } from '../common/DesignTokens';
 import { MissionService } from '../services/MissionService';
+import { NativeMaterialService } from '../services/NativeMaterialService';
+import { NativeMaterialDraft, NativeMaterialPreview } from '../models/NativeMaterial';
+import { nativeMaterialFormat, nativeMaterialMime, nativeMaterialPreview, nativeMaterialLimit } from '../common/NativeMaterialContract';
+import { copyPickedFile, removePickedCopy } from '../common/PickedFile';
 import { SessionStore } from '../services/SessionStore';
 import { MissionCommand } from '../models/Mission';
 import { ApiError } from '../models/Project';
@@ -28,9 +34,13 @@ struct OutcomeWorkbenchPage {
   @State private challengePending: boolean = false;
   @State private controlPending: boolean = false;
   @StorageProp('missionAppActive') @Watch('appActivityChanged') private appActive: boolean = true;
+  @StorageProp('pm.shareSeq') @Watch('shareArrived') private shareSeq: number = 0;
+  @State private nativeDraft: NativeMaterialDraft | null = null;
+  @State private nativeBusy: boolean = false;
   private projectId: string = '';
   private missionId: string = '';
   private service: MissionService = new MissionService();
+  private nativeService: NativeMaterialService = new NativeMaterialService();
   private visible: boolean = false;
   private generation: number = 0;
   private timer: number = -1;
@@ -42,6 +52,7 @@ struct OutcomeWorkbenchPage {
   private controlAction: string = '';
   private draftKey: string = '';
   private drafts: Record<string, string> = {};
+  private shareConsumed: number = 0;
   private expired: () => void = () => {
     this.stop(); this.view = new MissionWorkbench(); this.challenge = null; this.fresh = false;
     this.material = ''; this.challengeText = ''; this.selected = []; this.drafts = {};
@@ -54,7 +65,7 @@ struct OutcomeWorkbenchPage {
     this.projectId = params?.['projectId'] ?? ''; this.missionId = params?.['missionId'] ?? '';
     SessionStore.onSessionExpired(this.expired);
   }
-  onPageShow(): void { this.visible = true; this.fresh = false; this.read(); }
+  onPageShow(): void { this.visible = true; this.fresh = false; this.read(); this.consumeShare(); }
   onPageHide(): void { this.visible = false; this.stop(); }
   aboutToDisappear(): void { this.visible = false; this.stop(); SessionStore.offSessionExpired(this.expired); }
   private appActivityChanged(): void { if (this.appActive && this.visible) this.read(); else this.stop(); }
@@ -97,6 +108,81 @@ struct OutcomeWorkbenchPage {
       if (this.current(generation, token)) this.timer = setTimeout(() => { this.read(); }, 4000);
       else if (this.visible && this.appActive && SessionStore.isTokenValid()) this.read();
     }
+  }
+
+  private shareArrived(): void { if (this.visible && this.appActive) this.consumeShare(); }
+  private consumeShare(): void {
+    if (this.shareConsumed >= this.shareSeq) return;
+    const uri = AppStorage.get<string>('pendingShareUri') ?? '';
+    const name = AppStorage.get<string>('pendingShareName') ?? '分享的材料';
+    if (uri === '') return;
+    this.shareConsumed = this.shareSeq;
+    AppStorage.setOrCreate<string>('pendingShareUri', '');
+    AppStorage.setOrCreate<string>('pendingShareName', '');
+    this.loadNativeFile(uri, name);
+  }
+  private async pickNativeMaterial(): Promise<void> {
+    if (this.busy || this.nativeBusy) return;
+    try {
+      const options = new picker.DocumentSelectOptions();
+      options.maxSelectNumber = 1;
+      options.fileSuffixFilters = ['TXT|.txt', 'Markdown|.md', 'CSV|.csv', 'Word|.docx'];
+      const uris = await new picker.DocumentViewPicker().select(options);
+      if (uris.length === 0) return;
+      this.loadNativeFile(uris[0], '');
+    } catch (_e) {
+      this.error = '无法打开文件选择器，请改为粘贴文本或重新进入';
+    }
+  }
+  private async loadNativeFile(uri: string, suppliedName: string): Promise<void> {
+    if (this.busy || this.nativeBusy || this.missionId === '') return;
+    this.nativeBusy = true; this.error = ''; this.notice = '';
+    const generation = this.generation, token = SessionStore.getToken();
+    const context = getContext(this) as common.UIAbilityContext;
+    let localPath = uri;
+    let name = suppliedName;
+    try {
+      if (name === '') { const parts = uri.split('?')[0].split('/'); name = decodeURIComponent(parts[parts.length - 1] ?? '材料'); }
+      const format = nativeMaterialFormat(name);
+      if (format === 'UNSUPPORTED') throw new ApiError('MATERIAL_FORMAT', '请选择 TXT、Markdown、普通 CSV 或 DOCX 文件');
+      localPath = copyPickedFile(context.cacheDir, uri);
+      const size = fileIo.statSync(localPath).size;
+      if (size === 0 || size > nativeMaterialLimit(format)) throw new ApiError('MATERIAL_SIZE_LIMIT', format === 'DOCX' ? 'Word 文件需在 2MB 以内' : '文本材料需在 64KB 以内');
+      let text = '';
+      let limitations = '';
+      if (format === 'DOCX') {
+        const extracted = await this.nativeService.extract(this.projectId, localPath, name, nativeMaterialMime(format));
+        text = extracted.text; limitations = extracted.limitations;
+      } else {
+        text = fileIo.readTextSync(localPath);
+        limitations = format === 'CSV' ? '按普通文本读取，不当作实验指标。' : '按 UTF-8 文本读取，不识别排版或图片。';
+      }
+      if (!this.current(generation, token)) return;
+      const preview: NativeMaterialPreview = await this.nativeService.preview(this.missionId, name, text);
+      if (!this.current(generation, token)) return;
+      this.nativeDraft = NativeMaterialDraft.fromPreview(this.missionId, uri, preview, format, size);
+      this.notice = '已解析，先核对预览和目标，再确认加入。';
+    } catch (e) {
+      if (this.current(generation, token)) this.fail(e);
+    } finally {
+      removePickedCopy(uri, localPath);
+      this.nativeBusy = false;
+    }
+  }
+  private async confirmNativeMaterial(): Promise<void> {
+    if (this.busy || this.nativeDraft === null || this.materialPending) return;
+    const draft = this.nativeDraft;
+    const body = new WorkbenchMaterial(); body.requestId = draft.requestId; body.text = draft.text; body.name = draft.name; body.kind = 'MATERIAL';
+    this.materialRequest = body; this.materialPending = true; this.busy = true; this.error = '';
+    const generation = this.generation, token = SessionStore.getToken();
+    try {
+      await this.service.addWorkbenchMaterial(this.missionId, body);
+      if (!this.current(generation, token)) return;
+      this.materialRequest = null; this.materialPending = false; this.nativeDraft = null;
+      this.notice = '材料已加入原委托；原许可、预算和来源限制继续生效。';
+    } catch (e) {
+      if (this.current(generation, token)) { if (this.definite(e)) { this.materialRequest = null; this.materialPending = false; } this.fail(e); }
+    } finally { this.busy = false; this.read(); }
   }
   private async addMaterial(): Promise<void> {
     if (this.busy || this.challengePending || this.controlPending || this.material.trim() === '') return;
@@ -228,6 +314,19 @@ struct OutcomeWorkbenchPage {
                 PMButton({ label: '证据侦探 · 引用追溯', secondary: true, disabled: this.busy || !this.fresh || this.view.outputs.length === 0, onAction: (): void => { this.play('', 'EVIDENCE'); } })
               }
               if (this.challenge !== null && this.challenge.status !== 'STOPPED') { this.Challenge(this.challenge) }
+            }
+            Text('补材料').fontSize(18).fontWeight(FontWeight.Medium)
+            if (this.nativeDraft !== null) {
+              Text(`${this.nativeDraft.name} · ${this.nativeDraft.format} · ${this.nativeDraft.text.length} 字`).fontSize(13).fontColor(PMColors.INK_SECONDARY)
+              Text(this.nativeDraft.limitations).fontSize(12).fontColor(PMColors.INK_TERTIARY)
+              Text(nativeMaterialPreview(this.nativeDraft.text, 240)).fontSize(14).fontColor(PMColors.INK_PRIMARY)
+              Row({ space: 8 }) {
+                PMButton({ label: this.materialPending ? '重试原材料请求' : '确认加入原委托', disabled: this.busy, onAction: (): void => { this.confirmNativeMaterial(); } })
+                PMButton({ label: '取消', secondary: true, disabled: this.busy, onAction: (): void => { this.nativeDraft = null; this.error = ''; } })
+              }
+            } else {
+              PMButton({ label: this.nativeBusy ? '正在解析…' : '从手机补材料', secondary: true, disabled: this.busy || this.nativeBusy, onAction: (): void => { this.pickNativeMaterial(); } })
+              Text('TXT、Markdown、普通 CSV 或 DOCX；先预览，确认后加入当前原委托。').fontSize(12).fontColor(PMColors.INK_TERTIARY)
             }
             Text('补充反馈').fontSize(18).fontWeight(FontWeight.Medium)
             TextArea({ text: this.material, placeholder: '记录待核对的反馈，原委托继续处理' }).height(110).maxLength(20000).enabled(!this.busy && !this.materialPending).onChange((text: string) => { this.material = text; })

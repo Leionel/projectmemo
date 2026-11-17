@@ -14,6 +14,7 @@ export async function GET(request: Request) {
     // 交代委托前让用户知道“关掉页面后会不会继续”：只给心跳/巡检与云模型资格，不暴露 release、库或配置指纹。
     const presence = readWorkerPresence(), cloud = await cloudCapability(user.id);
     return Response.json({ uxWorkStateAvailable:true,enabled, widgetEnabled: enabled && isFeatureEnabled("MISSION_WIDGET_ENABLED", false),
+      workbenchEnabled: enabled && isFeatureEnabled("MISSION_V2_ENABLED", false) && isFeatureEnabled("MISSION_WORKBENCH_ENABLED", false),
       background: { worker: presence.status, inspecting: presence.isActivelyInspecting, lastHeartbeatAt: presence.lastHeartbeatAt },
       cloud: { available: cloud.available, reason: cloud.reason } }, { headers: { "cache-control": "no-store" } });
   } catch (error) { return apiError(error); }

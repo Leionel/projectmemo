@@ -12,6 +12,7 @@ export type WorkbenchStageArtifact = {
   presentation: AgentPresentation; checks: Array<{ name: string; passed: boolean; detail: string }>; unknowns: string[];
 };
 export type WorkbenchSnapshot = {
+  challengesEnabled?: boolean;
   id: string; projectId: string; goal: string; projectTitle: string; workingObjective: string;
   status: string; phase: string; reason: string; reasonCode: string; checkedAt: string; provider: string; version: number;
   models: number; tools: number; outputs: WorkbenchOutput[]; stageArtifacts: WorkbenchStageArtifact[]; sources: WorkbenchSource[];

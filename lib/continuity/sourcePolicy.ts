@@ -121,6 +121,13 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
   } else if (id.startsWith("capture:")) {
     const capture = await tx.capture.findFirst({ where: { id: id.slice(8), projectId }, select: { id: true, sourceType: true } });
     known = !!capture;
+    if (capture?.sourceType === "CHALLENGE_FEEDBACK") {
+      const receipts = await tx.agentMissionEvent.findMany({ where: { type: "CHALLENGE_HANDED_OFF", mission: { projectId },
+        payloadJson: { path: "$.sourceId", equals: id } }, take: 2, select: { payloadJson: true } });
+      const outputId = record(receipts[0]?.payloadJson).outputId;
+      derived = true; known &&= receipts.length === 1 && typeof outputId === "string";
+      if (typeof outputId === "string") childIds.push("mission-output:" + outputId);
+    }
     const signals = await tx.externalSignal.findMany({ where: { adoptedCaptureId: id.slice(8), projectId }, select: { id: true } });
     childIds.push(...signals.map(s => "signal:" + s.id));
     if (signals.length || capture?.sourceType === "仓库信号") { derived = true; known &&= signals.length > 0; }

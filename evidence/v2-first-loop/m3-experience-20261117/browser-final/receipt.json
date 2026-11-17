@@ -1,0 +1,17 @@
+{
+  "at": "2026-11-17T05:02:17.254Z",
+  "missionId": "cmwk86z340002k08ofakpdatf",
+  "sessionId": "cmwk8716u0006k08ouew1ztlr",
+  "checks": [
+    "three rounds -> lost answer response retry -> page reload same session -> source visit -> lost handoff response retry -> same Mission revision 2, original retained, no duplicate receipt",
+    "citation tracing uses actual output references; no answer key in response; link match does not claim factual verification",
+    "360px interactive challenge and original evidence: no horizontal overflow",
+    "native-shaped pause/material requests target same Mission; paused Mission keeps both versions and cannot auto-resume",
+    "new material withdraws challenge; source suppression removes original and derived-feedback evidence from workbench, legacy challenge events reveal no private payload"
+  ],
+  "errors": [],
+  "data": "isolated synthetic SQLite",
+  "provider": "localhost HTTP mock",
+  "physicalHarmonyVerified": false,
+  "realProviderQualityVerified": false
+}

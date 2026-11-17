@@ -6,6 +6,7 @@ import { workbenchFixture } from "@/lib/experience/workbenchFixture";
 import { workbenchArtifactMessage, workbenchMessage, type WorkbenchSnapshot } from "@/lib/types/workbench";
 import styles from "./OutcomeWorkbench.module.css";
 import { MissionMaterialForm } from "./MissionMaterialForm";
+import { OutcomeChallenges } from "./OutcomeChallenges";
 
 async function api(url: string, body?: unknown) {
   const response = await fetch(url, { method: body ? "POST" : "GET", cache: "no-store",
@@ -163,11 +164,11 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
             return found ? <button key={id} onClick={() => setSourceKey(found.key)}><BookOpen size={14} aria-hidden="true" />定位原记录{found.name ? " · " + found.name : ""}</button> : null;
           }) : <p>这版内容仅为推断或来源需要重新核对。</p>}</div>
         </div> : <p className={styles.empty}>原委托还没有生成报告稿。阶段成果与后台过程保留在本次读取中。</p>}
-        <div className={styles.games}><span>围绕这份成果试一试</span>
+        {!live && <div className={styles.games}><span>围绕这份成果试一试</span>
           <button aria-pressed={game === "mentor"} onClick={() => setGame(game === "mentor" ? null : "mentor")}>严格导师</button>
           <button aria-pressed={game === "evidence"} onClick={() => setGame(game === "evidence" ? null : "evidence")}>证据侦探</button>
-          <button aria-pressed={game === "sprint"} onClick={() => setGame(game === "sprint" ? null : "sprint")}>双人冲刺</button></div>
-        {game && <section className={styles.game} aria-label="成果挑战">
+          <button aria-pressed={game === "sprint"} onClick={() => setGame(game === "sprint" ? null : "sprint")}>双人冲刺</button></div>}
+        {!live && game && <section className={styles.game} aria-label="成果挑战">
           {game === "mentor" && <><h2>交付前，先回答这三个追问</h2><ol><li>这份稿中，哪一句能直接定位到原记录？</li>
             <li>哪一个条件仍然未知，不能写成结论？</li><li>新资料改变了哪一处交付判断？</li></ol>
             <label htmlFor="mentor-answer">记下这份成果的缺口</label><textarea id="mentor-answer" value={answer} onChange={e => setAnswer(e.target.value)} maxLength={500} />
@@ -183,6 +184,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
             {sprinting && <label className={styles.checkbox}><input type="checkbox" checked={sprintChecked} onChange={e => setSprintChecked(e.target.checked)} />我已核对原记录</label>}
             {sprintChecked && <p>已记下你的自述；这不会把项目行动标记为完成。</p>}</>}
         </section>}
+        {live && snapshot.challengesEnabled && <OutcomeChallenges missionId={snapshot.id} outputId={output?.id} onSource={setSourceKey} onHandoff={refresh} />}
         {live && <MissionMaterialForm missionId={snapshot.id} projectId={snapshot.projectId} onSaved={refresh} />}
         <form className={styles.composer} onSubmit={submit}><label htmlFor="workbench-message">接下来怎么做，直接告诉忆程</label>
           <textarea id="workbench-message" value={message} disabled={busy || hasPending} onChange={e => setMessage(e.target.value)}

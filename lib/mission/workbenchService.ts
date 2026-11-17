@@ -89,6 +89,7 @@ export async function readMissionWorkbench(userId: string, id: string): Promise<
     const labels: Record<string, string> = { SKILL_ENTERED: "开始读取项目资料", SKILL_HANDOFF: "证据包已交给创作",
       SKILL_OUTPUT_READY: "创作产物已保存", OUTPUT_SAVED: "私有稿已更新", CHECKPOINT_REACHED: "成果备好，继续留意变化",
       USER_MATERIAL_ADDED: "你补充的资料已保存", USER_FEEDBACK_ADDED: "你的反馈已保存，等待核对影响",
+      CHALLENGE_HANDED_OFF: "成果核查缺口已交回原委托",
       SKILL_ARTIFACT_SAVED: "阶段成果已保存", SKILL_DELIVERABLE_READY: "阶段成果已备好，原报告与行动未改动",
       INVESTIGATION_WOKEN: "新资料唤醒原委托", INVESTIGATION_OBSERVATION_CHANGED: "观察到获准变化",
       CLAIMED: "后台取得本轮执行权", TOOL_STARTED: "正在执行获准步骤", TOOL_FINISHED: "步骤回执已保存",
@@ -97,6 +98,7 @@ export async function readMissionWorkbench(userId: string, id: string): Promise<
       FAILURE: "当前步骤需核对" };
     const usage = record(m.budgetUsedJson);
     return { id, projectId: m.projectId, projectTitle: project.title, goal: m.goal,
+      challengesEnabled: m.runtimeProtocolVersion === 2 && isFeatureEnabled("MISSION_V2_ENABLED", false) && isFeatureEnabled("MISSION_CHALLENGES_ENABLED", false),
       workingObjective: continuity.workingObjective ?? m.goal, status: m.status, phase: state.phase, reason: state.reasonText, reasonCode: state.reasonCode, version: m.version,
       checkedAt: new Date().toISOString(), provider: run?.provider ?? "尚无模型调用",
       models: Number(usage.models ?? 0), tools: Number(usage.tools ?? 0), outputs, stageArtifacts, sources,

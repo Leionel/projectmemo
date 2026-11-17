@@ -1,0 +1,21 @@
+.challenge { margin-block: 14px 22px; font-size: 13px; line-height: 1.8; }
+.entry,.actions,.sources { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.entry { padding-block: 14px; color: var(--muted); }
+.entry>span { margin-right: auto; }
+.challenge button { min-height: 36px; padding: 7px 10px; border: 1px solid var(--rule); border-radius: 5px; color: var(--teal-strong); text-align: left; }
+.body { border-block: 1px solid var(--rule); padding-block: 20px; }
+.body header { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.body h2,.body h3 { font-size: 14px; font-weight: 600; margin-block: 10px; }
+.body blockquote { padding-left: 14px; border-left: 2px solid var(--rule); color: var(--ink-soft); margin-block: 16px; overflow-wrap: anywhere; white-space: pre-wrap; }
+.body label { display: block; }
+.body textarea { display: block; width: 100%; border: 1px solid var(--rule); border-radius: 6px; padding: 12px; margin-block: 9px 14px; color: var(--ink); background: var(--card-bg); font: inherit; resize: vertical; }
+.body fieldset { border: 0; margin-block: 16px; padding: 0; }
+.body .option { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+.option input { accent-color: var(--teal); width: 18px; height: 18px; }
+.progress { color: var(--muted); font-size: 12px; margin-top: 15px; }
+.sources { margin-block: 16px; }.sources button { border: 0; padding-left: 0; }
+.body details { margin-block: 16px; }.body details p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.challenge p[role=alert] { color: var(--brick); }.handoff { margin-top: 16px; }
+.challenge button:focus-visible,.challenge input:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+@media(max-width:680px) { .entry>span { width: 100%; }.body textarea { font-size: 16px; } }
+@media(pointer:coarse) { .challenge button { min-height: 48px; } }

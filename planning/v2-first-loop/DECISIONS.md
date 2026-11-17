@@ -111,3 +111,10 @@
 - 验证：全量 275 文件/2145 条、定向 26 条、tsc、scoped eslint、Web 生产构建、DOCX Worker 与 24 个依赖入口追踪、Harmony 合约 155/155；生产构建浏览器真实闭环通过（localhost mock，360px）。
 - 无新增迁移、无本轮付费调用或生产部署。真实模型质量/留存/真机/72h/滚动升级尚未验证。
 - 完整回执：[M2_MATERIALS_20261117.md](M2_MATERIALS_20261117.md)，证据 evidence/v2-first-loop/m2-materials-20261117。
+
+## 2026-11-17 M3 切片 A：真实成果挑战
+
+- 严格导师三轮开放彩排、证据侦探引用追溯绑定原 Output 与来源，回答/来源打开/退出/交回由原 Mission 事件持久化；刷新可接续，原请求重试幂等。来源/材料/目标/新稿/到期变化撤题。
+- 显式交回才生成待核对反馈并触发原扫描器同 Mission 改稿；反馈副本沿原 Output 继承来源限制。旧事件 API 隐藏挑战题面与答案键。无新 Skills、引擎或 Schema/Migration；开关默认关闭。
+- 定向 5 文件/34 条、类型/scoped lint/Web 生产构建、生产浏览器五组闭环检查通过。注入/localhost mock，真实模型与用户效果未验；原生适配另记下一片。
+- 回执：[M3_EXPERIENCE_20261117.md](M3_EXPERIENCE_20261117.md)；证据 evidence/v2-first-loop/m3-experience-20261117。

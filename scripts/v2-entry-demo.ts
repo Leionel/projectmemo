@@ -70,7 +70,13 @@ const server = http.createServer(async (request, response) => {
     if (request.headers.host !== "127.0.0.1:" + controlPort) { response.writeHead(403).end(); return; }
     const url = new URL(request.url ?? "/", controlOrigin);
     if (request.method === "GET" && url.pathname === "/open") {
-      response.writeHead(303, { "Set-Cookie": sessionCookieHeader(session.token), Location: "http://127.0.0.1:" + port + "/projects/" + project.id, "Cache-Control": "no-store" }).end();
+      // Demo-only authenticated deep link. The optional target must belong to this temporary owner.
+      const selectedId = url.searchParams.get("mission");
+      const selected = selectedId && selectedId.length <= 160 ? await db.agentMission.findFirst({
+        where: { id: selectedId, ownerUserId: user.id, projectId: project.id, runtimeProtocolVersion: 2 }, select: { id: true },
+      }) : null;
+      const target = selected ? "/v2/workbench?missionId=" + encodeURIComponent(selected.id) : "/projects/" + project.id;
+      response.writeHead(303, { "Set-Cookie": sessionCookieHeader(session.token), Location: "http://127.0.0.1:" + port + target, "Cache-Control": "no-store" }).end();
       return;
     }
     if (request.method === "POST" && url.pathname === "/material") {

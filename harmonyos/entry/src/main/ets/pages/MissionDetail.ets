@@ -70,6 +70,7 @@ struct MissionDetail {
   private refreshTask: Promise<void> | null = null;
   @State updatedAt: string = '';
   @State missionUiEnabled: boolean = false;
+  @State workbenchEnabled: boolean = false;
   @State backgroundNotice: string = '';
   @State backgroundOk: boolean = false;
   @State nextCursor: string = '';
@@ -179,6 +180,7 @@ struct MissionDetail {
       const capability = await this.service.capabilities(this.projectId);
       if (!this.current(generation, token)) return;
       this.missionUiEnabled = capability.enabled;
+      this.workbenchEnabled = capability.workbenchEnabled === true;
       this.backgroundNotice = missionBackgroundNotice(capability); this.backgroundOk = missionBackgroundOk(capability);
       if (this.createRequested) {
         this.createRequested = false;
@@ -946,6 +948,11 @@ struct MissionDetail {
   }
   @Builder private MissionBody() {
     Column({ space: 12 }) {
+      if (this.workbenchEnabled && this.mission.runtimeProtocolVersion === 2) {
+        PMButton({ label: '打开持续成果工作台', secondary: true, onAction: (): void => {
+          router.pushUrl({ url: 'pages/OutcomeWorkbench', params: { projectId: this.projectId, missionId: this.missionId } });
+        } })
+      }
       Row({ space: 4 }) {
         this.ViewTab('概况', 'overview')
         this.ViewTab('进展', 'progress')

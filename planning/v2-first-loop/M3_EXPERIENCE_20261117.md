@@ -53,3 +53,22 @@ npm.cmd exec tsx -- scripts/verify-v2-m3.ts
 证据在 `evidence/v2-first-loop/m3-experience-20261117/`。`browser-final/` 为最终截图；`browser-production/` 为此前同样通过的生产验收，`browser-dev.log` 记录了验收脚本误把正常 202 当错误的首次失败，随后已修复。截图滚动位置修正后再跑完整流程，并未改变业务代码或判据。
 
 本片未验证真实模型质量、真实用户玩法价值、容量/72h 或生产部署。指标可比性题、独立尝试删除/保留策略、回访胶囊和双人冲刺仍未落为正式功能；原生适配另记下一切片。
+
+### 切片 B：鸿蒙原生成果页
+
+- `models/MissionWorkbench.ets`、`pages/OutcomeWorkbench.ets` 与原 `MissionService.ets`：读取同一 Mission/Output/source hash，切换稿件、打开来源、追加反馈、暂停/恢复；自然改道进入原 FocusConversation，未新增原生调度器。
+- 导师/侦探使用同一挑战接口和 session；可接续 Web 已答回合。输入按 session/题目分开保留，弱网重试冻结原请求；页面隐藏、前后台切换、账号失效或回包晚到不重挂旧对象。失权清除内容。
+- 从既有 MissionDetail 进入；capabilities 新增可选 `workbenchEnabled`，旧后端不返回时隐藏新入口，旧客户端忽略新字段。未改 `Constants.ets` 的后端地址。
+- 独立演示 CLI 增加 `/open?mission=...`，只允许当前合成 Owner/Project 内的 V2 对象，陌生 ID 回到演示项目；没有新增产品登录或测试 provider 后门。
+
+```powershell
+npm.cmd run harmony:test
+npm.cmd run harmony:build
+npm.cmd test
+```
+
+- 鸿蒙本地合约 **160/160**；新增 5 条验证冻结来源绑定、精确版本/当前回合与可选命令字段序列化。
+- 新页 ArkTS 编译与 HAP 打包通过；产物 `harmonyos/entry/build/default/outputs/default/entry-default-unsigned.hap`，8,870,084 字节，SHA256 `e613c07ed4d05a6575e41e662c9c009c45ffa780119799a10d288717db74812f`。未配置签名；构建包含 SDK 弃用/异常处理提示。
+- 全量 **276 文件 / 2162 条**通过，525.80 秒；`full-tests.log`。类型与 lint 复查通过，`CHECKS.json` 汇总命令。无新增 Schema/Migration，迁移负责人未变。
+- 这是合约、编译和本机 HTTP 同对象操作证据；**未做真机安装、系统分享、通知或原生弱网实测**。手机本片支持输入文本反馈，原生文件选择/DOCX 与 Web 的文件导入还未接齐。
+- 本次不宣称整个 M3 出口条件全部完成；下一条主线是有预算的真实用户/模型与跨端验收，冲刺/回访实验继续独立，不阻塞原委托。

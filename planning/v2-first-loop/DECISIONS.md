@@ -118,3 +118,10 @@
 - 显式交回才生成待核对反馈并触发原扫描器同 Mission 改稿；反馈副本沿原 Output 继承来源限制。旧事件 API 隐藏挑战题面与答案键。无新 Skills、引擎或 Schema/Migration；开关默认关闭。
 - 定向 5 文件/34 条、类型/scoped lint/Web 生产构建、生产浏览器五组闭环检查通过。注入/localhost mock，真实模型与用户效果未验；原生适配另记下一片。
 - 回执：[M3_EXPERIENCE_20261117.md](M3_EXPERIENCE_20261117.md)；证据 evidence/v2-first-loop/m3-experience-20261117。
+
+## 2026-11-17 M3 切片 B：原生同对象适配
+
+- 鸿蒙 OutcomeWorkbench 原生页：同 Mission 的版本/来源、文本反馈、暂停/恢复、原 Conversation 改道；导师/侦探沿同一 session 接续。旧后端不返回可选 capability 时隐藏入口，未改后端地址。
+- 验证：鸿蒙合约 160/160，ArkTS 与 unsigned HAP 构建通过；全量 276 文件/2162 条、类型/scoped lint、生产构建与浏览器闭环通过。HAP SHA256 与命令见 M3 回执。
+- 无新增 Schema/Migration、本轮无付费调用或部署。真机分享/通知/弱网、原生文件导入、真实模型/用户玩法收益仍未验；整个 M3 出口尚未全部满足，双人冲刺/回访保持独立探索。
+- 干净本机演示通过正常预览与确认生成首稿，地址见 evidence/v2-first-loop/m3-experience-20261117/playable-preview.json。

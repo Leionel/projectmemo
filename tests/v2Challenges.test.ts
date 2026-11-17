@@ -103,6 +103,53 @@ test("three rehearsal rounds are open questions, handoff atomically preserves un
   expect((await sourceUse(f.user.id, f.project.id, a.session.handoffSourceId!)).state).not.toBe("ALLOWED");
 });
 
+test("rehearsal answers can bind a real source; foreign keys are rejected and old clients still work", async () => {
+  const f = await fixture(), s = await f.begin("REHEARSAL"), key = s.sourceKeys[0];
+  const first = await commandChallenge(f.user.id, f.m.id, s.id, { action: "ANSWER", requestId: "bind", questionKey: s.questions[0].key,
+    text: "这条依据仍要保留，分享边界不改。", evidenceKeys: [key] });
+  expect(first.session.answers[0].evidenceKeys).toEqual([key]);
+  await expect(commandChallenge(f.user.id, f.m.id, s.id, { action: "ANSWER", requestId: "foreign", questionKey: s.questions[1].key,
+    text: "另一处边界", evidenceKeys: ["capture:not-this-mission@hash"] })).rejects.toMatchObject({ code: "CHALLENGE_SOURCE_DENIED" });
+  const legacy = await commandChallenge(f.user.id, f.m.id, s.id, { action: "ANSWER", requestId: "legacy", questionKey: s.questions[1].key,
+    text: "旧客户端不发送来源绑定。" });
+  expect(legacy.session.answers[1].evidenceKeys).toEqual([]);
+  expect(legacy.session.answers).toHaveLength(2);
+});
+
+test("handed-off answers are locked; deleting the attempt withdraws the receipt and redacts feedback", async () => {
+  const f = await fixture(), s = await f.begin("EVIDENCE");
+  await commandChallenge(f.user.id, f.m.id, s.id, { action: "ANSWER", requestId: "answer", questionKey: "trace", selected: [f.ref.id] });
+  const handed = await commandChallenge(f.user.id, f.m.id, s.id, { action: "HANDOFF", requestId: "handoff" });
+  expect(handed.session.status).toBe("COMPLETED");
+  await expect(commandChallenge(f.user.id, f.m.id, s.id, { action: "ANSWER", requestId: "late-answer", questionKey: "trace", selected: [f.ref.id] }))
+    .rejects.toMatchObject({ code: "CHALLENGE_ALREADY_HANDED_OFF" });
+  const feedbackId = handed.session.handoffSourceId!.slice(8);
+  const deleted = await commandChallenge(f.user.id, f.m.id, s.id, { action: "DELETE_ATTEMPT", requestId: "delete" });
+  expect(deleted.session.handoffSourceId).toBeNull();
+  expect(deleted.session.handoffAt).toBeNull();
+  expect(deleted.session.answers).toEqual([]);
+  expect(deleted.session.status).toBe("ACTIVE");
+  expect((await db.capture.findUniqueOrThrow({ where: { id: feedbackId } })).rawText).toBe("本轮核查回答已删除。");
+  const again = await commandChallenge(f.user.id, f.m.id, s.id, { action: "ANSWER", requestId: "again", questionKey: "trace", selected: [f.ref.id] });
+  expect(again.session.status).toBe("COMPLETED");
+  expect(await db.agentMissionEvent.count({ where: { missionId: f.m.id, type: "CHALLENGE_HANDED_OFF" } })).toBe(1);
+});
+
+test("handoff receipt survives later material and a newer draft without becoming a withdrawal", async () => {
+  const f = await fixture(), s = await f.begin("REHEARSAL");
+  for (const question of s.questions) await commandChallenge(f.user.id, f.m.id, s.id, { action: "ANSWER", requestId: question.key,
+    questionKey: question.key, text: "保留分享入口未验证；补一条真机验证计划。" });
+  const handed = await commandChallenge(f.user.id, f.m.id, s.id, { action: "HANDOFF", requestId: "handoff" });
+  expect(handed.session.handoffAt).toBeTruthy();
+  await db.capture.create({ data: { projectId: f.project.id, sourceType: "TEXT", rawText: "交回之后的另一份材料" } });
+  await db.agentMissionOutput.create({ data: { missionId: f.m.id, revision: 2, kind: "NOTE", contentJson: { blocks: [] }, sourceRefsJson: [], claimChecksJson: [] } });
+  const after = await readChallenge(f.user.id, f.m.id, s.id);
+  expect(after?.status).toBe("COMPLETED");
+  expect(after?.handoffSourceId).toBe(handed.session.handoffSourceId);
+  expect(after?.handoffAt).toBe(handed.session.handoffAt);
+  expect(after?.questions).toHaveLength(3);
+});
+
 test("source suppression after a completed attempt redacts both original questions and submitted answers", async () => {
   const f = await fixture(), s = await f.begin("REHEARSAL");
   await commandChallenge(f.user.id, f.m.id, s.id, { action: "ANSWER", requestId: "answer", questionKey: "evidence", text: "canary-private-m3 引用还要核对" });

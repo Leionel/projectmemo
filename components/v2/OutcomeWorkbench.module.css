@@ -59,3 +59,16 @@
 @media(max-width:1050px) { .workspace { grid-template-columns: 165px minmax(0,1fr); gap: 20px; }.source { grid-column: 2; border-left: none; border-top: 1px solid var(--rule); padding: 18px 0 0; } }
 @media(max-width:680px) { .workbench { padding: 20px 16px 95px; }.topline { align-items: flex-start; flex-direction: column; font-size: 11px; }.heading { margin-top: 22px; flex-direction: column; gap: 13px; }.heading h1 { font-size: 23px; }.workspace { display: flex; flex-direction: column; gap: 22px; }.progress,.document,.source { width: 100%; }.progress ol { display: none; }.objective { margin-bottom: 12px; }.usage { padding-top: 10px; }.paper { padding: 20px; }.source { order: 2; }.source blockquote,.game,.diff { font-size: 16px; }.composer textarea,.game textarea { font-size: 16px; }.sampleBar { align-items: flex-start; flex-direction: column; }.documentHead { align-items: flex-start; flex-direction: column; }.composer>div>span { max-width: 180px; }.games>span { width: 100%; }.source blockquote { line-height: 1.9; } }
 @media(pointer:coarse) { .workbench button,.source summary { min-height: 48px; } }
+
+.gameEntry { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin: 0 0 22px;
+  padding: 13px 16px; border: 1px solid var(--rule); border-radius: 14px;
+  background: radial-gradient(90% 140% at 4% 0%, color-mix(in srgb, var(--teal-pale) 66%, transparent), transparent 62%), var(--card-bg); }
+.gameEntryMain { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.gameEntryMain > div { display: grid; gap: 2px; min-width: 0; }
+.gameEntryMain strong { font-size: 13px; }
+.gameEntryMain p { margin: 0; color: var(--muted); font-size: 11.5px; line-height: 1.6; }
+.gameEntryActions { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.gameEntryActions button { min-height: 34px; padding: 6px 11px; border: 1px solid var(--rule); border-radius: 8px;
+  background: var(--card-bg); color: var(--teal-strong); font-size: 12px; font-weight: 600; }
+.gameEntryActions button:first-child { border-color: color-mix(in srgb, var(--teal) 42%, var(--rule)); background: var(--teal-pale); }
+@media (max-width: 680px) { .gameEntry { align-items: flex-start; flex-direction: column; } .gameEntryActions { width: 100%; } .gameEntryActions button { flex: 1; } }

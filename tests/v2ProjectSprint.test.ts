@@ -26,12 +26,20 @@ test("real lease, durable receipts, self report and independent end are idempote
     expect(started.session!.agent).toMatchObject({ working: true, completedSteps: 0, newOutputs: 0 });
     expect((await commandProjectSprint(f.user.id, f.mission.id, body)).replayed).toBe(true);
     await db.agentMissionStep.create({ data: { missionId: f.mission.id, ordinal: 1, planRevision: 1, toolName: "read_project_material", status: "SUCCEEDED", canonicalInputJson: {}, inputHash: "fixture", readSetJson: [], finishedAt: new Date() } });
-    await db.agentMissionOutput.create({ data: { missionId: f.mission.id, revision: 1, kind: "NOTE", contentJson: { blocks: [] }, sourceRefsJson: [], claimChecksJson: [] } });
+    await db.agentMissionOutput.create({ data: { missionId: f.mission.id, revision: 1, kind: "NOTE",
+      contentJson: { blocks: [], missingInformation: ["真机分享仍待核对"] }, sourceRefsJson: [], claimChecksJson: [] } });
+    await db.agentMissionEvent.create({ data: { missionId: f.mission.id, seq: 999, type: "CHALLENGE_SOURCE_OPENED",
+      payloadJson: { challengeId: "synthetic", sourceKey: "capture:record@hash" } } });
     const before = await db.agentMission.findUniqueOrThrow({ where: { id: f.mission.id } });
     const report = await commandProjectSprint(f.user.id, f.mission.id, { action: "SELF_REPORT", requestId: "done", sprintId: id, done: true });
-    expect(report.session).toMatchObject({ selfReportedDone: true, agent: { completedSteps: 1, newOutputs: 1 } });
+    expect(report.session).toMatchObject({ selfReportedDone: true, agent: { completedSteps: 1, newOutputs: 1, latestNewRevision: 1, openedSources: 1, openItems: ["真机分享仍待核对"] } });
+    expect(report.session!.agent.receipts.map(receipt => receipt.label)).toEqual(expect.arrayContaining(["读取资料", "保存新稿 · 第 1 版"]));
     const ended = await commandProjectSprint(f.user.id, f.mission.id, { action: "END", requestId: "end", sprintId: id });
     expect(ended.session!.status).toBe("ENDED");
+    await db.agentMissionOutput.create({ data: { missionId: f.mission.id, revision: 2, kind: "NOTE", contentJson: { blocks: [] }, sourceRefsJson: [], claimChecksJson: [] } });
+    const afterEnd = await readProjectSprint(f.user.id, f.mission.id);
+    expect(afterEnd.session!.agent.newOutputs).toBe(1);
+    expect(afterEnd.session!.agent.latestNewRevision).toBe(1);
     const after = await db.agentMission.findUniqueOrThrow({ where: { id: f.mission.id } });
     expect(after.status).toBe("RUNNING"); expect(after.version).toBe(before.version); expect(after.pauseRequestedAt).toBeNull();
     await expect(commandProjectSprint(f.user.id, f.mission.id, { action: "SELF_REPORT", requestId: "late", sprintId: id, done: false })).rejects.toMatchObject({ code: "SPRINT_ENDED" });

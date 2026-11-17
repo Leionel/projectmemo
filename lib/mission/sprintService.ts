@@ -27,17 +27,35 @@ async function view(tx: Tx, userId: string, missionId: string): Promise<SprintVi
     const payload = record(start.payloadJson), filter = { missionId, payloadJson: { path: "$.sprintId", equals: start.id } };
     const ended = await tx.agentMissionEvent.findFirst({ where: { ...filter, type: "SPRINT_ENDED" } });
     const cutoff = new Date(Math.min(Date.parse(String(payload.endsAt)), ended?.createdAt.getTime() ?? Infinity));
-    const [reported, steps, outputs, latest] = await Promise.all([
+    const [reported, steps, outputs, latest, recentSteps, recentOutputs, opens] = await Promise.all([
       tx.agentMissionEvent.findFirst({ where: { ...filter, type: "SPRINT_SELF_REPORTED" }, orderBy: { seq: "desc" } }),
       tx.agentMissionStep.count({ where: { missionId, status: "SUCCEEDED", finishedAt: { gte: start.createdAt, lte: cutoff } } }),
       tx.agentMissionOutput.count({ where: { missionId, revision: { gt: Number(payload.baselineRevision) }, createdAt: { gte: start.createdAt, lte: cutoff } } }),
       tx.agentMissionOutput.findFirst({ where: { missionId }, orderBy: { revision: "desc" }, select: { revision: true } }),
+      tx.agentMissionStep.findMany({ where: { missionId, status: "SUCCEEDED", finishedAt: { gte: start.createdAt, lte: cutoff } },
+        orderBy: { finishedAt: "desc" }, take: 6, select: { id: true, toolName: true, finishedAt: true } }),
+      tx.agentMissionOutput.findMany({ where: { missionId, revision: { gt: Number(payload.baselineRevision) }, createdAt: { gte: start.createdAt, lte: cutoff } },
+        orderBy: { revision: "desc" }, take: 3, select: { revision: true, createdAt: true, contentJson: true } }),
+      tx.agentMissionEvent.findMany({ where: { missionId, type: "CHALLENGE_SOURCE_OPENED", createdAt: { gte: start.createdAt, lte: cutoff } },
+        select: { payloadJson: true }, take: 32 }),
     ]);
+    const labelOf = (toolName: string) => toolName === "read_project_material" ? "读取资料"
+      : toolName === "save_mission_output" ? "保存新稿"
+      : toolName === "search_project" || toolName === "inspect_project" ? "整理依据" : "完成一个步骤";
+    const receipts = [
+      ...recentSteps.filter(step => step.finishedAt).map(step => ({ id: step.id, label: labelOf(step.toolName), at: step.finishedAt!.toISOString(), kind: "STEP" as const })),
+      ...recentOutputs.map(row => ({ id: "output-" + row.revision, label: "保存新稿 · 第 " + row.revision + " 版", at: row.createdAt.toISOString(), kind: "OUTPUT" as const })),
+    ].sort((a, b) => Date.parse(a.at) - Date.parse(b.at)).slice(-5);
+    const missing = record(recentOutputs[0]?.contentJson).missingInformation;
+    const openItems = Array.isArray(missing) ? missing.filter((item): item is string => typeof item === "string").slice(0, 3) : [];
     const elapsed = Date.now() >= Date.parse(String(payload.endsAt));
     session = { id: start.id, missionId, objective: String(payload.objective), startedAt: start.createdAt.toISOString(), endsAt: String(payload.endsAt),
       status: ended ? "ENDED" : elapsed ? "ELAPSED" : "ACTIVE", selfReportedDone: record(reported?.payloadJson).done === true,
       agent: { working, label: working ? "正在处理原委托" : m.status === "WAITING_INPUT" ? "正在等待资料或你的判断" : m.status === "PAUSED" ? "原委托已暂停" : "当前没有执行中的步骤",
-        completedSteps: steps, newOutputs: outputs, latestRevision: latest?.revision ?? null } };
+        completedSteps: steps, newOutputs: outputs, latestRevision: latest?.revision ?? null,
+        latestNewRevision: recentOutputs[0]?.revision ?? null,
+        latestNewOutputAt: recentOutputs[0]?.createdAt.toISOString() ?? null,
+        receipts, openedSources: new Set(opens.map(row => String(record(row.payloadJson).sourceKey))).size, openItems } };
   }
   return { canStart: working && session?.status !== "ACTIVE", reason: working ? "" : "等原委托开始实际处理后再开启；你也可以先阅读已有成果。", session };
 }

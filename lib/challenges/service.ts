@@ -14,7 +14,9 @@ import { challengeQuestions, linkVerdict, type FrozenQuestion } from "./rules";
 const requestId = z.string().min(1).max(100);
 const startInput = z.object({ requestId, kind: z.enum(["EVIDENCE", "REHEARSAL", "METRIC"]), outputId: z.string().min(1).max(160) }).strict();
 const commandInput = z.discriminatedUnion("action", [
-  z.object({ action: z.literal("ANSWER"), requestId, questionKey: z.string().max(50), text: z.string().trim().max(1200).default(""), selected: z.array(z.string().max(180)).max(17).default([]) }).strict(),
+  z.object({ action: z.literal("ANSWER"), requestId, questionKey: z.string().max(50), text: z.string().trim().max(1200).default(""), selected: z.array(z.string().max(180)).max(17).default([]),
+    // 增量字段：旧客户端不发送；仅在 REHEARSAL 中绑定本轮来源，服务端逐项校验。
+    evidenceKeys: z.array(z.string().max(240)).max(3).default([]) }).strict(),
   z.object({ action: z.literal("OPEN_SOURCE"), requestId, sourceKey: z.string().max(240) }).strict(),
   z.object({ action: z.literal("HANDOFF"), requestId }).strict(),
   z.object({ action: z.literal("STOP"), requestId }).strict(),
@@ -47,6 +49,8 @@ async function sessionState(tx: Tx, m: AgentMission, id: string) {
   ]);
   const answerEvents = await tx.agentMissionEvent.findMany({ where: { ...where, type: "CHALLENGE_ANSWERED", seq: { gt: deletion?.seq ?? start.seq } }, orderBy: { seq: "asc" }, take: 3 });
   const answers = answerEvents.filter(row => !record(row.payloadJson).deleted).map(row => record(row.payloadJson).answer as ChallengeAnswer);
+  // 删除回答会撤下交回回执；本轮回到可重答状态，但不会把反馈副本重新展示出来。
+  const handedOff = !!handoff && (!deletion || handoff.seq > deletion.seq);
   if (Date.now() - start.createdAt.getTime() > CHALLENGE_RETENTION_DAYS * 86400000) {
     await redactChallengeAnswers(tx, m.id, id, handoff ? String(record(handoff.payloadJson).sourceId) : null);
     answers.length = 0;
@@ -54,21 +58,30 @@ async function sessionState(tx: Tx, m: AgentMission, id: string) {
   let reason: string | null = null;
   const output = await tx.agentMissionOutput.findFirst({ where: { id: frozen.outputId, missionId: m.id } });
   const latest = await tx.agentMissionOutput.findFirst({ where: { missionId: m.id }, orderBy: { revision: "desc" }, select: { id: true } });
-  if (!output || latest?.id !== frozen.outputId || frozen.outputHash !== jsonHash({ content: output.contentJson, sources: output.sourceRefsJson })) reason = "稿件已有变化，请从当前版本重新开始";
+  if (handoff) {
+    // 交回后本轮已闭合：后续新稿或新材料是同一 Mission 的成果，不应撤销回执或判为撤题。
+    // 仍要核对原来源许可，撤权时隐藏题面与回答。
+    if (!output) reason = "原稿已不可读，请核对当前成果";
+    else {
+      try { await validateSources(m.projectId, output.sourceRefsJson as unknown as Source[], tx, m.id); }
+      catch { reason = "来源已变化或使用权限已撤销，本轮已撤下"; }
+    }
+  } else if (!output || latest?.id !== frozen.outputId || frozen.outputHash !== jsonHash({ content: output.contentJson, sources: output.sourceRefsJson })) reason = "稿件已有变化，请从当前版本重新开始";
   else if (m.contextVersion !== frozen.contextVersion || (await investigationInputHash(m, tx)).hash !== frozen.inputHash) reason = "项目资料或工作方向已变化，本轮已撤下";
   else {
     try { await validateSources(m.projectId, output.sourceRefsJson as unknown as Source[], tx, m.id); }
     catch { reason = "来源已变化或使用权限已撤销，本轮已撤下"; }
   }
-  if (Date.now() - start.createdAt.getTime() > 86400000) reason = "本轮已超过一天，请核对当前成果后重新开始";
+  if (!handoff && Date.now() - start.createdAt.getTime() > 86400000) reason = "本轮已超过一天，请核对当前成果后重新开始";
   const stopped = !!stop || ["CANCELLED", "SUCCEEDED"].includes(m.status);
   const session: ChallengeSession = { schemaVersion: 1, id, missionId: m.id, outputId: frozen.outputId, revision: frozen.revision, kind: frozen.kind,
-    status: reason ? "STALE" : stopped ? "STOPPED" : answers.length === frozen.questions.length ? "COMPLETED" : "ACTIVE", reason,
+    status: reason ? "STALE" : stopped ? "STOPPED" : handedOff ? "COMPLETED" : answers.length === frozen.questions.length ? "COMPLETED" : "ACTIVE", reason,
     // A revoked or stale source must not survive in cached question/answer text from the event ledger.
     questions: reason ? [] : frozen.questions.map(({ key, title, excerpt, options }) => ({ key, title, excerpt, options })), answers: reason ? [] : answers,
     sourceKeys: reason ? [] : frozen.sourceKeys,
     openedSourceKeys: reason ? [] : opened.map(e => String(record(e.payloadJson).sourceKey)),
-    handoffSourceId: handoff ? String(record(handoff.payloadJson).sourceId) : null, createdAt: start.createdAt.toISOString(),
+    handoffSourceId: handedOff ? String(record(handoff!.payloadJson).sourceId) : null,
+    handoffAt: handedOff ? handoff!.createdAt.toISOString() : null, createdAt: start.createdAt.toISOString(),
     retentionDays: CHALLENGE_RETENTION_DAYS,
     logicalDeletionNote: "删除会清除在线回答正文并撤下派生反馈；30 天后访问时也会清除。事件身份保留，备份不宣称已物理擦除。" };
   return { session, frozen, answers };
@@ -125,14 +138,21 @@ export async function commandChallenge(userId: string, missionId: string, id: st
     } else {
       if (session.status === "STALE") throw new AppError("CHALLENGE_STALE", session.reason!, 409);
       if (session.status === "STOPPED" || ["CANCELLED", "SUCCEEDED"].includes(m.status)) throw new AppError("CHALLENGE_STOPPED", "本轮或原委托已结束，不再接受新操作", 409);
+      if (body.action === "ANSWER" && session.handoffSourceId) throw new AppError("CHALLENGE_ALREADY_HANDED_OFF", "本轮已交回，不能再修改回答；如需重来，请先删除本轮回答", 409);
       if (body.action === "ANSWER") {
         const question = frozen.questions[session.answers.length];
         if (!question || question.key !== body.questionKey) throw new AppError("CHALLENGE_ROUND_CHANGED", "本题已回答，请读取当前回合", 409);
         if (frozen.kind === "REHEARSAL" && (!body.text || body.selected.length)) throw new AppError("CHALLENGE_ANSWER_REQUIRED", "写下一项缺口，或说明目前不知道", 422);
         if (frozen.kind === "EVIDENCE" && (!body.selected.length || body.text || new Set(body.selected).size !== body.selected.length)) throw new AppError("CHALLENGE_ANSWER_REQUIRED", "请选择引用记录，或选择没有引用依据", 422);
         if (frozen.kind === "METRIC" && (body.selected.length !== 1 || body.text)) throw new AppError("CHALLENGE_ANSWER_REQUIRED", "请选择一项指标可比性判断", 422);
+        if (frozen.kind !== "REHEARSAL" && body.evidenceKeys.length) throw new AppError("CHALLENGE_ANSWER_REQUIRED", "本轮回答不接受来源绑定", 422);
+        if (body.evidenceKeys.length && (new Set(body.evidenceKeys).size !== body.evidenceKeys.length ||
+          body.evidenceKeys.some(key => !frozen.sourceKeys.includes(key)))) {
+          throw new AppError("CHALLENGE_SOURCE_DENIED", "该来源不属于本轮成果", 404);
+        }
         const answer: ChallengeAnswer = { questionKey: question.key, text: body.text, selected: body.selected,
-          verdict: frozen.kind === "REHEARSAL" ? "OPEN" : linkVerdict(question, body.selected) };
+          verdict: frozen.kind === "REHEARSAL" ? "OPEN" : linkVerdict(question, body.selected),
+          ...(frozen.kind === "REHEARSAL" ? { evidenceKeys: body.evidenceKeys } : {}) };
         await event(tx, missionId, "CHALLENGE_ANSWERED", { ...base, answer }, command);
       } else if (body.action === "OPEN_SOURCE") {
         if (!frozen.sourceKeys.includes(body.sourceKey)) throw new AppError("CHALLENGE_SOURCE_DENIED", "该来源不属于本轮成果", 404);

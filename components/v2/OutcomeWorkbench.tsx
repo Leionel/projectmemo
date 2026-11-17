@@ -7,10 +7,10 @@ import { AgentMessageBlocks } from "@/components/AgentMessageBlocks";
 import { workbenchFixture } from "@/lib/experience/workbenchFixture";
 import { workbenchArtifactMessage, workbenchMessage, type WorkbenchSnapshot } from "@/lib/types/workbench";
 import { ReentryBriefPanel } from "./ReentryBrief";
+import { BookmarkSpiritAvatar } from "@/components/mascot/BookmarkSpirit";
+import { MissionGames, type GameTab } from "./MissionGames";
 import styles from "./OutcomeWorkbench.module.css";
 import { MissionMaterialForm } from "./MissionMaterialForm";
-import { OutcomeChallenges } from "./OutcomeChallenges";
-import { ProjectSprint } from "./ProjectSprint";
 
 async function api(url: string, body?: unknown) {
   const response = await fetch(url, { method: body ? "POST" : "GET", cache: "no-store",
@@ -30,6 +30,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
   const [selectedArtifactId, setSelectedArtifactId] = useState<string | null>(null);
   const [message, setMessage] = useState(""), [busy, setBusy] = useState(false), [error, setError] = useState("");
   const [notice, setNotice] = useState(""), [game, setGame] = useState<"mentor" | "evidence" | "sprint" | null>(null);
+  const [liveGame, setLiveGame] = useState<GameTab | null>(null);
   const [chosen, setChosen] = useState(""), [answer, setAnswer] = useState(""), [sprinting, setSprinting] = useState(false);
   const [sprintChecked, setSprintChecked] = useState(false);
   const [hasPending, setHasPending] = useState(false);
@@ -50,41 +51,53 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
     try { setSnapshot(await api("/api/missions/" + encodeURIComponent(missionId) + "/workbench")); setError(""); }
     catch (e) { setError(e instanceof Error ? e.message : "读取失败"); }
   }
+  /** 把一句话交给原 Conversation/Directive 链；返回值只描述真实应用结果。 */
+  async function deliver(text: string): Promise<{ applied: boolean; objective: string; message: string }> {
+    const quoted = text.trim();
+    if (!quoted) throw new Error("先写一句要调整的方向。");
+    if (!snapshot) throw new Error("工作台尚未读取完成。");
+    if (!live) {
+      const restricted = /不联网|不要联网/.test(quoted), paused = /^(暂停|停止)/.test(quoted);
+      setSnapshot({ ...snapshot, workingObjective: quoted, phase: paused ? "PAUSED" : snapshot.phase,
+        reason: paused ? "样例跟进已暂停" : restricted ? "样例：保持原成果，后续只使用本地资料" : "样例：已记录新的工作重点",
+        events: [{ id: crypto.randomUUID(), label: "样例：收到你的改道输入", at: new Date().toISOString() }, ...snapshot.events] });
+      return { applied: true, objective: quoted, message: "样例交互已更新；没有写入真实项目。" };
+    }
+    if (pending.current && String(pending.current.body.message) !== quoted)
+      throw new Error("上一条输入尚未确认；请先在成果页重试原请求。");
+    if (!pending.current) {
+      if (!conversationId.current) {
+        const created = await api("/api/conversations", { requestId: crypto.randomUUID(), scope: "PROJECT",
+          projectId: snapshot.projectId, title: "成果工作台" });
+        conversationId.current = created.id;
+      }
+      const c = await api("/api/conversations/" + conversationId.current);
+      pending.current = { conversationId: c.id, body: { requestId: crypto.randomUUID(), expectedVersion: c.version,
+        expectedContinuitySeq: c.continuity?.seq ?? 0, message: quoted, projectId: snapshot.projectId,
+        entityRef: { kind: "MISSION", id: snapshot.id, projectId: snapshot.projectId } } };
+      setHasPending(true);
+    }
+    const request = pending.current;
+    await api("/api/conversations/" + request.conversationId + "/turns", request.body);
+    pending.current = null; setHasPending(false);
+    const next = await api("/api/missions/" + encodeURIComponent(snapshot.id) + "/workbench") as WorkbenchSnapshot;
+    const before = new Set(snapshot.events.map(event => event.id));
+    const applied = next.workingObjective !== snapshot.workingObjective ||
+      next.events.some(event => event.kind === "NATURAL_CONTROL_APPLIED" && !before.has(event.id));
+    setSnapshot(next); setError("");
+    return { applied, objective: next.workingObjective,
+      message: applied ? "已按你的指引调整原委托；以当前状态为准。" : "输入已送达原委托，工作重点尚未变化；以当前状态为准。" };
+  }
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (!snapshot || !message.trim() || busy) return;
     setBusy(true); setError(""); setNotice("");
-    try {
-      if (!live) {
-        const quoted = message.trim(), restricted = /不联网|不要联网/.test(quoted), paused = /^(暂停|停止)/.test(quoted);
-        setSnapshot({ ...snapshot, workingObjective: quoted, phase: paused ? "PAUSED" : snapshot.phase,
-          reason: paused ? "样例跟进已暂停" : restricted ? "样例：保持原成果，后续只使用本地资料" : "样例：已记录新的工作重点",
-          events: [{ id: crypto.randomUUID(), label: "样例：收到你的改道输入", at: new Date().toISOString() }, ...snapshot.events] });
-        setNotice("样例交互已更新；没有写入真实项目。");
-      } else {
-        if (!pending.current) {
-          if (!conversationId.current) {
-            const created = await api("/api/conversations", { requestId: crypto.randomUUID(), scope: "PROJECT",
-              projectId: snapshot.projectId, title: "成果工作台" });
-            conversationId.current = created.id;
-          }
-          const c = await api("/api/conversations/" + conversationId.current);
-          pending.current = { conversationId: c.id, body: { requestId: crypto.randomUUID(), expectedVersion: c.version,
-            expectedContinuitySeq: c.continuity?.seq ?? 0, message: message.trim(), projectId: snapshot.projectId,
-            entityRef: { kind: "MISSION", id: snapshot.id, projectId: snapshot.projectId } } };
-          setHasPending(true);
-        }
-        const request = pending.current;
-        await api("/api/conversations/" + request.conversationId + "/turns", request.body);
-        pending.current = null; setHasPending(false); await refresh();
-        setNotice("输入已送达原委托的对话控制链；应用结果以当前状态为准。");
-      }
-      setMessage("");
-    } catch (e) { setError(e instanceof Error ? e.message : "提交未确认，请重试原请求"); }
+    try { const result = await deliver(message); setMessage(""); setNotice(result.message); }
+    catch (e) { setError(e instanceof Error ? e.message : "提交未确认，请重试原请求"); }
     finally { setBusy(false); }
   }
-  async function control(action: "pause" | "cancel" | "resume") {
-    if (!snapshot || busy) return;
+  async function control(action: "pause" | "cancel" | "resume"): Promise<boolean> {
+    if (!snapshot || busy) return false;
     setBusy(true); setError("");
     try {
       // Controls bind to the current persisted version, not the last poll snapshot.
@@ -93,7 +106,8 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
       await api("/api/missions/" + encodeURIComponent(snapshot.id) + "/" + action, { requestId: crypto.randomUUID(), expectedVersion: current.version });
       setConfirmingEnd(false); setNotice(action === "pause" ? "已收到暂停请求，后台不再派发新步骤。" : action === "resume" ? "已恢复跟进；阶段成果与原报告都保留。" : "已结束持续跟进；已交付版本与依据仍然保留。");
       await refresh();
-    } catch (e) { setError(e instanceof Error ? e.message : "操作未确认，请重试"); }
+      return true;
+    } catch (e) { setError(e instanceof Error ? e.message : "操作未确认，请重试"); return false; }
     finally { setBusy(false); }
   }
   function switchSample(value: boolean) {
@@ -103,6 +117,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
   if (!snapshot) return <main className={styles.loading}><h1>成果工作台</h1><p role="status">{error || "正在读取原委托…"}</p>
     {error && <><button onClick={() => void refresh()}>重试读取</button><a href="/login">登录后继续</a></>}</main>;
   const output = snapshot.outputs.find(o => o.revision === selectedRevision) ?? snapshot.outputs[0];
+  const latestOutput = snapshot.outputs[0] ?? null;
   const artifact = snapshot.stageArtifacts.find(item => item.id === selectedArtifactId) ?? snapshot.stageArtifacts[0];
   const stageReady = snapshot.reasonCode === "SKILL_DELIVERABLE_READY";
   const previous = output ? snapshot.outputs.find(o => o.revision < output.revision) : undefined;
@@ -110,23 +125,34 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
     snapshot.sources.find(s => output?.sourceKeys.includes(s.key)) ?? snapshot.sources[0];
   const currentSourceIds = output?.blocks.flatMap(b => b.sourceIds) ?? [];
   function prepareQuestion(text: string) { setMessage("今天先核对" + text); setNotice("已放入下方输入框，发送后交给原委托。"); }
+  function openRevision(revision: number) { setSelectedRevision(revision); setView("draft"); setSourceKey(null); setLiveGame(null); window.scrollTo({ top: 0, behavior: "smooth" }); }
+  async function pauseFromGame() { const ok = await control("pause"); if (!ok) throw new Error("暂停尚未确认，请重试。"); }
   return <main className={styles.workbench}>
     <div className={styles.topline}><a href="/focus">忆程 <ChevronRight size={14} aria-hidden="true" /> 成果工作台</a>
       <span>{live ? (snapshot.provider.startsWith("INJECTED") ? "隔离流程演示 · 注入模型" : "原委托实时读回") : "可点击交互样例 · 未运行模型"}</span></div>
-    <header className={styles.heading}><div><p>{snapshot.projectTitle}</p><h1>{snapshot.goal}</h1>
+    {!liveGame && <header className={styles.heading}><div><p>{snapshot.projectTitle}</p><h1>{snapshot.goal}</h1>
       <div className={styles.state} role="status"><span aria-hidden="true" className={styles.dot} />
         {stageReady ? snapshot.reason : phaseLabels[snapshot.phase] ?? snapshot.reason}</div></div>
       {live ? <div className={styles.controls}><button className={styles.secondary} onClick={() => void refresh()}><RefreshCw size={15} aria-hidden="true" />重新读取</button>{stageReady && <button className={styles.secondary} disabled={busy} onClick={() => void control("resume")}>继续跟进</button>}<button className={styles.secondary} disabled={busy || snapshot.status !== "READY" && snapshot.phase !== "WAITING_OBSERVATION"} onClick={() => void control("pause")}>暂停跟进</button><button className={styles.secondary} disabled={busy} onClick={() => void (confirmingEnd ? control("cancel") : setConfirmingEnd(true))}>{confirmingEnd ? "确认结束跟进" : "结束跟进"}</button></div> :
         <div className={styles.sampleChoices}><button aria-pressed={!research} onClick={() => switchSample(false)}>开发样例</button>
           <button aria-pressed={research} onClick={() => switchSample(true)}>科研对照</button></div>}
-    </header>
+    </header>}
     {!live && <div className={styles.sampleBar}><p>用一条新资料体验同一份成果的接续修改。</p><button className={styles.secondary}
       disabled={snapshot.outputs.length >= 2} onClick={() => { setSnapshot(workbenchFixture(2, research)); setSelectedRevision(null); setSourceKey(null); }}>
       载入新资料样例 <ArrowUpRight size={15} aria-hidden="true" /></button></div>}
     {error && <div role="alert" className={styles.error}>{error}{hasPending && "；原请求编号已保留，再次发送会重试原请求。"}</div>}
-    {live && <ReentryBriefPanel missionId={missionId} onOpenRevision={revision => { setSelectedRevision(revision); setView("draft"); }} />}
-    {live && snapshot.challengesEnabled && <ProjectSprint key={missionId} missionId={missionId} onOpenRevision={revision => { setSelectedRevision(revision); setView("draft"); }} />}
-    <div className={styles.workspace}>
+    {live && !liveGame && <ReentryBriefPanel missionId={missionId} onOpenRevision={revision => { setSelectedRevision(revision); setView("draft"); }} />}
+    {live && snapshot.challengesEnabled && !liveGame && <section className={styles.gameEntry} aria-label="成果玩法入口">
+      <div className={styles.gameEntryMain}><BookmarkSpiritAvatar size={44} /><div><strong>围绕这份成果试一试</strong>
+        <p>核对引用、做一轮交付彩排，或和忆程一起推进一小步；玩法不会替代独立内容核验。</p></div></div>
+      <div className={styles.gameEntryActions}><button type="button" onClick={() => setLiveGame("EVIDENCE")}>证据侦探</button>
+        <button type="button" onClick={() => setLiveGame("REHEARSAL")}>交付彩排</button>
+        <button type="button" onClick={() => setLiveGame("SPRINT")}>双人冲刺</button></div>
+    </section>}
+    {live && snapshot.challengesEnabled && liveGame && <MissionGames missionId={snapshot.id} snapshot={snapshot} output={latestOutput} latestOutput={latestOutput}
+      tab={liveGame} onTab={setLiveGame} onExit={() => setLiveGame(null)} onHandoff={refresh} onOpenRevision={openRevision}
+      onPauseMission={pauseFromGame} onDirective={deliver} />}
+    {!liveGame && <div className={styles.workspace}>
       <aside className={styles.progress} aria-label="Agent过程反馈"><h2>这份成果的进展</h2>
         <p className={styles.objective}>{snapshot.workingObjective}</p>
         <ol>{snapshot.events.slice(0, 8).map(event => { const Icon = event.kind === "TOOL_STARTED" || event.kind === "CLAIMED" ? Clock3 : event.kind === "SKILL_ENTERED" ? Search : event.kind === "SKILL_HANDOFF" ? ArrowUpRight : event.kind === "OUTPUT_SAVED" ? FileCheck2 : event.kind?.startsWith("USER_") ? MessageSquareText : Check;
@@ -190,7 +216,6 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
             {sprinting && <label className={styles.checkbox}><input type="checkbox" checked={sprintChecked} onChange={e => setSprintChecked(e.target.checked)} />我已核对原记录</label>}
             {sprintChecked && <p>已记下你的自述；这不会把项目行动标记为完成。</p>}</>}
         </section>}
-        {live && snapshot.challengesEnabled && <OutcomeChallenges missionId={snapshot.id} outputId={output?.id} onSource={setSourceKey} onHandoff={refresh} />}
         {live && <MissionMaterialForm missionId={snapshot.id} projectId={snapshot.projectId} onSaved={refresh} />}
         <form className={styles.composer} onSubmit={submit}><label htmlFor="workbench-message">接下来怎么做，直接告诉忆程</label>
           <textarea id="workbench-message" value={message} disabled={busy || hasPending} onChange={e => setMessage(e.target.value)}
@@ -206,6 +231,6 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
           technical={[{ label: "来源标识", value: source.id }, { label: "修订标识", value: source.revision }, ...(source.revision !== source.hash ? [{ label: "内容校验", value: source.hash }] : [])]} />
           <blockquote data-testid="source-excerpt">{source.text}</blockquote></> : <p>尚无可用引用，或来源使用许可需要重新核对。</p>}
       </aside>
-    </div>
+    </div>}
   </main>;
 }

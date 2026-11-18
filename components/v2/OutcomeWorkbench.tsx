@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { ArrowUpRight, BookOpen, Check, ChevronRight, Clock3, FileCheck2, FileText, GitCompareArrows, MessageSquareText, RefreshCw, Search } from "lucide-react";
 import { SourceProvenance } from "@/components/SourceProvenance";
 import { evidenceTime, sourceDisplayName } from "@/lib/client/sourceDisplay";
@@ -7,16 +7,18 @@ import { AgentMessageBlocks } from "@/components/AgentMessageBlocks";
 import { workbenchFixture } from "@/lib/experience/workbenchFixture";
 import { workbenchArtifactMessage, workbenchMessage, type WorkbenchSnapshot } from "@/lib/types/workbench";
 import { ReentryBriefPanel } from "./ReentryBrief";
-import { BookmarkSpiritAvatar } from "@/components/mascot/BookmarkSpirit";
-import { MissionGames, type GameTab } from "./MissionGames";
+import { GAME_ENTRIES, MissionGames, type GameTab } from "./MissionGames";
 import styles from "./OutcomeWorkbench.module.css";
 import { MissionMaterialForm } from "./MissionMaterialForm";
 
+class RequestError extends Error {
+  constructor(message: string, readonly status: number) { super(message); }
+}
 async function api(url: string, body?: unknown) {
   const response = await fetch(url, { method: body ? "POST" : "GET", cache: "no-store",
     headers: body ? { "Content-Type": "application/json" } : {}, ...(body ? { body: JSON.stringify(body) } : {}) });
   const value = await response.json();
-  if (!response.ok) throw new Error(typeof value.error === "string" ? value.error : value.error?.message ?? "暂时无法读取，请重试原请求");
+  if (!response.ok) throw new RequestError(typeof value.error === "string" ? value.error : value.error?.message ?? "暂时无法读取，请重试原请求", response.status);
   return value;
 }
 const phaseLabels: Record<string, string> = { WAITING_OBSERVATION: "稿件已备好，继续留意变化", QUEUED: "已接到工作，等待后台推进",
@@ -36,21 +38,41 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
   const [hasPending, setHasPending] = useState(false);
   const [confirmingEnd, setConfirmingEnd] = useState(false);
   const pending = useRef<Pending | null>(null), conversationId = useRef<string | null>(null);
+  const snapshotRead = useRef({ seq: 0 });
+  const refresh = useCallback(async () => {
+    if (!missionId) return;
+    const seq = ++snapshotRead.current.seq;
+    try {
+      const value = await api("/api/missions/" + encodeURIComponent(missionId) + "/workbench");
+      if (seq !== snapshotRead.current.seq) return;
+      setSnapshot(value);
+      return value as WorkbenchSnapshot;
+    } catch (e) {
+      if (seq !== snapshotRead.current.seq) return;
+      if (e instanceof RequestError && [401, 403, 404].includes(e.status)) {
+        setSnapshot(null);
+        setLiveGame(null);
+        setMessage("");
+        pending.current = null;
+        conversationId.current = null;
+        setHasPending(false);
+      }
+      setError(e instanceof Error ? e.message : "读取失败");
+    }
+  }, [missionId]);
   useEffect(() => {
     if (!missionId) return;
-    let active = true;
-    const refresh = async () => {
-      try { const value = await api("/api/missions/" + encodeURIComponent(missionId) + "/workbench"); if (active) setSnapshot(value); }
-      catch (e) { if (active) setError(e instanceof Error ? e.message : "读取失败"); }
+    const reads = snapshotRead.current;
+    let inFlight = false;
+    const poll = async () => {
+      if (inFlight) return;
+      inFlight = true;
+      try { await refresh(); } finally { inFlight = false; }
     };
-    void refresh(); const interval = setInterval(() => void refresh(), 2500);
-    return () => { active = false; clearInterval(interval); };
-  }, [missionId]);
-  async function refresh() {
-    if (!missionId) return;
-    try { setSnapshot(await api("/api/missions/" + encodeURIComponent(missionId) + "/workbench")); setError(""); }
-    catch (e) { setError(e instanceof Error ? e.message : "读取失败"); }
-  }
+    const first = setTimeout(() => void poll(), 0);
+    const interval = setInterval(() => void poll(), 2500);
+    return () => { reads.seq++; clearTimeout(first); clearInterval(interval); };
+  }, [missionId, refresh]);
   /** 把一句话交给原 Conversation/Directive 链；返回值只描述真实应用结果。 */
   async function deliver(text: string): Promise<{ applied: boolean; objective: string; message: string }> {
     const quoted = text.trim();
@@ -80,11 +102,11 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
     const request = pending.current;
     await api("/api/conversations/" + request.conversationId + "/turns", request.body);
     pending.current = null; setHasPending(false);
-    const next = await api("/api/missions/" + encodeURIComponent(snapshot.id) + "/workbench") as WorkbenchSnapshot;
+    const next = await refresh();
+    if (!next) return { applied: false, objective: snapshot.workingObjective, message: "输入已送达，等待工作台重新读回。" };
     const before = new Set(snapshot.events.map(event => event.id));
     const applied = next.workingObjective !== snapshot.workingObjective ||
       next.events.some(event => event.kind === "NATURAL_CONTROL_APPLIED" && !before.has(event.id));
-    setSnapshot(next); setError("");
     return { applied, objective: next.workingObjective,
       message: applied ? "已按你的指引调整原委托；以当前状态为准。" : "输入已送达原委托，工作重点尚未变化；以当前状态为准。" };
   }
@@ -125,6 +147,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
     snapshot.sources.find(s => output?.sourceKeys.includes(s.key)) ?? snapshot.sources[0];
   const currentSourceIds = output?.blocks.flatMap(b => b.sourceIds) ?? [];
   function prepareQuestion(text: string) { setMessage("今天先核对" + text); setNotice("已放入下方输入框，发送后交给原委托。"); }
+  async function reread() { await refresh(); }
   function openRevision(revision: number) { setSelectedRevision(revision); setView("draft"); setSourceKey(null); setLiveGame(null); window.scrollTo({ top: 0, behavior: "smooth" }); }
   async function pauseFromGame() { const ok = await control("pause"); if (!ok) throw new Error("暂停尚未确认，请重试。"); }
   return <main className={styles.workbench}>
@@ -143,14 +166,12 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
     {error && <div role="alert" className={styles.error}>{error}{hasPending && "；原请求编号已保留，再次发送会重试原请求。"}</div>}
     {live && !liveGame && <ReentryBriefPanel missionId={missionId} onOpenRevision={revision => { setSelectedRevision(revision); setView("draft"); }} />}
     {live && snapshot.challengesEnabled && !liveGame && <section className={styles.gameEntry} aria-label="成果玩法入口">
-      <div className={styles.gameEntryMain}><BookmarkSpiritAvatar size={44} /><div><strong>围绕这份成果试一试</strong>
-        <p>核对引用、做一轮交付彩排，或和忆程一起推进一小步；玩法不会替代独立内容核验。</p></div></div>
-      <div className={styles.gameEntryActions}><button type="button" onClick={() => setLiveGame("EVIDENCE")}>证据侦探</button>
-        <button type="button" onClick={() => setLiveGame("REHEARSAL")}>交付彩排</button>
-        <button type="button" onClick={() => setLiveGame("SPRINT")}>双人冲刺</button></div>
+      <h2>成果演练</h2>
+      <div className={styles.gameEntryActions}>{GAME_ENTRIES.map(({ key, label, icon: Icon }) =>
+        <button type="button" key={key} onClick={() => setLiveGame(key)}><Icon size={16} aria-hidden />{label}</button>)}</div>
     </section>}
     {live && snapshot.challengesEnabled && liveGame && <MissionGames missionId={snapshot.id} snapshot={snapshot} output={latestOutput} latestOutput={latestOutput}
-      tab={liveGame} onTab={setLiveGame} onExit={() => setLiveGame(null)} onHandoff={refresh} onOpenRevision={openRevision}
+      tab={liveGame} onTab={setLiveGame} onExit={() => setLiveGame(null)} onHandoff={reread} onOpenRevision={openRevision}
       onPauseMission={pauseFromGame} onDirective={deliver} />}
     {!liveGame && <div className={styles.workspace}>
       <aside className={styles.progress} aria-label="Agent过程反馈"><h2>这份成果的进展</h2>
@@ -216,7 +237,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
             {sprinting && <label className={styles.checkbox}><input type="checkbox" checked={sprintChecked} onChange={e => setSprintChecked(e.target.checked)} />我已核对原记录</label>}
             {sprintChecked && <p>已记下你的自述；这不会把项目行动标记为完成。</p>}</>}
         </section>}
-        {live && <MissionMaterialForm missionId={snapshot.id} projectId={snapshot.projectId} onSaved={refresh} />}
+        {live && <MissionMaterialForm missionId={snapshot.id} projectId={snapshot.projectId} onSaved={reread} />}
         <form className={styles.composer} onSubmit={submit}><label htmlFor="workbench-message">接下来怎么做，直接告诉忆程</label>
           <textarea id="workbench-message" value={message} disabled={busy || hasPending} onChange={e => setMessage(e.target.value)}
             placeholder="例如：继续整理，但不要联网" maxLength={3000} required />

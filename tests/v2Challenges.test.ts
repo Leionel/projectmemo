@@ -49,6 +49,16 @@ test("concurrent answer retries converge; changed body and second round writes a
   await expect(commandChallenge(f.user.id, f.m.id, s.id, { ...input, requestId: "other" })).rejects.toMatchObject({ code: "CHALLENGE_ROUND_CHANGED" });
 });
 
+test("answers recorded before evidence binding still replay with the original request ID", async () => {
+  const f = await fixture(), s = await f.begin("REHEARSAL");
+  const answer = { action: "ANSWER", requestId: "legacy", questionKey: "evidence", text: "请核对分享入口", selected: [] };
+  await commandChallenge(f.user.id, f.m.id, s.id, answer);
+  const key = { missionId: f.m.id, commandRequestId: "challenge:" + s.id + ":legacy" };
+  await db.agentMissionEvent.update({ where: { missionId_commandRequestId: key }, data: { commandPayloadHash: jsonHash(answer) } });
+  expect((await commandChallenge(f.user.id, f.m.id, s.id, answer)).replayed).toBe(true);
+  await expect(commandChallenge(f.user.id, f.m.id, s.id, { ...answer, evidenceKeys: s.sourceKeys })).rejects.toMatchObject({ code: "REQUEST_ID_REUSED" });
+});
+
 test.each(["source-change", "source-delete", "new-material", "output-change", "context-change"])("%s withdraws cached questions and refuses answers", async change => {
   const f = await fixture(), s = await f.begin();
   if (change === "source-change") await db.capture.update({ where: { id: f.source.id }, data: { rawText: "修订记录" } });
@@ -128,11 +138,17 @@ test("handed-off answers are locked; deleting the attempt withdraws the receipt 
   expect(deleted.session.handoffSourceId).toBeNull();
   expect(deleted.session.handoffAt).toBeNull();
   expect(deleted.session.answers).toEqual([]);
-  expect(deleted.session.status).toBe("ACTIVE");
+  expect(deleted.session.status).toBe("STOPPED");
   expect((await db.capture.findUniqueOrThrow({ where: { id: feedbackId } })).rawText).toBe("本轮核查回答已删除。");
-  const again = await commandChallenge(f.user.id, f.m.id, s.id, { action: "ANSWER", requestId: "again", questionKey: "trace", selected: [f.ref.id] });
-  expect(again.session.status).toBe("COMPLETED");
-  expect(await db.agentMissionEvent.count({ where: { missionId: f.m.id, type: "CHALLENGE_HANDED_OFF" } })).toBe(1);
+  const nextAnswer = { action: "ANSWER", requestId: "again", questionKey: "trace", selected: [f.ref.id] };
+  await expect(commandChallenge(f.user.id, f.m.id, s.id, nextAnswer)).rejects.toMatchObject({ code: "CHALLENGE_STOPPED" });
+  const fresh = await f.begin("EVIDENCE");
+  expect(fresh.id).not.toBe(s.id);
+  await commandChallenge(f.user.id, f.m.id, fresh.id, nextAnswer);
+  const next = await commandChallenge(f.user.id, f.m.id, fresh.id, { action: "HANDOFF", requestId: "fresh-handoff" });
+  expect(next.session.handoffSourceId).toBeTruthy();
+  expect(next.session.handoffSourceId).not.toBe(handed.session.handoffSourceId);
+  expect((await db.capture.findUniqueOrThrow({ where: { id: feedbackId } })).rawText).toBe("本轮核查回答已删除。");
 });
 
 test("handoff receipt survives later material and a newer draft without becoming a withdrawal", async () => {

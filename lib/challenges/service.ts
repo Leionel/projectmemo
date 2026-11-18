@@ -29,9 +29,10 @@ function enabled() {
   if (!isFeatureEnabled("MISSION_V2_ENABLED", false) || !isFeatureEnabled("MISSION_CHALLENGES_ENABLED", false))
     throw new AppError("CHALLENGE_DISABLED", "成果挑战尚未开启", 404);
 }
-async function replay(tx: Tx, missionId: string, id: string, hash: string) {
+async function replay(tx: Tx, missionId: string, id: string, hash: string, previousHash?: string) {
   const row = await tx.agentMissionEvent.findUnique({ where: { missionId_commandRequestId: { missionId, commandRequestId: id } } });
-  if (row && row.commandPayloadHash !== hash) throw new AppError("REQUEST_ID_REUSED", "请求编号已用于其他挑战内容", 409);
+  if (row && row.commandPayloadHash !== hash && row.commandPayloadHash !== previousHash)
+    throw new AppError("REQUEST_ID_REUSED", "请求编号已用于其他挑战内容", 409);
   return row;
 }
 async function sessionState(tx: Tx, m: AgentMission, id: string) {
@@ -49,19 +50,22 @@ async function sessionState(tx: Tx, m: AgentMission, id: string) {
   ]);
   const answerEvents = await tx.agentMissionEvent.findMany({ where: { ...where, type: "CHALLENGE_ANSWERED", seq: { gt: deletion?.seq ?? start.seq } }, orderBy: { seq: "asc" }, take: 3 });
   const answers = answerEvents.filter(row => !record(row.payloadJson).deleted).map(row => record(row.payloadJson).answer as ChallengeAnswer);
-  // 删除回答会撤下交回回执；本轮回到可重答状态，但不会把反馈副本重新展示出来。
   const handedOff = !!handoff && (!deletion || handoff.seq > deletion.seq);
-  if (Date.now() - start.createdAt.getTime() > CHALLENGE_RETENTION_DAYS * 86400000) {
+  const age = Date.now() - start.createdAt.getTime();
+  const retentionExpired = age > CHALLENGE_RETENTION_DAYS * 86400000;
+  if (retentionExpired) {
     await redactChallengeAnswers(tx, m.id, id, handoff ? String(record(handoff.payloadJson).sourceId) : null);
     answers.length = 0;
   }
   let reason: string | null = null;
   const output = await tx.agentMissionOutput.findFirst({ where: { id: frozen.outputId, missionId: m.id } });
   const latest = await tx.agentMissionOutput.findFirst({ where: { missionId: m.id }, orderBy: { revision: "desc" }, select: { id: true } });
-  if (handoff) {
+  if (retentionExpired) reason = "本轮回答已超过保留期限，请从当前版本重新开始";
+  else if (handoff && !handedOff) reason = null;
+  else if (handedOff) {
     // 交回后本轮已闭合：后续新稿或新材料是同一 Mission 的成果，不应撤销回执或判为撤题。
     // 仍要核对原来源许可，撤权时隐藏题面与回答。
-    if (!output) reason = "原稿已不可读，请核对当前成果";
+    if (!output || frozen.outputHash !== jsonHash({ content: output.contentJson, sources: output.sourceRefsJson })) reason = "原稿已变化，请核对当前成果";
     else {
       try { await validateSources(m.projectId, output.sourceRefsJson as unknown as Source[], tx, m.id); }
       catch { reason = "来源已变化或使用权限已撤销，本轮已撤下"; }
@@ -72,16 +76,18 @@ async function sessionState(tx: Tx, m: AgentMission, id: string) {
     try { await validateSources(m.projectId, output.sourceRefsJson as unknown as Source[], tx, m.id); }
     catch { reason = "来源已变化或使用权限已撤销，本轮已撤下"; }
   }
-  if (!handoff && Date.now() - start.createdAt.getTime() > 86400000) reason = "本轮已超过一天，请核对当前成果后重新开始";
-  const stopped = !!stop || ["CANCELLED", "SUCCEEDED"].includes(m.status);
+  if (!handoff && age > 86400000) reason = "本轮已超过一天，请核对当前成果后重新开始";
+  const deletedHandoff = !!handoff && !handedOff;
+  const stopped = !!stop || deletedHandoff || ["CANCELLED", "SUCCEEDED"].includes(m.status);
+  const hidden = !!reason || deletedHandoff;
   const session: ChallengeSession = { schemaVersion: 1, id, missionId: m.id, outputId: frozen.outputId, revision: frozen.revision, kind: frozen.kind,
     status: reason ? "STALE" : stopped ? "STOPPED" : handedOff ? "COMPLETED" : answers.length === frozen.questions.length ? "COMPLETED" : "ACTIVE", reason,
     // A revoked or stale source must not survive in cached question/answer text from the event ledger.
-    questions: reason ? [] : frozen.questions.map(({ key, title, excerpt, options }) => ({ key, title, excerpt, options })), answers: reason ? [] : answers,
-    sourceKeys: reason ? [] : frozen.sourceKeys,
-    openedSourceKeys: reason ? [] : opened.map(e => String(record(e.payloadJson).sourceKey)),
-    handoffSourceId: handedOff ? String(record(handoff!.payloadJson).sourceId) : null,
-    handoffAt: handedOff ? handoff!.createdAt.toISOString() : null, createdAt: start.createdAt.toISOString(),
+    questions: hidden ? [] : frozen.questions.map(({ key, title, excerpt, options }) => ({ key, title, excerpt, options })), answers: hidden ? [] : answers,
+    sourceKeys: hidden ? [] : frozen.sourceKeys,
+    openedSourceKeys: hidden ? [] : opened.map(e => String(record(e.payloadJson).sourceKey)),
+    handoffSourceId: handedOff && !retentionExpired ? String(record(handoff!.payloadJson).sourceId) : null,
+    handoffAt: handedOff && !retentionExpired ? handoff!.createdAt.toISOString() : null, createdAt: start.createdAt.toISOString(),
     retentionDays: CHALLENGE_RETENTION_DAYS,
     logicalDeletionNote: "删除会清除在线回答正文并撤下派生反馈；30 天后访问时也会清除。事件身份保留，备份不宣称已物理擦除。" };
   return { session, frozen, answers };
@@ -123,9 +129,12 @@ export async function startChallenge(userId: string, missionId: string, raw: unk
 }
 export async function commandChallenge(userId: string, missionId: string, id: string, raw: unknown) {
   enabled(); const body = commandInput.parse(raw), hash = jsonHash(body), key = "challenge:" + id + ":" + body.requestId;
+  const previousHash = body.action === "ANSWER" && body.evidenceKeys.length === 0
+    ? jsonHash({ action: body.action, requestId: body.requestId, questionKey: body.questionKey, text: body.text, selected: body.selected })
+    : undefined;
   return db.$transaction(async tx => {
     const m = await ownedMission(userId, missionId, tx); await lock(tx, missionId);
-    const old = await replay(tx, missionId, key, hash);
+    const old = await replay(tx, missionId, key, hash, previousHash);
     const { session, frozen, answers } = await sessionState(tx, m, id);
     if (old) return { session, replayed: true };
     const command = { id: key, hash }, base = { challengeId: id };
@@ -138,7 +147,7 @@ export async function commandChallenge(userId: string, missionId: string, id: st
     } else {
       if (session.status === "STALE") throw new AppError("CHALLENGE_STALE", session.reason!, 409);
       if (session.status === "STOPPED" || ["CANCELLED", "SUCCEEDED"].includes(m.status)) throw new AppError("CHALLENGE_STOPPED", "本轮或原委托已结束，不再接受新操作", 409);
-      if (body.action === "ANSWER" && session.handoffSourceId) throw new AppError("CHALLENGE_ALREADY_HANDED_OFF", "本轮已交回，不能再修改回答；如需重来，请先删除本轮回答", 409);
+      if (body.action === "ANSWER" && session.handoffSourceId) throw new AppError("CHALLENGE_ALREADY_HANDED_OFF", "本轮已交回。如需再次核对，请从当前版本开始新一轮。", 409);
       if (body.action === "ANSWER") {
         const question = frozen.questions[session.answers.length];
         if (!question || question.key !== body.questionKey) throw new AppError("CHALLENGE_ROUND_CHANGED", "本题已回答，请读取当前回合", 409);

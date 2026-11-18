@@ -1,29 +1,31 @@
 /**
  * Web 玩法生产包验收：隔离库 → 迁移 → 合成数据 → next start → 真实浏览器流程 → 截图与回执。
- * 只操作 prisma/projectmemo-web-games.db；不读取、不写入真实项目。
+ * 每次使用新的 SQLite 与证据目录，方便复跑和对照。
  *
  * 前置：npm.cmd run build（NEXT_DIST_DIR=.next-webgames）
  * 运行：npm.cmd exec tsx -- scripts/verify-web-games.ts
  */
 import fs from "node:fs";
 import path from "node:path";
-import { spawn, spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { chromium, type Page } from "@playwright/test";
+import Database from "better-sqlite3";
 import { xlsxMaterial } from "./fixtures/xlsx-material";
 
 const ROOT = process.cwd();
-const DB_PATH = path.resolve(ROOT, "prisma", "projectmemo-web-games.db");
-const DB_URL = "file:" + DB_PATH.replaceAll("\\", "/");
-const OUT = path.resolve(ROOT, "evidence/v2-first-loop/web-games-20261117");
-const SCREENS = path.join(OUT, "screens");
 const PORT = Number(process.env.WEB_GAMES_PORT ?? "4320");
 const BASE = "http://127.0.0.1:" + PORT;
 const DIST = process.env.NEXT_DIST_DIR || ".next-webgames";
 
-if (!DB_PATH.startsWith(path.resolve(ROOT, "prisma")) || !DB_PATH.includes("web-games")) throw new Error("拒绝操作非演示数据库：" + DB_PATH);
+if (!Number.isInteger(PORT) || PORT < 1024 || PORT > 65535) throw new Error("无效的 WEB_GAMES_PORT");
 if (!fs.existsSync(path.join(ROOT, DIST, "BUILD_ID"))) throw new Error("找不到生产构建：" + DIST + "，请先运行 npm.cmd run build");
+const TEMP = path.join(ROOT, "tmp");
+fs.mkdirSync(TEMP, { recursive: true });
+const DB_PATH = path.join(fs.mkdtempSync(path.join(TEMP, "web-games-")), "review.db");
+const DB_URL = "file:" + DB_PATH.replaceAll("\\", "/");
+const OUT = path.resolve(ROOT, "output", "playwright", "web-games", new Date().toISOString().replace(/[:.]/g, "-"));
+const SCREENS = path.join(OUT, "screens");
 fs.mkdirSync(SCREENS, { recursive: true });
-for (const name of fs.readdirSync(SCREENS)) if (name.endsWith(".png")) fs.rmSync(path.join(SCREENS, name), { force: true });
 let MISSION_ID = "";
 
 const ENV = {
@@ -44,11 +46,15 @@ function check(name: string, pass: boolean, detail = "") {
   if (!pass) throw new Error("验收失败：" + name + (detail ? " · " + detail : ""));
 }
 
-function resetDatabase() {
-  for (const suffix of ["", "-journal", "-shm", "-wal"]) fs.rmSync(DB_PATH + suffix, { force: true });
-  const prisma = path.resolve(ROOT, "node_modules", "prisma", "build", "index.js");
-  const result = spawnSync(process.execPath, [prisma, "migrate", "deploy"], { cwd: ROOT, env: ENV, encoding: "utf8" });
-  if (result.status !== 0) throw new Error("迁移失败：\n" + result.stdout + "\n" + result.stderr);
+function migrateDatabase() {
+  const database = new Database(DB_PATH);
+  const migrations = path.join(ROOT, "prisma", "migrations");
+  try {
+    for (const name of fs.readdirSync(migrations).sort()) {
+      const file = path.join(migrations, name, "migration.sql");
+      if (fs.existsSync(file)) database.exec(fs.readFileSync(file, "utf8"));
+    }
+  } finally { database.close(); }
 }
 
 async function startServer() {
@@ -58,6 +64,7 @@ async function startServer() {
   child.stdout?.on("data", chunk => { log += String(chunk); });
   child.stderr?.on("data", chunk => { log += String(chunk); });
   for (let attempt = 0; attempt < 60; attempt++) {
+    if (child.exitCode !== null) break;
     try {
       const response = await fetch(BASE + "/login");
       if (response.ok && (await response.text()).includes("<!DOCTYPE html>")) return { child, log: () => log };
@@ -80,7 +87,7 @@ async function shot(page: Page, name: string) { await page.screenshot({ path: pa
 async function openGame(page: Page, name: string) { await page.getByRole("button", { name, exact: true }).first().click(); await page.waitForTimeout(900); }
 
 async function main() {
-  resetDatabase();
+  migrateDatabase();
   Object.assign(process.env, ENV);
   const { seedWebGamesFixture } = await import("./web-games-fixture");
   const { db } = await import("../lib/db");
@@ -89,8 +96,9 @@ async function main() {
   // 合成租约持有者：真实 Worker 会续租；这里延长到 1 小时，只是让冲刺可启动，不推进任何业务状态。
   await db.agentMission.update({ where: { id: fixture.mission.id }, data: { leaseUntil: new Date(Date.now() + 3600_000) } });
   const server = await startServer();
-  const browser = await chromium.launch();
+  let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined;
   try {
+    browser = await chromium.launch();
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     await login(page);
     await shot(page, "01-workbench-1440");
@@ -150,6 +158,21 @@ async function main() {
     await openGame(page, "证据侦探");
     await shot(page, "06-evidence-360");
     check("360 可读且无横向溢出", await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+    await page.getByRole("button", { name: /查看本轮提示/ }).click();
+    check("360 精灵提示完整可见", await page.evaluate(() => {
+      const hint = document.querySelector('[aria-label="成果玩法工作区"] [role="note"]')?.getBoundingClientRect();
+      return !!hint && hint.left >= 0 && hint.right <= window.innerWidth;
+    }));
+    await page.getByRole("button", { name: "收起提示" }).click();
+    const mobileSource = page.getByRole("button", { name: "打开原文" }).first();
+    await mobileSource.click();
+    const reader = page.getByRole("region", { name: "出处", exact: true });
+    await page.waitForFunction(() => document.activeElement?.getAttribute("aria-label") === "出处");
+    const bounds = await reader.boundingBox();
+    check("360 打开来源会定位到可见的原文面板", !!bounds && bounds.y >= 60 && bounds.y < 800);
+    await shot(page, "06b-source-reader-360");
+    await page.getByRole("button", { name: "收起原文阅读" }).click();
+    check("收起原文后焦点回到原来的来源卡", await mobileSource.evaluate(button => button === document.activeElement));
 
     // 删除回答：撤下回执与反馈副本
     await page.setViewportSize({ width: 1440, height: 1000 });
@@ -185,6 +208,11 @@ async function main() {
     await page.getByRole("button", { name: /重试原请求/ }).click();
     await page.waitForTimeout(1700);
     check("重试原请求后进入第二轮", (await page.locator("main").innerText()).includes("第 2 / 3 轮"));
+    await shot(page, "07b-mentor-answer-1440");
+    await page.setViewportSize({ width: 360, height: 800 });
+    check("360 彩排无横向溢出", await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+    await shot(page, "07c-mentor-answer-360");
+    await page.setViewportSize({ width: 1440, height: 1000 });
     const answers = ["系统分享的真机验证和验收口径尚未确认；这处我还不知道，需要项目负责人确认。", "下一版保留未验证状态，补充真机验证计划，不写成已完成。"];
     for (const answer of answers) {
       await page.locator('textarea[id^="rehearsal-"]').fill(answer);
@@ -215,11 +243,11 @@ async function main() {
     await db.agentMissionOutput.create({ data: { missionId: fixture.mission.id, revision: latest.revision + 1, kind: "NOTE",
       contentJson: { blocks: [{ blockId: "sprint", kind: "PROJECT_OBSERVATION", text: "输入回归已通过；系统分享仍待真机验证。", sourceIds: [] }], missingInformation: ["真机分享仍待核对"] },
       sourceRefsJson: previous.sourceRefsJson as unknown as object[], claimChecksJson: [] } });
-    await db.$transaction(async tx => {
-      const updated = await tx.agentMission.update({ where: { id: fixture.mission.id }, data: { nextEventSeq: { increment: 1 } }, select: { nextEventSeq: true } });
-      await tx.agentMissionEvent.create({ data: { missionId: fixture.mission.id, seq: updated.nextEventSeq, type: "CHALLENGE_SOURCE_OPENED",
-        payloadJson: { challengeId: "verify-sprint", sourceKey: "capture:record@hash" } } });
-    });
+    await page.getByRole("region", { name: "我的这一小步" }).getByRole("button", { name: /输入回归记录/ }).click();
+    await page.locator('[aria-label="原文阅读"]').waitFor();
+    const visit = await db.agentMissionEvent.findFirst({ where: { missionId: fixture.mission.id, type: "SPRINT_SOURCE_OPENED" } });
+    check("冲刺中打开原文写入本轮回执", visit !== null);
+    await page.getByRole("button", { name: "收起原文阅读" }).click();
     await page.waitForTimeout(5000);
     check("冲刺显示真实步骤回执", (await page.locator("main").innerText()).includes("读取资料"));
     check("冲刺只在保存后显示打开新稿", (await page.locator("main").innerText()).includes("打开新稿"));
@@ -264,7 +292,8 @@ async function main() {
     await shot(page, "14-sprint-paused-1440");
 
     // 角色素材与 reduced-motion
-    const reduced = await browser.newPage({ viewport: { width: 1440, height: 1000 }, reducedMotion: "reduce" });
+    const reduced = await browser.newPage({ viewport: { width: 1440, height: 1000 }, reducedMotion: "reduce", colorScheme: "dark" });
+    await reduced.addInitScript(() => localStorage.setItem("theme", "dark"));
     await login(reduced);
     await openGame(reduced, "双人冲刺");
     const motion = await reduced.evaluate(() => {
@@ -274,6 +303,7 @@ async function main() {
     });
     check("角色图片来自白名单且已加载", motion.found && motion.naturalWidth > 0 && motion.src.startsWith("/mascot/bookmark-spirit/v1/web/"));
     check("reduced-motion 关闭角色动画", motion.animation === "none");
+    check("深色模式使用实际主题", await reduced.locator("html").evaluate(html => html.classList.contains("dark")));
     await shot(reduced, "15-reduced-motion-1440");
     await reduced.close();
 
@@ -298,7 +328,7 @@ async function main() {
     fs.writeFileSync(path.join(OUT, "browser-receipt.json"), JSON.stringify(receipt, null, 2) + "\n");
     console.log("receipt", path.join(OUT, "browser-receipt.json"));
   } finally {
-    await browser.close().catch(() => {});
+    await browser?.close().catch(() => {});
     server.child.kill("SIGTERM");
     await db.$disconnect().catch(() => {});
   }

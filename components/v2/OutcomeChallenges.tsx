@@ -11,12 +11,12 @@ import styles from "./OutcomeChallenges.module.css";
 
 type Pending = { url: string; body: Record<string, unknown> };
 type Props = {
-  missionId: string; outputId?: string; output: WorkbenchOutput | null; latestOutput: WorkbenchOutput | null;
+  missionId: string; outputId?: string; outputs: WorkbenchOutput[]; latestOutput: WorkbenchOutput | null;
   kind: ChallengeKind; sources: WorkbenchSource[]; phase: string; phaseLabel: string;
   onKind: (kind: ChallengeKind) => void; onHandoff: () => void | Promise<void>; onOpenRevision: (revision: number) => void;
 };
 
-const EMPTY_HINT = "先读出这段稿实际用了哪几条记录；点选或拖入都可以，键盘也能完成。";
+const EMPTY_HINT = "先打开原文，再选出这段稿实际引用的记录。";
 const VERIFIED_HINT = "打开原文只定位出处；核对引用不等于证明内容正确。";
 const DONE_HINT = "引用关系已对上，内容仍待核验；要改稿就显式交回。";
 const HANDOFF_HINT = "已交回；新稿要等原委托真正保存后才会出现。";
@@ -27,12 +27,13 @@ function sourceTime(source: WorkbenchSource) { return source.observedAt ? eviden
 function HandoffReceipt({ session, latestOutput, phase, phaseLabel, onOpenRevision }: {
   session: ChallengeSession; latestOutput: WorkbenchOutput | null; phase: string; phaseLabel: string; onOpenRevision: (revision: number) => void;
 }) {
-  const newer = latestOutput && latestOutput.revision > session.revision ? latestOutput : null;
+  const newer = latestOutput && session.handoffAt && latestOutput.revision > session.revision &&
+    Date.parse(latestOutput.createdAt) >= Date.parse(session.handoffAt) ? latestOutput : null;
   const status = handoffStatus(phase);
   return <section className={styles.receipt} aria-label="交回回执">
     <div className={styles.receiptHead}><span className={styles.receiptCheck}><Check size={15} aria-hidden />已接收</span>
       <span>{session.handoffAt ? evidenceTime(session.handoffAt) : "时间未记录"}</span></div>
-    <h3>{newer ? "同一份委托已保存新稿" : "反馈已交回原委托"}</h3>
+    <h3>{newer ? "交回后，原委托保存了新稿" : "反馈已交回原委托"}</h3>
     <p>{newer ? "新版本已保存；旧版本仍可读，交回建议不等于已批准结论。" : status}</p>
     <div className={styles.receiptMeta}><span>{phaseLabel || "原委托已接收"}</span>{newer && <span>第 {newer.revision} 版 · {evidenceTime(newer.createdAt)}</span>}</div>
     {newer && <button type="button" className={styles.primary} onClick={() => onOpenRevision(newer.revision)}>
@@ -57,9 +58,8 @@ function Launch({ kind, outputId, busy, uncertain, error, onStart, onRetry, onKi
       ? { title: "把这版稿，讲清楚", lead: "依据、边界、改稿三轮追问。回答会整理成待核对意见，不会自动改动原稿。", action: "开始三轮彩排" }
       : { title: "两条记录，能不能直接比？", lead: "从本稿来源中的真实指标记录出题；判断不会改变项目事实。", action: "开始指标核对" };
   return <div className={styles.launch}>
-    <div className={styles.launchArt}><BookmarkSpirit pose={kind === "REHEARSAL" ? "thinking" : "inspect"} size={190}
-      hint={kind === "EVIDENCE" ? EMPTY_HINT : "这里只核对依据与边界；不会替你编出已验证结论。"} />
-      <span className={styles.paperTag}><Paperclip size={13} aria-hidden />同一份稿，换一种核对</span></div>
+    <div className={styles.launchArt}><BookmarkSpirit pose={kind === "REHEARSAL" ? "thinking" : "inspect"} size={152}
+      hint={kind === "EVIDENCE" ? EMPTY_HINT : undefined} /></div>
     <div className={styles.launchCopy}><p className={styles.eyebrow}>{challengeKindLabel(kind)}</p><h2>{copy.title}</h2><p>{copy.lead}</p>
       {!outputId ? <p className={styles.blocked}>先准备一版有来源的成果，再开始。</p> : <div className={styles.launchActions}>
         <button type="button" className={styles.primary} disabled={busy || uncertain} onClick={() => onStart(kind)}>{copy.action}<ArrowRight size={15} aria-hidden /></button>
@@ -77,19 +77,22 @@ function StepTrail({ index }: { index: number }) {
   </ol>;
 }
 
-function EvidenceView({ session, sources, busy, uncertain, readerKey, openReader, closeReader, choices, setChoice, clearChoices, openSource, handoff, latestOutput, phase, phaseLabel, onOpenRevision, celebrate }: {
+function EvidenceView({ session, sources, busy, uncertain, readerKey, closeReader, choices, setChoice, clearChoices, openSource, handoff, latestOutput, phase, phaseLabel, onOpenRevision, celebrate }: {
   session: ChallengeSession; sources: WorkbenchSource[]; busy: boolean; uncertain: boolean;
-  readerKey: string | null; openReader: (key: string) => void; closeReader: () => void;
+  readerKey: string | null; closeReader: () => void;
   choices: string[]; setChoice: (key: string, selected: boolean) => void; clearChoices: () => void;
   openSource: (source: WorkbenchSource) => void; handoff: () => void;
   latestOutput: WorkbenchOutput | null; phase: string; phaseLabel: string; onOpenRevision: (revision: number) => void; celebrate: boolean;
 }) {
   const question = session.questions[0];
   const [dragging, setDragging] = useState(false);
+  const readerColumn = useRef<HTMLDivElement>(null);
+  const readerTrigger = useRef<HTMLButtonElement>(null);
   const done = session.status === "COMPLETED";
   const verdict = evidenceVerdict(session);
-  const byId = new Map(sources.map(source => [source.id, source]));
-  const reader = readerKey ? sources.find(source => source.key === readerKey) : undefined;
+  const roundSources = sources.filter(source => session.sourceKeys.includes(source.key));
+  const byId = new Map(roundSources.map(source => [source.id, source]));
+  const reader = readerKey ? roundSources.find(source => source.key === readerKey) : undefined;
   const optionFor = (source: WorkbenchSource) => question?.options.find(option => option.key === source.id);
   const cards = (question?.options ?? []).filter(option => option.key !== "NO_REFERENCE")
     .map(option => ({ option, source: byId.get(option.key) }))
@@ -98,27 +101,41 @@ function EvidenceView({ session, sources, busy, uncertain, readerKey, openReader
   const selectedSources = choices.map(key => byId.get(key)).filter((source): source is WorkbenchSource => !!source);
   const pose = celebrate ? "success" : session.handoffSourceId ? "handoff" : reader ? "inspect" : choices.length ? "inspect" : "idle";
   const hint = session.handoffSourceId ? HANDOFF_HINT : done ? DONE_HINT : choices.length ? VERIFIED_HINT : EMPTY_HINT;
+  function read(source: WorkbenchSource, trigger: HTMLButtonElement) {
+    readerTrigger.current = trigger;
+    openSource(source);
+    if (window.matchMedia("(max-width: 680px)").matches) {
+      window.requestAnimationFrame(() => {
+        const panel = readerColumn.current;
+        panel?.focus({ preventScroll: true });
+        panel?.scrollIntoView({ block: "start", behavior: "instant" });
+      });
+    }
+  }
+  function close() {
+    closeReader();
+    readerTrigger.current?.focus();
+  }
 
   if (!question) return <div className={styles.summary}><p>本轮题面已撤下，请核对当前版本与来源许可。</p></div>;
   return <div className={styles.evidenceLayout}>
     <div className={styles.canvas}>
       <div className={styles.draftRow}>
-        <div className={styles.draftCard}><span className={styles.draftLabel}><FileText size={14} aria-hidden />稿件原句 · 第 {session.revision} 版</span>
-          <p>{question.excerpt}</p><span className={styles.draftNote}>请找出这段实际引用的记录</span></div>
-        <div className={styles.mascotSpot}><BookmarkSpirit pose={pose} size={164} hint={hint} />
-          <span className={styles.speech}>{done ? "先看关系，再谈结论。" : "先看原文，再下判断。"}</span></div>
+        <div className={styles.draftCard}><span className={styles.draftLabel}><FileText size={15} aria-hidden />稿件原句 · 第 {session.revision} 版</span>
+          <p>{question.excerpt}</p></div>
+        <div className={styles.mascotSpot}><BookmarkSpirit pose={pose} size={104} hint={hint} /></div>
       </div>
       <div className={styles.slot} data-dragging={dragging} data-filled={selectedSources.length > 0}
-        onDragOver={event => { if (done) return; event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)}
+        onDragOver={event => { if (done || busy || uncertain || !event.dataTransfer.types.includes("application/x-projectmemo-source")) return; event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)}
         onDrop={event => {
-          if (done) return; event.preventDefault(); setDragging(false);
-          const key = event.dataTransfer.getData("application/x-projectmemo-source") || event.dataTransfer.getData("text/plain");
-          if (key) setChoice(key, true);
+          if (done || busy || uncertain) return; event.preventDefault(); setDragging(false);
+          const key = event.dataTransfer.getData("application/x-projectmemo-source");
+          if (cards.some(card => card.option.key === key)) setChoice(key, true);
         }}>
         <div className={styles.slotHead}><span><Paperclip size={16} aria-hidden />{selectedSources.length ? "已放入 " + selectedSources.length + " 条引用" : "点选或拖入引用记录"}</span>
           {!!selectedSources.length && !done && <button type="button" onClick={clearChoices} disabled={busy || uncertain}>清空</button>}</div>
         {selectedSources.length ? <ul className={styles.chips}>{selectedSources.map(source => <li key={source.key}>
-          <button type="button" className={styles.chip} onClick={() => { openSource(source); openReader(source.key); }}><BookOpen size={13} aria-hidden />{sourceName(source)}
+          <button type="button" className={styles.chip} onClick={event => read(source, event.currentTarget)}><BookOpen size={13} aria-hidden />{sourceName(source)}
             <span>{sourceTime(source)}</span></button>
           {!done && <button type="button" className={styles.chipRemove} aria-label={"取消选择 " + sourceName(source)} disabled={busy || uncertain}
             onClick={() => setChoice(optionFor(source)?.key ?? source.id, false)}><X size={13} aria-hidden /></button>}
@@ -133,7 +150,7 @@ function EvidenceView({ session, sources, busy, uncertain, readerKey, openReader
           onDragEnd={() => setDragging(false)}>
           <div className={styles.sourceTop}><span><FileText size={15} aria-hidden />{sourceName(source)}</span><time dateTime={source.observedAt || undefined}>{sourceTime(source)}</time></div>
           <p>{source.text.trim().slice(0, 96) || "这条记录没有可读正文，请打开原文核对。"}</p>
-          <div className={styles.sourceFoot}><button type="button" disabled={busy || uncertain} onClick={() => { openSource(source); openReader(source.key); }}>打开原文</button>
+          <div className={styles.sourceFoot}><button type="button" disabled={busy || uncertain} onClick={event => read(source, event.currentTarget)}>打开原文</button>
             <button type="button" aria-pressed={selected} disabled={done || busy || uncertain} onClick={() => setChoice(option.key, !selected)}>
               {selected ? <><Check size={14} aria-hidden />已选</> : "选择这条"}</button></div>
         </article>;
@@ -147,9 +164,8 @@ function EvidenceView({ session, sources, busy, uncertain, readerKey, openReader
         done ? <div className={styles.doneBar}><p><strong>引用关系已对上，内容仍待核验。</strong>交回只会形成待核对反馈，不会自动改稿。</p>
           <button type="button" className={styles.primary} disabled={busy || uncertain} onClick={handoff}>{busy ? <><Loader2 size={15} className={styles.spin} aria-hidden />交回中…</> : "把缺口交回改稿"}<ArrowRight size={15} aria-hidden /></button></div> : null}
     </div>
-    <div className={styles.readerColumn}>{reader ? <SourceReader source={reader} excerpt={question.excerpt} onClose={closeReader} /> :
-      <div className={styles.readerEmpty}><BookOpen size={22} aria-hidden /><h3>原文阅读</h3><p>点一张来源卡的“打开原文”，这里会定位到当前版本的相关段落。</p>
-        <p className={styles.readerNote}>打开原文只记录一次来源访问；不改变项目事实。</p></div>}</div>
+    <div className={styles.readerColumn} ref={readerColumn} tabIndex={-1} role="region" aria-label="出处">{reader ? <SourceReader source={reader} excerpt={question.excerpt} onClose={close} /> :
+      <div className={styles.readerEmpty}><BookOpen size={19} aria-hidden /><h3>原文阅读</h3><p>打开一张来源卡，查看原文里的相关段落。</p></div>}</div>
   </div>;
 }
 
@@ -163,13 +179,13 @@ function MentorView({ session, sources, output, busy, uncertain, drafts, setDraf
   const [notebook, setNotebook] = useState<"findings" | "source">("findings");
   const question = session.questions[session.answers.length];
   const done = session.status === "COMPLETED";
-  const reader = readerKey ? sources.find(source => source.key === readerKey) : undefined;
+  const reader = readerKey && session.sourceKeys.includes(readerKey) ? sources.find(source => source.key === readerKey) : undefined;
   const activeNotebook = notebook === "source" && reader ? "source" : "findings";
   const sourceByKey = new Map(sources.map(source => [source.key, source]));
   const draftText = drafts[question?.key ?? ""] ?? "";
   const bound = question ? evidence[question.key] : undefined;
   const pose = celebrate ? "success" : session.handoffSourceId ? "handoff" : activeNotebook === "source" ? "inspect" : "thinking";
-  const hint = done ? "右侧是待核对意见；交回前不会改动原稿。" : "开放问题没有标准答案；写下你能确认的边界就好。";
+  const hint = done ? "这里留下了你刚才指出的缺口，交回后可以跟进新稿。" : "如果没有足够的材料，可以把这处标为待确认。";
   const preview = session.questions.map((item, index) => {
     const saved = session.answers[index];
     return saved ? mentorFinding(item, saved, index) : null;
@@ -178,7 +194,7 @@ function MentorView({ session, sources, output, busy, uncertain, drafts, setDraf
   if (!question && !done) return <div className={styles.summary}><p>本轮题面已撤下，请核对当前版本与来源许可。</p></div>;
   return <>
     <StepTrail index={done ? REHEARSAL_STEPS.length : session.answers.length} />
-    <div className={styles.mentorLayout}>
+    <div className={styles.mentorLayout} data-done={done}>
       <aside className={styles.draftPane} aria-label="原稿预览">
         <div className={styles.paneHead}><span><FileText size={14} aria-hidden />原稿 · 第 {session.revision} 版</span><time>{output ? evidenceTime(output.createdAt) : ""}</time></div>
         <div className={styles.draftBody}>{output?.blocks.slice(0, 4).map(block => {
@@ -189,9 +205,11 @@ function MentorView({ session, sources, output, busy, uncertain, drafts, setDraf
           onClick={() => { const source = sources[0]; openSource(source); setReaderKey(source.key); setNotebook("source"); }}><BookOpen size={14} aria-hidden />打开原记录</button>}
       </aside>
       <div className={styles.rehearsal}>
-        <div className={styles.rehearsalTop}><BookmarkSpirit pose={pose} size={150} hint={hint} quiet={notebook === "source"} />
-          <div className={styles.questionBubble}><span>{question ? rehearsalStep(question, session.answers.length).label : "本轮已完成"}</span>
-            <h3>{question?.title ?? "三轮问题都已保存"}</h3>{question && <p>{question.excerpt}</p>}</div></div>
+        {question && <div className={styles.rehearsalTop}>
+          <div className={styles.questionBubble}><span>{rehearsalStep(question, session.answers.length).label}</span>
+            <h3>{question.title}</h3><p>{question.excerpt}</p></div>
+          <BookmarkSpirit pose={pose} size={96} hint={hint} quiet={notebook === "source"} />
+        </div>}
         {question ? <form className={styles.reply} onSubmit={event => { event.preventDefault(); if (draftText.trim()) answer(); }}>
           <label htmlFor={"rehearsal-" + question.key}>本轮核查意见</label>
           <textarea id={"rehearsal-" + question.key} rows={4} maxLength={1200} value={draftText} disabled={busy || uncertain}
@@ -202,12 +220,11 @@ function MentorView({ session, sources, output, busy, uncertain, drafts, setDraf
                 onClick={() => setEvidence(question.key, key)}>{sourceName(source)}</button> : null; })}</div></div>
           <div className={styles.replyFoot}><button type="button" className={styles.quick} disabled={busy || uncertain}
             onClick={() => setDraft(question.key, "这处我还不知道，需要项目负责人确认。") }>这处我还不知道</button>
-            <button type="button" className={styles.quietAction} disabled={busy} onClick={() => { if (sources[0]) { openSource(sources[0]); setReaderKey(sources[0].key); setNotebook("source"); } }}>先看原稿</button>
             <button type="submit" className={styles.primary} disabled={busy || uncertain || !draftText.trim()}>{busy ? <><Loader2 size={15} className={styles.spin} aria-hidden />保存中…</> : "回答并继续"}<ArrowRight size={15} aria-hidden /></button></div>
           <p className={styles.counter}>第 {session.answers.length + 1} / {session.questions.length} 轮 · 回答不会自动改变项目事实</p>
         </form> : <div className={styles.preview}>
-          <div className={styles.previewHead}><div><p className={styles.eyebrow}>本轮整理</p><h3>{preview.length} 条改稿意见已整理</h3></div>
-            <span className={styles.previewNote}>先核对，再修订</span></div>
+          <div className={styles.previewHead}><div><p className={styles.eyebrow}>待核对</p><h3>{preview.length} 条改稿意见已整理</h3></div>
+            <BookmarkSpirit pose={pose} size={76} hint={hint} /></div>
           <div className={styles.previewRows}>{preview.map(item => <div key={item.questionKey} className={styles.previewRow}>
             <span className={styles.previewStep}>{item.stepLabel}</span>
             <div><span className={styles.basisTag}>{item.basisLabel}</span><p>{item.basis}</p></div>
@@ -218,17 +235,17 @@ function MentorView({ session, sources, output, busy, uncertain, drafts, setDraf
             <button type="button" className={styles.primary} disabled={busy || uncertain} onClick={handoff}>{busy ? <><Loader2 size={15} className={styles.spin} aria-hidden />交回中…</> : "交回原委托"}<Send size={15} aria-hidden /></button>}
         </div>}
       </div>
-      <aside className={styles.notebook} aria-label="本轮发现">
+      {(!done || activeNotebook === "source") && <aside className={styles.notebook} aria-label="本轮发现">
         <div className={styles.paneHead}><span>{activeNotebook === "source" ? "原文阅读" : "本轮发现"}</span>
-          {activeNotebook === "source" ? <button type="button" className={styles.paneSwitch} onClick={() => setNotebook("findings")}>回到发现</button> : <span className={styles.notebookPin} />}</div>
+          {activeNotebook === "source" && <button type="button" className={styles.paneSwitch} onClick={() => setNotebook("findings")}>回到发现</button>}</div>
         {activeNotebook === "source" && reader ? <SourceReader source={reader} excerpt={question?.excerpt ?? session.questions[0]?.excerpt ?? ""} onClose={() => setNotebook("findings")} /> :
           <>{preview.length ? <ul className={styles.findings}>{preview.map((item, index) => <li key={item.questionKey}>
             <span className={styles.findingIndex}>{index + 1}</span><div><p>{item.suggestion}</p><small>{item.stepLabel}{item.evidenceKey && sourceByKey.get(item.evidenceKey) ? " · 已引用 " + sourceName(sourceByKey.get(item.evidenceKey)!) : " · 未绑定来源"}</small></div>
             {item.evidenceKey && sourceByKey.get(item.evidenceKey) && <button type="button" aria-label="打开这条发现的来源" disabled={busy || uncertain}
               onClick={() => { const source = sourceByKey.get(item.evidenceKey!)!; openSource(source); setReaderKey(source.key); setNotebook("source"); }}><BookOpen size={14} aria-hidden /></button>}
           </li>)}</ul> : <div className={styles.findingsEmpty}><ShieldQuestion size={20} aria-hidden /><p>回答第一轮后，这里会逐条整理待核对缺口。</p></div>}
-          <div className={styles.notebookFoot}><span>开放问题不自动判真假</span><span>{preview.length} / {session.questions.length}</span></div></>}
-      </aside>
+        </>}
+      </aside>}
     </div>
   </>;
 }
@@ -256,7 +273,7 @@ function MetricView({ session, sources, busy, uncertain, choices, setChoice, han
   </div>;
 }
 
-export function OutcomeChallenges({ missionId, outputId, output, latestOutput, kind, sources, phase, phaseLabel, onKind, onHandoff, onOpenRevision }: Props) {
+export function OutcomeChallenges({ missionId, outputId, outputs, latestOutput, kind, sources, phase, phaseLabel, onKind, onHandoff, onOpenRevision }: Props) {
   const base = "/api/missions/" + encodeURIComponent(missionId) + "/challenges";
   const [session, setSession] = useState<ChallengeSession | null>(null);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -297,7 +314,7 @@ export function OutcomeChallenges({ missionId, outputId, output, latestOutput, k
     if (!at) previousHandoff.current = null;
   }, [session?.handoffAt]);
   async function send(body: Record<string, unknown>, starting = false) {
-    if (busy) return;
+    if (busy || (pending.current && Object.keys(body).length)) return;
     mutationEpoch.current++;
     pending.current ??= { url: starting ? base : base + "/" + session!.id, body: { ...body, requestId: crypto.randomUUID() } };
     setBusy(true); setUncertain(true); setError("");
@@ -314,7 +331,10 @@ export function OutcomeChallenges({ missionId, outputId, output, latestOutput, k
         throw new Error(value.error?.message ?? "提交尚未确认，请重试原请求");
       }
       pending.current = null; setUncertain(false); setSession(value.session);
-      if (request.body.action === "DELETE_ATTEMPT") { setDrafts({}); setChoices({}); setEvidence({}); setDeleteArmed(false); }
+      if (request.body.action === "DELETE_ATTEMPT" || request.url === base) {
+        setDrafts({}); setChoices({}); setEvidence({}); setDeleteArmed(false);
+        setReaderKey(null); setReaderClosed(false);
+      }
       if (request.body.action === "HANDOFF") void Promise.resolve(onHandoff()).catch(() => setError("交回已保存；工作台尚未刷新，可稍后重新读取。"));
     } catch (cause) { setError(cause instanceof Error ? cause.message : "提交尚未确认，请重试原请求"); }
     finally { setBusy(false); }
@@ -322,6 +342,7 @@ export function OutcomeChallenges({ missionId, outputId, output, latestOutput, k
   const retry = () => void send({});
   const start = (value: ChallengeKind) => void send({ kind: value, outputId }, true);
   const answered = session?.answers[0];
+  const originalOutput = outputs.find(output => output.id === session?.outputId) ?? null;
   // 刷新后从服务端已保存的回答恢复选择，避免“已核对”却没有已选来源的错位。
   const selected = choices[session?.questions[0]?.key ?? ""] ?? answered?.selected ?? [];
   const setChoice = (key: string, value: boolean) => {
@@ -348,40 +369,44 @@ export function OutcomeChallenges({ missionId, outputId, output, latestOutput, k
   const handoff = () => void send({ action: "HANDOFF" });
   const stop = () => void send({ action: "STOP" });
   const remove = () => { if (!deleteArmed) { setDeleteArmed(true); return; } void send({ action: "DELETE_ATTEMPT" }); };
+  const deleteLabel = deleteArmed ? "确认删除回答" : "删除本轮回答";
+  const retryNote = <RetryNote uncertain={uncertain} busy={busy} error={error} onRetry={retry} />;
 
   if (!session) return <Launch kind={kind} outputId={outputId} busy={busy} uncertain={uncertain} error={error} onStart={start} onRetry={retry} onKind={onKind} />;
   if (session.status === "ACTIVE" && session.kind !== kind) return <div className={styles.lockNote}>
     <ShieldQuestion size={22} aria-hidden /><div><h3>有一轮{session.kind === "EVIDENCE" ? "证据侦探" : session.kind === "REHEARSAL" ? "交付彩排" : "指标核对"}还没结束</h3>
       <p>同一份成果同时只保留一轮核查。先继续原轮次，或退出后再开新玩法。</p></div>
     <div><button type="button" className={styles.primary} onClick={() => onKind(session.kind)}>继续这一轮</button>
-      <button type="button" className={styles.secondary} disabled={busy || uncertain} onClick={stop}>退出本轮</button></div></div>;
+      <button type="button" className={styles.secondary} disabled={busy || uncertain} onClick={stop}>退出本轮</button>{retryNote}</div></div>;
   if (session.kind !== kind) return <Launch kind={kind} outputId={outputId} busy={busy} uncertain={uncertain} error={error} onStart={start} onRetry={retry} onKind={onKind} />;
   if (session.status === "STALE" && session.handoffSourceId) return <div className={styles.console}>
     <div className={styles.stale}><CheckCircle2 size={22} aria-hidden /><div><h3>{latestOutput && latestOutput.revision > session.revision ? "本轮已交回，原稿已有新版本" : "本轮已交回，后续资料有变化"}</h3>
       <p>核查反馈仍保留在原记录中；本轮题面已撤下，旧版本继续可读。</p>
       <p className={styles.staleNote}>{session.reason ?? "稿件或来源已变化。"}</p></div>
-      <div><button type="button" className={styles.secondary} disabled={busy || uncertain} onClick={remove}>删除本轮回答</button></div></div>
+      <div><button type="button" className={styles.secondary} disabled={busy || uncertain || !outputId} onClick={() => start(session.kind)}>从当前版本重新开始</button>
+        <button type="button" className={styles.secondary} disabled={busy || uncertain} onClick={remove}>{deleteLabel}</button>{retryNote}</div></div>
     <HandoffReceipt session={session} latestOutput={latestOutput} phase={phase} phaseLabel={phaseLabel} onOpenRevision={onOpenRevision} />
   </div>;
   if (session.status === "STALE") return <div className={styles.stale}>
     <AlertTriangle size={22} aria-hidden /><div><h3>本轮已撤下</h3><p>{session.reason ?? "稿件或来源已变化，请从当前版本重新开始。"}</p>
       <p className={styles.staleNote}>已输入的文字与选择仍保留在本地；重新开始会生成一轮新题。</p></div>
-    <div><button type="button" className={styles.primary} disabled={busy || uncertain} onClick={() => start(session.kind)}>从当前版本重新开始</button>
-      <button type="button" className={styles.secondary} disabled={busy || uncertain} onClick={remove}>删除上一轮回答</button></div></div>;
+    <div><button type="button" className={styles.primary} disabled={busy || uncertain || !outputId} onClick={() => start(session.kind)}>从当前版本重新开始</button>
+      <button type="button" className={styles.secondary} disabled={busy || uncertain} onClick={remove}>{deleteLabel}</button>{retryNote}</div></div>;
   if (session.status === "STOPPED") return <div className={styles.stale}>
     <CheckCircle2 size={22} aria-hidden /><div><h3>本轮已退出</h3><p>原委托继续保留；这轮回答仍可按保留规则删除。</p></div>
-    <div><button type="button" className={styles.primary} disabled={busy || uncertain} onClick={() => start(session.kind)}>再开一轮</button>
-      <button type="button" className={styles.secondary} disabled={busy || uncertain} onClick={remove}>删除本轮回答</button></div></div>;
+    <div><button type="button" className={styles.primary} disabled={busy || uncertain || !outputId} onClick={() => start(session.kind)}>再开一轮</button>
+      {!!session.answers.length && <button type="button" className={styles.secondary} disabled={busy || uncertain} onClick={remove}>{deleteLabel}</button>}{retryNote}</div></div>;
 
   return <div className={styles.console} data-kind={session.kind}>
     <div className={styles.consoleHead}><div><p className={styles.eyebrow}>{challengeKindLabel(session.kind)} · 第 {session.revision} 版</p>
       <h2>{session.kind === "EVIDENCE" ? "给这句话，找回原记录" : session.kind === "REHEARSAL" ? "把这版稿，讲清楚" : "两条记录，能不能直接比？"}</h2></div>
-      <div className={styles.consoleActions}><span className={styles.stageMark}>{session.kind === "REHEARSAL" ? (session.status === "COMPLETED" ? "已完成" : "第 " + Math.min(session.answers.length + 1, 3) + " 轮") : session.questions.length + " 题"}</span>
+      <div className={styles.consoleActions}>{session.status === "COMPLETED" && <span className={styles.stageMark}>已完成</span>}
+        {session.handoffSourceId && <button type="button" className={styles.secondary} disabled={busy || uncertain || !outputId} onClick={() => start(session.kind)}>再开一轮</button>}
         {session.status === "ACTIVE" && <button type="button" className={styles.secondary} disabled={busy || uncertain} onClick={stop}>退出本轮</button>}</div></div>
-    {session.kind === "EVIDENCE" && <EvidenceView session={session} sources={sources} busy={busy} uncertain={uncertain} readerKey={activeReaderKey} openReader={openReader} closeReader={closeReader}
+    {session.kind === "EVIDENCE" && <EvidenceView session={session} sources={sources} busy={busy} uncertain={uncertain} readerKey={activeReaderKey} closeReader={closeReader}
       choices={selected} setChoice={setChoice} clearChoices={clearChoices} openSource={openSource} handoff={handoff}
       latestOutput={latestOutput} phase={phase} phaseLabel={phaseLabel} onOpenRevision={onOpenRevision} celebrate={celebrate} />}
-    {session.kind === "REHEARSAL" && <MentorView session={session} sources={sources} output={output} busy={busy} uncertain={uncertain}
+    {session.kind === "REHEARSAL" && <MentorView session={session} sources={sources} output={originalOutput} busy={busy} uncertain={uncertain}
       drafts={drafts} setDraft={(key, value) => setDrafts(current => ({ ...current, [key]: value }))} evidence={evidence}
       setEvidence={(key, value) => setEvidence(current => ({ ...current, [key]: value }))} openSource={openSource}
       readerKey={readerKey} setReaderKey={setReaderKey} answer={answer} handoff={handoff} latestOutput={latestOutput} phase={phase}
@@ -394,10 +419,8 @@ export function OutcomeChallenges({ missionId, outputId, output, latestOutput, k
       <div><button type="button" className={styles.quietAction} disabled={busy || uncertain} onClick={remove}>{deleteArmed ? "确认删除回答" : "删除本轮回答"}</button>
         {session.status === "ACTIVE" && <button type="button" className={styles.primary} disabled={busy || uncertain || !selected.length} onClick={verify}>
           {busy ? <><Loader2 size={15} className={styles.spin} aria-hidden />核对中…</> : <><Check size={15} aria-hidden />核对引用</>}</button>}</div></div>}
-    {session.kind !== "EVIDENCE" && <div className={styles.verifyBar}><div>
-      <strong>{session.handoffSourceId ? "反馈已交回原委托" : session.status === "COMPLETED" ? "本轮意见已整理" : "回答与选择会保留在本轮"}</strong>
-      <span>{session.handoffSourceId ? "新稿保存前不会出现打开入口。" : session.status === "COMPLETED" ? "交回前不会改动原稿。" : "来源变化会撤下本轮；删除会同时撤下派生反馈。"}</span></div>
-      <button type="button" className={styles.quietAction} disabled={busy || uncertain} onClick={remove}>{deleteArmed ? "确认删除回答" : "删除本轮回答"}</button></div>}
+    {session.kind !== "EVIDENCE" && <div className={styles.roundTools}>
+      <button type="button" className={styles.quietAction} disabled={busy || uncertain} onClick={remove}>{deleteLabel}</button></div>}
     {error && <p role="alert" className={styles.error}><AlertTriangle size={15} aria-hidden />{error}</p>}
     {uncertain && !busy && <button type="button" className={styles.retry} onClick={retry}><RotateCcw size={14} aria-hidden />重试原请求</button>}
   </div>;

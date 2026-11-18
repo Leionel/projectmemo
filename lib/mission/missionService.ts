@@ -71,7 +71,8 @@ export async function missionDetail(userId:string,id:string){
 export async function readOutput(userId:string,id:string,outputId:string){await ownedMission(userId,id);const output=await db.agentMissionOutput.findFirst({where:{id:outputId,missionId:id}});if(!output)throw new AppError("OUTPUT_NOT_FOUND","没有找到成果草稿",404);return output;}
 export async function missionEvents(userId:string,id:string,after=0){await ownedMission(userId,id);const rows=await db.agentMissionEvent.findMany({where:{missionId:id,seq:{gt:after}},orderBy:{seq:"asc"},take:100});
  // Challenge text/answer keys are only read through the version- and permission-checked challenge view.
- const events=rows.map(row=>row.type.startsWith("CHALLENGE_")?{...row,payloadJson:{challengeId:row.type==="CHALLENGE_STARTED"?row.id:String(record(row.payloadJson).challengeId??"")}}:row);
+ const events=rows.map(row=>row.type.startsWith("CHALLENGE_")?{...row,payloadJson:{challengeId:row.type==="CHALLENGE_STARTED"?row.id:String(record(row.payloadJson).challengeId??"")}}:
+   row.type==="SPRINT_SOURCE_OPENED"?{...row,payloadJson:{sprintId:String(record(row.payloadJson).sprintId??"")}}:row);
  return{events,nextAfterSeq:rows.at(-1)?.seq??after};}
 export async function commandMission(userId:string,id:string,action:string,raw:unknown,approvalId?:string,guard?:(mission:Awaited<ReturnType<typeof ownedMission>>)=>void, transaction?:Prisma.TransactionClient){
   requireMissions();const body=commandSchema.parse(raw),hash=jsonHash({action,approvalId,body});

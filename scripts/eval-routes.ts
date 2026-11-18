@@ -50,6 +50,7 @@ const { record } = await import("@/lib/conversation/repository");
 const { readSkillArtifacts } = await import("@/lib/skills/artifacts");
 const reviewBundle = process.argv.includes("--review-bundle") ? await import("@/lib/evaluation/routeReview") : null;
 import type { CaseRun } from "@/lib/evaluation/checks";
+import type { AgentMissionOutput } from "@/lib/generated/prisma/client";
 import type { SkillRouteDecision } from "@/lib/skills/router";
 
 type FrozenCase = { caseId: string; group: string; input: { fixtureId: string; message: string; event: string } };
@@ -65,6 +66,16 @@ const missionRefOf = (fixtureId: string) => dataset.fixtures[fixtureId]?.mission
 
 async function countOutputs(missionId: string | null) { return missionId ? db.agentMissionOutput.count({ where: { missionId } }) : 0; }
 
+function outputCitations(output: Pick<AgentMissionOutput, "contentJson" | "sourceRefsJson"> | null) {
+  const content = output?.contentJson as { blocks?: Array<{ text?: string; citations?: Array<{ sourceId?: string }> }> } | undefined;
+  const sources = (output?.sourceRefsJson as Array<{ id: string; hash: string }> | null) ?? [];
+  const keys = new Map(sources.map(source => [source.id, source.id + "@" + source.hash]));
+  return { outputText: content?.blocks?.map(block => block.text ?? "").join("\n") ?? "",
+    cited: [...new Set(content?.blocks?.flatMap(block => (block.citations ?? []).map(citation =>
+      keys.get(citation.sourceId ?? "") ?? "unresolved:" + citation.sourceId)) ?? [])],
+    refs: [...keys.values()] };
+}
+
 function baseRun(testCase: FrozenCase, refs: FixtureRefs, decision: SkillRouteDecision, outputsBefore: number, missionStatusBefore: string | null): CaseRun {
   return {
     caseId: testCase.caseId, decision, fixtureMissionRef: missionRefOf(testCase.input.fixtureId), missionRealId: refs.missionId,
@@ -73,7 +84,7 @@ function baseRun(testCase: FrozenCase, refs: FixtureRefs, decision: SkillRouteDe
     evidence: { entered: [], handoffs: 0, checkpoint: false },
     artifacts: { receiptsBefore: refs.artifactReceiptCount, receiptsAfter: refs.artifactReceiptCount, artifactHashBefore: null, artifactHashAfter: null },
     actions: { before: 0, after: 0 }, persisted: { settings: { provider: "INJECTED_V2_FIXTURE", mode: "OFFLINE_FIXTURE" } },
-    outputText: "", citations: { cited: [], refs: [] },
+    outputText: "", citations: { cited: [], refs: [], previous: [] },
   };
 }
 
@@ -92,6 +103,8 @@ async function executeRun(testCase: FrozenCase, refs: FixtureRefs, decision: Ski
   }
   if (!missionId) missionId = await createFixtureMission(refs.ownerUserId, refs.projectId, testCase.input.message);
   run.missionRealId = missionId;
+  const previousOutput = await db.agentMissionOutput.findFirst({ where: { missionId }, orderBy: { revision: "desc" } });
+  run.actions.before = await db.actionItem.count({ where: { projectId: refs.projectId, isSimulated: false } });
   await installRequestRoute(missionId, decision, "EVALUATION_HARNESS");
   const pointers = refs.sources.filter(source => source.kind === "PROJECT").map(source => ({ sourceId: source.id, sourceHash: source.hash }));
   const provider = fixtureSkillProvider(async () => pointers, { terminalArtifacts: true });
@@ -121,12 +134,9 @@ async function executeRun(testCase: FrozenCase, refs: FixtureRefs, decision: Ski
   run.actions.after = await db.actionItem.count({ where: { projectId: refs.projectId, isSimulated: false } });
   run.artifacts.receiptsAfter = await db.missionArtifactReceipt.count({ where: { missionId } });
   run.artifacts.artifactHashAfter = refs.artifactId ? (await db.generatedArtifact.findUniqueOrThrow({ where: { id: refs.artifactId } })).content : null;
-  const content = latestOutput ? (latestOutput.contentJson as { blocks?: Array<{ text?: string; citations?: Array<{ sourceId?: string }> }> }) : undefined;
-  run.outputText = content?.blocks?.map(block => block.text ?? "").join("\n") ?? "";
-  run.citations = {
-    cited: content?.blocks?.flatMap(block => (block.citations ?? []).map(citation => String(citation.sourceId ?? ""))) ?? [],
-    refs: ((latestOutput?.sourceRefsJson as Array<{ id?: string }> | null) ?? []).map(source => String(source.id ?? "")),
-  };
+  const latestCitations = outputCitations(latestOutput);
+  run.outputText = latestCitations.outputText;
+  run.citations = { cited: latestCitations.cited, refs: latestCitations.refs, previous: outputCitations(previousOutput).cited };
   const cursor = (mission.planJson as { skillCursor?: { evidencePack?: { sources: unknown[]; unknowns: Array<{ kind: string; column: string }> } } }).skillCursor;
   run.evidence = {
     pack: cursor?.evidencePack ? { sources: cursor.evidencePack.sources.length, unknowns: cursor.evidencePack.unknowns } : undefined,
@@ -168,9 +178,14 @@ async function executeControl(testCase: FrozenCase, refs: FixtureRefs, decision:
   const missionBefore = refs.missionId ? await db.agentMission.findUniqueOrThrow({ where: { id: refs.missionId } }) : null;
   const run = baseRun(testCase, refs, decision, await countOutputs(refs.missionId), missionBefore?.status ?? null);
   if (decision.mode === "CONTROL" && decision.restrictions.pause && refs.missionId) {
+    const stepsBefore = await db.agentMissionStep.count({ where: { missionId: refs.missionId } });
     await commandMission(refs.ownerUserId, refs.missionId, "pause", { requestId: "eval-pause", expectedVersion: missionBefore!.version });
+    let workerClaimed = false;
+    await runMissionSlice({ id: refs.missionId, tools: {}, onClaim: () => { workerClaimed = true; },
+      provider: async () => { throw new Error("PAUSE_PROBE_UNEXPECTED_DECISION"); } });
     const after = await db.agentMission.findUniqueOrThrow({ where: { id: refs.missionId } });
-    run.control.pause = { requestedAt: after.pauseRequestedAt?.toISOString() ?? null, statusAfter: after.status, stepsAfterPause: 0 };
+    const stepsAfterPause = await db.agentMissionStep.count({ where: { missionId: refs.missionId } }) - stepsBefore;
+    run.control.pause = { requestedAt: after.pauseRequestedAt?.toISOString() ?? null, statusAfter: after.status, stepsAfterPause, workerClaimed };
   } else if (decision.mode === "CONTROL" && decision.restrictions.sourceSuppression) {
     await recordRestriction(refs, testCase.input.message, "SUPPRESS_USE", [refs.sources[0]?.id ?? ""], run);
   } else if (decision.mode === "CONTROL" && decision.restrictions.attentionOnly && refs.missionId) {
@@ -238,7 +253,8 @@ for (const testCase of dataset.cases) {
     dimensions: {
       route: { mode: decision.mode, primary: decision.primary, sequence: decision.sequence, reasonCode: decision.reasonCode, reuseMissionId: decision.reuseMissionId, evidenceGate: decision.evidenceGate, restrictions: decision.restrictions, handoffOn: decision.handoffOn, intentHash: decision.intentHash },
       toolBoundary: { passed: boundary.every(check => check.passed), checks: boundary },
-      evidence: { missionId: run.missionRealId, outputsBefore: run.outputsBefore, outputsAfter: run.outputsAfter, missionStatus: run.missionStatusAfter, enteredSkills: run.evidence.entered, handoffs: run.evidence.handoffs, checkpoint: run.evidence.checkpoint, evidencePack: run.evidence.pack },
+      evidence: { missionId: run.missionRealId, outputsBefore: run.outputsBefore, outputsAfter: run.outputsAfter, missionStatus: run.missionStatusAfter, enteredSkills: run.evidence.entered, handoffs: run.evidence.handoffs, checkpoint: run.evidence.checkpoint, evidencePack: run.evidence.pack,
+        pause: run.control.pause, citations: run.citations.previous.length ? run.citations : undefined },
     },
     provider: "INJECTED_V2_FIXTURE", fixtureHash: datasetFingerprint.slice(0, 16), durationMs: Date.now() - caseStarted,
   });

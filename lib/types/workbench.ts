@@ -4,7 +4,14 @@ export type WorkbenchOutput = {
   id: string; revision: number; createdAt: string; sourceKeys: string[];
   blocks: Array<{ blockId: string; text: string; kind: string; sourceIds: string[] }>;
   presentation: AgentPresentation;
+  missingInformation?: string[];
+  sourceAccessChanged?: boolean;
 };
+export type WorkbenchRevisionTarget = { revision: number; baselineRevision: number; sourceId?: string };
+export function readRevision(value: string | null | undefined) {
+  const revision = value && /^\d+$/.test(value) ? Number(value) : 0;
+  return Number.isSafeInteger(revision) && revision > 0 && revision <= 2147483647 ? revision : undefined;
+}
 export type WorkbenchSource = { key: string; id: string; revision: string; hash: string; text: string; current: boolean; kind: string; name?: string; observedAt?: string };
 export type WorkbenchStageArtifact = {
   id: string; skillId: string; label: string; createdAt: string; sourceKeys: string[];
@@ -13,6 +20,8 @@ export type WorkbenchStageArtifact = {
 };
 export type WorkbenchSnapshot = {
   challengesEnabled?: boolean;
+  artifactAdoptionEnabled?: boolean;
+  lastSeenOutputRevision?: number;
   id: string; projectId: string; goal: string; projectTitle: string; workingObjective: string;
   status: string; phase: string; reason: string; reasonCode: string; checkedAt: string; provider: string; version: number;
   models: number; tools: number; outputs: WorkbenchOutput[]; stageArtifacts: WorkbenchStageArtifact[]; sources: WorkbenchSource[];

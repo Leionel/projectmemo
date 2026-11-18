@@ -1,11 +1,11 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, ArrowRight, BookOpen, Check, CheckCircle2, FileText, Loader2, Paperclip, RotateCcw, Send, ShieldQuestion, X } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { AlertTriangle, ArrowRight, BookOpen, Check, CheckCircle2, FileText, GitCompareArrows, Loader2, Paperclip, RotateCcw, Send, ShieldQuestion, X } from "lucide-react";
 import { BookmarkSpirit } from "@/components/mascot/BookmarkSpirit";
 import { evidenceTime, sourceDisplayName } from "@/lib/client/sourceDisplay";
 import type { ChallengeKind, ChallengeSession } from "@/lib/types/challenge";
 import { challengeKindLabel, evidenceVerdict, handoffStatus, mentorFinding, rehearsalStep, REHEARSAL_STEPS } from "@/lib/challenges/presentation";
-import type { WorkbenchOutput, WorkbenchSource } from "@/lib/types/workbench";
+import type { WorkbenchOutput, WorkbenchRevisionTarget, WorkbenchSource } from "@/lib/types/workbench";
 import { SourceReader } from "./games/SourceReader";
 import styles from "./OutcomeChallenges.module.css";
 
@@ -14,6 +14,7 @@ type Props = {
   missionId: string; outputId?: string; outputs: WorkbenchOutput[]; latestOutput: WorkbenchOutput | null;
   kind: ChallengeKind; sources: WorkbenchSource[]; phase: string; phaseLabel: string;
   onKind: (kind: ChallengeKind) => void; onHandoff: () => void | Promise<void>; onOpenRevision: (revision: number) => void;
+  onReviewFeedback: (target: WorkbenchRevisionTarget) => void;
 };
 
 const EMPTY_HINT = "先打开原文，再选出这段稿实际引用的记录。";
@@ -24,20 +25,30 @@ const HANDOFF_HINT = "已交回；新稿要等原委托真正保存后才会出�
 function sourceName(source: WorkbenchSource) { return sourceDisplayName(source.id, source.name); }
 function sourceTime(source: WorkbenchSource) { return source.observedAt ? evidenceTime(source.observedAt) : "时间未记录"; }
 
-function HandoffReceipt({ session, latestOutput, phase, phaseLabel, onOpenRevision }: {
-  session: ChallengeSession; latestOutput: WorkbenchOutput | null; phase: string; phaseLabel: string; onOpenRevision: (revision: number) => void;
+function HandoffReceipt({ session, outputs, phase, phaseLabel, onOpenRevision, onReviewFeedback }: {
+  session: ChallengeSession; outputs: WorkbenchOutput[]; phase: string; phaseLabel: string;
+  onOpenRevision: (revision: number) => void; onReviewFeedback: (target: WorkbenchRevisionTarget) => void;
 }) {
-  const newer = latestOutput && session.handoffAt && latestOutput.revision > session.revision &&
-    Date.parse(latestOutput.createdAt) >= Date.parse(session.handoffAt) ? latestOutput : null;
+  const savedAfter = session.handoffAt ? outputs.filter(output => output.revision > session.revision &&
+    Date.parse(output.createdAt) >= Date.parse(session.handoffAt!)) : [];
+  const sourceId = session.handoffSourceId;
+  const linked = sourceId ? savedAfter.find(output => !output.sourceAccessChanged &&
+    output.blocks.some(block => block.sourceIds.includes(sourceId))) : undefined;
+  const newer = linked ?? savedAfter[0];
   const status = handoffStatus(phase);
   return <section className={styles.receipt} aria-label="交回回执">
     <div className={styles.receiptHead}><span className={styles.receiptCheck}><Check size={15} aria-hidden />已接收</span>
       <span>{session.handoffAt ? evidenceTime(session.handoffAt) : "时间未记录"}</span></div>
-    <h3>{newer ? "交回后，原委托保存了新稿" : "反馈已交回原委托"}</h3>
-    <p>{newer ? "新版本已保存；旧版本仍可读，交回建议不等于已批准结论。" : status}</p>
+    <h3>{linked ? "新稿引用了这次反馈" : newer ? "交回后，原委托保存了新稿" : "反馈已交回原委托"}</h3>
+    <p>{linked ? "可以对照原稿，查看引用这次反馈的段落。" : newer ? "这版稿件里没有可定位到本轮反馈的引用。" : status}</p>
     <div className={styles.receiptMeta}><span>{phaseLabel || "原委托已接收"}</span>{newer && <span>第 {newer.revision} 版 · {evidenceTime(newer.createdAt)}</span>}</div>
-    {newer && <button type="button" className={styles.primary} onClick={() => onOpenRevision(newer.revision)}>
-      <FileText size={15} aria-hidden />打开第 {newer.revision} 版</button>}
+    {newer && <div className={styles.receiptActions}>
+      {linked && sourceId && <button type="button" className={styles.primary}
+        onClick={() => onReviewFeedback({ revision: linked.revision, baselineRevision: session.revision, sourceId })}>
+        <GitCompareArrows size={15} aria-hidden />查看反馈关联改动</button>}
+      <button type="button" className={linked ? styles.secondary : styles.primary} onClick={() => onOpenRevision(newer.revision)}>
+        <FileText size={15} aria-hidden />打开第 {newer.revision} 版</button>
+    </div>}
   </section>;
 }
 
@@ -77,12 +88,12 @@ function StepTrail({ index }: { index: number }) {
   </ol>;
 }
 
-function EvidenceView({ session, sources, busy, uncertain, readerKey, closeReader, choices, setChoice, clearChoices, openSource, handoff, latestOutput, phase, phaseLabel, onOpenRevision, celebrate }: {
+function EvidenceView({ session, sources, busy, uncertain, readerKey, closeReader, choices, setChoice, clearChoices, openSource, handoff, receipt, celebrate }: {
   session: ChallengeSession; sources: WorkbenchSource[]; busy: boolean; uncertain: boolean;
   readerKey: string | null; closeReader: () => void;
   choices: string[]; setChoice: (key: string, selected: boolean) => void; clearChoices: () => void;
   openSource: (source: WorkbenchSource) => void; handoff: () => void;
-  latestOutput: WorkbenchOutput | null; phase: string; phaseLabel: string; onOpenRevision: (revision: number) => void; celebrate: boolean;
+  receipt: ReactNode; celebrate: boolean;
 }) {
   const question = session.questions[0];
   const [dragging, setDragging] = useState(false);
@@ -160,7 +171,7 @@ function EvidenceView({ session, sources, busy, uncertain, readerKey, closeReade
         <span className={styles.verdictIcon}>{verdict.tone === "match" ? <CheckCircle2 size={20} aria-hidden /> : <ShieldQuestion size={20} aria-hidden />}</span>
         <div><h3>{verdict.title}</h3><p className={styles.verdictDetail}>{verdict.detail}</p><p>{verdict.note}</p></div>
       </section>}
-      {session.handoffSourceId ? <HandoffReceipt session={session} latestOutput={latestOutput} phase={phase} phaseLabel={phaseLabel} onOpenRevision={onOpenRevision} /> :
+      {session.handoffSourceId ? receipt :
         done ? <div className={styles.doneBar}><p><strong>引用关系已对上，内容仍待核验。</strong>交回只会形成待核对反馈，不会自动改稿。</p>
           <button type="button" className={styles.primary} disabled={busy || uncertain} onClick={handoff}>{busy ? <><Loader2 size={15} className={styles.spin} aria-hidden />交回中…</> : "把缺口交回改稿"}<ArrowRight size={15} aria-hidden /></button></div> : null}
     </div>
@@ -169,12 +180,11 @@ function EvidenceView({ session, sources, busy, uncertain, readerKey, closeReade
   </div>;
 }
 
-function MentorView({ session, sources, output, busy, uncertain, drafts, setDraft, evidence, setEvidence, openSource, readerKey, setReaderKey, answer, handoff, latestOutput, phase, phaseLabel, onOpenRevision, celebrate }: {
+function MentorView({ session, sources, output, busy, uncertain, drafts, setDraft, evidence, setEvidence, openSource, readerKey, setReaderKey, answer, handoff, receipt, celebrate }: {
   session: ChallengeSession; sources: WorkbenchSource[]; output: WorkbenchOutput | null; busy: boolean; uncertain: boolean;
   drafts: Record<string, string>; setDraft: (key: string, value: string) => void; evidence: Record<string, string | undefined>; setEvidence: (key: string, value: string | undefined) => void;
   openSource: (source: WorkbenchSource) => void; readerKey: string | null; setReaderKey: (key: string | null) => void;
-  answer: () => void; handoff: () => void; latestOutput: WorkbenchOutput | null; phase: string; phaseLabel: string;
-  onOpenRevision: (revision: number) => void; celebrate: boolean;
+  answer: () => void; handoff: () => void; receipt: ReactNode; celebrate: boolean;
 }) {
   const [notebook, setNotebook] = useState<"findings" | "source">("findings");
   const question = session.questions[session.answers.length];
@@ -231,7 +241,7 @@ function MentorView({ session, sources, output, busy, uncertain, drafts, setDraf
             <div><span className={styles.suggestTag}>建议</span><p>{item.suggestion}</p></div>
           </div>)}</div>
           <p className={styles.previewFoot}>建议来自你的回答，不会自动变成本轮结论；交回后由原委托决定如何改稿。</p>
-          {session.handoffSourceId ? <HandoffReceipt session={session} latestOutput={latestOutput} phase={phase} phaseLabel={phaseLabel} onOpenRevision={onOpenRevision} /> :
+          {session.handoffSourceId ? receipt :
             <button type="button" className={styles.primary} disabled={busy || uncertain} onClick={handoff}>{busy ? <><Loader2 size={15} className={styles.spin} aria-hidden />交回中…</> : "交回原委托"}<Send size={15} aria-hidden /></button>}
         </div>}
       </div>
@@ -250,9 +260,9 @@ function MentorView({ session, sources, output, busy, uncertain, drafts, setDraf
   </>;
 }
 
-function MetricView({ session, sources, busy, uncertain, choices, setChoice, handoff, latestOutput, phase, phaseLabel, onOpenRevision, celebrate }: {
+function MetricView({ session, sources, busy, uncertain, choices, setChoice, handoff, receipt, celebrate }: {
   session: ChallengeSession; sources: WorkbenchSource[]; busy: boolean; uncertain: boolean; choices: string[]; setChoice: (key: string, selected: boolean) => void;
-  handoff: () => void; latestOutput: WorkbenchOutput | null; phase: string; phaseLabel: string; onOpenRevision: (revision: number) => void; celebrate: boolean;
+  handoff: () => void; receipt: ReactNode; celebrate: boolean;
 }) {
   const question = session.questions[0]; const done = session.status === "COMPLETED"; const answer = session.answers[0];
   if (!question) return <div className={styles.summary}><p>本轮题面已撤下，请核对当前版本与来源许可。</p></div>;
@@ -264,7 +274,7 @@ function MetricView({ session, sources, busy, uncertain, choices, setChoice, han
       {done && answer && <section className={styles.verdict} data-tone={answer.verdict === "LINK_MATCH" ? "match" : "review"} aria-label="核对结果">
         <span className={styles.verdictIcon}>{answer.verdict === "LINK_MATCH" ? <CheckCircle2 size={20} aria-hidden /> : <ShieldQuestion size={20} aria-hidden />}</span>
         <div><h3>{answer.verdict === "LINK_MATCH" ? "判断与已提供的指标条件一致" : "判断与记录条件有差异"}</h3><p>这只核对可比性条件，不代表实验结果已被独立验证。</p></div></section>}
-      {session.handoffSourceId ? <HandoffReceipt session={session} latestOutput={latestOutput} phase={phase} phaseLabel={phaseLabel} onOpenRevision={onOpenRevision} /> :
+      {session.handoffSourceId ? receipt :
         done ? <div className={styles.doneBar}><p>把口径疑问交回原委托，保留未知条件。</p><button type="button" className={styles.primary} disabled={busy || uncertain} onClick={handoff}>交回核查请求<ArrowRight size={15} aria-hidden /></button></div> : null}
     </div>
     <aside className={styles.metricSide}><BookmarkSpirit pose={celebrate ? "success" : done ? "thinking" : "inspect"} size={170} hint="判断来自记录条件；不要用当前时间补缺失的时间。" />
@@ -273,7 +283,7 @@ function MetricView({ session, sources, busy, uncertain, choices, setChoice, han
   </div>;
 }
 
-export function OutcomeChallenges({ missionId, outputId, outputs, latestOutput, kind, sources, phase, phaseLabel, onKind, onHandoff, onOpenRevision }: Props) {
+export function OutcomeChallenges({ missionId, outputId, outputs, latestOutput, kind, sources, phase, phaseLabel, onKind, onHandoff, onOpenRevision, onReviewFeedback }: Props) {
   const base = "/api/missions/" + encodeURIComponent(missionId) + "/challenges";
   const [session, setSession] = useState<ChallengeSession | null>(null);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -379,13 +389,15 @@ export function OutcomeChallenges({ missionId, outputId, outputs, latestOutput, 
     <div><button type="button" className={styles.primary} onClick={() => onKind(session.kind)}>继续这一轮</button>
       <button type="button" className={styles.secondary} disabled={busy || uncertain} onClick={stop}>退出本轮</button>{retryNote}</div></div>;
   if (session.kind !== kind) return <Launch kind={kind} outputId={outputId} busy={busy} uncertain={uncertain} error={error} onStart={start} onRetry={retry} onKind={onKind} />;
+  const receipt = <HandoffReceipt session={session} outputs={outputs} phase={phase} phaseLabel={phaseLabel}
+    onOpenRevision={onOpenRevision} onReviewFeedback={onReviewFeedback} />;
   if (session.status === "STALE" && session.handoffSourceId) return <div className={styles.console}>
     <div className={styles.stale}><CheckCircle2 size={22} aria-hidden /><div><h3>{latestOutput && latestOutput.revision > session.revision ? "本轮已交回，原稿已有新版本" : "本轮已交回，后续资料有变化"}</h3>
       <p>核查反馈仍保留在原记录中；本轮题面已撤下，旧版本继续可读。</p>
       <p className={styles.staleNote}>{session.reason ?? "稿件或来源已变化。"}</p></div>
       <div><button type="button" className={styles.secondary} disabled={busy || uncertain || !outputId} onClick={() => start(session.kind)}>从当前版本重新开始</button>
         <button type="button" className={styles.secondary} disabled={busy || uncertain} onClick={remove}>{deleteLabel}</button>{retryNote}</div></div>
-    <HandoffReceipt session={session} latestOutput={latestOutput} phase={phase} phaseLabel={phaseLabel} onOpenRevision={onOpenRevision} />
+    {receipt}
   </div>;
   if (session.status === "STALE") return <div className={styles.stale}>
     <AlertTriangle size={22} aria-hidden /><div><h3>本轮已撤下</h3><p>{session.reason ?? "稿件或来源已变化，请从当前版本重新开始。"}</p>
@@ -405,15 +417,14 @@ export function OutcomeChallenges({ missionId, outputId, outputs, latestOutput, 
         {session.status === "ACTIVE" && <button type="button" className={styles.secondary} disabled={busy || uncertain} onClick={stop}>退出本轮</button>}</div></div>
     {session.kind === "EVIDENCE" && <EvidenceView session={session} sources={sources} busy={busy} uncertain={uncertain} readerKey={activeReaderKey} closeReader={closeReader}
       choices={selected} setChoice={setChoice} clearChoices={clearChoices} openSource={openSource} handoff={handoff}
-      latestOutput={latestOutput} phase={phase} phaseLabel={phaseLabel} onOpenRevision={onOpenRevision} celebrate={celebrate} />}
+      receipt={receipt} celebrate={celebrate} />}
     {session.kind === "REHEARSAL" && <MentorView session={session} sources={sources} output={originalOutput} busy={busy} uncertain={uncertain}
       drafts={drafts} setDraft={(key, value) => setDrafts(current => ({ ...current, [key]: value }))} evidence={evidence}
       setEvidence={(key, value) => setEvidence(current => ({ ...current, [key]: value }))} openSource={openSource}
-      readerKey={readerKey} setReaderKey={setReaderKey} answer={answer} handoff={handoff} latestOutput={latestOutput} phase={phase}
-      phaseLabel={phaseLabel} onOpenRevision={onOpenRevision} celebrate={celebrate} />}
+      readerKey={readerKey} setReaderKey={setReaderKey} answer={answer} handoff={handoff} receipt={receipt} celebrate={celebrate} />}
     {session.kind === "METRIC" && <MetricView session={session} sources={sources} busy={busy} uncertain={uncertain} choices={selected}
       setChoice={(key, value) => setChoices(current => ({ ...current, [session.questions[0]?.key ?? ""]: value ? [key] : [] }))}
-      handoff={handoff} latestOutput={latestOutput} phase={phase} phaseLabel={phaseLabel} onOpenRevision={onOpenRevision} celebrate={celebrate} />}
+      handoff={handoff} receipt={receipt} celebrate={celebrate} />}
     {session.kind === "EVIDENCE" && <div className={styles.verifyBar}><div><strong>{selected.length ? "已选 " + selected.length + " 条" : "还没有选择引用"}</strong>
       <span>{session.status === "COMPLETED" ? "本轮已核对；内容仍待核验。" : "核对只比较引用关系，不在前端判定答案。"}</span></div>
       <div><button type="button" className={styles.quietAction} disabled={busy || uncertain} onClick={remove}>{deleteArmed ? "确认删除回答" : "删除本轮回答"}</button>

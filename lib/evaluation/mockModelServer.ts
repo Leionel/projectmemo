@@ -26,8 +26,9 @@ async function latestPointers(projectId: string): Promise<Array<{ sourceId: stri
   return pointers;
 }
 
-export async function startMockModelServer(options: { model?: string; delayMs?: number } = {}) {
+export async function startMockModelServer(options: { model?: string; delayMs?: number; questionGoal?: string } = {}) {
   const readThisCycle = new Set<string>(), model = options.model ?? "mock-local-model";
+  const askedProjects = new Set<string>();
   const server = http.createServer(async (request, response) => {
     if (request.method !== "POST" || !request.url?.endsWith("/chat/completions")) { response.writeHead(404).end(); return; }
     // Optional local-only latency makes an actual in-flight Runner visible to browser acceptance.
@@ -41,9 +42,13 @@ export async function startMockModelServer(options: { model?: string; delayMs?: 
       context = (envelope as { context?: MockContext } | null)?.context ?? (envelope as MockContext | null);
     } catch { context = null; }
     const skill = context?.skillExecution;
+    const projectId = context?.sourceInput?.projectId ?? "";
     let choice: Record<string, unknown>;
     if (!skill) {
       choice = { kind: "ask", question: "请补充本轮工作目标", missing: "PRIVATE" };
+    } else if (options.questionGoal && context?.goal === options.questionGoal && !askedProjects.has(projectId)) {
+      askedProjects.add(projectId);
+      choice = { kind: "ask", question: "这轮验收采用哪个口径？", missing: "PRIVATE" };
     } else {
       const scopeKey = String(context?.sourceInput?.projectId ?? "") + ":" + String(context?.contextVersion ?? 0);
       const terminalArtifact = skill.stage !== "deliverable-creation" && skill.stageIndex === (skill.sequence?.length ?? 1) - 1

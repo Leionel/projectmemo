@@ -59,7 +59,6 @@
 .evidenceChoices button[aria-pressed=true] { border-color: var(--teal); background: var(--teal-pale); }
 .checkbox { display: flex !important; gap: 8px; margin-top: 14px; align-items: center; }.checkbox input { accent-color: var(--teal); }
 .composer { margin-top: 19px; }.composer label { display: block; font-size: 13px; font-weight: 550; margin-bottom: 10px; }
-.question { margin-bottom: 8px; padding: 8px 10px; border-left: 2px solid var(--teal); background: var(--teal-pale); color: var(--ink-soft); font-size: 13px; overflow-wrap: anywhere; }
 .composer textarea,.game textarea { width: 100%; background: var(--card-bg); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px; color: var(--ink); font-size: 13px; line-height: 1.8; resize: vertical; }
 .composer textarea { min-height: 94px; }.composer>div { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 9px; }
 .composer>div>span { font-size: 11px; color: var(--muted); }

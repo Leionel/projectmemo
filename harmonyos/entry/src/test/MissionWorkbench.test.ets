@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@ohos/hypium';
-import { MissionWorkbench, OutcomeChallenge, OutcomeChallengeCommand, WorkbenchMaterial, workbenchOutput, workbenchSource, challengeQuestion } from '../main/ets/models/MissionWorkbench';
+import { MissionWorkbench, OutcomeChallenge, OutcomeChallengeCommand, WorkbenchMaterial, WorkbenchReadReceipt, workbenchOutput, unreadWorkbenchOutput, workbenchSource, challengeQuestion } from '../main/ets/models/MissionWorkbench';
 
 export default function missionWorkbenchTest() {
   describe('MissionWorkbench', () => {
@@ -13,6 +13,17 @@ export default function missionWorkbenchTest() {
       expect(workbenchSource(view, 'capture:a@old')?.hash).assertEqual('old');
       expect(workbenchSource(view, 'capture:a@new')?.hash).assertEqual('new');
       expect(workbenchSource(view, 'capture:a') === undefined).assertTrue();
+    });
+    it('shows_the_newest_readable_revision_after_the_shared_receipt', 0, () => {
+      const view = JSON.parse('{"outputs":[{"id":"hidden","revision":4,"sourceAccessChanged":true},{"id":"visible","revision":3},{"id":"read","revision":1}]}') as MissionWorkbench;
+      expect(unreadWorkbenchOutput(view) === undefined).assertTrue();
+      view.lastSeenOutputRevision = 1;
+      expect(unreadWorkbenchOutput(view)?.id).assertEqual('visible');
+      view.lastSeenOutputRevision = 3;
+      expect(unreadWorkbenchOutput(view) === undefined).assertTrue();
+      const receipt = new WorkbenchReadReceipt();
+      receipt.requestId = 'same-on-retry'; receipt.seenOutputRevision = 3;
+      expect(JSON.stringify(receipt)).assertEqual('{"requestId":"same-on-retry","seenSeq":0,"seenOutputRevision":3}');
     });
     it('stale_and_stopped_challenges_have_no_answerable_question', 0, () => {
       const s = JSON.parse('{"status":"STALE","questions":[{"key":"hidden"}],"answers":[]}') as OutcomeChallenge;

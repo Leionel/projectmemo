@@ -3,7 +3,7 @@ import { MissionReadTarget, MissionReadbackReply, missionReadbackQuery } from '.
 import { ApiClient } from './ApiClient';
 import { NativeMaterialExtract, NativeMaterialPreview, NativeMaterialPreviewBody } from '../models/NativeMaterial';
 import { MissionAttentionReceipt } from '../models/Mission';
-import { MissionWorkbench, WorkbenchMaterial, WorkbenchMaterialReply, OutcomeChallengeReply, OutcomeChallengeCommand } from '../models/MissionWorkbench';
+import { MissionWorkbench, WorkbenchMaterial, WorkbenchMaterialReply, WorkbenchReadReceipt, WorkbenchReadReply, OutcomeChallengeReply, OutcomeChallengeCommand } from '../models/MissionWorkbench';
 import { SessionStore } from './SessionStore';
 import { ApiError } from '../models/Project';
 import { Mission, MissionCreate, MissionReply, MissionDetailReply, MissionList, MissionEvents, MissionCommand,
@@ -15,6 +15,9 @@ import { Mission, MissionCreate, MissionReply, MissionDetailReply, MissionList, 
 export class MissionService {
   async workbench(id: string): Promise<MissionWorkbench> { this.authorize(); return this.client.get<MissionWorkbench>(`${this.path(id)}/workbench`); }
   async addWorkbenchMaterial(id: string, body: WorkbenchMaterial): Promise<WorkbenchMaterialReply> { this.authorize(); return this.client.post<WorkbenchMaterialReply>(`${this.path(id)}/materials`, body); }
+  async markWorkbenchOutputRead(id: string, body: WorkbenchReadReceipt): Promise<WorkbenchReadReply> {
+    this.authorize(); return this.client.post<WorkbenchReadReply>(`${this.path(id)}/reentry-brief`, body);
+  }
 
   async challenge(id: string): Promise<OutcomeChallengeReply> { this.authorize(); return this.client.get<OutcomeChallengeReply>(`${this.path(id)}/challenges`); }
   async startChallenge(id: string, body: OutcomeChallengeCommand): Promise<OutcomeChallengeReply> { this.authorize(); return this.client.post<OutcomeChallengeReply>(`${this.path(id)}/challenges`, body); }

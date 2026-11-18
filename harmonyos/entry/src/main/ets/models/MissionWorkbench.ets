@@ -1,12 +1,20 @@
 export interface WorkbenchBlock { blockId: string; text: string; kind: string; sourceIds: string[]; }
-export interface WorkbenchOutput { id: string; revision: number; createdAt: string; blocks: WorkbenchBlock[]; sourceKeys: string[]; }
+export interface WorkbenchOutput { id: string; revision: number; createdAt: string; blocks: WorkbenchBlock[]; sourceKeys: string[]; sourceAccessChanged?: boolean; }
 export interface WorkbenchSource { key: string; id: string; hash: string; revision: string; text: string; current: boolean; kind: string; name?: string; observedAt?: string; }
 export interface WorkbenchEvent { id: string; label: string; at: string; }
 export class MissionWorkbench {
   id: string = ''; projectId: string = ''; projectTitle: string = ''; goal: string = ''; workingObjective: string = '';
   status: string = ''; phase: string = ''; reason: string = ''; version: number = 0; checkedAt: string = '';
   challengesEnabled?: boolean; outputs: WorkbenchOutput[] = []; sources: WorkbenchSource[] = []; events: WorkbenchEvent[] = [];
+  lastSeenOutputRevision?: number;
 }
+
+export class WorkbenchReadReceipt {
+  requestId: string = '';
+  seenSeq: number = 0;
+  seenOutputRevision: number = 0;
+}
+export interface WorkbenchReadReply { missionId: string; lastSeenOutputRevision?: number; }
 export class WorkbenchMaterial {
   requestId: string = ''; text: string = ''; kind: string = 'FEEDBACK'; name?: string;
 }
@@ -25,6 +33,11 @@ export class OutcomeChallengeCommand {
 }
 export function workbenchOutput(view: MissionWorkbench, id: string): WorkbenchOutput | undefined {
   return view.outputs.find((output: WorkbenchOutput) => output.id === id) ?? view.outputs[0];
+}
+export function unreadWorkbenchOutput(view: MissionWorkbench): WorkbenchOutput | undefined {
+  const seen = view.lastSeenOutputRevision;
+  if (seen === undefined) return undefined;
+  return view.outputs.find((output: WorkbenchOutput) => output.revision > seen && !output.sourceAccessChanged);
 }
 export function workbenchSource(view: MissionWorkbench, key: string): WorkbenchSource | undefined {
   // Bind by frozen id+hash, never only by a reused filename or bare source id.

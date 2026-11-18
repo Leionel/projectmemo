@@ -23,6 +23,8 @@ Object.assign(process.env, {
   FOCUS_AGENT_ENABLED: "true", FOCUS_CONTINUITY_ENABLED: "true", FOCUS_AGENT_R4_ENABLED: "false", FOCUS_ASYNC_ENABLED: "false",
   FOCUS_WEB_ENABLED: "true", MISSION_ENABLED: "true", MISSION_WRITES_ENABLED: "true", MISSION_WEB_ENABLED: "true",
   MISSION_V2_ENABLED: "true", MISSION_WORKBENCH_ENABLED: "true", MISSION_INVESTIGATION_DELEGATION_ENABLED: "true",
+  MISSION_CHALLENGES_ENABLED: process.env.MISSION_CHALLENGES_ENABLED ?? "true",
+  MISSION_ARTIFACT_ADOPTION_ENABLED: process.env.MISSION_ARTIFACT_ADOPTION_ENABLED ?? "true",
   MISSION_EVENT_CONTINUATION_ENABLED: "false", MISSION_WAIT_EMAIL_ENABLED: "false",
 });
 const sql = new Database(file); sql.pragma("journal_mode = WAL");
@@ -40,7 +42,10 @@ const { processInvestigationDelegations } = await import("../lib/mission/investi
 const { runMissionSlice } = await import("../lib/mission/runner");
 const { startMockModelServer } = await import("../lib/evaluation/mockModelServer");
 
-const mock = await startMockModelServer({ delayMs: Number(process.env.V2_ENTRY_MODEL_DELAY_MS ?? 0) });
+const mock = await startMockModelServer({
+  delayMs: Number(process.env.V2_ENTRY_MODEL_DELAY_MS ?? 0),
+  questionGoal: "整理本轮验收报告",
+});
 Object.assign(process.env, { LLM_MODE: "openai-compatible", LLM_PROVIDER: "openai-compatible",
   LLM_BASE_URL: mock.baseUrl, LLM_API_KEY: "mock-local-only", LLM_MODEL_NAME: "mock-local-model", LLM_TIMEOUT_MS: "20000" });
 

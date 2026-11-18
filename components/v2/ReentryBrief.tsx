@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { ArrowRight, BellDot, BookOpen, Check, FileText, GitCompareArrows, MessageSquareText, Plus } from "lucide-react";
 import { evidenceTime } from "@/lib/client/sourceDisplay";
 import type { ReentryBrief } from "@/lib/types/reentryBrief";
@@ -10,12 +11,13 @@ import styles from "./ReentryBrief.module.css";
 type Receipt = { requestId: string; seenSeq: number; seenOutputRevision: number; handledItemIds: string[] };
 const icons = { NEEDS_DECISION: MessageSquareText, OUTPUT_UPDATED: FileText, SOURCE_CHANGED: BellDot };
 
-export function ReentryBriefPanel({ missionId, outputs, onOpenRevision, onAddMaterial, onOpenComposer }: {
+export function ReentryBriefPanel({ missionId, projectId, outputs, onOpenRevision, onAddMaterial, onOpenQuestion }: {
   missionId: string;
+  projectId: string;
   outputs: WorkbenchOutput[];
-  onOpenRevision: (revision: number, compare: boolean) => void;
+  onOpenRevision: (revision: number, compare: boolean, baseline?: number) => void;
   onAddMaterial: () => void;
-  onOpenComposer: () => void;
+  onOpenQuestion: () => void;
 }) {
   const [brief, setBrief] = useState<ReentryBrief | null>(null);
   const [busy, setBusy] = useState(false);
@@ -92,11 +94,13 @@ export function ReentryBriefPanel({ missionId, outputs, onOpenRevision, onAddMat
 
   if (!brief && !readError && !writeError) return null;
   if (brief && !brief.items.length && brief.readState === "SEEN" && !notice && !readError && !writeError) return null;
+  const unreadCount = brief?.items.filter(item => !item.read).length ?? 0;
+  const pendingQuestion = brief?.items.some(item => item.questionId);
   return <section className={styles.brief} aria-label="回访变化">
     <header className={styles.head}>
       <div className={styles.heading}><span className={styles.headIcon}><BellDot size={19} aria-hidden /></span>
-        <div><h2>回访简报</h2>{!!brief?.items.length && <p>{brief.items.length} 项变化待查看</p>}</div></div>
-      {!!brief?.items.length && <button type="button" className={styles.secondary} disabled={busy || retry} onClick={() => void acknowledge()}>
+        <div><h2>回访简报</h2>{unreadCount ? <p>{unreadCount} 项变化待查看</p> : pendingQuestion && <p>有一个原问题需要答复</p>}</div></div>
+      {!!unreadCount && <button type="button" className={styles.secondary} disabled={busy || retry} onClick={() => void acknowledge()}>
         <Check size={15} aria-hidden />我已看过
       </button>}
     </header>
@@ -105,6 +109,8 @@ export function ReentryBriefPanel({ missionId, outputs, onOpenRevision, onAddMat
       const revision = item.revision;
       const output = outputs.find(row => row.id === item.outputId && row.revision === revision);
       const canCompare = !!output && outputs.some(row => row.revision < output.revision);
+      const seen = brief.lastSeenOutputRevision;
+      const baseline = output && seen && seen < output.revision ? seen : undefined;
       const recorded = evidenceTime(item.recordedAt, true);
       return <li key={item.id} data-kind={item.kind}>
         <div className={styles.itemHead}><Icon size={16} aria-hidden /><time dateTime={item.recordedAt}>{recorded}</time></div>
@@ -112,17 +118,21 @@ export function ReentryBriefPanel({ missionId, outputs, onOpenRevision, onAddMat
         <p>{item.why}</p>
         {item.occurredAt !== item.recordedAt && <p className={styles.occurred}>变化发生于 <time dateTime={item.occurredAt}>{evidenceTime(item.occurredAt, true)}</time></p>}
         <div className={styles.actions}>
-          {output && <button type="button" className={styles.action} onClick={() => onOpenRevision(output.revision, canCompare)}>
+          {output && <button type="button" className={styles.action} onClick={() => onOpenRevision(output.revision, canCompare, baseline)}>
             {canCompare ? <GitCompareArrows size={15} aria-hidden /> : <BookOpen size={15} aria-hidden />}
             {canCompare ? "查看第 " + output.revision + " 版修改" : "打开第 " + output.revision + " 版"}<ArrowRight size={14} aria-hidden />
           </button>}
-          {item.kind === "NEEDS_DECISION" && <button type="button" className={styles.action} onClick={onOpenComposer}>
-            <MessageSquareText size={15} aria-hidden />补充判断<ArrowRight size={14} aria-hidden />
+          {item.questionId && <button type="button" className={styles.action} onClick={onOpenQuestion}>
+            <MessageSquareText size={15} aria-hidden />回答原问题<ArrowRight size={14} aria-hidden />
           </button>}
+          {item.kind === "NEEDS_DECISION" && !item.questionId && <Link prefetch={false} className={styles.action}
+            href={`/projects/${encodeURIComponent(projectId)}/missions?${new URLSearchParams({ mission: missionId, ...(item.approvalId ? { approvalId: item.approvalId } : {}) })}`}>
+            查看原委托<ArrowRight size={14} aria-hidden />
+          </Link>}
           {item.kind === "SOURCE_CHANGED" && <button type="button" className={styles.action} onClick={onAddMaterial}>
             <Plus size={15} aria-hidden />补充资料<ArrowRight size={14} aria-hidden />
           </button>}
-          {!item.handled && <button type="button" className={styles.secondary}
+          {!item.questionId && !item.handled && <button type="button" className={styles.secondary}
             disabled={busy || retry} onClick={() => void acknowledge([item.id])}>标记已处理</button>}
         </div>
       </li>;

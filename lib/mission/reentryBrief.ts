@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { record } from "@/lib/conversation/repository";
 import { isFeatureEnabled } from "@/lib/config/features";
-import { event, lock, ownedMission, type Tx } from "@/lib/mission/repository";
+import { assertOwner, event, lock, ownedMission, type Tx } from "@/lib/mission/repository";
 import { jsonHash, type Source } from "@/lib/mission/contracts";
 import { sourceUse } from "@/lib/continuity/sourcePolicy";
 import type { ReentryBrief, ReentryItem } from "@/lib/types/reentryBrief";
@@ -21,57 +21,91 @@ export async function readReentryBrief(userId: string, missionId: string): Promi
   enabled();
   return db.$transaction(tx => buildBrief(userId, missionId, tx));
 }
+export async function readReentryReceipt(tx: Tx, missionId: string) {
+  const row = await tx.agentMissionEvent.findFirst({ where: { missionId, type: "REENTRY_BRIEF_SEEN" }, orderBy: { seq: "desc" } });
+  return record(row?.payloadJson);
+}
+
+export async function readProjectReturnItems(userId: string, projectId: string) {
+  return db.$transaction(async tx => {
+    await assertOwner(userId, projectId, tx);
+    const missions = await tx.agentMission.findMany({ where: { projectId, ownerUserId: userId, runtimeProtocolVersion: 2 },
+      orderBy: [{ updatedAt: "desc" }, { id: "desc" }], take: 6, select: { id: true, goal: true } });
+    const reads = await Promise.all(missions.map(async mission => {
+      const brief = await buildBrief(userId, mission.id, tx);
+      return { ...mission, questionId: brief.items.find(item => item.questionId)?.questionId,
+        output: brief.items.filter(item => item.kind === "OUTPUT_UPDATED").at(-1),
+        baseline: brief.lastSeenOutputRevision };
+    }));
+    return reads.filter(item => item.questionId || item.output).slice(0, 3);
+  });
+}
 
 async function buildBrief(userId: string, missionId: string, tx: Tx): Promise<ReentryBrief> {
   const mission = await ownedMission(userId, missionId, tx);
-  const [seen, outputs, events, latestOutput] = await Promise.all([
-    tx.agentMissionEvent.findFirst({ where: { missionId, type: "REENTRY_BRIEF_SEEN" }, orderBy: { seq: "desc" } }),
+  const [seenPayload, outputs, events, pendingApprovals] = await Promise.all([
+    readReentryReceipt(tx, missionId),
     tx.agentMissionOutput.findMany({ where: { missionId }, orderBy: { revision: "desc" }, take: ITEM_LIMIT + 2 }),
     tx.agentMissionEvent.findMany({ where: { missionId, type: { in: ["QUESTION", "INVESTIGATION_HELD", "APPROVAL_REQUESTED", "INVESTIGATION_INPUT_CHANGED", "INVESTIGATION_OBSERVATION_CHANGED", "USER_MATERIAL_ADDED", "USER_FEEDBACK_ADDED"] } }, orderBy: { seq: "desc" }, take: 40 }),
-    tx.agentMissionOutput.findFirst({ where: { missionId }, orderBy: { revision: "desc" }, select: { revision: true } }),
+    mission.status === "WAITING_APPROVAL" && !mission.pauseRequestedAt && !mission.cancelRequestedAt
+      ? tx.agentMissionApproval.findMany({ where: { missionId, status: "PENDING", expiresAt: { gt: new Date() } }, select: { id: true, stepId: true } }) : [],
   ]);
-  const seenPayload = record(seen?.payloadJson);
   const baseSeq = Number(seenPayload.seenSeq ?? 0), baseRevision = Number(seenPayload.seenOutputRevision ?? 0);
   const handledIds = new Set(Array.isArray(seenPayload.handledItemIds) ? seenPayload.handledItemIds.map(String) : []);
   const currentSeq = (await tx.agentMissionEvent.findFirst({ where: { missionId }, orderBy: { seq: "desc" }, select: { seq: true } }))?.seq ?? 0;
-  const currentRevision = latestOutput?.revision ?? 0;
+  const currentRevision = outputs[0]?.revision ?? 0;
   const items: ReentryItem[] = [];
 
   const sourceChanged = events.filter(item => item.seq > baseSeq && ["INVESTIGATION_INPUT_CHANGED", "INVESTIGATION_OBSERVATION_CHANGED", "INVESTIGATION_DUPLICATE_IGNORED", "USER_MATERIAL_ADDED", "USER_FEEDBACK_ADDED"].includes(item.type));
-  const decisions = events.filter(item => item.seq > baseSeq && ["QUESTION", "INVESTIGATION_HELD", "APPROVAL_REQUESTED"].includes(item.type));
-  for (const item of decisions.slice(0, ITEM_LIMIT).map(item => {
+  const wait = record(mission.waitStateJson);
+  const activeQuestion = mission.status === "WAITING_INPUT" && wait.waitingFor !== "OBSERVATION" &&
+    wait.resolved !== true && !mission.pauseRequestedAt && !mission.cancelRequestedAt && typeof wait.questionId === "string" ? wait.questionId : undefined;
+  const question = activeQuestion ? await tx.agentMissionEvent.findFirst({ where: { missionId, type: "QUESTION", id: activeQuestion } }) : null;
+  const approvalsByStep = new Map(pendingApprovals.map(approval => [approval.stepId, approval.id]));
+  const approvalId = (payload: unknown) => approvalsByStep.get(String(record(payload).stepId));
+  const decisions = events.filter(item => item.seq > baseSeq && (item.type === "INVESTIGATION_HELD" && mission.status === "PAUSED" ||
+    item.type === "APPROVAL_REQUESTED" && approvalId(item.payloadJson)));
+  if (question) decisions.unshift(question);
+  for (const item of decisions.filter(item => item.id === activeQuestion || !handledIds.has("decision:" + item.id)).slice(0, ITEM_LIMIT).map(item => {
     return {
       id: "decision:" + item.id, kind: "NEEDS_DECISION" as const,
       title: item.type === "QUESTION" ? "原委托有一处需要你的判断" : item.type === "APPROVAL_REQUESTED" ? "原委托提出一项待批准操作" : "持续跟进需要你核对条件",
       why: "请打开原委托，按当前来源许可核对待处理问题。",
+      ...(item.id === activeQuestion ? { questionId: item.id } : {}),
+      ...(item.type === "APPROVAL_REQUESTED" ? { approvalId: approvalId(item.payloadJson) } : {}),
       sourceKeys: [], occurredAt: item.createdAt.toISOString(), recordedAt: item.createdAt.toISOString(),
-      decisionAt: null, read: false, handled: handledIds.has("decision:" + item.id), approved: false,
+      decisionAt: null, read: item.seq <= baseSeq, handled: handledIds.has("decision:" + item.id), approved: false,
     };
   })) items.push(item);
-  const newOutputs = outputs.filter(output => output.revision > baseRevision).sort((left, right) => left.revision - right.revision);
+  const newOutputs = outputs.filter(output => output.revision > baseRevision);
   const availableSlots = ITEM_LIMIT - items.length;
-  for (const output of availableSlots > 0 ? newOutputs.slice(-availableSlots) : []) {
+  const visibleOutputs: ReentryItem[] = [];
+  for (const output of newOutputs) {
+    if (visibleOutputs.length === availableSlots) break;
+    if (handledIds.has("output:" + output.id)) continue;
     const refs = (output.sourceRefsJson as unknown as Source[] | null) ?? [];
     const allowed = await Promise.all(refs.map(source => sourceUse(userId, mission.projectId, source.id, tx, { missionId })));
     if (allowed.some(result => result.state !== "ALLOWED")) continue;
     const latestSourceChange = sourceChanged.find(item => item.createdAt <= output.createdAt);
     const why = latestSourceChange ? "资料或反馈更新后保存了这版成果；具体变化请打开原稿核对" : "保存了新的私有稿；具体变化请打开原稿核对";
-    items.push({ id: "output:" + output.id, kind: "OUTPUT_UPDATED", title: "私有稿更新到第 " + output.revision + " 版", why,
+    visibleOutputs.push({ id: "output:" + output.id, kind: "OUTPUT_UPDATED", title: "私有稿更新到第 " + output.revision + " 版", why,
       outputId: output.id, revision: output.revision, sourceKeys: refs.map(source => source.id + "@" + source.hash),
       occurredAt: latestSourceChange?.createdAt.toISOString() ?? output.createdAt.toISOString(),
       recordedAt: output.createdAt.toISOString(), decisionAt: null, read: false,
       handled: handledIds.has("output:" + output.id), approved: false });
   }
+  items.push(...visibleOutputs.reverse());
   if (!items.length && sourceChanged.length) {
     const item = sourceChanged[0];
     items.push({ id: "source:" + item.id, kind: "SOURCE_CHANGED", title: "有新的项目变化被记录", why: "原扫描器已记录变化；是否影响成果需按当前稿件核对",
       sourceKeys: [], occurredAt: item.createdAt.toISOString(), recordedAt: item.createdAt.toISOString(), decisionAt: null,
       read: false, handled: handledIds.has("source:" + item.id), approved: false });
   }
-  const unhandled = items.filter(item => !handledIds.has(item.id));
-  return { schemaVersion: 1, missionId, generatedAt: new Date().toISOString(), readState: unhandled.length || !seen ? "UNREAD" : "SEEN",
+  const unhandled = items.filter(item => item.questionId || !handledIds.has(item.id));
+  return { schemaVersion: 1, missionId, generatedAt: new Date().toISOString(), readState: unhandled.some(item => !item.read) || !seenPayload.at ? "UNREAD" : "SEEN",
     cursor: { seq: currentSeq, outputRevision: currentRevision },
-    items: unhandled.slice(0, ITEM_LIMIT).sort((left, right) => (left.kind === "NEEDS_DECISION" ? -1 : right.kind === "NEEDS_DECISION" ? 1 : 0)),
+    lastSeenOutputRevision: baseRevision,
+    items: unhandled.slice(0, ITEM_LIMIT),
     note: mission.runtimeProtocolVersion === 2 ? NOTE : "旧协议委托仅展示已记录的成果版本变化。" };
 }
 

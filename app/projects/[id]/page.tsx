@@ -1,11 +1,12 @@
 import {readableProjectNotice} from "@/lib/projectNotice";
 import {ProjectImpact} from "@/components/ProjectImpact";
 import Link from "next/link";
-import {ArrowRight} from "lucide-react";
+import {ArrowRight, BellDot, FileCheck2, MessageSquareText} from "lucide-react";
 import {isFeatureEnabled} from "@/lib/config/features";
 import {isInterventionActive,sortActions} from "@/lib/projectDashboard";
 import {requireWorkspaceProject,loadWorkspaceOverview} from "@/lib/server/projectWorkspace";
 import {missionWorkspaceSummary} from "@/lib/mission/workspaceSummary";
+import {readProjectReturnItems} from "@/lib/mission/reentryBrief";
 import {missionStatusLabels,type MissionWorkspaceSummary} from "@/lib/mission/presentation";
 import {WorkStateBadges} from "@/components/WorkStateBadges";
 import {primaryActionTone} from "@/lib/client/workStateBadge";
@@ -25,7 +26,11 @@ export const dynamic="force-dynamic";
 export const runtime="nodejs";
 export default async function ProjectHome({params}:{params:Promise<{id:string}>}){
  const {id}=await params;const {user,missionOwner}=await requireWorkspaceProject(id);
- const {project,actions,interventions,dashboard}=await loadWorkspaceOverview(id),base=`/projects/${id}`;
+ const returnEnabled = missionOwner && isFeatureEnabled("MISSION_V2_ENABLED",false) && isFeatureEnabled("MISSION_WORKBENCH_ENABLED",false);
+ const [{project,actions,interventions,dashboard}, returns] = await Promise.all([
+  loadWorkspaceOverview(id), returnEnabled ? readProjectReturnItems(user.id,id).catch(() => []) : [],
+ ]);
+ const base=`/projects/${id}`;
  let summary:MissionWorkspaceSummary={enabled:false,totalActive:0,items:[]};let missionError=false;
  if(missionOwner)try{summary=await missionWorkspaceSummary(user.id,id);}catch{missionError=true;}
  const important=interventions.filter(i=>!i.isSimulated&&isInterventionActive(i)).sort((a,b)=>b.severity-a.severity).slice(0,3);
@@ -51,6 +56,11 @@ export default async function ProjectHome({params}:{params:Promise<{id:string}>}
   <div className={styles.overviewLayout}><div className={styles.overviewMain}>
   {/* 60 秒接续置顶：与鸿蒙、桌面卡片读取同一份只读聚合；未开启时组件自身不渲染。 */}
   {isFeatureEnabled("PROJECT_REENTRY_ENABLED",false)&&<details className={styles.secondary}><summary>阶段记录与时间安排</summary><ReentryBrief projectId={id} enabled episodesEnabled={isFeatureEnabled("PROJECT_EPISODES_ENABLED",false)} stateEnabled={isFeatureEnabled("PROJECT_STATE_ENABLED",false)} schedulingEnabled={isFeatureEnabled("PROJECT_SCHEDULING_ENABLED",false)} showPrimary={false}/></details>}
+  {returns.length>0&&<section className={styles.returnPanel} aria-label="项目回访"><h3><BellDot size={18} aria-hidden /> 项目回访</h3>
+   <ul>{returns.map(item=><li key={item.id}><span>{item.goal}</span><div>
+    {item.questionId&&<Link prefetch={false} href={`/v2/workbench?${new URLSearchParams({missionId:item.id, entry:"question"})}`}><MessageSquareText size={16} aria-hidden /> 回答原问题 <ArrowRight size={14} aria-hidden /></Link>}
+    {item.output?.revision&&<Link prefetch={false} href={`/v2/workbench?${new URLSearchParams({missionId:item.id, entry:"review", revision:String(item.output.revision), ...(item.baseline ? {from:String(item.baseline)} : {})})}`}><FileCheck2 size={16} aria-hidden /> 查看第 {item.output.revision} 版 <ArrowRight size={14} aria-hidden /></Link>}
+   </div></li>)}</ul></section>}
   <section className={styles.focus} aria-label="当前最重要的事项"><div className="min-w-0"><small className={kind==="reminder"||(kind==="mission"&&first&&["WAITING_INPUT","WAITING_APPROVAL","PAUSED","FAILED"].includes(first.status))?"workspace-status":"workspace-status workspace-status-neutral"}>{focus.eyebrow}</small>{agentContext?.nextStep.workState&&<> <WorkStateBadges state={agentContext.nextStep.workState}/></>}<h3>{focus.title}</h3><p><EvidenceText text={readableProjectNotice(focus.detail)}/></p></div><div className={styles.focusActions}><Link className={"focus-ring "+(primaryActionTone(agentContext?.nextStep.workState)==="solid"?"editorial-button":"editorial-button-secondary")} prefetch={false} href={focus.href}>{focus.action}<ArrowRight size={14} aria-hidden="true"/></Link>{summary.totalActive>1&&<Link className={styles.otherTasks} href={`${base}/missions`}>全部 {summary.totalActive} 项委托<ArrowRight size={13} aria-hidden="true"/></Link>}</div></section>
   {agentContext&&agentContext.goal!==focus.title&&<p className={styles.empty}>当前目标：{agentContext.goal}</p>}
   {missionOwner&&<ProjectAgentFocus projectId={id} items={summary.items} selected={agentContext?.focusMissionId??null}/>}

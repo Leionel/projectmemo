@@ -11,13 +11,14 @@ import type { WorkbenchOutput, WorkbenchSnapshot, WorkbenchSource, WorkbenchStag
 import type { Source } from "./contracts";
 import { ownedMission, validateSources } from "./repository";
 import { missionWorkState } from "./workState";
+import { readReentryReceipt } from "./reentryBrief";
 
 /** Authenticated, bounded, read-only view. Historical material is checked against current source-use permission. */
-export async function readMissionWorkbench(userId: string, id: string): Promise<WorkbenchSnapshot> {
+export async function readMissionWorkbench(userId: string, id: string, selection: { revision?: number; baseline?: number } = {}): Promise<WorkbenchSnapshot> {
   if (!isFeatureEnabled("MISSION_WORKBENCH_ENABLED", false)) throw new AppError("WORKBENCH_DISABLED", "成果工作台试验未开启", 404);
   return db.$transaction(async tx => {
     const m = await ownedMission(userId, id, tx);
-    const [project, rows, events, run, continuity, approvals, unknownSteps] = await Promise.all([
+    const [project, recent, events, run, continuity, approvals, unknownSteps, receipt] = await Promise.all([
       tx.project.findUniqueOrThrow({ where: { id: m.projectId }, select: { title: true } }),
       tx.agentMissionOutput.findMany({ where: { missionId: id }, orderBy: { revision: "desc" }, take: 5 }),
       tx.agentMissionEvent.findMany({ where: { missionId: id }, orderBy: { seq: "desc" }, take: 24 }),
@@ -25,13 +26,20 @@ export async function readMissionWorkbench(userId: string, id: string): Promise<
       effectiveContinuity(userId, { projectId: m.projectId, missionId: id }, tx),
       tx.agentMissionApproval.findMany({ where: { missionId: id, status: "PENDING" } }),
       tx.agentMissionStep.count({ where: { missionId: id, status: "UNKNOWN" } }),
+      readReentryReceipt(tx, id),
     ]);
+    const lastSeenOutputRevision = Number(receipt.seenOutputRevision ?? 0);
+    const included = new Set(recent.map(row => row.revision));
+    const requested = [...new Set([selection.revision, selection.baseline, lastSeenOutputRevision])]
+      .filter((revision): revision is number => typeof revision === "number" && revision > 0 && !included.has(revision));
+    const extra = requested.length ? await tx.agentMissionOutput.findMany({ where: { missionId: id, revision: { in: requested } } }) : [];
+    const rows = [...recent, ...extra].sort((a, b) => b.revision - a.revision);
     const sources: WorkbenchSource[] = [], outputs: WorkbenchOutput[] = [], stageArtifacts: WorkbenchStageArtifact[] = [];
     const materialEvents = await tx.agentMissionEvent.findMany({ where: { missionId: id, type: { in: ["USER_MATERIAL_ADDED", "USER_FEEDBACK_ADDED"] } },
       orderBy: { seq: "desc" }, take: 64, select: { payloadJson: true } });
     const sourceNames = new Map<string, string>();
-    const receipt = record(record(m.planJson).v2DelegationReceipt);
-    if (typeof receipt.materialSourceId === "string" && typeof receipt.materialName === "string") sourceNames.set(receipt.materialSourceId, receipt.materialName);
+    const delegation = record(record(m.planJson).v2DelegationReceipt);
+    if (typeof delegation.materialSourceId === "string" && typeof delegation.materialName === "string") sourceNames.set(delegation.materialSourceId, delegation.materialName);
     for (const event of materialEvents) {
       const payload = record(event.payloadJson);
       if (typeof payload.sourceId === "string" && typeof payload.name === "string" && !sourceNames.has(payload.sourceId)) sourceNames.set(payload.sourceId, payload.name);
@@ -75,6 +83,8 @@ export async function readMissionWorkbench(userId: string, id: string): Promise<
       const refs = row.sourceRefsJson as unknown as Source[];
       const allowed = await visibleRefs(refs);
       const content = record(row.contentJson), raw = Array.isArray(content.blocks) ? content.blocks.map(record) : [];
+      const sourceAccessChanged = refs.some(source => !allowed.has(source.id)) || raw.some(block =>
+        Array.isArray(block.sourceIds) && block.sourceIds.some(sourceId => typeof sourceId === "string" && !allowed.has(sourceId)));
       const blocks = raw.map(b => {
         const ids = Array.isArray(b.sourceIds) ? b.sourceIds.filter((v): v is string => typeof v === "string") : [];
         const visible = refs.every(source => allowed.has(source.id)) && ids.every(sourceId => allowed.has(sourceId));
@@ -82,13 +92,15 @@ export async function readMissionWorkbench(userId: string, id: string): Promise<
           kind: String(b.kind), sourceIds: visible ? ids : [] };
       });
       outputs.push({ id: row.id, revision: row.revision, createdAt: row.createdAt.toISOString(),
-        sourceKeys: refs.filter(s => allowed.has(s.id)).map(s => s.id + "@" + s.hash), blocks, presentation: presentationOf(blocks) });
+        sourceKeys: refs.filter(s => allowed.has(s.id)).map(s => s.id + "@" + s.hash), blocks, presentation: presentationOf(blocks), sourceAccessChanged,
+        missingInformation: !sourceAccessChanged && Array.isArray(content.missingInformation)
+          ? content.missingInformation.filter((item): item is string => typeof item === "string") : [] });
     }
     const state = missionWorkState({ ...m, delegationEnabled: isFeatureEnabled("MISSION_INVESTIGATION_DELEGATION_ENABLED", false),
       events, approvals, unknownSteps });
     const labels: Record<string, string> = { SKILL_ENTERED: "开始读取项目资料", SKILL_HANDOFF: "证据包已交给创作",
       SKILL_OUTPUT_READY: "创作产物已保存", OUTPUT_SAVED: "私有稿已更新", CHECKPOINT_REACHED: "成果备好，继续留意变化",
-      USER_MATERIAL_ADDED: "你补充的资料已保存", USER_FEEDBACK_ADDED: "你的反馈已保存，等待核对影响",
+      USER_MATERIAL_ADDED: "你补充的资料已保存", USER_FEEDBACK_ADDED: "你的反馈已保存，等待核对影响", INPUT: "你对原问题的答复已保存",
       CHALLENGE_HANDED_OFF: "成果核查缺口已交回原委托",
       SKILL_ARTIFACT_SAVED: "阶段成果已保存", SKILL_DELIVERABLE_READY: "阶段成果已备好，原报告与行动未改动",
       INVESTIGATION_WOKEN: "新资料唤醒原委托", INVESTIGATION_INPUT_CHANGED: "新资料唤醒原委托", INVESTIGATION_OBSERVATION_CHANGED: "观察到获准变化",
@@ -98,6 +110,8 @@ export async function readMissionWorkbench(userId: string, id: string): Promise<
       FAILURE: "当前步骤需核对" };
     const usage = record(m.budgetUsedJson);
     return { id, projectId: m.projectId, projectTitle: project.title, goal: m.goal,
+      lastSeenOutputRevision: m.runtimeProtocolVersion === 2 && isFeatureEnabled("MISSION_V2_ENABLED", false) ? lastSeenOutputRevision : undefined,
+      artifactAdoptionEnabled: m.status !== "CANCELLED" && isFeatureEnabled("MISSION_ARTIFACT_ADOPTION_ENABLED", false),
       challengesEnabled: m.runtimeProtocolVersion === 2 && isFeatureEnabled("MISSION_V2_ENABLED", false) && isFeatureEnabled("MISSION_CHALLENGES_ENABLED", false),
       workingObjective: continuity.workingObjective ?? m.goal, status: m.status, phase: state.phase, reason: state.reasonText, reasonCode: state.reasonCode, version: m.version,
       checkedAt: new Date().toISOString(), provider: run?.provider ?? "尚无模型调用",

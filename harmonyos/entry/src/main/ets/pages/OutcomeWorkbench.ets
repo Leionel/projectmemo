@@ -13,8 +13,8 @@ import { copyPickedFile, removePickedCopy } from '../common/PickedFile';
 import { SessionStore } from '../services/SessionStore';
 import { MissionCommand } from '../models/Mission';
 import { ApiError } from '../models/Project';
-import { MissionWorkbench, WorkbenchOutput, WorkbenchBlock, WorkbenchSource, WorkbenchEvent, WorkbenchMaterial,
-  OutcomeChallenge, OutcomeChallengeCommand, ChallengeQuestion, ChallengeOption, workbenchOutput, workbenchSource, challengeQuestion, workbenchTime } from '../models/MissionWorkbench';
+import { MissionWorkbench, WorkbenchOutput, WorkbenchBlock, WorkbenchSource, WorkbenchEvent, WorkbenchMaterial, WorkbenchReadReceipt,
+  OutcomeChallenge, OutcomeChallengeCommand, ChallengeQuestion, ChallengeOption, workbenchOutput, unreadWorkbenchOutput, workbenchSource, challengeQuestion, workbenchTime } from '../models/MissionWorkbench';
 
 @Entry
 @Component
@@ -33,6 +33,8 @@ struct OutcomeWorkbenchPage {
   @State private materialPending: boolean = false;
   @State private challengePending: boolean = false;
   @State private controlPending: boolean = false;
+  @State private readReceipt: WorkbenchReadReceipt | null = null;
+  @State private savingReadReceipt: boolean = false;
   @StorageProp('missionAppActive') @Watch('appActivityChanged') private appActive: boolean = true;
   @StorageProp('pm.shareSeq') @Watch('shareArrived') private shareSeq: number = 0;
   @State private nativeDraft: NativeMaterialDraft | null = null;
@@ -58,6 +60,7 @@ struct OutcomeWorkbenchPage {
     this.material = ''; this.challengeText = ''; this.selected = []; this.drafts = {};
     this.materialRequest = null; this.challengeRequest = null; this.controlRequest = null;
     this.materialPending = false; this.challengePending = false; this.controlPending = false;
+    this.readReceipt = null;
     if (this.visible) router.replaceUrl({ url: 'pages/LoginPage' });
   };
   aboutToAppear(): void {
@@ -78,8 +81,33 @@ struct OutcomeWorkbenchPage {
     if (e instanceof ApiError && [401, 403, 404].includes(e.status)) {
       this.view = new MissionWorkbench(); this.challenge = null; this.sourceKey = ''; this.selected = [];
       this.challengeText = ''; this.drafts = {}; this.material = '';
+      this.readReceipt = null;
       if (e.status === 401) this.expired();
     }
+  }
+  private async markOutputRead(output?: WorkbenchOutput): Promise<void> {
+    if (this.savingReadReceipt) return;
+    if (this.readReceipt === null) {
+      if (!this.fresh || output === undefined || output.sourceAccessChanged) return;
+      const receipt = new WorkbenchReadReceipt();
+      receipt.requestId = this.newRequestId();
+      receipt.seenOutputRevision = output.revision;
+      this.readReceipt = receipt;
+    }
+    const receipt = this.readReceipt, generation = this.generation, token = SessionStore.getToken();
+    this.savingReadReceipt = true;
+    this.error = '';
+    try {
+      await this.service.markWorkbenchOutputRead(this.missionId, receipt);
+      if (!this.current(generation, token)) return;
+      this.readReceipt = null;
+      this.notice = `已记录第 ${receipt.seenOutputRevision} 版已读，Web 与手机共用这个位置。`;
+    } catch (e) {
+      if (this.current(generation, token)) {
+        if (this.definite(e)) this.readReceipt = null;
+        this.fail(e);
+      }
+    } finally { this.savingReadReceipt = false; this.read(); }
   }
   private setChallenge(value: OutcomeChallenge | null): void {
     const question = challengeQuestion(value), key = question === undefined || value === null ? '' : value.id + ':' + question.key;
@@ -287,6 +315,22 @@ struct OutcomeWorkbenchPage {
     }
     ForEach(output.blocks, (block: WorkbenchBlock) => { Text(block.text).fontSize(16).lineHeight(26).fontColor(PMColors.INK_PRIMARY).copyOption(CopyOptions.InApp) }, (block: WorkbenchBlock) => block.blockId)
     ForEach(output.sourceKeys, (key: string, index: number) => { PMButton({ label: `定位原记录 ${index + 1}`, secondary: true, disabled: !this.fresh, onAction: (): void => { this.sourceKey = key; } }) }, (key: string) => key)
+    if (this.readReceipt === null && this.view.lastSeenOutputRevision !== undefined &&
+        output.revision > this.view.lastSeenOutputRevision && !output.sourceAccessChanged) {
+      PMButton({ label: `标记第 ${output.revision} 版已读`, secondary: true, disabled: !this.fresh || this.savingReadReceipt,
+        onAction: (): void => { this.markOutputRead(output); } })
+    }
+  }
+  @Builder private ReturnDraft(output: WorkbenchOutput) {
+    Column({ space: 6 }) {
+      Row({ space: 8 }) {
+        ClockIcon({ iconSize: 16, color: PMColors.BRAND })
+        Text(`第 ${output.revision} 版可回访`).fontSize(17).fontWeight(FontWeight.Medium)
+      }
+      Text(workbenchTime(output.createdAt)).fontSize(13).fontColor(PMColors.INK_SECONDARY)
+      PMButton({ label: `打开第 ${output.revision} 版`, secondary: true, disabled: !this.fresh,
+        onAction: (): void => { this.outputId = output.id; this.sourceKey = ''; } })
+    }.width('100%').alignItems(HorizontalAlign.Start).padding(12).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(PMRadius.MD)
   }
   build() {
     Column() {
@@ -299,6 +343,9 @@ struct OutcomeWorkbenchPage {
           else {
             Text(this.view.goal).fontSize(23).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
             Text(this.view.reason).fontColor(PMColors.BRAND)
+            if (unreadWorkbenchOutput(this.view) !== undefined) { this.ReturnDraft(unreadWorkbenchOutput(this.view) as WorkbenchOutput) }
+            if (this.readReceipt !== null) { PMButton({ label: this.savingReadReceipt ? '正在记录已读…' : '重试原已读回执', secondary: true,
+              disabled: this.savingReadReceipt, onAction: (): void => { this.markOutputRead(); } }) }
             if (this.controlPending) { PMButton({ label: '重试原控制请求', secondary: true, disabled: this.busy, onAction: (): void => { this.control(this.controlAction); } }) }
             else { PMButton({ label: this.view.status === 'PAUSED' ? '恢复原委托' : '暂停原委托', secondary: true,
               disabled: this.busy || !this.fresh || this.materialPending || this.challengePending || ['SUCCEEDED', 'CANCELLED'].includes(this.view.status), onAction: (): void => { this.control(this.view.status === 'PAUSED' ? 'resume' : 'pause'); } }) }

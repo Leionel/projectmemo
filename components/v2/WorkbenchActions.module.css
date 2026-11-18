@@ -1,0 +1,16 @@
+.question, .delivery, .preview { border: 1px solid var(--rule); border-radius: 12px; background: var(--card-bg); padding: 14px 16px; }
+.question { margin-bottom: 16px; border-left: 3px solid var(--teal); scroll-margin-top: 80px; }
+.question:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+.question h2, .delivery h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-size: 16px; font-weight: 650; color: var(--ink); }
+.question h2 { font-family: var(--font-serif); font-size: 19px; }
+.question h2 svg, .delivery h3 svg { color: var(--teal-strong); }
+.question p, .delivery p { margin: 6px 0; font-size: 13px; color: var(--ink-soft); overflow-wrap: anywhere; }
+.delivery { margin-top: 14px; }
+.delivery header, .actions { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+.actions { margin-top: 9px; justify-content: flex-start; }
+.button, .primary { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 5px 9px; border: 1px solid var(--rule); border-radius: 6px; color: var(--teal-strong); font-size: 12px; }
+.primary { background: var(--teal-strong); color: var(--paper-strong); border-color: var(--teal-strong); }
+.preview { margin-top: 8px; background: var(--paper); }
+.previewBody { overflow-wrap: anywhere; font-size: 13px; line-height: 1.75; max-height: 46vh; overflow: auto; }
+.primary:focus-visible, .button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.delivery [role="alert"] { color: var(--brick); }

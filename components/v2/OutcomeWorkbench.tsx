@@ -6,12 +6,14 @@ import { evidenceTime, sourceDisplayName } from "@/lib/client/sourceDisplay";
 import { AgentMessageBlocks } from "@/components/AgentMessageBlocks";
 import { highlightSegments, locateExcerpt } from "@/lib/challenges/presentation";
 import { workbenchFixture } from "@/lib/experience/workbenchFixture";
-import { workbenchArtifactMessage, workbenchMessage, type WorkbenchSnapshot } from "@/lib/types/workbench";
+import { workbenchArtifactMessage, workbenchMessage, type WorkbenchRevisionTarget, type WorkbenchSnapshot } from "@/lib/types/workbench";
 import { ReentryBriefPanel } from "./ReentryBrief";
 import { GAME_ENTRIES, MissionGames, type GameTab } from "./MissionGames";
 import styles from "./OutcomeWorkbench.module.css";
 import { MissionMaterialForm } from "./MissionMaterialForm";
 import { RevisionComparison, type OpenRevisionSource } from "./RevisionComparison";
+import { MissionQuestionPanel } from "./MissionQuestionPanel";
+import { WorkbenchDelivery } from "./WorkbenchDelivery";
 
 class RequestError extends Error {
   constructor(message: string, readonly status: number) { super(message); }
@@ -34,12 +36,15 @@ function reveal(element: () => HTMLElement | null, block: ScrollLogicalPosition 
     target?.scrollIntoView({ block, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
   });
 }
-export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
+export function OutcomeWorkbench({ missionId, entry, initialRevision, initialBaseline }: {
+  missionId?: string; entry?: "question" | "review"; initialRevision?: number; initialBaseline?: number;
+}) {
   const live = !!missionId;
   const [snapshot, setSnapshot] = useState<WorkbenchSnapshot | null>(() => live ? null : workbenchFixture());
-  const [research, setResearch] = useState(false), [selectedRevision, setSelectedRevision] = useState<number | null>(null);
-  const [view, setView] = useState<"draft" | "diff">("draft");
-  const [compareRevision, setCompareRevision] = useState<number | null>(null);
+  const [research, setResearch] = useState(false), [selectedRevision, setSelectedRevision] = useState<number | null>(initialRevision ?? null);
+  const [view, setView] = useState<"draft" | "diff">(entry === "review" && initialBaseline ? "diff" : "draft");
+  const [compareRevision, setCompareRevision] = useState<number | null>(initialBaseline ?? null);
+  const [feedbackSourceId, setFeedbackSourceId] = useState<string>();
   const [sourceSelection, setSourceSelection] = useState<SourceSelection | null>(null);
   const [materialOpen, setMaterialOpen] = useState(false);
   const documentTools = useRef<HTMLDivElement>(null), sourcePanelId = useId();
@@ -51,6 +56,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
   const [selectedArtifactId, setSelectedArtifactId] = useState<string | null>(null);
   const [message, setMessage] = useState(""), [busy, setBusy] = useState(false), [error, setError] = useState("");
   const [notice, setNotice] = useState(""), [game, setGame] = useState<"mentor" | "evidence" | "sprint" | null>(null);
+  const [questionReceipt, setQuestionReceipt] = useState(false);
   const [liveGame, setLiveGame] = useState<GameTab | null>(null);
   const [chosen, setChosen] = useState(""), [answer, setAnswer] = useState(""), [sprinting, setSprinting] = useState(false);
   const [sprintChecked, setSprintChecked] = useState(false);
@@ -62,7 +68,10 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
     if (!missionId) return;
     const seq = ++snapshotRead.current.seq;
     try {
-      const value = await api("/api/missions/" + encodeURIComponent(missionId) + "/workbench");
+      const selection = new URLSearchParams();
+      if (selectedRevision) selection.set("revision", String(selectedRevision));
+      if (compareRevision) selection.set("from", String(compareRevision));
+      const value = await api("/api/missions/" + encodeURIComponent(missionId) + "/workbench" + (selection.size ? "?" + selection : ""));
       if (seq !== snapshotRead.current.seq) return;
       setSnapshot(value);
       return value as WorkbenchSnapshot;
@@ -80,7 +89,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
       }
       setError(e instanceof Error ? e.message : "读取失败");
     }
-  }, [missionId]);
+  }, [missionId, selectedRevision, compareRevision]);
   useEffect(() => {
     if (!missionId) return;
     const reads = snapshotRead.current;
@@ -94,6 +103,12 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
     const interval = setInterval(() => void poll(), 2500);
     return () => { reads.seq++; clearTimeout(first); clearInterval(interval); };
   }, [missionId, refresh]);
+  const hasQuestion = snapshot?.reasonCode === "QUESTION_PENDING";
+  const loaded = snapshot !== null;
+  useEffect(() => {
+    if (entry === "question" && hasQuestion) reveal(() => document.getElementById("workbench-question"));
+    if (entry === "review" && loaded) reveal(() => document.getElementById("workbench-document"));
+  }, [entry, hasQuestion, loaded]);
   /** 把一句话交给原 Conversation/Directive 链；返回值只描述真实应用结果。 */
   async function deliver(text: string): Promise<{ applied: boolean; objective: string; message: string }> {
     const quoted = text.trim();
@@ -163,17 +178,17 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
     finally { setBusy(false); }
   }
   function switchSample(value: boolean) {
-    setResearch(value); setSnapshot(workbenchFixture(1, value)); setSelectedRevision(null); setSourceSelection(null); setCompareRevision(null);
+    setResearch(value); setSnapshot(workbenchFixture(1, value)); setSelectedRevision(null); setSourceSelection(null); setCompareRevision(null); setFeedbackSourceId(undefined);
     setChosen(""); setNotice(""); setAnswer(""); setSprintChecked(false); setSprinting(false);
   }
   if (!snapshot) return <main className={styles.loading}><h1>成果工作台</h1><p role="status">{error || "正在读取原委托…"}</p>
     {error && <><button onClick={() => void refresh()}>重试读取</button><a href="/login">登录后继续</a></>}</main>;
-  const output = snapshot.outputs.find(o => o.revision === selectedRevision) ?? snapshot.outputs[0];
+  const output = selectedRevision === null ? snapshot.outputs[0] : snapshot.outputs.find(o => o.revision === selectedRevision);
   const latestOutput = snapshot.outputs[0] ?? null;
   const artifact = snapshot.stageArtifacts.find(item => item.id === selectedArtifactId) ?? snapshot.stageArtifacts[0];
   const stageReady = snapshot.reasonCode === "SKILL_DELIVERABLE_READY";
   const olderVersions = output ? snapshot.outputs.filter(row => row.revision < output.revision) : [];
-  const previous = olderVersions.find(row => row.revision === compareRevision) ?? olderVersions[0];
+  const previous = compareRevision === null ? olderVersions[0] : olderVersions.find(row => row.revision === compareRevision);
   const selectedSourceKey = sourceSelection?.key;
   const source = selectedSourceKey ? snapshot.sources.find(row => row.key === selectedSourceKey) :
     snapshot.sources.find(row => output?.sourceKeys.includes(row.key)) ??
@@ -190,10 +205,17 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
   }
   function openMaterial() { setMaterialOpen(true); reveal(() => materialStart.current); }
   async function reread() { await refresh(); }
-  function selectRevision(revision: number) { setSelectedRevision(revision); setCompareRevision(null); setSourceSelection(null); }
-  function openRevision(revision: number, compare = false) {
-    selectRevision(revision); setView(compare ? "diff" : "draft"); setLiveGame(null);
+  async function questionAnswered() { setQuestionReceipt(true); await refresh(); }
+  function selectRevision(revision: number) {
+    setSelectedRevision(revision); setCompareRevision(null); setSourceSelection(null); setFeedbackSourceId(undefined);
+  }
+  function openRevision(revision: number, compare = false, baseline?: number) {
+    selectRevision(revision); setCompareRevision(baseline ?? null); setView(compare ? "diff" : "draft"); setLiveGame(null);
     reveal(() => documentTools.current);
+  }
+  function openFeedbackChanges(target: WorkbenchRevisionTarget) {
+    openRevision(target.revision, true, target.baselineRevision);
+    setFeedbackSourceId(target.sourceId);
   }
   async function pauseFromGame() { const ok = await control("pause"); if (!ok) throw new Error("暂停尚未确认，请重试。"); }
   return <main className={styles.workbench}>
@@ -210,8 +232,11 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
       disabled={snapshot.outputs.length >= 2} onClick={() => { setSnapshot(workbenchFixture(2, research)); selectRevision(2); }}>
       载入新资料样例 <ArrowUpRight size={15} aria-hidden="true" /></button></div>}
     {error && <div role="alert" className={styles.error}>{error}{hasPending && "；原请求编号已保留，再次发送会重试原请求。"}</div>}
-    {live && !liveGame && <ReentryBriefPanel key={missionId} missionId={missionId} outputs={snapshot.outputs}
-      onOpenRevision={openRevision} onAddMaterial={openMaterial} onOpenComposer={openComposer} />}
+    {live && !liveGame && <ReentryBriefPanel key={missionId} missionId={missionId} projectId={snapshot.projectId} outputs={snapshot.outputs}
+      onOpenRevision={openRevision} onAddMaterial={openMaterial} onOpenQuestion={() => reveal(() => document.getElementById("workbench-question"))} />}
+    {live && hasQuestion && !liveGame && <MissionQuestionPanel missionId={missionId} projectId={snapshot.projectId} version={snapshot.version} onAnswered={questionAnswered} />}
+    {questionReceipt && !hasQuestion && <p role="status" className={styles.notice}>原问题答复已提交，可在过程回执里查看后续进展。</p>}
+    {entry === "question" && !hasQuestion && !questionReceipt && <p role="status" className={styles.notice}>原委托目前没有等待答复的问题。</p>}
     {live && snapshot.challengesEnabled && !liveGame && <section className={styles.gameEntry} aria-label="成果玩法入口">
       <h2>成果演练</h2>
       <div className={styles.gameEntryActions}>{GAME_ENTRIES.map(({ key, label, icon: Icon }) =>
@@ -219,7 +244,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
     </section>}
     {live && snapshot.challengesEnabled && liveGame && <MissionGames missionId={snapshot.id} snapshot={snapshot} output={latestOutput} latestOutput={latestOutput}
       tab={liveGame} onTab={setLiveGame} onExit={() => setLiveGame(null)} onHandoff={reread} onOpenRevision={openRevision}
-      onPauseMission={pauseFromGame} onDirective={deliver} />}
+      onReviewFeedback={openFeedbackChanges} onPauseMission={pauseFromGame} onDirective={deliver} />}
     {!liveGame && <div className={styles.workspace}>
       <aside className={styles.progress} aria-label="Agent过程反馈"><h2>这份成果的进展</h2>
         <p className={styles.objective}>{snapshot.workingObjective}</p>
@@ -228,7 +253,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
         <div className={styles.usage}>{live ? <><span>模型调用 {snapshot.models}</span><span>工具调用 {snapshot.tools}</span></> : "样例操作不会调用模型"}
           <small>{live ? "读取时间" : "样例时点"} {new Date(snapshot.checkedAt).toLocaleTimeString("zh-CN", { timeZone: "Asia/Shanghai" })}（北京时间）</small></div>
       </aside>
-      <section className={styles.document} aria-label="项目成果">
+      <section className={styles.document} id="workbench-document" aria-label="项目成果" tabIndex={-1}>
         {artifact && <section className={styles.stageArtifacts} aria-label="阶段成果">
           <div className={styles.documentHead}><div className={styles.views}><h2><FileText size={15} aria-hidden="true" />阶段成果</h2></div>
             <div className={styles.versions} aria-label="阶段成果列表">{snapshot.stageArtifacts.map(item => <button key={item.id}
@@ -242,7 +267,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
           })}{artifact.unknowns.length > 0 && <p>仍未知：{artifact.unknowns.join("；")}</p>}</div>
         </section>}
         <div className={styles.documentHead} ref={documentTools} tabIndex={-1}><div className={styles.views}>
-          <button aria-pressed={view === "draft"} onClick={() => { setView("draft"); setSourceSelection(null); }}><FileText size={15} aria-hidden="true" />成果</button>
+          <button aria-pressed={view === "draft"} onClick={() => { setView("draft"); setSourceSelection(null); setFeedbackSourceId(undefined); }}><FileText size={15} aria-hidden="true" />成果</button>
           <button aria-pressed={view === "diff"} onClick={() => { setView("diff"); setSourceSelection(null); }}><GitCompareArrows size={15} aria-hidden="true" />修改对照</button></div>
           <div className={styles.versions} aria-label="成果版本">{snapshot.outputs.map(o => <button key={o.id}
             aria-pressed={output?.id === o.id} aria-label={"第 " + o.revision + " 版"} onClick={() => selectRevision(o.revision)}><Clock3 size={14} aria-hidden="true" /><span><strong>第 {o.revision} 版</strong><time dateTime={o.createdAt}>{evidenceTime(o.createdAt, true)}</time></span></button>)}</div>
@@ -253,17 +278,20 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
             conversationId={"workbench-view-" + snapshot.id} busy={busy} onAction={async () => { /* Read-only presentation has no business actions. */ }} /> :
             previous ? <>
               {olderVersions.length > 1 && <label className={styles.comparePicker}>对照起点
-                <select value={previous.revision} onChange={event => { setCompareRevision(Number(event.target.value)); setSourceSelection(null); }}>
+                <select value={previous.revision} onChange={event => { setCompareRevision(Number(event.target.value)); setSourceSelection(null); setFeedbackSourceId(undefined); }}>
                   {olderVersions.map(row => <option key={row.id} value={row.revision}>第 {row.revision} 版 · {evidenceTime(row.createdAt, true)}</option>)}
                 </select>
               </label>}
-              <RevisionComparison baseline={previous} output={output} sources={snapshot.sources} onOpenSource={openSource} />
-            </> : <p className={styles.empty}>没有更早的稿件可供对照。新资料更新后，可在这里比较。</p>}
+              <RevisionComparison baseline={previous} output={output} sources={snapshot.sources} onOpenSource={openSource}
+                feedbackSourceId={feedbackSourceId} onClearFilter={() => setFeedbackSourceId(undefined)} />
+            </> : <p className={styles.empty}>{compareRevision !== null ? "所选对照起点暂不可读。" : "没有更早的稿件可供对照。新资料更新后，可在这里比较。"}</p>}
           {view === "draft" && <div className={styles.references}><span>本稿依据</span>{currentSourceIds.length ? [...new Set(currentSourceIds)].map(id => {
             const found = snapshot.sources.find(s => s.id === id && output.sourceKeys.includes(s.key));
             return found ? <button key={id} onClick={() => openSource(found, output.createdAt)}><BookOpen size={14} aria-hidden="true" />定位原记录{found.name ? " · " + found.name : ""}</button> : null;
           }) : <p>这版内容仅为推断或来源需要重新核对。</p>}</div>}
-        </div> : <p className={styles.empty}>原委托还没有生成报告稿。阶段成果与后台过程保留在本次读取中。</p>}
+        </div> : <p className={styles.empty}>{selectedRevision !== null ? "所选稿件暂不可读，请重新选择版本。" : "原委托还没有生成报告稿。"}</p>}
+        {live && output && <WorkbenchDelivery key={output.id + ":" + (previous?.revision ?? 0)} missionId={missionId}
+          projectId={snapshot.projectId} output={output} baseline={previous?.revision} adoptionEnabled={snapshot.artifactAdoptionEnabled} />}
         {!live && <div className={styles.games}><span>围绕这份成果试一试</span>
           <button aria-pressed={game === "mentor"} onClick={() => setGame(game === "mentor" ? null : "mentor")}>严格导师</button>
           <button aria-pressed={game === "evidence"} onClick={() => setGame(game === "evidence" ? null : "evidence")}>证据侦探</button>
@@ -287,7 +315,6 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
         {live && <div className={styles.anchor} ref={materialStart} tabIndex={-1} aria-label="材料表单"><MissionMaterialForm missionId={snapshot.id} projectId={snapshot.projectId}
           open={materialOpen} onOpenChange={setMaterialOpen} onSaved={reread} /></div>}
         <form className={styles.composer} onSubmit={submit}><label htmlFor="workbench-message">接下来怎么做，直接告诉忆程</label>
-          {snapshot.reasonCode === "QUESTION_PENDING" && <p className={styles.question}>{snapshot.reason}</p>}
           <textarea ref={composerInput} id="workbench-message" value={message} disabled={busy || hasPending} onChange={e => setMessage(e.target.value)}
             placeholder="例如：继续整理，但不要联网" maxLength={3000} required />
           <div><span>修改工作方向，保留已有成果和用量。</span><button type="submit" className={styles.primary} disabled={busy || !message.trim()}>

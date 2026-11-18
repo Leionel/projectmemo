@@ -2,7 +2,7 @@
 import { ArrowLeft, FileSearch, LineChart, MessagesSquare, Users } from "lucide-react";
 import { evidenceTime } from "@/lib/client/sourceDisplay";
 import type { ChallengeKind } from "@/lib/types/challenge";
-import type { WorkbenchSnapshot, WorkbenchOutput } from "@/lib/types/workbench";
+import type { WorkbenchSnapshot, WorkbenchOutput, WorkbenchRevisionTarget } from "@/lib/types/workbench";
 import { OutcomeChallenges } from "./OutcomeChallenges";
 import { ProjectSprint } from "./ProjectSprint";
 import styles from "./MissionGames.module.css";
@@ -12,6 +12,7 @@ type Props = {
   missionId: string; snapshot: WorkbenchSnapshot; output: WorkbenchOutput | null; latestOutput: WorkbenchOutput | null;
   tab: GameTab; onTab: (tab: GameTab) => void; onExit: () => void; onHandoff: () => void | Promise<void>;
   onOpenRevision: (revision: number) => void; onPauseMission: () => Promise<void>;
+  onReviewFeedback: (target: WorkbenchRevisionTarget) => void;
   onDirective: (text: string) => Promise<{ applied: boolean; objective: string; message: string }>;
 };
 export const GAME_ENTRIES: ReadonlyArray<{ key: GameTab; label: string; icon: typeof FileSearch }> = [
@@ -21,7 +22,7 @@ export const GAME_ENTRIES: ReadonlyArray<{ key: GameTab; label: string; icon: ty
 ];
 const TABS = [...GAME_ENTRIES, { key: "METRIC" as const, label: "指标可比性", icon: LineChart }];
 
-export function MissionGames({ missionId, snapshot, output, latestOutput, tab, onTab, onExit, onHandoff, onOpenRevision, onPauseMission, onDirective }: Props) {
+export function MissionGames({ missionId, snapshot, output, latestOutput, tab, onTab, onExit, onHandoff, onOpenRevision, onReviewFeedback, onPauseMission, onDirective }: Props) {
   const version = latestOutput ? "最新第 " + latestOutput.revision + " 版" : "尚无成果版本";
   return <section className={styles.shell} aria-label="成果玩法工作区">
     <header className={styles.header}>
@@ -42,7 +43,7 @@ export function MissionGames({ missionId, snapshot, output, latestOutput, tab, o
         onPauseMission={onPauseMission} onDirective={onDirective} /> :
         <OutcomeChallenges missionId={missionId} outputId={output?.id} outputs={snapshot.outputs} latestOutput={latestOutput}
           kind={tab as ChallengeKind} sources={snapshot.sources} phase={snapshot.phase} phaseLabel={snapshot.reason}
-          onKind={onTab} onHandoff={onHandoff} onOpenRevision={onOpenRevision} />}
+          onKind={onTab} onHandoff={onHandoff} onOpenRevision={onOpenRevision} onReviewFeedback={onReviewFeedback} />}
     </div>
   </section>;
 }

@@ -97,6 +97,8 @@
 .receipt p { margin: 0 0 8px; color: var(--ink-soft); font-size: 12px; line-height: 1.75; }
 .receiptMeta { display: flex; flex-wrap: wrap; gap: 10px; color: var(--muted); font-size: 11px; }
 .receipt .primary { margin-top: 10px; }
+.receiptActions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 9px; }
+.receiptActions .primary { margin-top: 0; }
 
 .readerColumn { position: sticky; top: 76px; align-self: start; min-width: 0; scroll-margin-top: 76px; }
 .readerColumn:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; border-radius: var(--game-radius); }

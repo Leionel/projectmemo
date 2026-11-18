@@ -16,6 +16,17 @@
 - 新窗口于 11 月 18 日 13:35:46 开始，使用当前用户后台宿主和隔离 fixture。状态和生命周期日志在 `output/v2-72h-2026-11-18T05-35-43-508Z/`。必须按心跳覆盖判定 72 小时。真机、获准真实项目和独立内容核验仍待完成。
 - Web 生产构建、74 条定向测试、9 项回访浏览器验收、37 项 Web 玩法回归与 165 条鸿蒙单测通过。执行 `node --import tsx scripts/verify-v2-entry.ts` 前先启动生产模式的 `scripts/v2-entry-demo.ts`。回访截图与回执见 `output/playwright/v2-reentry/2026-11-18T05-48-54-392Z/`。
 
+## 11 月 18 日冻结路由补证
+
+新增合成项目审查包。评估跑到真实阶段成果保存，35 份规划、研究或复盘成果可回查。阶段保存的 Step、成果和事件互相核对，并确认报告版本不变。64 条原评分仍为 39 条通过，0 条安全违反和关键失败。25 条待独立核验中，23 条已有可读产物，2 条没有持久化委托。合成产物用于人工核对入口与证据，内容质量继续待验。
+
+```powershell
+node --import tsx scripts/eval-routes.ts --out output/v2-route-review-final-20261118 --review-bundle
+node validation/evaluate-routes.mjs --results output/v2-route-review-final-20261118/results.jsonl
+```
+
+按 `caseId` 将评分结果与 `review-evidence.jsonl` 的原请求、证据回执、可见成果及来源关联。审核结果独立记录，冻结样例和原评分器保持原状。
+
 以下为 11 月 17 日门禁快照。
 
 | 项目 | 当前结论 | 可核查证据 |

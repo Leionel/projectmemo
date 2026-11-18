@@ -4,27 +4,45 @@ import { textHash } from "@/lib/research/sourceRepository";
 
 type SourcePointer = { sourceId: string; sourceHash: string };
 /** Deterministic fixture, used only by isolated tests/demo CLI. Never selected by a production flag or API. */
-export function fixtureSkillProvider(resolve: () => Promise<SourcePointer | SourcePointer[]>): DecisionProvider {
+export function fixtureSkillProvider(resolve: () => Promise<SourcePointer | SourcePointer[]>, { terminalArtifacts = false } = {}): DecisionProvider {
   // Test-transport bookkeeping only: which planned stage already read its sources in this cycle.
   const readThisCycle = new Set<string>();
   const readCounts = new Map<string, number>();
+  async function sourcePointers() {
+    const pointers = await resolve();
+    return Array.isArray(pointers) ? pointers : [pointers];
+  }
   return async raw => {
     const context = JSON.parse(raw), skill = context.skillExecution;
     if (!skill) throw new Error("FIXTURE_REQUIRES_V2_SKILL_CONTEXT");
     const cycleKey = (context.contextVersion ?? 0) + ":" + (context.planRevision ?? 0);
     const key = cycleKey + ":" + skill.stage;
+    const packSources: Array<{ id: string; text: string }> = skill.evidencePack?.sources ?? [];
+    const stageSources = terminalArtifacts && skill.stage !== "deliverable-creation" && !skill.outputId &&
+      skill.stageIndex === skill.sequence.length - 1 ? await sourcePointers() : null;
+    const stageArtifact = stageSources && readThisCycle.has(key) && packSources.length > 0 &&
+      packSources.length >= Math.min(stageSources.length, 4);
     let choice: RuntimeChoice;
     if (skill.outputId && (skill.stage === "deliverable-creation" || readThisCycle.has(key))) {
       choice = { kind: "await_event", outputId: skill.outputId, reason: "DELIVERABLE_READY", subscriptionIds: ["project-materials"] };
+    } else if (stageArtifact) {
+      const blocks = packSources.slice(0, 4).map((source, index) => {
+        const text = source.text.slice(0, 1100);
+        return { blockId: "stage-source-" + (index + 1), kind: "PROJECT_OBSERVATION", text, sourceIds: [source.id],
+          citations: [{ sourceId: source.id, start: 0, end: text.length, excerptHash: textHash(text) }] };
+      });
+      choice = { kind: "tool", tool: "save_mission_output", summary: "保存供独立审查的阶段样本",
+        args: { blocks, missingInformation: (skill.evidencePack?.unknowns ?? [])
+          .slice(0, 6).map((item: { column?: string }) => (item.column || "数值列") + "口径待核对") } };
     } else if (skill.stage !== "deliverable-creation") {
       readThisCycle.add(key);
-      const pointers = await resolve(), list = Array.isArray(pointers) ? pointers : [pointers];
+      const list = stageSources ?? await sourcePointers();
       const count = readCounts.get(cycleKey) ?? 0;
       const pointer = list[count % list.length];
       readCounts.set(cycleKey, count + 1);
-      choice = { kind: "tool", tool: "read_project_material", args: pointer, summary: "读取获准项目原文" };
+      choice = pointer ? { kind: "tool", tool: "read_project_material", args: pointer, summary: "读取获准项目原文" }
+        : { kind: "tool", tool: "inspect_project", args: {}, summary: "读取获准项目概况" };
     } else {
-      const packSources: Array<{ id: string; text: string }> = skill.evidencePack?.sources ?? [];
       const reads = (context.observations ?? []).filter((o: { tool: string; status: string; planRevision: number }) =>
         o.tool === "read_project_material" && o.status === "SUCCEEDED" && o.planRevision === context.planRevision);
       const excerpt = reads.at(-1)?.observation.sources[0]?.excerpts[0];

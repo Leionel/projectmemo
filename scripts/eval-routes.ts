@@ -6,7 +6,7 @@
  * real dispatch rows and persisted outcomes, and writes one JSON line per case.
  * Frozen expectations are never read here; the frozen scorer judges the output.
  *
- *   npm.cmd exec tsx -- scripts/eval-routes.ts [--out <dir>]
+ *   npm.cmd exec tsx -- scripts/eval-routes.ts [--out <dir>] [--review-bundle]
  */
 import fs from "node:fs";
 import os from "node:os";
@@ -46,6 +46,9 @@ const { createSession } = await import("@/lib/auth/session");
 const { createConversation } = await import("@/lib/conversation/service");
 const { submitDirective } = await import("@/lib/continuity/directiveService");
 const { jsonHash } = await import("@/lib/mission/contracts");
+const { record } = await import("@/lib/conversation/repository");
+const { readSkillArtifacts } = await import("@/lib/skills/artifacts");
+const reviewBundle = process.argv.includes("--review-bundle") ? await import("@/lib/evaluation/routeReview") : null;
 import type { CaseRun } from "@/lib/evaluation/checks";
 import type { SkillRouteDecision } from "@/lib/skills/router";
 
@@ -90,30 +93,28 @@ async function executeRun(testCase: FrozenCase, refs: FixtureRefs, decision: Ski
   if (!missionId) missionId = await createFixtureMission(refs.ownerUserId, refs.projectId, testCase.input.message);
   run.missionRealId = missionId;
   await installRequestRoute(missionId, decision, "EVALUATION_HARNESS");
-  const projectSourceCount = (await db.capture.count({ where: { projectId: refs.projectId } })) + (await db.attachment.count({ where: { projectId: refs.projectId } }));
   const pointers = refs.sources.filter(source => source.kind === "PROJECT").map(source => ({ sourceId: source.id, sourceHash: source.hash }));
-  const provider = fixtureSkillProvider(async () => pointers);
+  const provider = fixtureSkillProvider(async () => pointers, { terminalArtifacts: true });
   for (let index = 0; index < 6; index++) {
     const before = await db.agentMission.findUniqueOrThrow({ where: { id: missionId } });
     if (before.status !== "READY") break;
-    await runMissionSlice({ id: missionId, provider });
-    const after = await db.agentMission.findUniqueOrThrow({ where: { id: missionId } });
-    const cursor = (after.planJson as { skillCursor?: { stage: string; stageIndex: number; sequence: string[]; evidencePack?: { sources: unknown[] } } }).skillCursor;
-    if (!cursor) break;
-    const lastStage = cursor.stageIndex === cursor.sequence.length - 1 && cursor.stage !== "deliverable-creation";
-    if (lastStage) {
-      const stagePacks = (await db.agentMissionEvent.findMany({ where: { missionId, type: "SKILL_EVIDENCE_PACK" }, select: { payloadJson: true } }))
-        .filter(event => (event.payloadJson as { skillId?: string }).skillId === cursor.stage).length;
-      const packSources = cursor.evidencePack?.sources.length ?? 0;
-      const researchNeedsMore = cursor.stage === "evidence-research" && packSources < Math.min(projectSourceCount, 4);
-      if (stagePacks > 0 && !researchNeedsMore) break;
-    }
+    if (!await runMissionSlice({ id: missionId, provider })) break;
   }
   const mission = await db.agentMission.findUniqueOrThrow({ where: { id: missionId } });
   const steps = await db.agentMissionStep.findMany({ where: { missionId }, orderBy: { ordinal: "asc" } });
   const events = await db.agentMissionEvent.findMany({ where: { missionId }, orderBy: { seq: "asc" } });
   const latestOutput = await db.agentMissionOutput.findFirst({ where: { missionId }, orderBy: { revision: "desc" } });
-  run.steps = steps.map(step => ({ tool: step.toolName, status: step.status, effectClass: effectClassOf(step.toolName) }));
+  const artifactIds = new Set(readSkillArtifacts(mission.planJson).map(artifact => artifact.id));
+  const artifactByStep = new Map(events.filter(row => row.type === "SKILL_DELIVERABLE_READY").map(row => {
+    const payload = record(row.payloadJson);
+    return [String(payload.stepId), String(payload.artifactId)];
+  }));
+  run.steps = steps.map(step => {
+    const artifact = artifactByStep.get(step.id);
+    const persisted = record(record(step.resultJson).data).artifactId;
+    const stageArtifactId = step.status === "SUCCEEDED" && artifact && artifact === persisted && artifactIds.has(artifact) ? artifact : undefined;
+    return { tool: step.toolName, status: step.status, effectClass: effectClassOf(step.toolName), stageArtifactId };
+  });
   run.events = events.map(event => ({ type: event.type, payload: event.payloadJson }));
   run.outputsAfter = await countOutputs(missionId);
   run.missionStatusAfter = mission.status;
@@ -203,6 +204,7 @@ async function executeControl(testCase: FrozenCase, refs: FixtureRefs, decision:
 
 fs.mkdirSync(outDir, { recursive: true });
 const results: Array<Record<string, unknown>> = [];
+const reviewRows: string[] = [];
 const dimension = { total: dataset.cases.length, dispatchCases: 0, dispatchedTools: 0, externalReadDispatches: 0, externalWriteDispatches: 0, businessWriteDispatches: 0, controlCasesWithDispatch: 0, contentJudgement: "UNVERIFIED" };
 const started = Date.now();
 let index = 0;
@@ -213,6 +215,11 @@ for (const testCase of dataset.cases) {
   const input = await routingInputFor(refs, testCase.input.message, testCase.input.event);
   const decision = routeSkillRequest(input);
   const run = decision.mode === "RUN" ? await executeRun(testCase, refs, decision) : await executeControl(testCase, refs, decision);
+  if (reviewBundle) {
+    const evidence = await reviewBundle.readRouteReviewEvidence(refs, run);
+    reviewRows.push(JSON.stringify({ caseId: testCase.caseId, group: testCase.group, request: testCase.input.message,
+      fixture: testCase.input.fixtureId, datasetFingerprint, data: "SYNTHETIC_ONLY", provider: "INJECTED_V2_FIXTURE", ...evidence }));
+  }
   const checks = DETERMINISTIC_CHECK_NAMES.map(name => runCheck(name, run));
   const boundary = checks.filter(check => TOOL_BOUNDARY_CHECKS.has(check.name));
   if (run.steps.length) dimension.dispatchCases++;
@@ -225,7 +232,7 @@ for (const testCase of dataset.cases) {
     caseId: testCase.caseId, mode: decision.mode, primary: decision.primary, reasonCode: decision.reasonCode, sequence: decision.sequence,
     trace: {
       outputMissionId: run.fixtureMissionRef,
-      tools: run.steps.map(step => ({ name: step.tool, effectClass: step.effectClass })),
+      tools: run.steps.map(step => ({ name: step.tool, effectClass: step.effectClass, stageArtifactId: step.stageArtifactId })),
       checks: checks.map(check => ({ name: check.name, passed: check.passed, judge: check.judge, evidenceRef: check.evidenceRef, detail: check.detail })),
     },
     dimensions: {
@@ -239,10 +246,12 @@ for (const testCase of dataset.cases) {
 }
 const resultsFile = path.join(outDir, "results.jsonl");
 fs.writeFileSync(resultsFile, results.map(record => JSON.stringify(record)).join("\n") + "\n");
+const reviewFile = reviewBundle ? path.join(outDir, "review-evidence.jsonl") : undefined;
+if (reviewFile) fs.writeFileSync(reviewFile, reviewRows.join("\n") + "\n");
 const report = {
   datasetId: dataset.datasetId, datasetFingerprint, generatedAt: new Date().toISOString(),
   provider: "INJECTED_V2_FIXTURE", modelCalls: 0, paidCalls: 0,
-  cases: results.length, dimension, durationMs: Date.now() - started, resultsFile,
+  cases: results.length, dimension, durationMs: Date.now() - started, resultsFile, reviewFile,
   note: "路由、工具边界与持久证据由真实 Router/Mission Runner/控制服务与真实 AgentMissionStep 采集；内容语义判据在离线注入模型下标记 UNPROVEN，不判真，按失败计入最终证据维度。",
 };
 fs.writeFileSync(path.join(outDir, "report.json"), JSON.stringify(report, null, 2));

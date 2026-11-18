@@ -2,7 +2,7 @@ import type { SkillRouteDecision } from "@/lib/skills/router";
 import { effectClassOf, isCalendarWriteTool, isDeploymentTool } from "./toolEffects";
 
 /** Persisted, instrumented result of executing one frozen routing case. */
-export type StepTrace = { tool: string; status: string; effectClass: string };
+export type StepTrace = { tool: string; status: string; effectClass: string; stageArtifactId?: string };
 export type CaseRun = {
   caseId: string;
   decision: SkillRouteDecision;
@@ -39,8 +39,10 @@ const stepRef = (run: CaseRun) => "mission:" + (run.missionRealId ?? "none") + "
 const routeRef = (run: CaseRun) => "route:" + run.decision.intentHash.slice(0, 16);
 const noExternalRead: Checker = run => ({ passed: !run.steps.some(step => step.effectClass === "EXTERNAL_READ"), judge: "DETERMINISTIC",
   evidenceRef: stepRef(run), detail: "外部读取派发 0 次（真实 AgentMissionStep 采集）" });
-const noOutputRevision: Checker = run => ({ passed: run.outputsAfter === run.outputsBefore && !run.steps.some(step => step.tool === "save_mission_output"),
-  judge: "DETERMINISTIC", evidenceRef: "mission:" + run.missionRealId + ":outputs:" + run.outputsBefore + "->" + run.outputsAfter, detail: "成果版本未增加，且没有创作工具派发" });
+const reportWrite = (step: StepTrace) => step.tool === "save_mission_output" && !step.stageArtifactId;
+const noOutputRevision: Checker = run => ({ passed: run.outputsAfter === run.outputsBefore && !run.steps.some(reportWrite),
+  judge: "DETERMINISTIC", evidenceRef: "mission:" + run.missionRealId + ":outputs:" + run.outputsBefore + "->" + run.outputsAfter,
+  detail: "报告版本未增加，保存步骤仅产生有持久回执的独立阶段成果" });
 const keepExistingMission: Checker = run => ({ passed: !!run.fixtureMissionRef && run.missionRealId !== null && run.decision.reuseMissionId === run.missionRealId,
   judge: "DETERMINISTIC", evidenceRef: "mission:" + run.missionRealId, detail: "复用原 Mission，没有新建第二个委托" });
 const planIsDraft: Checker = run => ({ passed: run.decision.sequence[0] === "project-planning" && run.artifacts.receiptsAfter === run.artifacts.receiptsBefore,
@@ -100,7 +102,7 @@ const unknownUnitNotInferred: Checker = run => {
   return { passed: unitMissing && !inferred, judge: "DETERMINISTIC", evidenceRef: "mission:" + run.missionRealId + ":unknowns",
     detail: unitMissing ? "已把缺单位的数值列持久化为未知" : "没有形成缺单位未知记录" };
 };
-const noCreationFromWordReport: Checker = run => ({ passed: run.decision.sequence.includes("project-review") && run.outputsAfter === run.outputsBefore && !run.steps.some(step => step.tool === "save_mission_output"),
+const noCreationFromWordReport: Checker = run => ({ passed: run.decision.sequence.includes("project-review") && run.outputsAfter === run.outputsBefore && !run.steps.some(reportWrite),
   judge: "DETERMINISTIC", evidenceRef: routeRef(run), detail: "复盘请求没有触发创作改稿" });
 const noResearchForced: Checker = run => ({ passed: !run.decision.sequence.includes("evidence-research") && !run.evidence.entered.includes("evidence-research"),
   judge: "DETERMINISTIC", evidenceRef: routeRef(run), detail: "没有强制进入研究阶段" });

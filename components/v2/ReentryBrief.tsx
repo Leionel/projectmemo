@@ -1,61 +1,137 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowRight, BellDot, BookOpen, Check, FileText, GitCompareArrows, MessageSquareText, Plus } from "lucide-react";
+import { evidenceTime } from "@/lib/client/sourceDisplay";
 import type { ReentryBrief } from "@/lib/types/reentryBrief";
+import type { WorkbenchOutput } from "@/lib/types/workbench";
 import styles from "./ReentryBrief.module.css";
 
-function when(value: string): string {
-  const date = new Date(value);
-  return Number.isFinite(date.getTime()) ? date.toLocaleString("zh-CN", { hour12: false, month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "时间未记录";
-}
+type Receipt = { requestId: string; seenSeq: number; seenOutputRevision: number; handledItemIds: string[] };
+const icons = { NEEDS_DECISION: MessageSquareText, OUTPUT_UPDATED: FileText, SOURCE_CHANGED: BellDot };
 
-/** Up to three truthful changes since the last read. Read, handled and approved stay separate. */
-export function ReentryBriefPanel({ missionId, onOpenRevision }: { missionId: string; onOpenRevision?: (revision: number) => void }) {
+export function ReentryBriefPanel({ missionId, outputs, onOpenRevision, onAddMaterial, onOpenComposer }: {
+  missionId: string;
+  outputs: WorkbenchOutput[];
+  onOpenRevision: (revision: number, compare: boolean) => void;
+  onAddMaterial: () => void;
+  onOpenComposer: () => void;
+}) {
   const [brief, setBrief] = useState<ReentryBrief | null>(null);
-  const [busy, setBusy] = useState(false), [error, setError] = useState(""), [notice, setNotice] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [readError, setReadError] = useState("");
+  const [writeError, setWriteError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [retry, setRetry] = useState(false);
+  const request = useRef<Receipt | null>(null);
+  const readInFlight = useRef<AbortController | null>(null);
   const url = "/api/missions/" + encodeURIComponent(missionId) + "/reentry-brief";
-  useEffect(() => {
-    let active = true;
-    const read = async () => {
-      try {
-        const response = await fetch(url, { cache: "no-store" }), value = await response.json();
-        if (!active) return;
-        if (!response.ok) throw new Error(value.error?.message ?? "回访变化读取失败");
-        setBrief(value);
-      } catch (cause) { if (active) setError(cause instanceof Error ? cause.message : "回访变化暂时不可读"); }
-    };
-    void read();
-    const timer = setInterval(() => void read(), 5000);
-    return () => { active = false; clearInterval(timer); };
+  const read = useCallback(async () => {
+    if (request.current || readInFlight.current) return;
+    const controller = new AbortController();
+    readInFlight.current = controller;
+    try {
+      const response = await fetch(url, { cache: "no-store", signal: controller.signal });
+      const value = await response.json();
+      if (controller.signal.aborted) return;
+      if (!response.ok) {
+        if ([401, 403, 404].includes(response.status)) setBrief(null);
+        throw new Error(value.error?.message ?? "回访变化暂时不可读");
+      }
+      setBrief(value);
+      setReadError("");
+    } catch (cause) {
+      if (!controller.signal.aborted) setReadError(cause instanceof Error ? cause.message : "回访变化暂时不可读");
+    } finally {
+      if (readInFlight.current === controller) readInFlight.current = null;
+    }
   }, [url]);
+  useEffect(() => {
+    const refresh = () => { if (!document.hidden) void read(); };
+    const first = setTimeout(() => void read(), 0);
+    const timer = setInterval(refresh, 5000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      clearTimeout(first);
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", refresh);
+      readInFlight.current?.abort();
+      readInFlight.current = null;
+    };
+  }, [read]);
+
   async function acknowledge(handledItemIds: string[] = []) {
     if (!brief || busy) return;
-    setBusy(true); setError(""); setNotice("");
+    request.current ??= { requestId: crypto.randomUUID(), seenSeq: brief.cursor.seq,
+      seenOutputRevision: brief.cursor.outputRevision, handledItemIds };
+    const receipt = request.current;
+    readInFlight.current?.abort();
+    readInFlight.current = null;
+    setBusy(true); setWriteError(""); setNotice("");
     try {
-      const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requestId: crypto.randomUUID(), seenSeq: brief.cursor.seq,
-          seenOutputRevision: brief.cursor.outputRevision, handledItemIds }) });
+      const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(receipt) });
       const value = await response.json();
-      if (!response.ok) throw new Error(value.error?.message ?? "未能保存已读回执，可重试");
-      setBrief(value); setNotice(handledItemIds.length ? "已标记处理；这不等于批准或改变了项目事实。" : "已记录你看到了这次变化；任务进度没有因此前进。");
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "回执未确认，请重试"); }
-    finally { setBusy(false); }
+      if (!response.ok) {
+        if (response.status < 500 && response.status !== 408) {
+          request.current = null;
+          if ([401, 403, 404].includes(response.status)) setBrief(null);
+          else void read();
+        }
+        throw new Error(value.error?.message ?? "回执保存未确认");
+      }
+      request.current = null;
+      setBrief(value); setReadError("");
+      setNotice(receipt.handledItemIds.length ? "已标记这项变化为已处理。" : "已记录你看到了这次变化；任务进度没有因此前进。");
+    } catch (cause) {
+      setWriteError(cause instanceof Error ? cause.message : "回执保存未确认");
+    } finally {
+      setBusy(false);
+      setRetry(request.current !== null);
+    }
   }
-  if (!brief) return <section className={styles.brief} aria-label="回访变化">{error && <p role="alert">{error}</p>}</section>;
-  if (!brief.items.length && brief.readState === "SEEN" && notice === "") return null;
+
+  if (!brief && !readError && !writeError) return null;
+  if (brief && !brief.items.length && brief.readState === "SEEN" && !notice && !readError && !writeError) return null;
   return <section className={styles.brief} aria-label="回访变化">
-    <header><h2>回访变化 <small>最多三项 · 从上次已读之后</small></h2>
-      {brief.items.length > 0 && <button type="button" disabled={busy} onClick={() => void acknowledge()}>我已看过</button>}</header>
-    {brief.items.length === 0 ? <p>上次已读后没有新的成果变化。</p> : <ol>{brief.items.map(item => <li key={item.id}>
-      <div className={styles.heading}><strong>{item.title}</strong><span>{item.kind === "NEEDS_DECISION" ? "需要判断" : item.kind === "OUTPUT_UPDATED" ? "成果更新" : "来源变化"}</span></div>
-      <p>{item.why}</p>
-      <div className={styles.meta}><span>发生 {when(item.occurredAt)}</span><span>记录 {when(item.recordedAt)}</span><span>{item.approved ? "已批准" : "未批准"}</span></div>
-      <div className={styles.actions}>
-        {item.outputId && item.revision !== undefined && onOpenRevision && <button type="button" onClick={() => onOpenRevision(item.revision!)}>打开第 {item.revision} 版</button>}
-        {!item.handled && <button type="button" disabled={busy} onClick={() => void acknowledge([item.id])}>标记已处理</button>}
-        {item.handled && <span className={styles.done}>已标记处理</span>}
-      </div>
-    </li>)}</ol>}
-    {notice && <p role="status">{notice}</p>}{error && <p role="alert">{error}</p>}
-    <details><summary>说明</summary><p>{brief.note} 批准需在原成果采纳流程单独操作，回访面板不会改变项目事实或执行权限。</p></details>
+    <header className={styles.head}>
+      <div className={styles.heading}><span className={styles.headIcon}><BellDot size={19} aria-hidden /></span>
+        <div><h2>回访简报</h2>{!!brief?.items.length && <p>{brief.items.length} 项变化待查看</p>}</div></div>
+      {!!brief?.items.length && <button type="button" className={styles.secondary} disabled={busy || retry} onClick={() => void acknowledge()}>
+        <Check size={15} aria-hidden />我已看过
+      </button>}
+    </header>
+    {brief && (brief.items.length === 0 ? <p>上次已读后暂无新的成果变化。</p> : <ol className={styles.items}>{brief.items.map(item => {
+      const Icon = icons[item.kind];
+      const revision = item.revision;
+      const output = outputs.find(row => row.id === item.outputId && row.revision === revision);
+      const canCompare = !!output && outputs.some(row => row.revision < output.revision);
+      const recorded = evidenceTime(item.recordedAt, true);
+      return <li key={item.id} data-kind={item.kind}>
+        <div className={styles.itemHead}><Icon size={16} aria-hidden /><time dateTime={item.recordedAt}>{recorded}</time></div>
+        <h3>{item.title}</h3>
+        <p>{item.why}</p>
+        {item.occurredAt !== item.recordedAt && <p className={styles.occurred}>变化发生于 <time dateTime={item.occurredAt}>{evidenceTime(item.occurredAt, true)}</time></p>}
+        <div className={styles.actions}>
+          {output && <button type="button" className={styles.action} onClick={() => onOpenRevision(output.revision, canCompare)}>
+            {canCompare ? <GitCompareArrows size={15} aria-hidden /> : <BookOpen size={15} aria-hidden />}
+            {canCompare ? "查看第 " + output.revision + " 版修改" : "打开第 " + output.revision + " 版"}<ArrowRight size={14} aria-hidden />
+          </button>}
+          {item.kind === "NEEDS_DECISION" && <button type="button" className={styles.action} onClick={onOpenComposer}>
+            <MessageSquareText size={15} aria-hidden />补充判断<ArrowRight size={14} aria-hidden />
+          </button>}
+          {item.kind === "SOURCE_CHANGED" && <button type="button" className={styles.action} onClick={onAddMaterial}>
+            <Plus size={15} aria-hidden />补充资料<ArrowRight size={14} aria-hidden />
+          </button>}
+          {!item.handled && <button type="button" className={styles.secondary}
+            disabled={busy || retry} onClick={() => void acknowledge([item.id])}>标记已处理</button>}
+        </div>
+      </li>;
+    })}</ol>)}
+    {notice && <p role="status">{notice}</p>}
+    {(writeError || readError) && <div className={styles.feedback}>
+      <p role="alert">{writeError || readError}</p>
+      {retry ? <button type="button" className={styles.secondary} disabled={busy} onClick={() => void acknowledge()}>重试原回执</button>
+        : readError && <button type="button" className={styles.secondary} onClick={() => void read()}>重新读取</button>}
+    </div>}
   </section>;
 }

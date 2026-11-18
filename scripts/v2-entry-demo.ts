@@ -48,6 +48,8 @@ const user = await db.user.create({ data: { username: "v2-entry-" + crypto.rando
 const session = await createSession(user.id);
 const project = await db.project.create({ data: { title: "独立开发版本 · 发布准备", description: "本地合成资料，不含个人项目", goal: "整理下一版本发布说明",
   scenario: "RESEARCH", memberships: { create: { userId: user.id, role: "OWNER" } } } });
+const researchProject = await db.project.create({ data: { title: "实验阶段汇报 · 科研对照", description: "隔离科研合成资料", goal: "整理实验阶段汇报",
+  scenario: "RESEARCH", memberships: { create: { userId: user.id, role: "OWNER" } } } });
 
 const productionPreview = process.env.V2_ENTRY_PRODUCTION === "true";
 const child = spawn(process.execPath, ["node_modules/next/dist/bin/next", ...(productionPreview ? ["start"] : ["dev", "--webpack"]), "-H", "127.0.0.1", "-p", String(port)],
@@ -71,11 +73,12 @@ const server = http.createServer(async (request, response) => {
     const url = new URL(request.url ?? "/", controlOrigin);
     if (request.method === "GET" && url.pathname === "/open") {
       // Demo-only authenticated deep link. The optional target must belong to this temporary owner.
+      const selectedProject = url.searchParams.get("scenario") === "research" ? researchProject : project;
       const selectedId = url.searchParams.get("mission");
       const selected = selectedId && selectedId.length <= 160 ? await db.agentMission.findFirst({
-        where: { id: selectedId, ownerUserId: user.id, projectId: project.id, runtimeProtocolVersion: 2 }, select: { id: true },
+        where: { id: selectedId, ownerUserId: user.id, projectId: selectedProject.id, runtimeProtocolVersion: 2 }, select: { id: true },
       }) : null;
-      const target = selected ? "/v2/workbench?missionId=" + encodeURIComponent(selected.id) : "/projects/" + project.id;
+      const target = selected ? "/v2/workbench?missionId=" + encodeURIComponent(selected.id) : "/projects/" + selectedProject.id;
       response.writeHead(303, { "Set-Cookie": sessionCookieHeader(session.token), Location: "http://127.0.0.1:" + port + target, "Cache-Control": "no-store" }).end();
       return;
     }
@@ -83,7 +86,7 @@ const server = http.createServer(async (request, response) => {
       const missionId = url.searchParams.get("mission") ?? "";
       const mission = await db.agentMission.findFirst({ where: { id: missionId, ownerUserId: user.id } });
       if (!mission) { response.writeHead(404).end("mission not found"); return; }
-      await db.capture.create({ data: { projectId: project.id, sourceType: "TEXT",
+      await db.capture.create({ data: { projectId: mission.projectId, sourceType: "TEXT",
         rawText: "新增发布记录：移动端输入回归已补测，分享入口仍未验证；结果尚未独立复现。" } });
       // Use the existing scanner: it detects the new material fingerprint and wakes the same Mission
       // with a new context version. The demo does not bypass that path with a direct READY write.

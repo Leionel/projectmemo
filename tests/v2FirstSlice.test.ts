@@ -119,8 +119,14 @@ test("natural compound veto persists through original Conversation/Directive ser
   await cycle(f);
   const actor = { userId: f.u.id, sessionId: session.session.id };
   const c = await createConversation(actor, { requestId: "c", scope: "PROJECT", projectId: f.p.id });
-  await submitConversationTurn(actor, c.id, { requestId: "veto", expectedVersion: 1, expectedContinuitySeq: 0,
-    message: "继续整理，但不要联网", entityRef: { kind: "MISSION", id: f.m.id, projectId: f.p.id } }, undefined, { defer: true });
+  const request = { requestId: "veto", expectedVersion: 1, expectedContinuitySeq: 0,
+    message: "继续整理，但不要联网", entityRef: { kind: "MISSION", id: f.m.id, projectId: f.p.id } };
+  const receipt = await submitConversationTurn(actor, c.id, request, undefined, { defer: true });
+  expect(receipt.status).toBe("ANSWERED");
+  expect(receipt.conversation.activeTurn).toBeNull();
+  expect((await db.conversationTurn.findUniqueOrThrow({ where: { id: receipt.turnId } })).callCount).toBe(0);
+  expect((await submitConversationTurn(actor, c.id, request)).turnId).toBe(receipt.turnId);
+  expect(await db.agentMissionEvent.count({ where: { missionId: f.m.id, type: "NATURAL_CONTROL_APPLIED" } })).toBe(1);
   const view = await effectiveContinuity(f.u.id, { projectId: f.p.id, missionId: f.m.id });
   expect(() => assertDirectiveEffect(view, "EXTERNAL_READ")).toThrow();
   const restricted = await missionDetail(f.u.id, f.m.id);

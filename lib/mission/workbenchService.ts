@@ -91,7 +91,7 @@ export async function readMissionWorkbench(userId: string, id: string): Promise<
       USER_MATERIAL_ADDED: "你补充的资料已保存", USER_FEEDBACK_ADDED: "你的反馈已保存，等待核对影响",
       CHALLENGE_HANDED_OFF: "成果核查缺口已交回原委托",
       SKILL_ARTIFACT_SAVED: "阶段成果已保存", SKILL_DELIVERABLE_READY: "阶段成果已备好，原报告与行动未改动",
-      INVESTIGATION_WOKEN: "新资料唤醒原委托", INVESTIGATION_OBSERVATION_CHANGED: "观察到获准变化",
+      INVESTIGATION_WOKEN: "新资料唤醒原委托", INVESTIGATION_INPUT_CHANGED: "新资料唤醒原委托", INVESTIGATION_OBSERVATION_CHANGED: "观察到获准变化",
       CLAIMED: "后台取得本轮执行权", TOOL_STARTED: "正在执行获准步骤", TOOL_FINISHED: "步骤回执已保存",
       PAUSE: "已收到暂停请求", CANCEL: "已收到取消请求", RESPONSIBILITY_REVISED: "工作方向已更新",
       NATURAL_CONTROL_APPLIED: "已按你的指引调整原委托", INVESTIGATION_HELD: "持续跟进需核对条件",

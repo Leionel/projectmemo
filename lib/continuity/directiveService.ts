@@ -144,6 +144,7 @@ export async function admitDirectiveInTx(actor: ConversationActor, raw: unknown,
     await tx.conversationTurn.update({ where: { id: t.id }, data: { readManifestJson: json({ ...record(t.readManifestJson), directiveCandidate: { ...record(record(t.readManifestJson).directiveCandidate), status: "USER_CONFIRMED" } }) } });
   }
   await invalidateContinuityConsumers(tx, actor.userId, input.scope, events, kind === "STOP" && input.operation !== "WITHDRAW", projectIds, now);
+  let missionControlApplied = false;
   if (canContinue) {
     const view = await effectiveContinuity(actor.userId, { projectId: controlled.projectId, missionId: controlled.id }, tx);
     let modelAllowed = true;
@@ -156,9 +157,10 @@ export async function admitDirectiveInTx(actor: ConversationActor, raw: unknown,
         planJson: json({ ...plan, continuityBinding: { intentHash: view.intentHash, reusePolicyHash: view.reusePolicyHash } }) } });
       const { event } = await import("@/lib/mission/repository");
       await event(tx, current.id, "NATURAL_CONTROL_APPLIED", { directiveEventIds: events, kind, status: observe ? "WAITING_INPUT" : "READY", grantsAuthority: false });
+      missionControlApplied = true;
     }
   }
-  return { admission, events, view: await effectiveContinuity(actor.userId, input.scope, tx) };
+  return { admission, events, missionControlApplied, view: await effectiveContinuity(actor.userId, input.scope, tx) };
 }
 export async function submitDirective(actor: ConversationActor, conversationId: string, raw: unknown) {
   // Retry this database-only control transaction, never a model/tool request.

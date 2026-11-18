@@ -3,8 +3,10 @@ import { useRef, useState, type FormEvent } from "react";
 import { MaterialInput } from "./MaterialInput";
 import styles from "./V2DelegationStarter.module.css";
 
-export function MissionMaterialForm({ missionId, projectId, onSaved }: { missionId: string; projectId: string; onSaved: () => Promise<void> }) {
-  const [open, setOpen] = useState(false), [text, setText] = useState(""), [name, setName] = useState<string | undefined>();
+export function MissionMaterialForm({ missionId, projectId, open, onOpenChange, onSaved }: {
+  missionId: string; projectId: string; open: boolean; onOpenChange: (open: boolean) => void; onSaved: () => Promise<void>;
+}) {
+  const [text, setText] = useState(""), [name, setName] = useState<string | undefined>();
   const [kind, setKind] = useState<"MATERIAL" | "FEEDBACK">("FEEDBACK");
   const [busy, setBusy] = useState(false), [pending, setPending] = useState(false), [message, setMessage] = useState(""), [error, setError] = useState("");
   const request = useRef<{ requestId: string; text: string; name?: string; kind: typeof kind } | null>(null);
@@ -26,12 +28,12 @@ export function MissionMaterialForm({ missionId, projectId, onSaved }: { mission
       request.current = null; setPending(false); setText(""); setName(undefined);
       setMessage("材料已保存，原委托会按现有许可核对；反馈仍是待核对意见。");
       await onSaved();
-      setOpen(false);
+      onOpenChange(false);
     } catch (cause) { setError(cause instanceof Error ? cause.message : "保存未确认，请重试原请求"); }
     finally { setBusy(false); }
   }
   return <section className={styles.materialSection} aria-label="补充项目材料">
-    <button className="editorial-button-secondary" type="button" aria-expanded={open} onClick={() => setOpen(!open)}>补充材料或反馈</button>
+    <button className="editorial-button-secondary" type="button" aria-expanded={open} onClick={() => onOpenChange(!open)}>补充材料或反馈</button>
     {open && <form className={styles.form} onSubmit={event => void submit(event)}>
       <label>材料用途<select value={kind} disabled={busy || pending} onChange={event => setKind(event.target.value as typeof kind)}>
         <option value="FEEDBACK">反馈意见（待核对）</option><option value="MATERIAL">新项目资料</option>

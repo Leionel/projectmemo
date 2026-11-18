@@ -1,15 +1,17 @@
 "use client";
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
-import { ArrowUpRight, BookOpen, Check, ChevronRight, Clock3, FileCheck2, FileText, GitCompareArrows, MessageSquareText, RefreshCw, Search } from "lucide-react";
+import { useCallback, useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { ArrowUpRight, BookOpen, Check, ChevronRight, Clock3, FileCheck2, FileText, GitCompareArrows, MessageSquareText, Plus, RefreshCw, Search } from "lucide-react";
 import { SourceProvenance } from "@/components/SourceProvenance";
 import { evidenceTime, sourceDisplayName } from "@/lib/client/sourceDisplay";
 import { AgentMessageBlocks } from "@/components/AgentMessageBlocks";
+import { highlightSegments, locateExcerpt } from "@/lib/challenges/presentation";
 import { workbenchFixture } from "@/lib/experience/workbenchFixture";
 import { workbenchArtifactMessage, workbenchMessage, type WorkbenchSnapshot } from "@/lib/types/workbench";
 import { ReentryBriefPanel } from "./ReentryBrief";
 import { GAME_ENTRIES, MissionGames, type GameTab } from "./MissionGames";
 import styles from "./OutcomeWorkbench.module.css";
 import { MissionMaterialForm } from "./MissionMaterialForm";
+import { RevisionComparison, type OpenRevisionSource } from "./RevisionComparison";
 
 class RequestError extends Error {
   constructor(message: string, readonly status: number) { super(message); }
@@ -24,11 +26,28 @@ async function api(url: string, body?: unknown) {
 const phaseLabels: Record<string, string> = { WAITING_OBSERVATION: "稿件已备好，继续留意变化", QUEUED: "已接到工作，等待后台推进",
   RUNNING: "正在处理获准资料", WAITING_USER: "有一个判断需要你", PAUSED: "跟进已暂停", COMPLETED: "跟进已结束", UNKNOWN: "当前状态需核对" };
 type Pending = { conversationId: string; body: Record<string, unknown> };
+type SourceSelection = { key: string; citedAt?: string; excerpt?: string };
+function reveal(element: () => HTMLElement | null, block: ScrollLogicalPosition = "start") {
+  window.requestAnimationFrame(() => {
+    const target = element();
+    target?.focus({ preventScroll: true });
+    target?.scrollIntoView({ block, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+  });
+}
 export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
   const live = !!missionId;
   const [snapshot, setSnapshot] = useState<WorkbenchSnapshot | null>(() => live ? null : workbenchFixture());
   const [research, setResearch] = useState(false), [selectedRevision, setSelectedRevision] = useState<number | null>(null);
-  const [view, setView] = useState<"draft" | "diff">("draft"), [sourceKey, setSourceKey] = useState<string | null>(null);
+  const [view, setView] = useState<"draft" | "diff">("draft");
+  const [compareRevision, setCompareRevision] = useState<number | null>(null);
+  const [sourceSelection, setSourceSelection] = useState<SourceSelection | null>(null);
+  const [materialOpen, setMaterialOpen] = useState(false);
+  const documentTools = useRef<HTMLDivElement>(null), sourcePanelId = useId();
+  const materialStart = useRef<HTMLDivElement>(null), composerInput = useRef<HTMLTextAreaElement>(null);
+  const openSource = useCallback<OpenRevisionSource>((source, citedAt, excerpt) => {
+    setSourceSelection({ key: source.key, citedAt, excerpt });
+    reveal(() => document.getElementById(sourcePanelId), window.matchMedia("(max-width: 1050px)").matches ? "start" : "nearest");
+  }, [sourcePanelId]);
   const [selectedArtifactId, setSelectedArtifactId] = useState<string | null>(null);
   const [message, setMessage] = useState(""), [busy, setBusy] = useState(false), [error, setError] = useState("");
   const [notice, setNotice] = useState(""), [game, setGame] = useState<"mentor" | "evidence" | "sprint" | null>(null);
@@ -52,6 +71,8 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
       if (e instanceof RequestError && [401, 403, 404].includes(e.status)) {
         setSnapshot(null);
         setLiveGame(null);
+        setSourceSelection(null);
+        setMaterialOpen(false);
         setMessage("");
         pending.current = null;
         conversationId.current = null;
@@ -100,8 +121,17 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
       setHasPending(true);
     }
     const request = pending.current;
-    await api("/api/conversations/" + request.conversationId + "/turns", request.body);
+    let turn: { status?: string };
+    try {
+      turn = await api("/api/conversations/" + request.conversationId + "/turns", request.body);
+    } catch (cause) {
+      if (cause instanceof RequestError && cause.status >= 400 && cause.status < 500 && cause.status !== 408) {
+        pending.current = null; setHasPending(false);
+      }
+      throw cause;
+    }
     pending.current = null; setHasPending(false);
+    if (turn.status === "FAILED" || turn.status === "UNKNOWN") throw new Error("原请求未取得可用结果，输入已保留。");
     const next = await refresh();
     if (!next) return { applied: false, objective: snapshot.workingObjective, message: "输入已送达，等待工作台重新读回。" };
     const before = new Set(snapshot.events.map(event => event.id));
@@ -133,7 +163,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
     finally { setBusy(false); }
   }
   function switchSample(value: boolean) {
-    setResearch(value); setSnapshot(workbenchFixture(1, value)); setSelectedRevision(null); setSourceKey(null);
+    setResearch(value); setSnapshot(workbenchFixture(1, value)); setSelectedRevision(null); setSourceSelection(null); setCompareRevision(null);
     setChosen(""); setNotice(""); setAnswer(""); setSprintChecked(false); setSprinting(false);
   }
   if (!snapshot) return <main className={styles.loading}><h1>成果工作台</h1><p role="status">{error || "正在读取原委托…"}</p>
@@ -142,13 +172,29 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
   const latestOutput = snapshot.outputs[0] ?? null;
   const artifact = snapshot.stageArtifacts.find(item => item.id === selectedArtifactId) ?? snapshot.stageArtifacts[0];
   const stageReady = snapshot.reasonCode === "SKILL_DELIVERABLE_READY";
-  const previous = output ? snapshot.outputs.find(o => o.revision < output.revision) : undefined;
-  const source = snapshot.sources.find(s => s.key === sourceKey) ??
-    snapshot.sources.find(s => output?.sourceKeys.includes(s.key)) ?? snapshot.sources[0];
+  const olderVersions = output ? snapshot.outputs.filter(row => row.revision < output.revision) : [];
+  const previous = olderVersions.find(row => row.revision === compareRevision) ?? olderVersions[0];
+  const selectedSourceKey = sourceSelection?.key;
+  const source = selectedSourceKey ? snapshot.sources.find(row => row.key === selectedSourceKey) :
+    snapshot.sources.find(row => output?.sourceKeys.includes(row.key)) ??
+    snapshot.sources.find(row => artifact?.sourceKeys.includes(row.key));
+  const excerpt = source && sourceSelection?.excerpt ? locateExcerpt(source.text, sourceSelection.excerpt) : null;
   const currentSourceIds = output?.blocks.flatMap(b => b.sourceIds) ?? [];
-  function prepareQuestion(text: string) { setMessage("今天先核对" + text); setNotice("已放入下方输入框，发送后交给原委托。"); }
+  function openComposer() { reveal(() => composerInput.current, "center"); }
+  function prepareQuestion(text: string) {
+    if (!hasPending && !busy) {
+      setMessage(current => current.trim() ? current : "今天先核对" + text);
+      setNotice("请在输入框确认要核对的内容，然后发送给原委托。");
+    }
+    openComposer();
+  }
+  function openMaterial() { setMaterialOpen(true); reveal(() => materialStart.current); }
   async function reread() { await refresh(); }
-  function openRevision(revision: number) { setSelectedRevision(revision); setView("draft"); setSourceKey(null); setLiveGame(null); window.scrollTo({ top: 0, behavior: "smooth" }); }
+  function selectRevision(revision: number) { setSelectedRevision(revision); setCompareRevision(null); setSourceSelection(null); }
+  function openRevision(revision: number, compare = false) {
+    selectRevision(revision); setView(compare ? "diff" : "draft"); setLiveGame(null);
+    reveal(() => documentTools.current);
+  }
   async function pauseFromGame() { const ok = await control("pause"); if (!ok) throw new Error("暂停尚未确认，请重试。"); }
   return <main className={styles.workbench}>
     <div className={styles.topline}><a href="/focus">忆程 <ChevronRight size={14} aria-hidden="true" /> 成果工作台</a>
@@ -156,15 +202,16 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
     {!liveGame && <header className={styles.heading}><div><p>{snapshot.projectTitle}</p><h1>{snapshot.goal}</h1>
       <div className={styles.state} role="status"><span aria-hidden="true" className={styles.dot} />
         {stageReady ? snapshot.reason : phaseLabels[snapshot.phase] ?? snapshot.reason}</div></div>
-      {live ? <div className={styles.controls}><button className={styles.secondary} onClick={() => void refresh()}><RefreshCw size={15} aria-hidden="true" />重新读取</button>{stageReady && <button className={styles.secondary} disabled={busy} onClick={() => void control("resume")}>继续跟进</button>}<button className={styles.secondary} disabled={busy || snapshot.status !== "READY" && snapshot.phase !== "WAITING_OBSERVATION"} onClick={() => void control("pause")}>暂停跟进</button><button className={styles.secondary} disabled={busy} onClick={() => void (confirmingEnd ? control("cancel") : setConfirmingEnd(true))}>{confirmingEnd ? "确认结束跟进" : "结束跟进"}</button></div> :
+      {live ? <div className={styles.controls}><button type="button" className={styles.primary} onClick={openMaterial}><Plus size={16} aria-hidden />补资料</button><button className={styles.secondary} onClick={() => void refresh()}><RefreshCw size={15} aria-hidden="true" />重新读取</button>{stageReady && <button className={styles.secondary} disabled={busy} onClick={() => void control("resume")}>继续跟进</button>}<button className={styles.secondary} disabled={busy || snapshot.status !== "READY" && snapshot.phase !== "WAITING_OBSERVATION"} onClick={() => void control("pause")}>暂停跟进</button><button className={styles.secondary} disabled={busy} onClick={() => void (confirmingEnd ? control("cancel") : setConfirmingEnd(true))}>{confirmingEnd ? "确认结束跟进" : "结束跟进"}</button></div> :
         <div className={styles.sampleChoices}><button aria-pressed={!research} onClick={() => switchSample(false)}>开发样例</button>
           <button aria-pressed={research} onClick={() => switchSample(true)}>科研对照</button></div>}
     </header>}
     {!live && <div className={styles.sampleBar}><p>用一条新资料体验同一份成果的接续修改。</p><button className={styles.secondary}
-      disabled={snapshot.outputs.length >= 2} onClick={() => { setSnapshot(workbenchFixture(2, research)); setSelectedRevision(null); setSourceKey(null); }}>
+      disabled={snapshot.outputs.length >= 2} onClick={() => { setSnapshot(workbenchFixture(2, research)); selectRevision(2); }}>
       载入新资料样例 <ArrowUpRight size={15} aria-hidden="true" /></button></div>}
     {error && <div role="alert" className={styles.error}>{error}{hasPending && "；原请求编号已保留，再次发送会重试原请求。"}</div>}
-    {live && !liveGame && <ReentryBriefPanel missionId={missionId} onOpenRevision={revision => { setSelectedRevision(revision); setView("draft"); }} />}
+    {live && !liveGame && <ReentryBriefPanel key={missionId} missionId={missionId} outputs={snapshot.outputs}
+      onOpenRevision={openRevision} onAddMaterial={openMaterial} onOpenComposer={openComposer} />}
     {live && snapshot.challengesEnabled && !liveGame && <section className={styles.gameEntry} aria-label="成果玩法入口">
       <h2>成果演练</h2>
       <div className={styles.gameEntryActions}>{GAME_ENTRIES.map(({ key, label, icon: Icon }) =>
@@ -185,37 +232,37 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
         {artifact && <section className={styles.stageArtifacts} aria-label="阶段成果">
           <div className={styles.documentHead}><div className={styles.views}><h2><FileText size={15} aria-hidden="true" />阶段成果</h2></div>
             <div className={styles.versions} aria-label="阶段成果列表">{snapshot.stageArtifacts.map(item => <button key={item.id}
-              aria-pressed={item.id === artifact.id} onClick={() => { setSelectedArtifactId(item.id); setSourceKey(null); }}>{item.label}</button>)}</div></div>
+              aria-pressed={item.id === artifact.id} onClick={() => { setSelectedArtifactId(item.id); setSourceSelection(null); }}>{item.label}</button>)}</div></div>
           <p className={styles.paperLabel}>{artifact.label} · 原报告与业务行动未改动</p>
           <AgentMessageBlocks message={workbenchArtifactMessage(artifact, snapshot.projectId, snapshot.provider)}
             conversationId={"workbench-artifact-" + snapshot.id} busy={busy} onAction={async () => { /* Read-only presentation has no business actions. */ }} />
           <div className={styles.references}><span>本阶段依据</span>{[...new Set(artifact.blocks.flatMap(block => block.sourceIds))].map(id => {
             const found = snapshot.sources.find(item => item.id === id && artifact.sourceKeys.includes(item.key));
-            return found ? <button key={id} onClick={() => setSourceKey(found.key)}><BookOpen size={14} aria-hidden="true" />定位原记录{found.name ? " · " + found.name : ""}</button> : null;
+            return found ? <button key={id} onClick={() => openSource(found, artifact.createdAt)}><BookOpen size={14} aria-hidden="true" />定位原记录{found.name ? " · " + found.name : ""}</button> : null;
           })}{artifact.unknowns.length > 0 && <p>仍未知：{artifact.unknowns.join("；")}</p>}</div>
         </section>}
-        <div className={styles.documentHead}><div className={styles.views}>
-          <button aria-pressed={view === "draft"} onClick={() => setView("draft")}><FileText size={15} aria-hidden="true" />成果</button>
-          <button aria-pressed={view === "diff"} onClick={() => setView("diff")}><GitCompareArrows size={15} aria-hidden="true" />修改对照</button></div>
+        <div className={styles.documentHead} ref={documentTools} tabIndex={-1}><div className={styles.views}>
+          <button aria-pressed={view === "draft"} onClick={() => { setView("draft"); setSourceSelection(null); }}><FileText size={15} aria-hidden="true" />成果</button>
+          <button aria-pressed={view === "diff"} onClick={() => { setView("diff"); setSourceSelection(null); }}><GitCompareArrows size={15} aria-hidden="true" />修改对照</button></div>
           <div className={styles.versions} aria-label="成果版本">{snapshot.outputs.map(o => <button key={o.id}
-            aria-pressed={output?.id === o.id} aria-label={"第 " + o.revision + " 版"} onClick={() => { setSelectedRevision(o.revision); setSourceKey(null); }}><Clock3 size={14} aria-hidden="true" /><span><strong>第 {o.revision} 版</strong><time dateTime={o.createdAt}>{evidenceTime(o.createdAt, true)}</time></span></button>)}</div>
+            aria-pressed={output?.id === o.id} aria-label={"第 " + o.revision + " 版"} onClick={() => selectRevision(o.revision)}><Clock3 size={14} aria-hidden="true" /><span><strong>第 {o.revision} 版</strong><time dateTime={o.createdAt}>{evidenceTime(o.createdAt, true)}</time></span></button>)}</div>
         </div>
         {output ? <div className={styles.paper}>
           <p className={styles.paperLabel}><FileText size={14} aria-hidden="true" /><span>私有工作稿</span><time dateTime={output.createdAt}>{evidenceTime(output.createdAt)}</time></p>
           {view === "draft" ? <AgentMessageBlocks message={workbenchMessage(output, snapshot.projectId, snapshot.provider)}
             conversationId={"workbench-view-" + snapshot.id} busy={busy} onAction={async () => { /* Read-only presentation has no business actions. */ }} /> :
-            previous ? <div className={styles.diff}><h2>第 {previous.revision} 版 → 第 {output.revision} 版</h2>
-              {previous.blocks.filter(old => !output.blocks.some(b => b.blockId === old.blockId)).map(old =>
-                <del key={old.blockId}><span>已移除</span>{old.text}</del>)}
-              {output.blocks.map(block => {
-                const old = previous.blocks.find(b => b.blockId === block.blockId);
-                return <div key={block.blockId}>{old?.text === block.text ? <p>{block.text}</p> :
-                  <>{old && <del><span>原稿</span>{old.text}</del>}<ins><span>当前稿</span>{block.text}</ins></>}</div>;
-              })}</div> : <p className={styles.empty}>当前只有一版成果。新资料更新后，可在这里比较。</p>}
-          <div className={styles.references}><span>本稿依据</span>{currentSourceIds.length ? [...new Set(currentSourceIds)].map(id => {
+            previous ? <>
+              {olderVersions.length > 1 && <label className={styles.comparePicker}>对照起点
+                <select value={previous.revision} onChange={event => { setCompareRevision(Number(event.target.value)); setSourceSelection(null); }}>
+                  {olderVersions.map(row => <option key={row.id} value={row.revision}>第 {row.revision} 版 · {evidenceTime(row.createdAt, true)}</option>)}
+                </select>
+              </label>}
+              <RevisionComparison baseline={previous} output={output} sources={snapshot.sources} onOpenSource={openSource} />
+            </> : <p className={styles.empty}>没有更早的稿件可供对照。新资料更新后，可在这里比较。</p>}
+          {view === "draft" && <div className={styles.references}><span>本稿依据</span>{currentSourceIds.length ? [...new Set(currentSourceIds)].map(id => {
             const found = snapshot.sources.find(s => s.id === id && output.sourceKeys.includes(s.key));
-            return found ? <button key={id} onClick={() => setSourceKey(found.key)}><BookOpen size={14} aria-hidden="true" />定位原记录{found.name ? " · " + found.name : ""}</button> : null;
-          }) : <p>这版内容仅为推断或来源需要重新核对。</p>}</div>
+            return found ? <button key={id} onClick={() => openSource(found, output.createdAt)}><BookOpen size={14} aria-hidden="true" />定位原记录{found.name ? " · " + found.name : ""}</button> : null;
+          }) : <p>这版内容仅为推断或来源需要重新核对。</p>}</div>}
         </div> : <p className={styles.empty}>原委托还没有生成报告稿。阶段成果与后台过程保留在本次读取中。</p>}
         {!live && <div className={styles.games}><span>围绕这份成果试一试</span>
           <button aria-pressed={game === "mentor"} onClick={() => setGame(game === "mentor" ? null : "mentor")}>严格导师</button>
@@ -228,7 +275,7 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
             <button className={styles.secondary} disabled={!answer.trim()} onClick={() => prepareQuestion(answer)}>交给原委托核查</button></>}
           {game === "evidence" && <><h2>找到这版成果真正引用的记录</h2><p>{output?.blocks[0]?.text ?? "先准备一版成果再开始。"}</p>
             <div className={styles.evidenceChoices}>{snapshot.sources.map(s => <button key={s.key} aria-pressed={chosen === s.key}
-              onClick={() => { setChosen(s.key); setSourceKey(s.key); }}>{s.text.slice(0, 70)}</button>)}</div>
+              onClick={() => { setChosen(s.key); setSourceSelection({ key: s.key }); }}>{s.text.slice(0, 70)}</button>)}</div>
             {chosen && <p role="status">{output?.sourceKeys.includes(chosen)
               ? "这份记录出现在本稿引用中。引用关系不等于结论已经被验证。" : "这份记录没有出现在当前版本的引用中，可对照另一版查看。"}</p>}</>}
           {game === "sprint" && <><h2>你核对一处依据，忆程保持原委托的工作</h2>
@@ -237,20 +284,27 @@ export function OutcomeWorkbench({ missionId }: { missionId?: string }) {
             {sprinting && <label className={styles.checkbox}><input type="checkbox" checked={sprintChecked} onChange={e => setSprintChecked(e.target.checked)} />我已核对原记录</label>}
             {sprintChecked && <p>已记下你的自述；这不会把项目行动标记为完成。</p>}</>}
         </section>}
-        {live && <MissionMaterialForm missionId={snapshot.id} projectId={snapshot.projectId} onSaved={reread} />}
+        {live && <div className={styles.anchor} ref={materialStart} tabIndex={-1} aria-label="材料表单"><MissionMaterialForm missionId={snapshot.id} projectId={snapshot.projectId}
+          open={materialOpen} onOpenChange={setMaterialOpen} onSaved={reread} /></div>}
         <form className={styles.composer} onSubmit={submit}><label htmlFor="workbench-message">接下来怎么做，直接告诉忆程</label>
-          <textarea id="workbench-message" value={message} disabled={busy || hasPending} onChange={e => setMessage(e.target.value)}
+          {snapshot.reasonCode === "QUESTION_PENDING" && <p className={styles.question}>{snapshot.reason}</p>}
+          <textarea ref={composerInput} id="workbench-message" value={message} disabled={busy || hasPending} onChange={e => setMessage(e.target.value)}
             placeholder="例如：继续整理，但不要联网" maxLength={3000} required />
           <div><span>修改工作方向，保留已有成果和用量。</span><button type="submit" className={styles.primary} disabled={busy || !message.trim()}>
             {busy ? "正在提交…" : hasPending ? "重试原请求" : "发送"}<ArrowUpRight size={16} aria-hidden="true" /></button></div>
         </form>
         {notice && <p role="status" className={styles.notice}>{notice}</p>}
       </section>
-      <aside className={styles.source} aria-label="证据定位"><div><BookOpen size={17} aria-hidden="true" /><h2>原始依据</h2></div>
-        {source ? <><SourceProvenance name={sourceDisplayName(source.id, source.name)} observedAt={source.observedAt} current={source.current} external={source.kind === "EXTERNAL"}
-          referencedAt={output?.sourceKeys.includes(source.key) ? output.createdAt : artifact?.sourceKeys.includes(source.key) ? artifact.createdAt : undefined}
-          technical={[{ label: "来源标识", value: source.id }, { label: "修订标识", value: source.revision }, ...(source.revision !== source.hash ? [{ label: "内容校验", value: source.hash }] : [])]} />
-          <blockquote data-testid="source-excerpt">{source.text}</blockquote></> : <p>尚无可用引用，或来源使用许可需要重新核对。</p>}
+      <aside className={styles.source} aria-label="证据定位" id={sourcePanelId} tabIndex={-1}><div><BookOpen size={17} aria-hidden="true" /><h2>原始依据</h2></div>
+        {source ? <SourceProvenance className={styles.sourceMeta} name={sourceDisplayName(source.id, source.name)} observedAt={source.observedAt} current={source.current} external={source.kind === "EXTERNAL"}
+          referencedAt={sourceSelection?.citedAt ?? (output?.sourceKeys.includes(source.key) ? output.createdAt : artifact?.sourceKeys.includes(source.key) ? artifact.createdAt : undefined)}
+          technical={[{ label: "来源标识", value: source.id }, { label: "修订标识", value: source.revision }, ...(source.revision !== source.hash ? [{ label: "内容校验", value: source.hash }] : [])]}>
+          <blockquote data-testid="source-excerpt">{highlightSegments(source.text, excerpt).map((part, index) =>
+            part.marked ? <mark key={index}>{part.text}</mark> : <span key={index}>{part.text}</span>)}</blockquote>
+          {live && <button className={styles.sourceAction} type="button" disabled={busy || hasPending} onClick={() => prepareQuestion(" " + sourceDisplayName(source.id, source.name) + "（" + evidenceTime(source.observedAt, true) + "）对当前稿的影响")}>
+            <MessageSquareText size={15} aria-hidden />请忆程核对这条
+          </button>}
+        </SourceProvenance> : <p className={styles.emptySource}>{selectedSourceKey ? "这条引用当前不可读，请核对来源许可。" : "当前稿还没有可读的引用。"}</p>}
       </aside>
     </div>}
   </main>;

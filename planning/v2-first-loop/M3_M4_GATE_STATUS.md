@@ -4,6 +4,17 @@
 
 **M4 未通过，受控试用不放行。** 本地 M3 代码缺项已补；设备、实模、内容与长期价值仍有门槛。
 
+## 2026-11-18 回访与运行接续
+
+- 工作台回访简报可直达修改对照。用户能选择对照起点，查看变化段落及各版引用，并从来源面板起草核对指令。已读响应丢失后沿用原请求编号。
+- 明确指令成功调整原委托时，对话在同一事务保存 `ANSWERED` 回执。Worker 可立即继续改稿。回执不另读旧版上下文，也不发起额外模型调用。请求重放返回同一条回执，无新增迁移。
+- 开发发布与科研汇报在两个隔离项目中走正常托付入口。关页后经材料 API 补资料，由原调度器保存下一版，再回访查依据。此为 localhost 模型的加速演练，实际跨日和真实项目使用仍待验。
+- 11 月 17 日窗口在 11 月 18 日 09:25:57 后中断，已留下 360 条心跳、6 版稿件和两处超限间隔。Windows 于 09:26:03 记录休眠。恢复演练在隔离库从 1 版续到 2 版，间隔保留。
+- 新窗口于 11 月 18 日 13:35:46 开始，使用当前用户后台宿主和隔离 fixture。状态和生命周期日志在 `output/v2-72h-2026-11-18T05-35-43-508Z/`。必须按心跳覆盖判定 72 小时。真机、获准真实项目和独立内容核验仍待完成。
+- Web 生产构建、74 条定向测试、9 项回访浏览器验收、37 项 Web 玩法回归与 165 条鸿蒙单测通过。执行 `node --import tsx scripts/verify-v2-entry.ts` 前先启动生产模式的 `scripts/v2-entry-demo.ts`。回访截图与回执见 `output/playwright/v2-reentry/2026-11-18T05-48-54-392Z/`。
+
+以下为 11 月 17 日门禁快照。
+
 | 项目 | 当前结论 | 可核查证据 |
 |---|---|---|
 | 原生材料/分享 | 合约与构建 PASS；真机 UNVERIFIED | 全格式服务端字节校验、单文件分享、预览确认、全文请求绑定；Harmony 165/165、unsigned HAP 8,941,026 bytes |
@@ -23,7 +34,7 @@
 
 没有新增 Schema/Migration；Codex `/root` 是唯一负责人。没有迁移真实库、seed/reset、公开部署、邀请用户或外发。
 
-## 新窗口操作
+## 11 月 17 日窗口留档
 
 ```powershell
 npm.cmd exec tsx -- scripts/v2-long-run.ts status --out evidence/v2-first-loop/review-20261117/long-run-72h-verified
@@ -32,7 +43,7 @@ npm.cmd exec tsx -- scripts/v2-long-run.ts stop --out evidence/v2-first-loop/rev
 npm.cmd exec tsx -- scripts/v2-long-run.ts resume --background-host --out evidence/v2-first-loop/review-20261117/long-run-72h-verified
 ```
 
-机器应保持当前用户登录和唤醒。启动与 report 的时间差不能证明在线；需 `coverage.reliabilityGatePassed`、资源与故障证据同时满足。预计窗口结束为 2026-11-20 19:00:28；中断必须保留，超过窗口仍不通过时另起新窗口。运行态文件不跟踪，`run.snapshot.json` 与初始心跳是冻结证据。
+运行态文件与旧窗口回执保留用于查证。`run.snapshot.json` 与初始心跳是冻结证据。11 月 18 日窗口通过 `status` 或 `report` 指向上方新目录查询。
 
 ## 回退
 

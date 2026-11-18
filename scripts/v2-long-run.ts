@@ -27,6 +27,7 @@ const has = (name: string) => argv.includes("--" + name);
 const outDir = path.resolve(flag("out") ?? path.join("evidence/v2-first-loop/long-run", new Date().toISOString().replace(/[:.]/g, "-")));
 const configPath = path.join(outDir, "run.json");
 const evidencePath = path.join(outDir, "evidence.jsonl");
+const lifecyclePath = path.join(outDir, "lifecycle.jsonl");
 const logPath = path.join(outDir, "worker.log");
 const dbPath = path.join(outDir, "long-run.db");
 
@@ -64,6 +65,9 @@ function flags() {
     MISSION_WORKBENCH_ENABLED: "true", FOCUS_AGENT_ENABLED: "true", FOCUS_CONTINUITY_ENABLED: "true", LLM_MODE: "mock" } as Record<string, string>;
 }
 function stamp() { return new Date().toISOString(); }
+function lifecycle(kind: "STARTED" | "EXITED" | "FAILED", detail?: string) {
+  fs.appendFileSync(lifecyclePath, JSON.stringify({ at: stamp(), kind, pid: process.pid, detail }) + "\n");
+}
 
 async function start() {
   fs.mkdirSync(outDir, { recursive: true });
@@ -116,6 +120,7 @@ async function start() {
 async function worker() {
   const config = readConfig();
   config.workerPid = process.pid; writeConfig(config);
+  lifecycle("STARTED");
   Object.assign(process.env, flags(), { DATABASE_URL: databaseUrl(config.dbPath) });
   const { db } = await import("../lib/db");
   const { processInvestigationDelegations } = await import("../lib/mission/investigationDelegation");
@@ -131,10 +136,11 @@ async function worker() {
   });
   if (config.resumedAt === undefined) { config.resumeCount = config.resumeCount ?? 0; }
   let cycle = readEvidence().length;
+  let exitReason: string;
   while (true) {
-    if (fs.existsSync(stopFile)) break;
-    if (config.cycles > 0 && cycle >= config.cycles) break;
-    if (config.durationHours > 0 && Date.now() - Date.parse(config.startedAt) >= config.durationHours * 3600000) break;
+    if (fs.existsSync(stopFile)) { exitReason = "STOP_REQUESTED"; break; }
+    if (config.cycles > 0 && cycle >= config.cycles) { exitReason = "CYCLE_LIMIT"; break; }
+    if (config.durationHours > 0 && Date.now() - Date.parse(config.startedAt) >= config.durationHours * 3600000) { exitReason = "TIME_LIMIT"; break; }
     const row = await db.agentMission.findUniqueOrThrow({ where: { id: config.missionId } });
     let woken = 0, materialAdded = false;
     if (config.materialEvery > 0 && cycle % config.materialEvery === 0) {
@@ -162,6 +168,7 @@ async function worker() {
     cycle++;
   }
   await db.$disconnect();
+  lifecycle("EXITED", exitReason);
   writeConfig({ ...readConfig(), stoppedAt: stamp() });
 }
 function elapsedArtifacts(planJson: unknown): number {
@@ -179,7 +186,14 @@ function status() {
   const lines = readEvidence();
   const last = lines.at(-1), gaps = lines.slice(1).map((line, index) => (Date.parse(String(line.at)) - Date.parse(String(lines[index].at))) / 1000)
     .filter(seconds => seconds > Math.max(120, config.intervalMs / 1000 * 2.5));
-  console.log(JSON.stringify({ out: outDir, workerPid: config.workerPid ?? null, workerAlive: isAlive(config.workerPid),
+  const workerAlive = isAlive(config.workerPid);
+  const heartbeatAgeSeconds = last ? Math.max(0, Date.now() - Date.parse(String(last.at))) / 1000 : null;
+  const lastLifecycle = fs.existsSync(lifecyclePath) ? fs.readFileSync(lifecyclePath, "utf8").trim().split("\n").filter(Boolean).at(-1) : undefined;
+  const state = workerAlive
+    ? heartbeatAgeSeconds !== null && heartbeatAgeSeconds > Math.max(120, config.intervalMs / 1000 * 2.5) ? "HEARTBEAT_STALE" : "RUNNING"
+    : config.stoppedAt ? "EXITED" : "INTERRUPTED";
+  console.log(JSON.stringify({ out: outDir, workerPid: config.workerPid ?? null, workerAlive, state, heartbeatAgeSeconds,
+    lastLifecycle: lastLifecycle ? JSON.parse(lastLifecycle) : null,
     schedulerTaskName: config.schedulerTaskName ?? null, stopRequestedAt: config.stopRequestedAt ?? null, startedAt: config.startedAt, durationHours: config.durationHours,
     elapsedHours: (Date.now() - Date.parse(config.startedAt)) / 3600000,
     resumeCount: config.resumeCount ?? 0, mission: mission ?? null, outputs, checkpoints, evidenceLines: lines.length,
@@ -255,7 +269,10 @@ function report() {
 
 try {
   if (command === "start") await start();
-  else if (command === "worker") await worker();
+  else if (command === "worker") {
+    try { await worker(); }
+    catch (error) { lifecycle("FAILED", error instanceof Error ? error.name : "WorkerError"); throw error; }
+  }
   else if (command === "status") status();
   else if (command === "material") material();
   else if (command === "resume") resume();

@@ -12,8 +12,12 @@ $workerScript = Join-Path $Workspace 'scripts/v2-long-run.ts'
 if (-not (Test-Path -LiteralPath $workerScript) -or -not (Test-Path -LiteralPath (Join-Path $OutDirectory 'run.json'))) { throw 'Missing isolated run configuration' }
 if ($Mode -eq 'Run') {
   Set-Location -LiteralPath $Workspace
-  & $NodePath --import tsx $workerScript worker --out $OutDirectory *> (Join-Path $OutDirectory 'scheduled-worker.log')
-  exit $LASTEXITCODE
+  $workerLog = Join-Path $OutDirectory 'scheduled-worker.log'
+  Add-Content -LiteralPath $workerLog -Value ("{0} host-start pid={1}" -f (Get-Date -Format o), $PID)
+  & $NodePath --import tsx $workerScript worker --out $OutDirectory *>> $workerLog
+  $workerExitCode = $LASTEXITCODE
+  Add-Content -LiteralPath $workerLog -Value ("{0} host-exit code={1}" -f (Get-Date -Format o), $workerExitCode)
+  exit $workerExitCode
 }
 $description = 'ProjectMemo isolated fixture run: ' + $OutDirectory
 $arguments = '-NoProfile -NonInteractive -WindowStyle Hidden -File "' + $PSCommandPath + '" -Mode Run -Workspace "' + $Workspace + '" -NodePath "' + $NodePath + '" -OutDirectory "' + $OutDirectory + '" -TaskName "' + $TaskName + '"'

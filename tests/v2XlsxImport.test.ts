@@ -26,6 +26,17 @@ describe("XLSX 材料读取", () => {
     catch (error) { expect(error).toMatchObject({ code: "MATERIAL_FORMAT" }); }
   });
 
+  test("styled empty cells and formulas without cached values do not move or invent data", async () => {
+    const worksheet = '<worksheet><sheetData><row r="1"><c r="A1" s="1"/><c r="B1"><v>7</v></c><c r="C1" t="b"><f>TRUE()</f></c><c r="D1"><v>9</v></c></row></sheetData></worksheet>';
+    const text = await extractXlsxText(makeXlsx({ "xl/worksheets/sheet1.xml": strToU8(worksheet) }));
+    expect(text).toContain("工作表：发布记录\n\t7\t\t9");
+  });
+
+  test("rejects a sheet with material beyond the column limit instead of dropping it", async () => {
+    const worksheet = '<worksheet><sheetData><row r="1"><c r="A1"><v>7</v></c><c r="AY1"><v>9</v></c></row></sheetData></worksheet>';
+    await expect(extractXlsxText(makeXlsx({ "xl/worksheets/sheet1.xml": strToU8(worksheet) }))).rejects.toMatchObject({ code: "XLSX_EXTRACTION_FAILED" });
+  });
+
   test("macro, DOCTYPE and broken archives are rejected without evaluating content", async () => {
     await expect(extractXlsxText(makeXlsx({ "xl/vbaProject.bin": strToU8("macro") }))).rejects.toMatchObject({ code: "XLSX_EXTRACTION_FAILED" });
     const doctype = makeXlsx({ "xl/sharedStrings.xml": strToU8('<!DOCTYPE sst SYSTEM "x"><sst><si><t>回归</t></si></sst>') });

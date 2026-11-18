@@ -36,8 +36,8 @@ function reveal(element: () => HTMLElement | null, block: ScrollLogicalPosition 
     target?.scrollIntoView({ block, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
   });
 }
-export function OutcomeWorkbench({ missionId, entry, initialRevision, initialBaseline }: {
-  missionId?: string; entry?: "question" | "review"; initialRevision?: number; initialBaseline?: number;
+export function OutcomeWorkbench({ missionId, entry, initialRevision, initialBaseline, initialQuestionId }: {
+  missionId?: string; entry?: "question" | "review"; initialRevision?: number; initialBaseline?: number; initialQuestionId?: string;
 }) {
   const live = !!missionId;
   const [snapshot, setSnapshot] = useState<WorkbenchSnapshot | null>(() => live ? null : workbenchFixture());
@@ -57,6 +57,8 @@ export function OutcomeWorkbench({ missionId, entry, initialRevision, initialBas
   const [message, setMessage] = useState(""), [busy, setBusy] = useState(false), [error, setError] = useState("");
   const [notice, setNotice] = useState(""), [game, setGame] = useState<"mentor" | "evidence" | "sprint" | null>(null);
   const [questionReceipt, setQuestionReceipt] = useState(false);
+  const [submittedQuestionId, setSubmittedQuestionId] = useState<string | null>(null);
+  const [questionPin, setQuestionPin] = useState(initialQuestionId);
   const [liveGame, setLiveGame] = useState<GameTab | null>(null);
   const [chosen, setChosen] = useState(""), [answer, setAnswer] = useState(""), [sprinting, setSprinting] = useState(false);
   const [sprintChecked, setSprintChecked] = useState(false);
@@ -81,6 +83,8 @@ export function OutcomeWorkbench({ missionId, entry, initialRevision, initialBas
         setSnapshot(null);
         setLiveGame(null);
         setSourceSelection(null);
+        setSubmittedQuestionId(null);
+        setQuestionReceipt(false);
         setMaterialOpen(false);
         setMessage("");
         pending.current = null;
@@ -104,11 +108,13 @@ export function OutcomeWorkbench({ missionId, entry, initialRevision, initialBas
     return () => { reads.seq++; clearTimeout(first); clearInterval(interval); };
   }, [missionId, refresh]);
   const hasQuestion = snapshot?.reasonCode === "QUESTION_PENDING";
+  const showQuestion = hasQuestion && (!questionPin || snapshot?.pendingQuestionId === questionPin);
+  const answerSaved = questionReceipt || (submittedQuestionId !== null && snapshot?.lastAnsweredQuestionId === submittedQuestionId);
   const loaded = snapshot !== null;
   useEffect(() => {
-    if (entry === "question" && hasQuestion) reveal(() => document.getElementById("workbench-question"));
+    if (entry === "question" && showQuestion) reveal(() => document.getElementById("workbench-question"));
     if (entry === "review" && loaded) reveal(() => document.getElementById("workbench-document"));
-  }, [entry, hasQuestion, loaded]);
+  }, [entry, showQuestion, loaded]);
   /** 把一句话交给原 Conversation/Directive 链；返回值只描述真实应用结果。 */
   async function deliver(text: string): Promise<{ applied: boolean; objective: string; message: string }> {
     const quoted = text.trim();
@@ -206,6 +212,11 @@ export function OutcomeWorkbench({ missionId, entry, initialRevision, initialBas
   function openMaterial() { setMaterialOpen(true); reveal(() => materialStart.current); }
   async function reread() { await refresh(); }
   async function questionAnswered() { setQuestionReceipt(true); await refresh(); }
+  function openQuestion(id?: string) {
+    setQuestionPin(id);
+    setLiveGame(null);
+    reveal(() => document.getElementById("workbench-question"));
+  }
   function selectRevision(revision: number) {
     setSelectedRevision(revision); setCompareRevision(null); setSourceSelection(null); setFeedbackSourceId(undefined);
   }
@@ -233,10 +244,16 @@ export function OutcomeWorkbench({ missionId, entry, initialRevision, initialBas
       载入新资料样例 <ArrowUpRight size={15} aria-hidden="true" /></button></div>}
     {error && <div role="alert" className={styles.error}>{error}{hasPending && "；原请求编号已保留，再次发送会重试原请求。"}</div>}
     {live && !liveGame && <ReentryBriefPanel key={missionId} missionId={missionId} projectId={snapshot.projectId} outputs={snapshot.outputs}
-      onOpenRevision={openRevision} onAddMaterial={openMaterial} onOpenQuestion={() => reveal(() => document.getElementById("workbench-question"))} />}
-    {live && hasQuestion && !liveGame && <MissionQuestionPanel missionId={missionId} projectId={snapshot.projectId} version={snapshot.version} onAnswered={questionAnswered} />}
-    {questionReceipt && !hasQuestion && <p role="status" className={styles.notice}>原问题答复已提交，可在过程回执里查看后续进展。</p>}
-    {entry === "question" && !hasQuestion && !questionReceipt && <p role="status" className={styles.notice}>原委托目前没有等待答复的问题。</p>}
+      onOpenRevision={openRevision} onAddMaterial={openMaterial} onOpenQuestion={openQuestion} />}
+    {live && showQuestion && !liveGame && <MissionQuestionPanel key={snapshot.pendingQuestionId} questionId={snapshot.pendingQuestionId}
+      missionId={missionId} projectId={snapshot.projectId} version={snapshot.version}
+      onSubmit={id => { setSubmittedQuestionId(id); setQuestionReceipt(false); }} onAnswered={questionAnswered} />}
+    {live && hasQuestion && !showQuestion && !liveGame && <div className={styles.notice}>
+      <p role="status">{answerSaved ? "原问题答复已提交，委托提出了下一项判断。" : "原问题已变化，请确认你要回答当前问题。"}</p>
+      <button className="editorial-button-secondary" type="button" onClick={() => openQuestion(snapshot.pendingQuestionId)}>查看当前问题</button>
+    </div>}
+    {answerSaved && !hasQuestion && <p role="status" className={styles.notice}>原问题答复已提交，可在过程回执里查看后续进展。</p>}
+    {entry === "question" && !hasQuestion && !answerSaved && <p role="status" className={styles.notice}>原委托目前没有等待答复的问题。</p>}
     {live && snapshot.challengesEnabled && !liveGame && <section className={styles.gameEntry} aria-label="成果玩法入口">
       <h2>成果演练</h2>
       <div className={styles.gameEntryActions}>{GAME_ENTRIES.map(({ key, label, icon: Icon }) =>

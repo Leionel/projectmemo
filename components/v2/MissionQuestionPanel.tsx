@@ -13,10 +13,12 @@ type QuestionDetail = {
   evidencePremise?: FitPremise | null;
 };
 
-export function MissionQuestionPanel({ missionId, projectId, version, onAnswered }: {
+export function MissionQuestionPanel({ missionId, projectId, version, questionId, onSubmit, onAnswered }: {
   missionId: string;
   projectId: string;
   version: number;
+  questionId?: string;
+  onSubmit: (questionId: string) => void;
   onAnswered: () => Promise<void>;
 }) {
   const [detail, setDetail] = useState<QuestionDetail | null>(null);
@@ -41,7 +43,7 @@ export function MissionQuestionPanel({ missionId, projectId, version, onAnswered
     return () => controller.abort();
   }, [base, version, retryRead]);
 
-  const question = detail?.question;
+  const question = !questionId || detail?.question?.id === questionId ? detail?.question : null;
   async function answer(text: string, review?: EvidenceReview) {
     if (!question || !detail || detail.version !== version) throw new Error("原问题正在更新，请核对后再提交");
     const body = { questionId: question.id, answer: text.trim(), ...(review ? { evidenceReview: review } : {}) };
@@ -51,6 +53,7 @@ export function MissionQuestionPanel({ missionId, projectId, version, onAnswered
       throw new Error("原答复结果尚未确认，请使用原来的答复重试。");
     }
     pending.current ??= { questionId: question.id, binding, requestId: crypto.randomUUID(), expectedVersion: detail.version };
+    onSubmit(question.id);
     const response = await fetch(base + "/input", { method: "POST", headers: { "Content-Type": "application/json" },
       signal: AbortSignal.timeout(20000), body: JSON.stringify({ ...body, expectedVersion: pending.current.expectedVersion, requestId: pending.current.requestId }) });
     const result = await response.json();

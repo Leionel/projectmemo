@@ -8,6 +8,7 @@ import { claimMission } from "@/lib/mission/runtimeStore";
 import { acknowledgeReentryBrief, readProjectReturnItems, readReentryBrief } from "@/lib/mission/reentryBrief";
 import { readMissionWorkbench } from "@/lib/mission/workbenchService";
 import { readWorkbenchDelivery } from "@/lib/mission/workbenchDelivery";
+import { workbenchReferenceChanges } from "@/lib/mission/workbenchComparison";
 import { createSession } from "@/lib/auth/session";
 import { createConversation } from "@/lib/conversation/service";
 import { submitDirective } from "@/lib/continuity/directiveService";
@@ -79,6 +80,21 @@ test("an accepted V2 answer clears the waiting timer and is immediately claimabl
   expect(await db.agentMissionEvent.count({ where: { missionId: f.mission.id, type: "INPUT" } })).toBe(1);
 });
 
+test("a still-active question can return ahead of newer missions and observation waits", async () => {
+  const f = await fixture();
+  const question = await db.agentMissionEvent.create({ data: { missionId: f.mission.id, seq: 2, type: "QUESTION", payloadJson: { question: "需要决定交付范围" } } });
+  await db.agentMission.update({ where: { id: f.mission.id }, data: { status: "WAITING_INPUT", nextEventSeq: 2,
+    waitStateJson: { waitingFor: "USER", questionId: question.id }, updatedAt: new Date(0) } });
+  for (let i = 0; i < 7; i++) {
+    const newer = await createMission(f.user.id, { runtimeProtocolVersion: 2, projectId: f.project.id,
+      requestId: "newer-" + i, goal: "接续新稿，留意材料变化", llmContextApproved: true });
+    await db.agentMission.update({ where: { id: newer.id }, data: { status: "WAITING_INPUT",
+      waitStateJson: { waitingFor: "OBSERVATION", questionId: question.id } } });
+  }
+  const items = await readProjectReturnItems(f.user.id, f.project.id);
+  expect(items).toEqual([expect.objectContaining({ id: f.mission.id, questionId: question.id })]);
+});
+
 test("return baselines survive the recent revision window and delivery rechecks source permission", async () => {
   const f = await fixture();
   await f.output(1);
@@ -95,6 +111,11 @@ test("return baselines survive the recent revision window and delivery rechecks 
   expect(delivery.markdown).toContain("待补证据");
   expect(delivery.markdown).toContain("引用 〔1〕");
   await expect(readWorkbenchDelivery(f.user.id, f.mission.id, newest.id, 7, 1)).rejects.toMatchObject({ code: "OUTPUT_NOT_FOUND" });
+
+  const before = workbench.outputs[0];
+  // A source present in inventory but no longer cited in the next version counts as removed.
+  const after = { ...before, blocks: before.blocks.map(block => ({ ...block, sourceIds: [] })) };
+  expect(workbenchReferenceChanges(before, after, workbench.sources)).toEqual({ added: [], removed: [workbench.sources[0]] });
 
   const session = await createSession(f.user.id);
   const actor = { userId: f.user.id, sessionId: session.session.id };

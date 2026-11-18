@@ -16,6 +16,18 @@ export function blockSources(output: WorkbenchOutput, block: Block, sources: Wor
   return sources.filter(source => output.sourceKeys.includes(source.key) && block.sourceIds.includes(source.id));
 }
 
+export function workbenchReferenceChanges(baseline: WorkbenchOutput, output: WorkbenchOutput, sources: WorkbenchSource[]) {
+  function cited(version: WorkbenchOutput) {
+    const ids = new Set(version.blocks.flatMap(block => block.sourceIds));
+    return new Set(sources.filter(source => ids.has(source.id) && version.sourceKeys.includes(source.key)).map(source => source.key));
+  }
+  const before = cited(baseline), after = cited(output);
+  return {
+    added: sources.filter(source => after.has(source.key) && !before.has(source.key)),
+    removed: sources.filter(source => before.has(source.key) && !after.has(source.key)),
+  };
+}
+
 export function workbenchChanges(baseline: WorkbenchOutput, output: WorkbenchOutput, sources: WorkbenchSource[]): WorkbenchChange[] {
   const oldBlocks = new Map(baseline.blocks.map(block => [block.blockId, block]));
   const newIds = new Set(output.blocks.map(block => block.blockId));

@@ -18,7 +18,7 @@ export async function readMissionWorkbench(userId: string, id: string, selection
   if (!isFeatureEnabled("MISSION_WORKBENCH_ENABLED", false)) throw new AppError("WORKBENCH_DISABLED", "成果工作台试验未开启", 404);
   return db.$transaction(async tx => {
     const m = await ownedMission(userId, id, tx);
-    const [project, recent, events, run, continuity, approvals, unknownSteps, receipt] = await Promise.all([
+    const [project, recent, events, run, continuity, approvals, unknownSteps, receipt, recentAnswer] = await Promise.all([
       tx.project.findUniqueOrThrow({ where: { id: m.projectId }, select: { title: true } }),
       tx.agentMissionOutput.findMany({ where: { missionId: id }, orderBy: { revision: "desc" }, take: 5 }),
       tx.agentMissionEvent.findMany({ where: { missionId: id }, orderBy: { seq: "desc" }, take: 24 }),
@@ -27,6 +27,7 @@ export async function readMissionWorkbench(userId: string, id: string, selection
       tx.agentMissionApproval.findMany({ where: { missionId: id, status: "PENDING" } }),
       tx.agentMissionStep.count({ where: { missionId: id, status: "UNKNOWN" } }),
       readReentryReceipt(tx, id),
+      tx.agentMissionEvent.findFirst({ where: { missionId: id, type: "INPUT" }, orderBy: { seq: "desc" }, select: { payloadJson: true } }),
     ]);
     const lastSeenOutputRevision = Number(receipt.seenOutputRevision ?? 0);
     const included = new Set(recent.map(row => row.revision));
@@ -34,6 +35,12 @@ export async function readMissionWorkbench(userId: string, id: string, selection
       .filter((revision): revision is number => typeof revision === "number" && revision > 0 && !included.has(revision));
     const extra = requested.length ? await tx.agentMissionOutput.findMany({ where: { missionId: id, revision: { in: requested } } }) : [];
     const rows = [...recent, ...extra].sort((a, b) => b.revision - a.revision);
+    const artifactAdoptionEnabled = m.status !== "CANCELLED" && !m.cancelRequestedAt && isFeatureEnabled("MISSION_ARTIFACT_ADOPTION_ENABLED", false);
+    const adopted = artifactAdoptionEnabled && rows.length ? await tx.missionArtifactReceipt.findMany({
+      where: { missionId: id, projectId: m.projectId, outputId: { in: rows.map(row => row.id) }, artifactType: "weekly_report" },
+      select: { outputId: true, artifactId: true },
+    }) : [];
+    const weeklyReports = new Map(adopted.map(receipt => [receipt.outputId, receipt.artifactId]));
     const sources: WorkbenchSource[] = [], outputs: WorkbenchOutput[] = [], stageArtifacts: WorkbenchStageArtifact[] = [];
     const materialEvents = await tx.agentMissionEvent.findMany({ where: { missionId: id, type: { in: ["USER_MATERIAL_ADDED", "USER_FEEDBACK_ADDED"] } },
       orderBy: { seq: "desc" }, take: 64, select: { payloadJson: true } });
@@ -93,6 +100,7 @@ export async function readMissionWorkbench(userId: string, id: string, selection
       });
       outputs.push({ id: row.id, revision: row.revision, createdAt: row.createdAt.toISOString(),
         sourceKeys: refs.filter(s => allowed.has(s.id)).map(s => s.id + "@" + s.hash), blocks, presentation: presentationOf(blocks), sourceAccessChanged,
+        weeklyReportArtifactId: !sourceAccessChanged ? weeklyReports.get(row.id) : undefined,
         missingInformation: !sourceAccessChanged && Array.isArray(content.missingInformation)
           ? content.missingInformation.filter((item): item is string => typeof item === "string") : [] });
     }
@@ -109,9 +117,12 @@ export async function readMissionWorkbench(userId: string, id: string, selection
       NATURAL_CONTROL_APPLIED: "已按你的指引调整原委托", INVESTIGATION_HELD: "持续跟进需核对条件",
       FAILURE: "当前步骤需核对" };
     const usage = record(m.budgetUsedJson);
+    const answeredQuestion = record(recentAnswer?.payloadJson).questionId;
     return { id, projectId: m.projectId, projectTitle: project.title, goal: m.goal,
       lastSeenOutputRevision: m.runtimeProtocolVersion === 2 && isFeatureEnabled("MISSION_V2_ENABLED", false) ? lastSeenOutputRevision : undefined,
-      artifactAdoptionEnabled: m.status !== "CANCELLED" && isFeatureEnabled("MISSION_ARTIFACT_ADOPTION_ENABLED", false),
+      pendingQuestionId: state.exactQuestionRef ?? undefined,
+      lastAnsweredQuestionId: typeof answeredQuestion === "string" ? answeredQuestion : undefined,
+      artifactAdoptionEnabled,
       challengesEnabled: m.runtimeProtocolVersion === 2 && isFeatureEnabled("MISSION_V2_ENABLED", false) && isFeatureEnabled("MISSION_CHALLENGES_ENABLED", false),
       workingObjective: continuity.workingObjective ?? m.goal, status: m.status, phase: state.phase, reason: state.reasonText, reasonCode: state.reasonCode, version: m.version,
       checkedAt: new Date().toISOString(), provider: run?.provider ?? "尚无模型调用",

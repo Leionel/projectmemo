@@ -29,15 +29,27 @@ export async function readReentryReceipt(tx: Tx, missionId: string) {
 export async function readProjectReturnItems(userId: string, projectId: string) {
   return db.$transaction(async tx => {
     await assertOwner(userId, projectId, tx);
-    const missions = await tx.agentMission.findMany({ where: { projectId, ownerUserId: userId, runtimeProtocolVersion: 2 },
-      orderBy: [{ updatedAt: "desc" }, { id: "desc" }], take: 6, select: { id: true, goal: true } });
+    const [recent, waiting] = await Promise.all([
+      tx.agentMission.findMany({ where: { projectId, ownerUserId: userId, runtimeProtocolVersion: 2 },
+        orderBy: [{ updatedAt: "desc" }, { id: "desc" }], take: 6, select: { id: true, goal: true } }),
+      tx.$queryRaw<Array<{ id: string; goal: string }>>`
+        SELECT id, goal FROM "AgentMission"
+        WHERE "projectId" = ${projectId} AND "ownerUserId" = ${userId} AND "runtimeProtocolVersion" = 2
+          AND status = 'WAITING_INPUT' AND "pauseRequestedAt" IS NULL AND "cancelRequestedAt" IS NULL
+          AND json_type("waitStateJson", '$.questionId') = 'text'
+          AND COALESCE(json_extract("waitStateJson", '$.waitingFor'), '') != 'OBSERVATION'
+          AND COALESCE(json_extract("waitStateJson", '$.resolved'), 0) != 1
+        ORDER BY "updatedAt" DESC, id DESC LIMIT ${ITEM_LIMIT}`,
+    ]);
+    const waitingIds = new Set(waiting.map(mission => mission.id));
+    const missions = [...waiting, ...recent.filter(mission => !waitingIds.has(mission.id))];
     const reads = await Promise.all(missions.map(async mission => {
       const brief = await buildBrief(userId, mission.id, tx);
       return { ...mission, questionId: brief.items.find(item => item.questionId)?.questionId,
         output: brief.items.filter(item => item.kind === "OUTPUT_UPDATED").at(-1),
         baseline: brief.lastSeenOutputRevision };
     }));
-    return reads.filter(item => item.questionId || item.output).slice(0, 3);
+    return [...reads.filter(item => item.questionId), ...reads.filter(item => !item.questionId && item.output)].slice(0, ITEM_LIMIT);
   });
 }
 
@@ -46,7 +58,7 @@ async function buildBrief(userId: string, missionId: string, tx: Tx): Promise<Re
   const [seenPayload, outputs, events, pendingApprovals] = await Promise.all([
     readReentryReceipt(tx, missionId),
     tx.agentMissionOutput.findMany({ where: { missionId }, orderBy: { revision: "desc" }, take: ITEM_LIMIT + 2 }),
-    tx.agentMissionEvent.findMany({ where: { missionId, type: { in: ["QUESTION", "INVESTIGATION_HELD", "APPROVAL_REQUESTED", "INVESTIGATION_INPUT_CHANGED", "INVESTIGATION_OBSERVATION_CHANGED", "USER_MATERIAL_ADDED", "USER_FEEDBACK_ADDED"] } }, orderBy: { seq: "desc" }, take: 40 }),
+    tx.agentMissionEvent.findMany({ where: { missionId, type: { in: ["INVESTIGATION_HELD", "APPROVAL_REQUESTED", "INVESTIGATION_INPUT_CHANGED", "INVESTIGATION_OBSERVATION_CHANGED", "USER_MATERIAL_ADDED", "USER_FEEDBACK_ADDED"] } }, orderBy: { seq: "desc" }, take: 40 }),
     mission.status === "WAITING_APPROVAL" && !mission.pauseRequestedAt && !mission.cancelRequestedAt
       ? tx.agentMissionApproval.findMany({ where: { missionId, status: "PENDING", expiresAt: { gt: new Date() } }, select: { id: true, stepId: true } }) : [],
   ]);
@@ -80,11 +92,18 @@ async function buildBrief(userId: string, missionId: string, tx: Tx): Promise<Re
   const newOutputs = outputs.filter(output => output.revision > baseRevision);
   const availableSlots = ITEM_LIMIT - items.length;
   const visibleOutputs: ReentryItem[] = [];
+  const sourcePermissions = new Map<string, ReturnType<typeof sourceUse>>();
   for (const output of newOutputs) {
     if (visibleOutputs.length === availableSlots) break;
     if (handledIds.has("output:" + output.id)) continue;
     const refs = (output.sourceRefsJson as unknown as Source[] | null) ?? [];
-    const allowed = await Promise.all(refs.map(source => sourceUse(userId, mission.projectId, source.id, tx, { missionId })));
+    const allowed = await Promise.all(refs.map(source => {
+      const existing = sourcePermissions.get(source.id);
+      if (existing) return existing;
+      const permission = sourceUse(userId, mission.projectId, source.id, tx, { missionId });
+      sourcePermissions.set(source.id, permission);
+      return permission;
+    }));
     if (allowed.some(result => result.state !== "ALLOWED")) continue;
     const latestSourceChange = sourceChanged.find(item => item.createdAt <= output.createdAt);
     const why = latestSourceChange ? "资料或反馈更新后保存了这版成果；具体变化请打开原稿核对" : "保存了新的私有稿；具体变化请打开原稿核对";

@@ -1,6 +1,6 @@
 import { AppError } from "@/lib/api";
 import { evidenceTime, sourceDisplayName } from "@/lib/client/sourceDisplay";
-import { blockSources, workbenchChangeLabels, workbenchChanges } from "./workbenchComparison";
+import { blockSources, workbenchChangeLabels, workbenchChanges, workbenchReferenceChanges } from "./workbenchComparison";
 import { readMissionWorkbench } from "./workbenchService";
 
 // Plain paragraphs travel well across Markdown viewers even when the original includes HTML or Markdown.
@@ -31,12 +31,18 @@ export async function readWorkbenchDelivery(userId: string, missionId: string, o
   const sourceLines = sources.map((source, index) =>
     "- 〔" + (index + 1) + "〕 " + markdownText(sourceDisplayName(source.id, source.name)) + " · " + evidenceTime(source.observedAt) +
     (source.current ? "" : " · 历史引用版本"));
+  const references = base && !base.sourceAccessChanged ? workbenchReferenceChanges(base, output, snapshot.sources) : null;
+  const referenceLines = references ? [
+    ...references.added.map(source => "- 新增引用 · " + markdownText(sourceDisplayName(source.id, source.name)) + " · " + evidenceTime(source.observedAt)),
+    ...references.removed.map(source => "- 当前稿移除引用 · " + markdownText(sourceDisplayName(source.id, source.name)) + " · " + evidenceTime(source.observedAt)),
+  ] : [];
   const unknowns = output.missingInformation ?? [];
   const markdown = [
     "# " + markdownText(snapshot.goal.replace(/\s+/g, " ")),
     markdownText(snapshot.projectTitle) + " · 第 " + revision + " 版 · " + evidenceTime(output.createdAt) + "\n\n私有工作稿，交付前由你核对。",
     "## 正文\n\n" + blockLines.join("\n\n"),
     "## 修改摘要\n\n" + (base ? "第 " + base.revision + " 版 → 第 " + revision + " 版。 " : "") + changeSummary,
+    ...(referenceLines.length ? ["## 引用变化\n\n" + referenceLines.join("\n")] : []),
     "## 待确认项\n\n" + (unknowns.length ? unknowns.map(item => "- " + markdownText(item)).join("\n") : "此版本没有另外登记的待确认项。"),
     "## 引用资料\n\n" + (sourceLines.length ? sourceLines.join("\n") : "此版本没有可读的引用资料。"),
   ].join("\n\n") + "\n";

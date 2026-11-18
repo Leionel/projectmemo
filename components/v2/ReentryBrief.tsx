@@ -17,7 +17,7 @@ export function ReentryBriefPanel({ missionId, projectId, outputs, onOpenRevisio
   outputs: WorkbenchOutput[];
   onOpenRevision: (revision: number, compare: boolean, baseline?: number) => void;
   onAddMaterial: () => void;
-  onOpenQuestion: () => void;
+  onOpenQuestion: (questionId: string) => void;
 }) {
   const [brief, setBrief] = useState<ReentryBrief | null>(null);
   const [busy, setBusy] = useState(false);
@@ -107,6 +107,7 @@ export function ReentryBriefPanel({ missionId, projectId, outputs, onOpenRevisio
     {brief && (brief.items.length === 0 ? <p>上次已读后暂无新的成果变化。</p> : <ol className={styles.items}>{brief.items.map(item => {
       const Icon = icons[item.kind];
       const revision = item.revision;
+      const questionId = item.questionId;
       const output = outputs.find(row => row.id === item.outputId && row.revision === revision);
       const canCompare = !!output && outputs.some(row => row.revision < output.revision);
       const seen = brief.lastSeenOutputRevision;
@@ -122,7 +123,7 @@ export function ReentryBriefPanel({ missionId, projectId, outputs, onOpenRevisio
             {canCompare ? <GitCompareArrows size={15} aria-hidden /> : <BookOpen size={15} aria-hidden />}
             {canCompare ? "查看第 " + output.revision + " 版修改" : "打开第 " + output.revision + " 版"}<ArrowRight size={14} aria-hidden />
           </button>}
-          {item.questionId && <button type="button" className={styles.action} onClick={onOpenQuestion}>
+          {questionId && <button type="button" className={styles.action} onClick={() => onOpenQuestion(questionId)}>
             <MessageSquareText size={15} aria-hidden />回答原问题<ArrowRight size={14} aria-hidden />
           </button>}
           {item.kind === "NEEDS_DECISION" && !item.questionId && <Link prefetch={false} className={styles.action}

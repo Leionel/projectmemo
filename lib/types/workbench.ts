@@ -6,6 +6,7 @@ export type WorkbenchOutput = {
   presentation: AgentPresentation;
   missingInformation?: string[];
   sourceAccessChanged?: boolean;
+  weeklyReportArtifactId?: string;
 };
 export type WorkbenchRevisionTarget = { revision: number; baselineRevision: number; sourceId?: string };
 export function readRevision(value: string | null | undefined) {
@@ -22,6 +23,8 @@ export type WorkbenchSnapshot = {
   challengesEnabled?: boolean;
   artifactAdoptionEnabled?: boolean;
   lastSeenOutputRevision?: number;
+  pendingQuestionId?: string;
+  lastAnsweredQuestionId?: string;
   id: string; projectId: string; goal: string; projectTitle: string; workingObjective: string;
   status: string; phase: string; reason: string; reasonCode: string; checkedAt: string; provider: string; version: number;
   models: number; tools: number; outputs: WorkbenchOutput[]; stageArtifacts: WorkbenchStageArtifact[]; sources: WorkbenchSource[];

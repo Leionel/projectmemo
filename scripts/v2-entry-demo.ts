@@ -55,6 +55,11 @@ const project = await db.project.create({ data: { title: "独立开发版本 · 
   scenario: "RESEARCH", memberships: { create: { userId: user.id, role: "OWNER" } } } });
 const researchProject = await db.project.create({ data: { title: "实验阶段汇报 · 科研对照", description: "隔离科研合成资料", goal: "整理实验阶段汇报",
   scenario: "RESEARCH", memberships: { create: { userId: user.id, role: "OWNER" } } } });
+const projects = new Map([["developer", project], ["research", researchProject]]);
+for (const [scenario, title] of [["client-a", "客户甲交付"], ["client-b", "客户乙交付"]]) {
+  projects.set(scenario, await db.project.create({ data: { title, description: "隔离客户合成样例", goal: "整理客户交付说明",
+    scenario: "RESEARCH", memberships: { create: { userId: user.id, role: "OWNER" } } } }));
+}
 
 const productionPreview = process.env.V2_ENTRY_PRODUCTION === "true";
 const child = spawn(process.execPath, ["node_modules/next/dist/bin/next", ...(productionPreview ? ["start"] : ["dev", "--webpack"]), "-H", "127.0.0.1", "-p", String(port)],
@@ -78,7 +83,7 @@ const server = http.createServer(async (request, response) => {
     const url = new URL(request.url ?? "/", controlOrigin);
     if (request.method === "GET" && url.pathname === "/open") {
       // Demo-only authenticated deep link. The optional target must belong to this temporary owner.
-      const selectedProject = url.searchParams.get("scenario") === "research" ? researchProject : project;
+      const selectedProject = projects.get(url.searchParams.get("scenario") ?? "") ?? project;
       const selectedId = url.searchParams.get("mission");
       const selected = selectedId && selectedId.length <= 160 ? await db.agentMission.findFirst({
         where: { id: selectedId, ownerUserId: user.id, projectId: selectedProject.id, runtimeProtocolVersion: 2 }, select: { id: true },

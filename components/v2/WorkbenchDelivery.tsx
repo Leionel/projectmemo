@@ -65,8 +65,9 @@ export function WorkbenchDelivery({ missionId, projectId, output, baseline, adop
         <button className={styles.primary} type="button" disabled={busy} onClick={() => void prepare(true)}><Download size={16} aria-hidden />下载 Markdown</button>
         <button className={styles.button} type="button" disabled={busy} onClick={() => { setPreview(null); setFeedback(""); }}><X size={14} aria-hidden />收起预览</button>
       </div>
-      {adoptionEnabled && <MissionArtifactAdoption projectId={projectId} missionId={missionId} outputId={output.id} revision={output.revision} />}
     </div>}
+    {adoptionEnabled && !output.sourceAccessChanged && <MissionArtifactAdoption projectId={projectId} missionId={missionId}
+      outputId={output.id} revision={output.revision} savedArtifactId={output.weeklyReportArtifactId} />}
     {feedback && <p role="status">{feedback}</p>}
     {error && <p role="alert">{error}</p>}
   </section>;

@@ -4,6 +4,7 @@ import path from "node:path";
 import assert from "node:assert/strict";
 import { chromium, request as apiRequest } from "playwright";
 import type { WorkbenchSnapshot } from "../lib/types/workbench";
+import { docxMaterial } from "./fixtures/docx-material";
 
 const entryPort = Number(process.env.V2_ENTRY_PORT ?? 4420);
 const control = "http://127.0.0.1:" + (entryPort + 1);
@@ -79,6 +80,23 @@ async function leaveAndReturn(missionId: string, name: string, material: string,
   assert.ok(await page.getByTestId("source-excerpt").locator("mark").count(), "稿件引用应定位到原文");
   return current;
 }
+
+async function clientBrief(scenario: string, brief: string) {
+  await page.goto(control + "/open?scenario=" + scenario);
+  await page.getByLabel("起步场景").selectOption("client");
+  await page.getByLabel("导入材料文件").setInputFiles({
+    name: "交付简报.docx", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    buffer: Buffer.from(docxMaterial(brief)),
+  });
+  await page.getByRole("button", { name: "预览持续范围" }).click();
+  await page.getByText("仅本项目资料；关闭此项目的个人上下文").waitFor();
+  await page.getByRole("button", { name: "确认并开始" }).click();
+  await page.waitForURL(/\/v2\/workbench\?missionId=/, { timeout: 90000 });
+  const id = new URL(page.url()).searchParams.get("missionId")!;
+  const view = await savedRevision(id, 1);
+  assert.ok(view.outputs[0].blocks.some(block => block.text.includes(brief)));
+  return view;
+}
 try {
   await page.goto(control);
   await page.getByRole("link", { name: "打开项目并完成一次托付" }).click();
@@ -123,8 +141,13 @@ try {
   assert.equal(returned.outputs.length, 3);
   assert.equal(returned.outputs[2].id, first.outputs[0].id);
   assert.equal(returned.id, first.id);
+  const developerComparison = page.getByRole("region", { name: "版本修改对照" });
+  await developerComparison.getByText("引用变化", { exact: true }).click();
+  await developerComparison.getByRole("button", { name: /新增引用.*发布范围\.txt/ }).click();
+  assert.match(await page.getByTestId("source-excerpt").innerText(), /本次发布限于文字导入和回访对照/);
+  await developerComparison.getByText("引用变化", { exact: true }).click();
   await shot("developer-return-compare.png");
-  checks.push("开发场景：关闭全部页面 → 两次补资料唤醒同一委托 → 项目首页直达第 1 版到第 3 版对照 → 定位原文");
+  checks.push("开发场景：关页后两次补资料，首页直达第 1 版到第 3 版，正文与引用变化均可定位原文");
 
   const receiptIds: string[] = [];
   await page.route("**/reentry-brief", async route => {
@@ -143,12 +166,6 @@ try {
   assert.equal((await snapshot(missionId)).version, returned.version);
   checks.push("已读回执响应丢包后重试原编号，Mission 版本保持不变");
 
-  await page.getByRole("button", { name: "请忆程核对这条" }).click();
-  await page.waitForFunction(() => document.activeElement?.id === "workbench-message");
-  const requestedFocus = await page.getByLabel("接下来怎么做，直接告诉忆程").inputValue();
-  assert.match(requestedFocus, /补测记录.txt/);
-  checks.push("从原文面板起草核对指令并聚焦输入框");
-
   await page.getByRole("button", { name: "预览交付稿" }).click();
   const downloadButton = page.getByRole("button", { name: "下载 Markdown" });
   await downloadButton.waitFor();
@@ -158,12 +175,35 @@ try {
   const file = await downloaded;
   assert.match(file.suggestedFilename(), /第3版\.md$/);
   const markdown = fs.readFileSync((await file.path())!, "utf8");
-  for (const fragment of ["第 1 版 → 第 3 版", "待确认项", "补测记录.txt", "发布范围.txt"]) assert.ok(markdown.includes(fragment), fragment);
+  for (const fragment of ["第 1 版 → 第 3 版", "待确认项", "引用变化", "新增引用 · 发布范围.txt", "补测记录.txt"]) assert.ok(markdown.includes(fragment), fragment);
   await page.getByRole("button", { name: "预览归入项目周报" }).click();
   await page.getByRole("button", { name: "确认保存并向项目成员共享" }).waitFor();
   await page.getByRole("button", { name: "取消归入" }).click();
   await page.getByRole("button", { name: "收起预览" }).click();
   checks.push("所选版本可预览并下载 Markdown，周报归入仍需单独确认");
+
+  await page.getByRole("button", { name: "预览归入项目周报" }).click();
+  await page.getByRole("button", { name: "确认保存并向项目成员共享" }).click();
+  const adoptedLink = page.getByRole("link", { name: "打开已归入的成果版本" });
+  await adoptedLink.waitFor();
+  const savedArtifact = await adoptedLink.getAttribute("href");
+  assert.match(savedArtifact ?? "", /type=weekly_report&artifact=[\w-]+$/);
+  await page.reload();
+  await adoptedLink.waitFor();
+  assert.equal(await adoptedLink.getAttribute("href"), savedArtifact);
+  await shot("developer-weekly-report-saved.png");
+  await adoptedLink.click();
+  await page.waitForURL(/\/generate\?type=weekly_report&artifact=/);
+  assert.match(await page.getByRole("article", { name: "Markdown 渲染预览" }).innerText(), /本次发布限于文字导入和回访对照/);
+  await page.goBack();
+  checks.push("第 3 版归入项目周报后重新进页，仍能打开固定成果正文");
+
+  await page.getByRole("region", { name: "版本修改对照" }).getByRole("button", { name: "补测记录.txt" }).click();
+  await page.getByRole("button", { name: "请忆程核对这条" }).click();
+  await page.waitForFunction(() => document.activeElement?.id === "workbench-message");
+  const requestedFocus = await page.getByLabel("接下来怎么做，直接告诉忆程").inputValue();
+  assert.match(requestedFocus, /补测记录.txt/);
+  checks.push("从原文面板起草核对指令并聚焦输入框");
 
   const submit = page.waitForResponse(response => response.url().endsWith("/turns") && response.request().method() === "POST");
   await page.getByRole("button", { name: "发送", exact: true }).click();
@@ -313,16 +353,57 @@ try {
   const question = page.getByRole("region", { name: "原问题答复" });
   await question.getByText(prompt, { exact: true }).waitFor();
   await shot("research-original-question.png");
+  const stale = new URL(page.url());
+  const exactQuestionId = stale.searchParams.get("questionId");
+  assert.ok(exactQuestionId);
+  stale.searchParams.set("questionId", "older-question");
+  await page.goto(stale.toString());
+  await page.getByText("原问题已变化，请确认你要回答当前问题。").waitFor();
+  assert.equal(await question.count(), 0);
+  await page.getByRole("button", { name: "查看当前问题" }).click();
+  await question.getByText(prompt, { exact: true }).waitFor();
   await question.getByLabel("补充信息").fill("仅使用第一批验收记录，缺少拆分条件的条目不直接比较。");
-  const answering = page.waitForResponse(response => response.url().endsWith("/" + questionMissionId + "/input"));
+  const inputPath = "**/api/missions/" + questionMissionId + "/input";
+  let acceptedQuestion: string | undefined;
+  await page.route(inputPath, async route => {
+    const input = await route.fetch();
+    if (input.ok()) acceptedQuestion = route.request().postDataJSON().questionId;
+    await route.abort("failed");
+  }, { times: 1 });
   await question.getByRole("button", { name: "补充并继续" }).click();
-  const input = await answering;
-  assert.equal(input.ok(), true, await input.text());
-  assert.ok(input.request().postDataJSON().questionId, "必须绑定原问题");
   await page.getByText("原问题答复已提交", { exact: false }).waitFor();
   const answered = await savedRevision(questionMissionId, 1);
+  assert.ok(acceptedQuestion === exactQuestionId && answered.lastAnsweredQuestionId === acceptedQuestion, "丢包后的回执必须绑定原问题");
   assert.ok(answered.events.some(event => event.kind === "INPUT"), "原问题答复必须出现在过程回执");
-  checks.push("从项目首页回答委托的原问题，原 API 收到 questionId，答复回执与后续成果均可核对");
+  checks.push("首页链接绑定原问题，旧链接需显式切换；丢包后恢复原题答复回执，委托立即续稿");
+
+  const bText = "乙方只验收线下活动签到清单。";
+  const clientB = await clientBrief("client-b", bText);
+  const aText = "甲方先核对月度交付范围，暂未确认附件。";
+  const clientA = await clientBrief("client-a", aText);
+  assert.notEqual(clientA.projectId, clientB.projectId);
+  assert.ok(clientA.sources.every(source => !source.text.includes(bText)));
+  const aBrief = page.getByRole("region", { name: "回访变化" });
+  await aBrief.getByRole("button", { name: "我已看过" }).click();
+  await aBrief.getByRole("status").waitFor();
+  await page.getByRole("button", { name: "补资料", exact: true }).click();
+  await page.getByLabel("材料用途").selectOption("FEEDBACK");
+  const clientFeedback = "甲方建议附上交接清单，验收人仍待确认。";
+  await page.getByLabel("补充内容").fill(clientFeedback);
+  await page.getByRole("button", { name: "保存到原项目" }).click();
+  const revised = await savedRevision(clientA.id, 2);
+  assert.equal(revised.outputs[1].id, clientA.outputs[0].id);
+  assert.ok(revised.outputs[0].blocks.some(block => block.text.includes(clientFeedback) && block.text.includes("待核对")));
+  assert.ok(revised.sources.every(source => !source.text.includes(bText)));
+  assert.equal((await snapshot(clientB.id)).outputs[0].id, clientB.outputs[0].id);
+  await page.goto(app + "/projects/" + clientA.projectId);
+  await page.getByRole("region", { name: "项目回访" }).getByRole("link", { name: "查看第 2 版" }).click();
+  const clientCompare = page.getByRole("region", { name: "版本修改对照" });
+  await clientCompare.getByRole("heading", { name: "第 1 版 → 第 2 版" }).waitFor();
+  assert.match(await clientCompare.innerText(), /甲方建议附上交接清单/);
+  await shot("client-docx-feedback-compare.png");
+  checks.push("客户场景：同名 DOCX 分属两项目，反馈仅修订甲方私有稿，乙方材料与版本隔离");
+
   assert.deepEqual(errors, []);
   fs.writeFileSync(path.join(out, "receipt.json"), JSON.stringify({ checkedAt: new Date().toISOString(),
     entry: "normal project page -> v2 bounded delegation preview -> confirm -> workbench", missionId,

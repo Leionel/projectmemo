@@ -92,6 +92,7 @@ import { ExportFormatter } from '../common/ExportFormatter';
 import { DeviceIdentity } from '../common/DeviceIdentity';
 import { MissionPanel } from '../components/MissionPanel';
 import { MissionService } from '../services/MissionService';
+import { ProjectHandoff } from '../components/ProjectHandoff';
 import { MissionWorkspaceItem, MissionWorkspaceSummary } from '../models/Mission';
 import { missionStatusLabel } from '../common/MissionContract';
 import { selectProjectFocus } from '../common/ProjectAttention';
@@ -144,6 +145,7 @@ struct ProjectHome {
     if (this.pageVisible) { router.replaceUrl({ url: 'pages/LoginPage' }); }
   };
   @State homeMission: MissionWorkspaceItem | null = null;
+  @State private handoffRefresh: number = 0;
   @State showEvolution: boolean = false;
   @StorageProp(PMStorageKey.WIDTH_BP) widthBp: string = PMWidthBp.SM;
   // 卡片/通知在 App 已在前台时由 onNewWant 投递；页面可见时用序号驱动消费一次。
@@ -415,6 +417,7 @@ struct ProjectHome {
   }
 
   onPageShow(): void {
+    this.handoffRefresh++;
     this.pageVisible = true;
     this.missionRefreshKey++;
     // NAV-02: 消费可能在热启动时通过通知/卡片写入的参数
@@ -2831,7 +2834,7 @@ struct ProjectHome {
     } else if (index === 2) {
       TaskIcon({ isSelected: this.currentTabIndex === 2, iconSize: 20 })
     } else if (index === 3) {
-      CopilotIcon({ isSelected: this.currentTabIndex === 3, iconSize: 20 })
+      Image($r('app.media.bookmark_spirit_avatar')).width(25).height(25).objectFit(ImageFit.Contain)
     } else {
       ArtifactIcon({ isSelected: this.currentTabIndex === 4, iconSize: 20 })
     }
@@ -3682,6 +3685,8 @@ struct ProjectHome {
               .textOverflow({ overflow: TextOverflow.Ellipsis })
           }
         }.width('100%').alignItems(HorizontalAlign.Start)
+
+        ProjectHandoff({ projectId: this.projectId, refreshEpoch: this.handoffRefresh })
 
         // 2. 当前下一步
         this.HomeFocusView()

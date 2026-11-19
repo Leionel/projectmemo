@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { MessageCircle } from "lucide-react";
+import { BookmarkSpiritIcon } from "./mascot/BookmarkSpiritIcon";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import styles from "./ProjectWorkspace.module.css";
@@ -32,7 +32,7 @@ export function ProjectHeading({ projectId, title, askHref, children, actions }:
     <div className={styles.stickyBar} data-visible={scrolled ? "" : undefined} aria-hidden={scrolled ? undefined : true} inert={!scrolled} data-testid="project-sticky-bar">
       <div className={styles.stickyInner}>
         <strong>{title}</strong>
-        <Link prefetch={false} scroll={false} href={askHref} className={styles.stickyAsk + " focus-ring"} aria-label="打开项目协作对话"><MessageCircle size={14} aria-hidden="true"/>问忆程</Link>
+        <Link prefetch={false} scroll={false} href={askHref} className={styles.stickyAsk + " focus-ring"} aria-label="打开项目协作对话" title="问忆程"><BookmarkSpiritIcon size={28}/></Link>
       </div>
     </div>
   </>;

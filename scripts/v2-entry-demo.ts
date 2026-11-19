@@ -53,6 +53,7 @@ const user = await db.user.create({ data: { username: "v2-entry-" + crypto.rando
 const session = await createSession(user.id);
 const project = await db.project.create({ data: { title: "独立开发版本 · 发布准备", description: "本地合成资料，不含个人项目", goal: "整理下一版本发布说明",
   scenario: "RESEARCH", memberships: { create: { userId: user.id, role: "OWNER" } } } });
+await db.capture.create({ data: { projectId: project.id, sourceType: "TEXT", rawText: "登录流程已完成；移动端输入回归尚未记录；分享入口未验证。" } });
 const researchProject = await db.project.create({ data: { title: "实验阶段汇报 · 科研对照", description: "隔离科研合成资料", goal: "整理实验阶段汇报",
   scenario: "RESEARCH", memberships: { create: { userId: user.id, role: "OWNER" } } } });
 const projects = new Map([["developer", project], ["research", researchProject]]);

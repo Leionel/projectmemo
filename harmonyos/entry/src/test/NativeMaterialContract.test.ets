@@ -9,10 +9,12 @@ export default function nativeMaterialContractTest() {
       expect(nativeMaterialFormat('计划.MD')).assertEqual('MARKDOWN');
       expect(nativeMaterialFormat('data.CSV')).assertEqual('CSV');
       expect(nativeMaterialFormat('简报.docx')).assertEqual('DOCX');
+      expect(nativeMaterialFormat('清单.XLSX')).assertEqual('XLSX');
       expect(nativeMaterialFormat('scan.pdf')).assertEqual('UNSUPPORTED');
       expect(nativeMaterialMime('DOCX')).assertEqual('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
       expect(nativeMaterialLimit('TEXT')).assertEqual(64 * 1024);
       expect(nativeMaterialLimit('DOCX')).assertEqual(2 * 1024 * 1024);
+      expect(nativeMaterialLimit('XLSX')).assertEqual(2 * 1024 * 1024);
     });
     it('share_route_accepts_one_file_uri_only', 0, () => {
       expect(nativeShareFileUri('file://docs/a.txt', undefined)).assertEqual('file://docs/a.txt');
@@ -27,7 +29,7 @@ export default function nativeMaterialContractTest() {
       expect(nativeDraftError('', 'TEXT', 10)).assertEqual('文件没有可读正文，请重新选择');
       expect(nativeDraftError('正文', 'TEXT', 65 * 1024)).assertEqual('文本材料需在 64KB 以内');
       expect(nativeDraftError('正文', 'DOCX', 2 * 1024 * 1024 + 1)).assertEqual('Word 文件需在 2MB 以内');
-      expect(nativeDraftError('正文', 'UNSUPPORTED', 10)).assertEqual('请选择 TXT、Markdown、普通 CSV 或 DOCX 文件');
+      expect(nativeDraftError('正文', 'UNSUPPORTED', 10)).assertEqual('请选择 TXT、Markdown、普通 CSV、DOCX 或 XLSX 文件');
     });
     it('retry_request_id_is_stable_and_scoped', 0, () => {
       const first = nativeMaterialRequestId('mission-a', '客户.txt', '客户希望周五前看到第二版');

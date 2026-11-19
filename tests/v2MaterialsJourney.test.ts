@@ -68,6 +68,7 @@ test("new material cannot resume paused work or access another owner's project",
   expect(after.status).toBe("PAUSED"); expect(after.budgetUsedJson).toEqual(before.budgetUsedJson);
   const other = await start("course");
   await expect(addMissionMaterial(other.u.id, row.id, { requestId: "wrong-owner", text: "无权写入" })).rejects.toMatchObject({ code: "MISSION_NOT_FOUND" });
+  if (!other.result.materialSourceId) throw new Error("导入材料后必须返回来源");
   const source = (await readProjectMaterial(other.p.id, other.result.materialSourceId))!;
   await expect(projectTools.read_project_material.run({ userId: f.u.id, projectId: f.p.id, missionId: row.id }, { sourceId: source.id, sourceHash: source.hash })).rejects.toThrow();
 });

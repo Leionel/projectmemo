@@ -146,6 +146,12 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     await tx.agentMission.update({where:{id:m.id},data:{lastErrorJson:Prisma.DbNull}});
     const run=await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"SUCCESS",provider:decision.provider,trace:json({missionId:m.id,phase:"DECISION",model:decision.model,protocol:decision.protocol,prompt:decision.prompt??null,usage:decision.usage,serialization:decision.serialization,contextManifest}),resultJson:json({kind:choice.kind}),durationMs:Date.now()-started}});
     if(choice.kind==="ask"){
+     const skill = current.runtimeProtocolVersion === 2 && boundedPolicy(current) ? skillContext(current) : null;
+     if ("blocking" in choice && choice.blocking === false && choice.missing === "PRIVATE" && !choice.requirements && skill?.outputId && skill.stageIndex === skill.sequence.length - 1) {
+       await enterObservationCheckpoint(tx, current, { kind: "await_event", outputId: skill.outputId, reason: "DELIVERABLE_READY", subscriptionIds: ["project-materials"] });
+       await event(tx,current.id,"FOLLOWUP_DEFERRED",{outputId:skill.outputId,question:choice.question,contextVersion:current.contextVersion});
+       return null;
+     }
      phase="DECISION";const requirements=gapRequirementsSchema.parse(choice.requirements??{});if(!isFeatureEnabled("MISSION_EVIDENCE_FIT_ENABLED",false))delete requirements.evidenceFitV1;const gapId=randomUUID();phase="COMMIT";
      const evidencePremiseContext=requirements.evidenceFitV1?{constraintsVersion:current.constraintsVersion,scopeVersion:current.researchScopeVersion,goalHash:jsonHash(current.goal)}:undefined;
      const q=await event(tx,m.id,"QUESTION",{question:choice.question,missing:choice.missing,gapId,requirements,evidencePremiseContext,phase:"DECISION"});

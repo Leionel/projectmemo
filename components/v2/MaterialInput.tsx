@@ -1,8 +1,8 @@
 "use client";
 import { useRef, useState, type ChangeEvent } from "react";
 
-export function MaterialInput({ value, name, projectId, onChange, onReadingChange, disabled = false, label = "导入文本材料" }: {
-  value: string; name?: string; projectId: string; onChange: (text: string, name?: string) => void; onReadingChange?: (reading: boolean) => void; disabled?: boolean; label?: string;
+export function MaterialInput({ value, name, projectId, onChange, onReadingChange, disabled = false, required = true, label = "导入文本材料" }: {
+  value: string; name?: string; projectId: string; onChange: (text: string, name?: string) => void; onReadingChange?: (reading: boolean) => void; disabled?: boolean; required?: boolean; label?: string;
 }) {
   const revision = useRef(0), [error, setError] = useState(""), [reading, setReading] = useState(false);
   async function importFile(event: ChangeEvent<HTMLInputElement>) {
@@ -31,7 +31,7 @@ export function MaterialInput({ value, name, projectId, onChange, onReadingChang
     }
   }
   return <>
-    <label>{label}<textarea value={value} maxLength={20000} disabled={disabled || reading} required rows={4}
+    <label>{label}<textarea value={value} maxLength={20000} disabled={disabled || reading} required={required} rows={4}
       onChange={event => { revision.current++; setError(""); onChange(event.target.value, name); }} /></label>
     <label>从文件导入<input type="file" aria-label="导入材料文件" accept=".txt,.md,.csv,.docx,.xlsx" disabled={disabled || reading} onChange={event => void importFile(event)} /></label>
     {reading && <p role="status">正在提取材料…</p>}

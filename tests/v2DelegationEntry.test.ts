@@ -76,3 +76,28 @@ test("V2 entry is closed when the feature flags are off", async () => {
     .rejects.toMatchObject({ code: "MISSION_V2_DISABLED" });
   process.env.MISSION_V2_ENABLED = "true";
 });
+
+test("uses existing authorized material without reimport and rejects removal before initial confirmation", async () => {
+  const { previewV2Delegation, confirmV2Delegation } = await import("@/lib/mission/v2DelegationService");
+  const project = await db.project.create({ data: { title: "项目已有资料", description: "", goal: "写发布说明", scenario: "RESEARCH",
+    memberships: { create: { userId, role: "OWNER" } } } });
+  const input = { goal: "核对测试记录并更新发布说明" };
+  await expect(previewV2Delegation(userId, project.id, input)).rejects.toMatchObject({ code: "DELEGATION_MATERIAL_REQUIRED" });
+  const original = await db.capture.create({ data: { projectId: project.id, sourceType: "TEXT", rawText: "项目中的原始测试记录。" } });
+  const preview = await previewV2Delegation(userId, project.id, input);
+  const body = { ...input, previewHash: preview.previewHash, expiresAt: preview.expiresAt, requestId: "existing-only" };
+  await db.capture.delete({ where: { id: original.id } });
+  await expect(confirmV2Delegation(userId, project.id, body)).rejects.toMatchObject({ code: "DELEGATION_MATERIAL_REQUIRED" });
+  await db.capture.create({ data: { projectId: project.id, sourceType: "TEXT", rawText: "补回项目原始测试记录。" } });
+  const result = await confirmV2Delegation(userId, project.id, body);
+  expect(result.materialSourceId).toBeNull();
+  expect(await db.capture.count({ where: { projectId: project.id } })).toBe(1);
+  expect(await confirmV2Delegation(userId, project.id, body)).toMatchObject({ missionId: result.missionId, alreadyCreated: true });
+  const route = await import("@/app/api/projects/[id]/v2-delegation/route");
+  const { createSession } = await import("@/lib/auth/session");
+  const auth = await createSession(userId);
+  const response = await route.GET(new Request("http://localhost", { headers: { Authorization: "Bearer " + auth.token } }),
+    { params: Promise.resolve({ id: project.id }) });
+  expect(response.status).toBe(200);
+  expect(await response.json()).toMatchObject({ enabled: true, canStart: true, limits: { days: 7 } });
+});

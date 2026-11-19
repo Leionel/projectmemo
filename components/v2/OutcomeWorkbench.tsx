@@ -14,6 +14,7 @@ import { MissionMaterialForm } from "./MissionMaterialForm";
 import { RevisionComparison, type OpenRevisionSource } from "./RevisionComparison";
 import { MissionQuestionPanel } from "./MissionQuestionPanel";
 import { WorkbenchDelivery } from "./WorkbenchDelivery";
+import { BookmarkSpirit } from "@/components/mascot/BookmarkSpirit";
 
 class RequestError extends Error {
   constructor(message: string, readonly status: number) { super(message); }
@@ -64,6 +65,7 @@ export function OutcomeWorkbench({ missionId, entry, initialRevision, initialBas
   const [sprintChecked, setSprintChecked] = useState(false);
   const [hasPending, setHasPending] = useState(false);
   const [confirmingEnd, setConfirmingEnd] = useState(false);
+  const [controlBusy, setControlBusy] = useState(false);
   const pending = useRef<Pending | null>(null), conversationId = useRef<string | null>(null);
   const snapshotRead = useRef({ seq: 0 });
   const refresh = useCallback(async () => {
@@ -170,8 +172,8 @@ export function OutcomeWorkbench({ missionId, entry, initialRevision, initialBas
     finally { setBusy(false); }
   }
   async function control(action: "pause" | "cancel" | "resume"): Promise<boolean> {
-    if (!snapshot || busy) return false;
-    setBusy(true); setError("");
+    if (!snapshot || controlBusy) return false;
+    setControlBusy(true); setError("");
     try {
       // Controls bind to the current persisted version, not the last poll snapshot.
       const detail = await api("/api/missions/" + encodeURIComponent(snapshot.id));
@@ -181,7 +183,7 @@ export function OutcomeWorkbench({ missionId, entry, initialRevision, initialBas
       await refresh();
       return true;
     } catch (e) { setError(e instanceof Error ? e.message : "操作未确认，请重试"); return false; }
-    finally { setBusy(false); }
+    finally { setControlBusy(false); }
   }
   function switchSample(value: boolean) {
     setResearch(value); setSnapshot(workbenchFixture(1, value)); setSelectedRevision(null); setSourceSelection(null); setCompareRevision(null); setFeedbackSourceId(undefined);
@@ -193,6 +195,9 @@ export function OutcomeWorkbench({ missionId, entry, initialRevision, initialBas
   const latestOutput = snapshot.outputs[0] ?? null;
   const artifact = snapshot.stageArtifacts.find(item => item.id === selectedArtifactId) ?? snapshot.stageArtifacts[0];
   const stageReady = snapshot.reasonCode === "SKILL_DELIVERABLE_READY";
+  const stopping = snapshot.reasonCode === "STOP_REQUESTED_IN_FLIGHT";
+  const canPause = !stopping && ["READY", "RUNNING", "WAITING_INPUT", "WAITING_APPROVAL"].includes(snapshot.status);
+  const canEnd = !["CANCELLED", "SUCCEEDED"].includes(snapshot.status);
   const olderVersions = output ? snapshot.outputs.filter(row => row.revision < output.revision) : [];
   const previous = compareRevision === null ? olderVersions[0] : olderVersions.find(row => row.revision === compareRevision);
   const selectedSourceKey = sourceSelection?.key;
@@ -234,8 +239,17 @@ export function OutcomeWorkbench({ missionId, entry, initialRevision, initialBas
       <span>{live ? (snapshot.provider.startsWith("INJECTED") ? "隔离流程演示 · 注入模型" : "原委托实时读回") : "可点击交互样例 · 未运行模型"}</span></div>
     {!liveGame && <header className={styles.heading}><div><p>{snapshot.projectTitle}</p><h1>{snapshot.goal}</h1>
       <div className={styles.state} role="status"><span aria-hidden="true" className={styles.dot} />
-        {stageReady ? snapshot.reason : phaseLabels[snapshot.phase] ?? snapshot.reason}</div></div>
-      {live ? <div className={styles.controls}><button type="button" className={styles.primary} onClick={openMaterial}><Plus size={16} aria-hidden />补资料</button><button className={styles.secondary} onClick={() => void refresh()}><RefreshCw size={15} aria-hidden="true" />重新读取</button>{stageReady && <button className={styles.secondary} disabled={busy} onClick={() => void control("resume")}>继续跟进</button>}<button className={styles.secondary} disabled={busy || snapshot.status !== "READY" && snapshot.phase !== "WAITING_OBSERVATION"} onClick={() => void control("pause")}>暂停跟进</button><button className={styles.secondary} disabled={busy} onClick={() => void (confirmingEnd ? control("cancel") : setConfirmingEnd(true))}>{confirmingEnd ? "确认结束跟进" : "结束跟进"}</button></div> :
+        {stageReady || stopping ? snapshot.reason : phaseLabels[snapshot.phase] ?? snapshot.reason}</div></div>
+      {live ? <div className={styles.controls}>
+        <button type="button" className={styles.secondary} onClick={openMaterial}><Plus size={16} aria-hidden />补资料</button>
+        {snapshot.status === "PAUSED" ? <button className={styles.secondary} disabled={controlBusy} onClick={() => void control("resume")}>继续跟进</button> :
+          canPause && <button className={styles.secondary} disabled={controlBusy} onClick={() => void control("pause")}>暂停跟进</button>}
+        <details className={styles.more}><summary>更多</summary><div>
+          <button className={styles.secondary} onClick={() => void refresh()}><RefreshCw size={15} aria-hidden="true" />重新读取</button>
+          {canEnd && <button className={styles.secondary} disabled={controlBusy} onClick={() => void (confirmingEnd ? control("cancel") : setConfirmingEnd(true))}>
+            {confirmingEnd ? "确认结束跟进" : "结束跟进"}</button>}
+        </div></details>
+      </div> :
         <div className={styles.sampleChoices}><button aria-pressed={!research} onClick={() => switchSample(false)}>开发样例</button>
           <button aria-pressed={research} onClick={() => switchSample(true)}>科研对照</button></div>}
     </header>}
@@ -243,7 +257,9 @@ export function OutcomeWorkbench({ missionId, entry, initialRevision, initialBas
       disabled={snapshot.outputs.length >= 2} onClick={() => { setSnapshot(workbenchFixture(2, research)); selectRevision(2); }}>
       载入新资料样例 <ArrowUpRight size={15} aria-hidden="true" /></button></div>}
     {error && <div role="alert" className={styles.error}>{error}{hasPending && "；原请求编号已保留，再次发送会重试原请求。"}</div>}
-    {live && !liveGame && <ReentryBriefPanel key={missionId} missionId={missionId} projectId={snapshot.projectId} outputs={snapshot.outputs}
+    {live && !liveGame && !latestOutput && !hasQuestion && snapshot.phase === "RUNNING" && !stopping &&
+      <div className={styles.running}><BookmarkSpirit pose="writing" size={64} quiet /><p>忆程正在推进这份成果。你可以离开页面，稍后回来查看。</p></div>}
+    {live && !liveGame && <ReentryBriefPanel key={missionId} missionId={missionId} projectId={snapshot.projectId} outputs={snapshot.outputs} sources={snapshot.sources}
       onOpenRevision={openRevision} onAddMaterial={openMaterial} onOpenQuestion={openQuestion} />}
     {live && showQuestion && !liveGame && <MissionQuestionPanel key={snapshot.pendingQuestionId} questionId={snapshot.pendingQuestionId}
       missionId={missionId} projectId={snapshot.projectId} version={snapshot.version}
@@ -254,22 +270,18 @@ export function OutcomeWorkbench({ missionId, entry, initialRevision, initialBas
     </div>}
     {answerSaved && !hasQuestion && <p role="status" className={styles.notice}>原问题答复已提交，可在过程回执里查看后续进展。</p>}
     {entry === "question" && !hasQuestion && !answerSaved && <p role="status" className={styles.notice}>原委托目前没有等待答复的问题。</p>}
-    {live && snapshot.challengesEnabled && !liveGame && <section className={styles.gameEntry} aria-label="成果玩法入口">
-      <h2>成果演练</h2>
-      <div className={styles.gameEntryActions}>{GAME_ENTRIES.map(({ key, label, icon: Icon }) =>
-        <button type="button" key={key} onClick={() => setLiveGame(key)}><Icon size={16} aria-hidden />{label}</button>)}</div>
-    </section>}
+
     {live && snapshot.challengesEnabled && liveGame && <MissionGames missionId={snapshot.id} snapshot={snapshot} output={latestOutput} latestOutput={latestOutput}
       tab={liveGame} onTab={setLiveGame} onExit={() => setLiveGame(null)} onHandoff={reread} onOpenRevision={openRevision}
       onReviewFeedback={openFeedbackChanges} onPauseMission={pauseFromGame} onDirective={deliver} />}
     {!liveGame && <div className={styles.workspace}>
-      <aside className={styles.progress} aria-label="Agent过程反馈"><h2>这份成果的进展</h2>
+      <aside className={styles.progress} aria-label="Agent过程反馈"><details><summary>过程与用量</summary>
         <p className={styles.objective}>{snapshot.workingObjective}</p>
         <ol>{snapshot.events.slice(0, 8).map(event => { const Icon = event.kind === "TOOL_STARTED" || event.kind === "CLAIMED" ? Clock3 : event.kind === "SKILL_ENTERED" ? Search : event.kind === "SKILL_HANDOFF" ? ArrowUpRight : event.kind === "OUTPUT_SAVED" ? FileCheck2 : event.kind?.startsWith("USER_") ? MessageSquareText : Check;
           return <li key={event.id}><Icon size={14} aria-hidden="true" /><div>{event.label}<time dateTime={event.at}>{evidenceTime(event.at, true)}</time></div></li>; })}</ol>
         <div className={styles.usage}>{live ? <><span>模型调用 {snapshot.models}</span><span>工具调用 {snapshot.tools}</span></> : "样例操作不会调用模型"}
           <small>{live ? "读取时间" : "样例时点"} {new Date(snapshot.checkedAt).toLocaleTimeString("zh-CN", { timeZone: "Asia/Shanghai" })}（北京时间）</small></div>
-      </aside>
+      </details></aside>
       <section className={styles.document} id="workbench-document" aria-label="项目成果" tabIndex={-1}>
         {artifact && <section className={styles.stageArtifacts} aria-label="阶段成果">
           <div className={styles.documentHead}><div className={styles.views}><h2><FileText size={15} aria-hidden="true" />阶段成果</h2></div>
@@ -309,6 +321,11 @@ export function OutcomeWorkbench({ missionId, entry, initialRevision, initialBas
         </div> : <p className={styles.empty}>{selectedRevision !== null ? "所选稿件暂不可读，请重新选择版本。" : "原委托还没有生成报告稿。"}</p>}
         {live && output && <WorkbenchDelivery key={output.id + ":" + (previous?.revision ?? 0)} missionId={missionId}
           projectId={snapshot.projectId} output={output} baseline={previous?.revision} adoptionEnabled={snapshot.artifactAdoptionEnabled} />}
+    {live && output && snapshot.challengesEnabled && <section className={styles.gameEntry} aria-label="成果玩法入口">
+      <h2>成果演练</h2>
+      <div className={styles.gameEntryActions}>{GAME_ENTRIES.map(({ key, label, icon: Icon }) =>
+        <button type="button" key={key} onClick={() => setLiveGame(key)}><Icon size={16} aria-hidden />{label}</button>)}</div>
+    </section>}
         {!live && <div className={styles.games}><span>围绕这份成果试一试</span>
           <button aria-pressed={game === "mentor"} onClick={() => setGame(game === "mentor" ? null : "mentor")}>严格导师</button>
           <button aria-pressed={game === "evidence"} onClick={() => setGame(game === "evidence" ? null : "evidence")}>证据侦探</button>

@@ -21,7 +21,6 @@ async function openPage() {
   return page;
 }
 let page = await openPage();
-const material = "登录流程已完成；移动端输入回归尚未记录；分享入口未验证。";
 async function shot(name: string) {
   // Capture sticky navigation in its resting position in the full-page receipt.
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
@@ -83,14 +82,14 @@ async function leaveAndReturn(missionId: string, name: string, material: string,
 
 async function clientBrief(scenario: string, brief: string) {
   await page.goto(control + "/open?scenario=" + scenario);
+  await page.getByText("补资料或选场景", { exact: true }).click();
   await page.getByLabel("起步场景").selectOption("client");
   await page.getByLabel("导入材料文件").setInputFiles({
     name: "交付简报.docx", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     buffer: Buffer.from(docxMaterial(brief)),
   });
-  await page.getByRole("button", { name: "预览持续范围" }).click();
-  await page.getByText("仅本项目资料；关闭此项目的个人上下文").waitFor();
-  await page.getByRole("button", { name: "确认并开始" }).click();
+  await page.getByText(/本项目将关闭个人上下文/).waitFor();
+  await page.getByRole("button", { name: "交给忆程跟进", exact: true }).click();
   await page.waitForURL(/\/v2\/workbench\?missionId=/, { timeout: 90000 });
   const id = new URL(page.url()).searchParams.get("missionId")!;
   const view = await savedRevision(id, 1);
@@ -102,23 +101,13 @@ try {
   await page.getByRole("link", { name: "打开项目并完成一次托付" }).click();
   await page.getByRole("heading", { name: "交给忆程持续跟进" }).waitFor({ timeout: 60000 });
   await page.waitForTimeout(1500);
-  const goalInput = page.getByLabel("这次要完成什么"), materialInput = page.getByLabel("导入文本材料");
-  await goalInput.fill("整理下一版本发布说明");
-  await materialInput.fill(material);
-  const prepare = page.getByRole("button", { name: "预览持续范围" });
-  for (let index = 0; index < 40 && !(await prepare.isEnabled()); index++) await page.waitForTimeout(250);
-  assert.equal(await prepare.isEnabled(), true, "预览按钮在填写后仍不可用");
-  await prepare.click();
-
-  await page.getByRole("heading", { name: "确认这次持续跟进的范围" }).waitFor();
-  await page.getByText("联网检索、公开研究、业务写入、自动外发").waitFor();
-  assert.match(await page.locator("body").innerText(), /可持续到/);
-  assert.match(await page.locator("body").innerText(), /调用上限/);
+  await page.getByLabel("这次要完成什么").fill("整理下一版本发布说明");
+  const start = page.getByRole("button", { name: "交给忆程跟进", exact: true });
+  await page.getByText(/使用当前项目中获准的资料/).waitFor();
+  assert.ok(await page.getByRole("link", { name: "问忆程", exact: true }).locator('img[src*="avatar.png"]').count());
   await shot("preview.png");
-  checks.push("normal project page: import text material -> bounded delegation preview (scope, expiry, limits, excluded effects)");
-
-  const confirm = page.getByRole("button", { name: "确认并开始" });
-  await confirm.click();
+  await start.click();
+  checks.push("项目已有资料直接使用，范围和预算在授权前可见，一次点击开始；问忆程入口显示精灵头像");
   await page.waitForURL(/\/v2\/workbench\?missionId=/, { timeout: 90000 });
   const missionId = new URL(page.url()).searchParams.get("missionId")!;
   await page.getByRole("button", { name: "第 1 版", exact: true }).waitFor({ timeout: 90000 });
@@ -128,12 +117,13 @@ try {
   assert.ok(first.sources.some((source: { text: string }) => source.text.includes("登录流程")));
   await page.getByRole("button", { name: "定位原记录" }).first().click();
   assert.match(await page.getByTestId("source-excerpt").innerText(), /登录流程/);
+  await page.getByText("过程与用量", { exact: true }).click();
   await page.getByText("步骤回执已保存").first().waitFor();
   assert.match(await page.locator("aside").first().innerText(), /模型调用/);
   checks.push("one confirmation created the real v2 Mission and first private version; evidence, process and provider are readable");
 
   const firstBrief = page.getByRole("region", { name: "回访变化" });
-  await firstBrief.getByRole("button", { name: "我已看过" }).click();
+  await firstBrief.getByRole("button", { name: "打开首稿", exact: true }).click();
   await firstBrief.getByRole("status").waitFor();
   assert.equal((await snapshot(missionId)).version, first.version);
   const returned = await leaveAndReturn(missionId, "补测记录.txt", "移动端输入回归已补测；分享入口仍未验证。", "developer",
@@ -157,6 +147,7 @@ try {
     await route.fetch();
     await route.abort("failed");
   });
+  await page.getByText(/查看回访记录/).click();
   await page.getByRole("button", { name: "我已看过" }).click();
   await page.getByRole("button", { name: "重试原回执" }).click();
   await page.getByRole("region", { name: "回访变化" }).getByRole("status").waitFor();
@@ -244,6 +235,7 @@ try {
   await shot("developer-feedback-compare.png");
   checks.push("交付彩排反馈重新唤醒原委托，第 5 版逐条定位引用反馈的变化");
 
+  await page.getByText("更多", { exact: true }).click();
   await page.getByRole("button", { name: "重新读取" }).click();
   await page.getByRole("button", { name: "暂停跟进" }).click();
   await page.getByText("已收到暂停请求，后台不再派发新步骤。").waitFor({ timeout: 30000 });
@@ -267,17 +259,17 @@ try {
 
   await page.setViewportSize({ width: 1440, height: 1100 });
   await page.goto(control + "/open?scenario=research");
+  await page.getByText("补资料或选场景", { exact: true }).click();
   await page.getByLabel("起步场景").selectOption("research");
   await page.getByLabel("这次要完成什么").fill("整理实验阶段汇报和待核对条件");
   await page.getByLabel("导入文本材料").fill("实验记录：两组使用不同数据拆分；准确率不能直接比较。");
-  await page.getByRole("button", { name: "预览持续范围" }).click();
-  await page.getByRole("button", { name: "确认并开始" }).click();
+  await page.getByRole("button", { name: "交给忆程跟进", exact: true }).click();
   await page.waitForURL(/\/v2\/workbench\?missionId=/, { timeout: 90000 });
   const researchId = new URL(page.url()).searchParams.get("missionId")!;
   assert.notEqual(researchId, missionId);
   const researchFirst = await savedRevision(researchId, 1);
   assert.notEqual(researchFirst.projectId, first.projectId);
-  await page.getByRole("region", { name: "回访变化" }).getByRole("button", { name: "我已看过" }).click();
+  await page.getByRole("region", { name: "回访变化" }).getByRole("button", { name: "打开首稿" }).click();
   await page.getByRole("region", { name: "回访变化" }).getByRole("status").waitFor();
   const researchSecond = await leaveAndReturn(researchId, "实验补记.txt", "实验补记：补齐拆分描述；评估脚本版本仍未知，暂不直接比较。", "research");
   assert.equal(researchSecond.outputs[1].id, researchFirst.outputs[0].id);
@@ -313,11 +305,21 @@ try {
     await page.goto(app + "/projects/" + shared.projectId);
     await page.getByRole("region", { name: "项目回访" }).getByRole("link", { name: "查看第 3 版" }).click();
     await page.getByRole("heading", { name: "第 1 版 → 第 3 版" }).waitFor();
-    const mobileView = await mobile.get(missionPath + "/workbench");
+    const handoff = await mobile.get(projectPath + "/v2-delegation");
+    assert.equal(handoff.status(), 200, await handoff.text());
+    assert.ok((await handoff.json()).items.some((item: { id: string; output?: { revision: number }; baseline?: number }) =>
+      item.id === researchId && item.output?.revision === 3 && item.baseline === 1));
+    const mobileView = await mobile.get(missionPath + "/workbench?revision=3&from=1");
     assert.equal(mobileView.status(), 200, await mobileView.text());
     const mobileSnapshot: WorkbenchSnapshot = await mobileView.json();
     assert.equal(mobileSnapshot.id, researchId);
     assert.equal(mobileSnapshot.outputs[0].id, shared.outputs[0].id);
+    assert.equal(mobileSnapshot.comparison?.baselineRevision, 1);
+    assert.equal(mobileSnapshot.comparison?.revision, 3);
+    assert.ok(mobileSnapshot.comparison?.addedKeys.some(key => key.startsWith(sourceId + "@")));
+    const delivery = await mobile.get(missionPath + "/outputs/" + shared.outputs[0].id + "/delivery?revision=3&from=1");
+    assert.equal(delivery.status(), 200, await delivery.text());
+    assert.match((await delivery.json()).markdown, /第 1 版 → 第 3 版/);
     const read = { requestId: crypto.randomUUID(), seenSeq: 0, seenOutputRevision: 3 };
     for (let attempt = 0; attempt < 2; attempt++) {
       const reply = await mobile.post(missionPath + "/reentry-brief", { data: read });
@@ -336,14 +338,14 @@ try {
     assert.equal(pausedShared.status, "PAUSED");
     assert.equal(pausedShared.version, shared.version + 1);
     assert.equal(pausedShared.outputs[0].id, shared.outputs[0].id);
-    checks.push("跨端 API 演练：原生 Bearer 材料确认与重试 → Web 回访同稿 → 手机已读、暂停各重试一次，幂等且两端状态一致");
+    checks.push("跨端 API 演练：原生 Bearer 材料确认与重试 → Web 与原生接口回访同稿、对照与导出 → 手机已读、暂停各重试一次，幂等且两端状态一致");
   } finally { await mobile.dispose(); }
 
   await page.goto(control + "/open?scenario=research");
+  await page.getByText("补资料或选场景", { exact: true }).click();
   await page.getByLabel("这次要完成什么").fill("整理本轮验收报告");
   await page.getByLabel("导入文本材料").fill("第一批验收仅检查已记录的拆分与评估条件。");
-  await page.getByRole("button", { name: "预览持续范围" }).click();
-  await page.getByRole("button", { name: "确认并开始" }).click();
+  await page.getByRole("button", { name: "交给忆程跟进", exact: true }).click();
   await page.waitForURL(/\/v2\/workbench\?missionId=/, { timeout: 90000 });
   const questionMissionId = new URL(page.url()).searchParams.get("missionId")!;
   const prompt = "这轮验收采用哪个口径？";
@@ -384,7 +386,7 @@ try {
   assert.notEqual(clientA.projectId, clientB.projectId);
   assert.ok(clientA.sources.every(source => !source.text.includes(bText)));
   const aBrief = page.getByRole("region", { name: "回访变化" });
-  await aBrief.getByRole("button", { name: "我已看过" }).click();
+  await aBrief.getByRole("button", { name: "打开首稿" }).click();
   await aBrief.getByRole("status").waitFor();
   await page.getByRole("button", { name: "补资料", exact: true }).click();
   await page.getByLabel("材料用途").selectOption("FEEDBACK");

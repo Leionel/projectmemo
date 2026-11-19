@@ -9,6 +9,9 @@ import { createMissionInTx, editContinuationPolicy } from "./missionService";
 import { boundedInvestigationPolicySchema } from "@/lib/types/mission";
 import { parseProjectMaterial } from "@/lib/intake/projectMaterial";
 import { PROJECT_PRESET_IDS } from "@/lib/intake/projectPresets";
+import { sourceUse } from "@/lib/continuity/sourcePolicy";
+import { readProjectMaterial } from "./sourceSignals";
+import { V2_DELEGATION_LIMITS } from "@/lib/types/v2Delegation";
 
 /**
  * Product entry for a V2 bounded continuous delegation.
@@ -21,10 +24,10 @@ import { PROJECT_PRESET_IDS } from "@/lib/intake/projectPresets";
 const MAX_MATERIAL = 20000;
 const previewInput = z.object({
   goal: z.string().trim().min(3).max(300),
-  materialText: z.string().trim().min(1).max(MAX_MATERIAL),
+  materialText: z.string().trim().max(MAX_MATERIAL).default(""),
   materialName: z.string().trim().min(1).max(180).optional(),
   presetId: z.enum(PROJECT_PRESET_IDS).optional(),
-  expiresInDays: z.number().int().min(1).max(30).default(7),
+  expiresInDays: z.number().int().min(1).max(30).default(V2_DELEGATION_LIMITS.days),
 }).strict();
 const confirmInput = previewInput.extend({
   requestId: z.string().min(1).max(128),
@@ -41,7 +44,7 @@ function requireDelegationEntry() {
 export function delegationPolicy(expiresAt: string) {
   return boundedInvestigationPolicySchema.parse({
     mode: "BOUNDED_INVESTIGATION", schemaVersion: 1, expiresAt,
-    checkEveryMinutes: 60, maxModels: 24, maxTools: 32, maxMetadataRequests: 0,
+    checkEveryMinutes: 60, maxModels: V2_DELEGATION_LIMITS.maxModels, maxTools: V2_DELEGATION_LIMITS.maxTools, maxMetadataRequests: 0,
     allowedTools: ["read_project_material", "save_mission_output", "inspect_project"],
     connectionIds: [], trackBranchHead: false, timezone: "Asia/Shanghai",
   });
@@ -49,13 +52,28 @@ export function delegationPolicy(expiresAt: string) {
 
 function canonicalPreview(projectId: string, body: z.infer<typeof previewInput>, expiresAt: string) {
   const policy = delegationPolicy(expiresAt);
-  const material = parseProjectMaterial(body.materialText, body.materialName), materialText = material.text;
+  const material = body.materialText ? parseProjectMaterial(body.materialText, body.materialName) : null;
+  if (!material && body.materialName) throw new AppError("DELEGATION_MATERIAL_REQUIRED", "请重新导入该文件，或直接使用项目已有资料", 422);
+  const materialText = material?.text ?? "";
   const payload = {
     schemaVersion: 1 as const, projectId, goal: body.goal, materialTextHash: jsonHash(materialText),
     materialLength: materialText.length, expiresAt, policyHash: jsonHash(policy),
     ...(body.materialName ? { materialName: body.materialName } : {}), ...(body.presetId ? { presetId: body.presetId } : {}),
   };
   return { payload, previewHash: jsonHash(payload), policy, materialText, material };
+}
+
+async function requireExistingMaterial(userId: string, projectId: string, tx: Tx = db) {
+  const [captures, attachments] = await Promise.all([
+    tx.capture.findMany({ where: { projectId, rawText: { not: "" } }, orderBy: { createdAt: "desc" }, take: 24, select: { id: true } }),
+    tx.attachment.findMany({ where: { projectId, extractionStatus: "SUCCESS" }, orderBy: { createdAt: "desc" }, take: 24, select: { id: true } }),
+  ]);
+  for (const id of [...captures.map(row => "capture:" + row.id), ...attachments.map(row => "attachment:" + row.id)]) {
+    if ((await sourceUse(userId, projectId, id, tx)).state !== "ALLOWED") continue;
+    const source = await readProjectMaterial(projectId, id, tx);
+    if (source?.text.trim()) return;
+  }
+  throw new AppError("DELEGATION_MATERIAL_REQUIRED", "这个项目还没有可用于跟进的资料，请先补一份", 422);
 }
 
 const CAPABILITIES = {
@@ -71,10 +89,11 @@ export async function previewV2Delegation(userId: string, projectId: string, raw
   await assertOwner(userId, projectId);
   const expiresAt = new Date(Date.now() + body.expiresInDays * 86400000).toISOString();
   const canonical = canonicalPreview(projectId, body, expiresAt);
+  if (!canonical.material) await requireExistingMaterial(userId, projectId);
   return {
     schemaVersion: 1 as const, projectId, goal: body.goal,
     material: { length: canonical.materialText.length, preview: canonical.materialText.slice(0, 400),
-      format: canonical.material.format, name: canonical.material.name, rows: canonical.material.rows, columns: canonical.material.columns },
+      format: canonical.material?.format ?? null, name: canonical.material?.name ?? null, rows: canonical.material?.rows, columns: canonical.material?.columns },
     expiresAt, policy: canonical.policy, capabilities: CAPABILITIES,
     previewHash: canonical.previewHash,
     personalMemoryMode: body.presetId === "client" ? "PROJECT_ONLY" : "UNCHANGED",
@@ -84,14 +103,14 @@ export async function previewV2Delegation(userId: string, projectId: string, raw
 }
 
 export type V2DelegationResult = {
-  missionId: string; projectId: string; materialSourceId: string; policyHash: string;
+  missionId: string; projectId: string; materialSourceId: string | null; policyHash: string;
   expiresAt: string; workbenchUrl: string; alreadyCreated: boolean;
 };
 
 type V2DelegationReceipt = {
   schemaVersion: 1; requestId: string; projectId: string; ownerUserId: string;
   goalHash: string; materialHash: string; previewHash: string; policyHash: string;
-  expiresAt: string; materialSourceId: string; confirmedAt: string;
+  expiresAt: string; materialSourceId: string | null; confirmedAt: string;
   materialName?: string; presetId?: string;
 };
 
@@ -123,7 +142,7 @@ function idempotentResult(mission: { id: string; projectId: string; planJson: un
 export async function confirmV2Delegation(userId: string, projectId: string, raw: unknown): Promise<V2DelegationResult> {
   requireDelegationEntry();
   const body = confirmInput.parse(raw);
-  const goal = body.goal, materialText = parseProjectMaterial(body.materialText, body.materialName).text;
+  const goal = body.goal, materialText = body.materialText ? parseProjectMaterial(body.materialText, body.materialName).text : "";
   const createRequestId = "v2-delegation:" + body.requestId;
   const materialRequestId = "v2-material:" + body.requestId;
   for (let attempt = 0; ; attempt++) {
@@ -141,11 +160,12 @@ export async function confirmV2Delegation(userId: string, projectId: string, raw
         const canonical = canonicalPreview(projectId, body, body.expiresAt);
         if (canonical.previewHash !== body.previewHash)
           throw new AppError("DELEGATION_PREVIEW_CHANGED", "预览内容已变化，请重新核对范围与期限", 409);
-        const capture = await tx.capture.upsert({
+        if (!canonical.material) await requireExistingMaterial(userId, projectId, tx);
+        const capture = canonical.material ? await tx.capture.upsert({
           where: { projectId_requestId: { projectId, requestId: materialRequestId } },
           create: { projectId, requestId: materialRequestId, requestHash: jsonHash(canonical.materialText), rawText: canonical.materialText, sourceType: "TEXT" },
           update: {},
-        });
+        }) : null;
         if (body.presetId === "client") await tx.projectMembership.updateMany({
           where: { userId, projectId, personalMemoryMode: { not: "PROJECT_ONLY" } },
           data: { personalMemoryMode: "PROJECT_ONLY", personalMemoryModeVersion: { increment: 1 } },
@@ -159,7 +179,7 @@ export async function confirmV2Delegation(userId: string, projectId: string, raw
         const receipt: V2DelegationReceipt = {
           schemaVersion: 1, requestId: body.requestId, projectId, ownerUserId: userId,
           goalHash: jsonHash(goal), materialHash: jsonHash(materialText), previewHash: body.previewHash,
-          policyHash, expiresAt: canonical.policy.expiresAt, materialSourceId: "capture:" + capture.id,
+          policyHash, expiresAt: canonical.policy.expiresAt, materialSourceId: capture ? "capture:" + capture.id : null,
           confirmedAt: new Date().toISOString(),
           ...(body.materialName ? { materialName: body.materialName } : {}), ...(body.presetId ? { presetId: body.presetId } : {}),
         };

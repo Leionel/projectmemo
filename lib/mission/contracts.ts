@@ -27,14 +27,16 @@ export const createMissionSchema = z.object({
 export const commandSchema = z.object({ requestId: z.string().min(1).max(128), expectedVersion: z.number().int().positive(), questionId: z.string().optional(), answer: z.string().trim().min(1).max(3000).optional(), decision: z.enum(["APPROVED", "REJECTED"]).optional(), proposalHash: z.string().optional(), evidenceReview: evidenceReviewSchema.optional() }).strict();
 const experienceUseSchema = z.object({ experienceId: z.string().min(1).max(160),
   disposition: z.enum(["ADOPT", "ADAPT", "REJECT", "INVESTIGATE"]), reason: z.string().max(300).optional() }).strict();
+const askChoiceSchema = z.object({ kind: z.literal("ask"), question: z.string().min(1).max(500), missing: z.enum(["PRIVATE", "CRITICAL", "CONFLICT"]), requirements: gapRequirementsSchema.optional(), experienceUse: z.array(experienceUseSchema).max(3).optional() }).strict();
 export const choiceSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("tool"), tool: z.string(), args: z.unknown(), summary: z.string().max(240).default(""), experienceUse: z.array(experienceUseSchema).max(3).optional() }).strict(),
-  z.object({ kind: z.literal("ask"), question: z.string().min(1).max(500), missing: z.enum(["PRIVATE", "CRITICAL", "CONFLICT"]), requirements: gapRequirementsSchema.optional(), experienceUse: z.array(experienceUseSchema).max(3).optional() }).strict(),
+  askChoiceSchema,
   z.object({ kind: z.literal("finish"), outputId: z.string().min(1), experienceUse: z.array(experienceUseSchema).max(3).optional() }).strict(),
 ]);
 export type Choice = z.infer<typeof choiceSchema>;
 export const awaitEventChoiceSchema = z.object({ kind: z.literal("await_event"), outputId: z.string().min(1), reason: z.enum(["DELIVERABLE_READY", "NO_NEW_INFORMATION"]), subscriptionIds: z.array(z.string().min(1)).min(1).max(4), experienceUse: z.array(experienceUseSchema).max(3).optional() }).strict();
-export const choiceV2Schema = z.discriminatedUnion("kind", [...choiceSchema.options, awaitEventChoiceSchema]);
+export const choiceV2Schema = z.discriminatedUnion("kind", [choiceSchema.options[0],
+  askChoiceSchema.extend({ blocking: z.boolean().optional() }), choiceSchema.options[2], awaitEventChoiceSchema]);
 export function choiceSchemaFor(version: number) { return version === 2 ? choiceV2Schema : choiceSchema; }
 export type RuntimeChoice = z.infer<typeof choiceV2Schema>;
 export type Decision = { prompt?: { id: string; version: string; purpose: string; outputSchemaVersion: number }; choice: RuntimeChoice; provider: string; model: string; usage: { inputTokens: number | null; outputTokens: number | null }; protocol: string; callId?: string; serialization?: { escapedControls: number; responseHash: string } };

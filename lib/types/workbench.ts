@@ -9,6 +9,11 @@ export type WorkbenchOutput = {
   weeklyReportArtifactId?: string;
 };
 export type WorkbenchRevisionTarget = { revision: number; baselineRevision: number; sourceId?: string };
+export type WorkbenchComparison = {
+  revision: number; baselineRevision: number; restricted: boolean;
+  changes: Array<{ id: string; kind: string; before?: string; after?: string; beforeKeys: string[]; afterKeys: string[] }>;
+  addedKeys: string[]; removedKeys: string[];
+};
 export function readRevision(value: string | null | undefined) {
   const revision = value && /^\d+$/.test(value) ? Number(value) : 0;
   return Number.isSafeInteger(revision) && revision > 0 && revision <= 2147483647 ? revision : undefined;
@@ -25,6 +30,7 @@ export type WorkbenchSnapshot = {
   lastSeenOutputRevision?: number;
   pendingQuestionId?: string;
   lastAnsweredQuestionId?: string;
+  comparison?: WorkbenchComparison;
   id: string; projectId: string; goal: string; projectTitle: string; workingObjective: string;
   status: string; phase: string; reason: string; reasonCode: string; checkedAt: string; provider: string; version: number;
   models: number; tools: number; outputs: WorkbenchOutput[]; stageArtifacts: WorkbenchStageArtifact[]; sources: WorkbenchSource[];

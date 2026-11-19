@@ -14,3 +14,9 @@
 .facts dd { margin: 0; color: var(--ink, #202725); }
 .note { margin: 0; font-size: .85rem; color: var(--muted, #6b6f6b); }
 .error { margin: 0; color: #9b2c2c; font-size: .9rem; }
+.options, .limits { color: var(--ink-soft); font-size: .86rem; }
+.options > summary, .limits > summary { cursor: pointer; padding: 8px 0; }
+.options > summary svg { display: inline; margin-inline: 4px 6px; vertical-align: text-bottom; }
+.options > label { margin-top: 10px; }
+.scope { display: flex; align-items: flex-start; gap: 8px; padding: 10px; border-radius: 8px; background: var(--teal-pale); color: var(--ink); font-size: .86rem; }
+.scope svg { flex-shrink: 0; color: var(--teal-strong); }

@@ -39,7 +39,8 @@
               { "type": "text/plain" },
               { "type": "text/markdown" },
               { "type": "text/csv" },
-              { "type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document" }
+              { "type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
+              { "type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
             ]
           }
         ]

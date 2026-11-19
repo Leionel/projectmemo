@@ -3,6 +3,7 @@ import { common } from '@kit.AbilityKit';
 import { fileIo, picker } from '@kit.CoreFileKit';
 import { PMAppBar } from '../components/PMAppBar';
 import { PMButton } from '../components/PMReferencePrimitives';
+import { AgentMessageBlocks } from '../components/AgentMessageBlocks';
 import { WorkbenchSprint } from '../components/WorkbenchSprint';
 import { ClockIcon, PaperclipIcon, CheckIcon } from '../components/PMIcons';
 import { PMColors, PMSpacing, PMRadius } from '../common/DesignTokens';
@@ -15,7 +16,7 @@ import { SessionStore } from '../services/SessionStore';
 import { MissionCommand } from '../models/Mission';
 import { ApiError } from '../models/Project';
 import { MissionWorkbench, WorkbenchOutput, WorkbenchBlock, WorkbenchSource, WorkbenchEvent, WorkbenchMaterial, WorkbenchReadReceipt,
-  WorkbenchDelivery, WorkbenchComparison, WorkbenchChange, OutcomeChallenge, OutcomeChallengeCommand, ChallengeQuestion, ChallengeOption,
+  WorkbenchDelivery, WorkbenchComparison, WorkbenchChange, WorkbenchStageArtifact, OutcomeChallenge, OutcomeChallengeCommand, ChallengeQuestion, ChallengeOption,
   unreadWorkbenchOutput, workbenchSource, challengeQuestion, workbenchTime } from '../models/MissionWorkbench';
 
 @Entry
@@ -29,6 +30,7 @@ struct OutcomeWorkbenchPage {
   @State private delivery: WorkbenchDelivery | null = null;
   @State private deliveryBusy: boolean = false;
   @State private showVersions: boolean = false;
+  @State private selectedStageId: string = '';
   @State private showProcess: boolean = false;
   @State private showSprint: boolean = false;
   @State private feedbackSourceId: string = '';
@@ -413,9 +415,38 @@ struct OutcomeWorkbenchPage {
       ClockIcon({ iconSize: 16, color: PMColors.INK_SECONDARY })
       Text(`私有工作稿 ${workbenchTime(output.createdAt)}`).fontSize(14).fontColor(PMColors.INK_SECONDARY)
     }
-    ForEach(output.blocks, (block: WorkbenchBlock) => { Text(block.text).fontSize(16).lineHeight(26).fontColor(PMColors.INK_PRIMARY).copyOption(CopyOptions.InApp) }, (block: WorkbenchBlock) => block.blockId)
+    if (output.presentation !== undefined) {
+      AgentMessageBlocks({ presentation: output.presentation, messageId: output.id })
+    } else {
+      ForEach(output.blocks, (block: WorkbenchBlock) => { Text(block.text).fontSize(16).lineHeight(26).fontColor(PMColors.INK_PRIMARY).copyOption(CopyOptions.InApp) }, (block: WorkbenchBlock) => block.blockId)
+    }
     ForEach(output.sourceKeys, (key: string, index: number) => { PMButton({ label: `定位原记录 ${index + 1}`, secondary: true, disabled: !this.fresh, onAction: (): void => { this.sourceKey = key; } }) }, (key: string) => key)
   }
+  private currentStage(): WorkbenchStageArtifact | undefined {
+    const artifacts = this.view.stageArtifacts ?? [];
+    return artifacts.find((artifact: WorkbenchStageArtifact) => artifact.id === this.selectedStageId) ?? artifacts[0];
+  }
+
+  @Builder private StageArtifact(artifact: WorkbenchStageArtifact) {
+    Column({ space: 10 }) {
+      Text('阶段成果').fontSize(19).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+      if ((this.view.stageArtifacts?.length ?? 0) > 1) {
+        ForEach(this.view.stageArtifacts ?? [], (item: WorkbenchStageArtifact) => {
+          PMButton({ label: item.label + ' · ' + workbenchTime(item.createdAt), secondary: item.id !== artifact.id,
+            onAction: (): void => { this.selectedStageId = item.id; this.sourceKey = ''; } })
+        }, (item: WorkbenchStageArtifact) => item.id)
+      } else {
+        Text(artifact.label + ' · ' + workbenchTime(artifact.createdAt)).fontSize(13).fontColor(PMColors.INK_SECONDARY)
+      }
+      AgentMessageBlocks({ presentation: artifact.presentation, messageId: artifact.id })
+      ForEach(artifact.unknowns, (item: string) => {
+        Text('待确认 · ' + item).fontSize(13).fontColor(PMColors.INK_SECONDARY)
+      })
+      ForEach(artifact.sourceKeys, (key: string) => { this.Reference(key, '原记录 · ') }, (key: string) => key)
+    }.width('100%').padding(PMSpacing.MD).alignItems(HorizontalAlign.Start)
+      .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD)
+  }
+
   @Builder private ReturnDraft(output: WorkbenchOutput) {
     Column({ space: 6 }) {
       Row({ space: 8 }) {
@@ -518,7 +549,10 @@ struct OutcomeWorkbenchPage {
                   }
                 }, (output: WorkbenchOutput) => output.id)
               }
-            } else { Text(this.selectedRevision > 0 ? '所选版本暂不可读。' : '正在等待第一份成果。') }
+            } else if (this.selectedRevision > 0 || this.currentStage() === undefined) {
+              Text(this.selectedRevision > 0 ? '所选版本暂不可读。' : '正在等待第一份成果。')
+            }
+            if (this.currentStage() !== undefined) { this.StageArtifact(this.currentStage() as WorkbenchStageArtifact) }
             if (workbenchSource(this.view, this.sourceKey) !== undefined && this.fresh) { this.Source(workbenchSource(this.view, this.sourceKey) as WorkbenchSource) }
             if (this.view.challengesEnabled) {
               if (this.challengePending) { PMButton({ label: '重试原挑战请求', secondary: true, disabled: this.busy, onAction: (): void => { this.play(''); } }) }

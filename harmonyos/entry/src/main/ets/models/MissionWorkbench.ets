@@ -1,5 +1,11 @@
+import { AgentPresentation } from './AgentExperience';
+
 export interface WorkbenchBlock { blockId: string; text: string; kind: string; sourceIds: string[]; }
-export interface WorkbenchOutput { id: string; revision: number; createdAt: string; blocks: WorkbenchBlock[]; sourceKeys: string[]; sourceAccessChanged?: boolean; weeklyReportArtifactId?: string; }
+export interface WorkbenchOutput { id: string; revision: number; createdAt: string; blocks: WorkbenchBlock[]; sourceKeys: string[]; sourceAccessChanged?: boolean; weeklyReportArtifactId?: string; presentation?: AgentPresentation; }
+export interface WorkbenchStageArtifact {
+  id: string; label: string; createdAt: string; sourceKeys: string[];
+  presentation: AgentPresentation; unknowns: string[];
+}
 export interface WorkbenchSource { key: string; id: string; hash: string; revision: string; text: string; current: boolean; kind: string; name?: string; observedAt?: string; }
 export interface WorkbenchEvent { id: string; label: string; at: string; }
 export interface WorkbenchChange { id: string; kind: string; before?: string; after?: string; beforeKeys: string[]; afterKeys: string[]; }
@@ -12,6 +18,7 @@ export class MissionWorkbench {
   id: string = ''; projectId: string = ''; projectTitle: string = ''; goal: string = ''; workingObjective: string = '';
   status: string = ''; phase: string = ''; reason: string = ''; version: number = 0; checkedAt: string = '';
   challengesEnabled?: boolean; outputs: WorkbenchOutput[] = []; sources: WorkbenchSource[] = []; events: WorkbenchEvent[] = [];
+  stageArtifacts?: WorkbenchStageArtifact[];
   lastSeenOutputRevision?: number;
   pendingQuestionId?: string;
   lastAnsweredQuestionId?: string;

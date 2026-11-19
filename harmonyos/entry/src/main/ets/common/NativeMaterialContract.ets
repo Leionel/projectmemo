@@ -1,4 +1,4 @@
-export type NativeMaterialFormat = 'TEXT' | 'MARKDOWN' | 'CSV' | 'DOCX' | 'UNSUPPORTED';
+export type NativeMaterialFormat = 'TEXT' | 'MARKDOWN' | 'CSV' | 'DOCX' | 'XLSX' | 'UNSUPPORTED';
 
 export const NATIVE_MATERIAL_MAX_CHARS: number = 20000;
 export const NATIVE_TEXT_MAX_BYTES: number = 64 * 1024;
@@ -7,6 +7,7 @@ export const NATIVE_DOCX_MAX_BYTES: number = 2 * 1024 * 1024;
 export function nativeMaterialFormat(fileName: string): NativeMaterialFormat {
   const name = fileName.trim().toLowerCase();
   if (name.endsWith('.docx')) return 'DOCX';
+  if (name.endsWith('.xlsx')) return 'XLSX';
   if (name.endsWith('.md') || name.endsWith('.markdown')) return 'MARKDOWN';
   if (name.endsWith('.csv')) return 'CSV';
   if (name.endsWith('.txt')) return 'TEXT';
@@ -15,6 +16,7 @@ export function nativeMaterialFormat(fileName: string): NativeMaterialFormat {
 
 export function nativeMaterialMime(format: NativeMaterialFormat): string {
   if (format === 'DOCX') return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  if (format === 'XLSX') return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
   if (format === 'MARKDOWN') return 'text/markdown';
   if (format === 'CSV') return 'text/csv';
   if (format === 'TEXT') return 'text/plain';
@@ -22,7 +24,7 @@ export function nativeMaterialMime(format: NativeMaterialFormat): string {
 }
 
 export function nativeMaterialLimit(format: NativeMaterialFormat): number {
-  return format === 'DOCX' ? NATIVE_DOCX_MAX_BYTES : NATIVE_TEXT_MAX_BYTES;
+  return format === 'DOCX' || format === 'XLSX' ? NATIVE_DOCX_MAX_BYTES : NATIVE_TEXT_MAX_BYTES;
 }
 
 export function nativeFileDisplayName(uri: string, fallback: string): string {
@@ -56,12 +58,12 @@ export function nativeShareFileUri(uri: string, parameters: Record<string, Objec
 }
 
 export function nativeDraftError(text: string, format: NativeMaterialFormat, bytes: number): string {
-  if (format === 'UNSUPPORTED') return '请选择 TXT、Markdown、普通 CSV 或 DOCX 文件';
+  if (format === 'UNSUPPORTED') return '请选择 TXT、Markdown、普通 CSV、DOCX 或 XLSX 文件';
   if (bytes <= 0 || bytes > nativeMaterialLimit(format)) {
-    return format === 'DOCX' ? 'Word 文件需在 2MB 以内' : '文本材料需在 64KB 以内';
+    return format === 'DOCX' ? 'Word 文件需在 2MB 以内' : format === 'XLSX' ? 'Excel 文件需在 2MB 以内' : '文本材料需在 64KB 以内';
   }
-  if (format !== 'DOCX' && text.trim() === '') return '文件没有可读正文，请重新选择';
-  if (format !== 'DOCX' && text.length > NATIVE_MATERIAL_MAX_CHARS) return '正文超过 20,000 字，请拆分后导入';
+  if (format !== 'DOCX' && format !== 'XLSX' && text.trim() === '') return '文件没有可读正文，请重新选择';
+  if (format !== 'DOCX' && format !== 'XLSX' && text.length > NATIVE_MATERIAL_MAX_CHARS) return '正文超过 20,000 字，请拆分后导入';
   return '';
 }
 

@@ -1,12 +1,47 @@
 export interface WorkbenchBlock { blockId: string; text: string; kind: string; sourceIds: string[]; }
-export interface WorkbenchOutput { id: string; revision: number; createdAt: string; blocks: WorkbenchBlock[]; sourceKeys: string[]; sourceAccessChanged?: boolean; }
+export interface WorkbenchOutput { id: string; revision: number; createdAt: string; blocks: WorkbenchBlock[]; sourceKeys: string[]; sourceAccessChanged?: boolean; weeklyReportArtifactId?: string; }
 export interface WorkbenchSource { key: string; id: string; hash: string; revision: string; text: string; current: boolean; kind: string; name?: string; observedAt?: string; }
 export interface WorkbenchEvent { id: string; label: string; at: string; }
+export interface WorkbenchChange { id: string; kind: string; before?: string; after?: string; beforeKeys: string[]; afterKeys: string[]; }
+export interface WorkbenchComparison {
+  revision: number; baselineRevision: number; restricted: boolean;
+  changes: WorkbenchChange[]; addedKeys: string[]; removedKeys: string[];
+}
+export interface WorkbenchDelivery { revision: number; filename: string; markdown: string; }
 export class MissionWorkbench {
   id: string = ''; projectId: string = ''; projectTitle: string = ''; goal: string = ''; workingObjective: string = '';
   status: string = ''; phase: string = ''; reason: string = ''; version: number = 0; checkedAt: string = '';
   challengesEnabled?: boolean; outputs: WorkbenchOutput[] = []; sources: WorkbenchSource[] = []; events: WorkbenchEvent[] = [];
   lastSeenOutputRevision?: number;
+  pendingQuestionId?: string;
+  lastAnsweredQuestionId?: string;
+  reasonCode?: string;
+  artifactAdoptionEnabled?: boolean;
+  comparison?: WorkbenchComparison;
+}
+
+export interface ProjectReturnItem {
+  id: string; goal: string; questionId?: string; baseline?: number; output?: ProjectReturnOutput;
+}
+export interface ProjectReturnOutput { revision: number; recordedAt: string; }
+export interface DelegationLimits { days: number; maxModels: number; maxTools: number; }
+export interface ProjectDelegation { enabled: boolean; canStart: boolean; items: ProjectReturnItem[]; limits: DelegationLimits; }
+export class DelegationInput { goal: string = ''; materialText: string = ''; }
+export class DelegationConfirmation extends DelegationInput { requestId: string = ''; previewHash: string = ''; expiresAt: string = ''; }
+export interface DelegationPreview { previewHash: string; expiresAt: string; }
+export interface DelegationResult { projectId: string; missionId: string; }
+export interface SprintReceipt { id: string; label: string; at: string; kind: string; }
+export interface SprintAgent {
+  label: string; working: boolean; completedSteps: number; newOutputs: number; openedSources: number;
+  latestNewRevision: number | null; receipts: SprintReceipt[]; openItems: string[];
+}
+export interface WorkbenchSprint {
+  id: string; objective: string; endsAt: string; status: string;
+  selfReportedDone: boolean; agent: SprintAgent;
+}
+export interface WorkbenchSprintView { canStart: boolean; reason: string; session: WorkbenchSprint | null; }
+export class WorkbenchSprintCommand {
+  action: string = ''; requestId: string = ''; objective?: string; minutes?: number; sprintId?: string; done?: boolean; sourceKey?: string;
 }
 
 export class WorkbenchReadReceipt {

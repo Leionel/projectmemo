@@ -3,18 +3,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, BellDot, BookOpen, Check, FileText, GitCompareArrows, MessageSquareText, Plus } from "lucide-react";
-import { evidenceTime } from "@/lib/client/sourceDisplay";
-import type { ReentryBrief } from "@/lib/types/reentryBrief";
-import type { WorkbenchOutput } from "@/lib/types/workbench";
+import { evidenceTime, sourceDisplayName } from "@/lib/client/sourceDisplay";
+import type { ReentryBrief, ReentryItem } from "@/lib/types/reentryBrief";
+import type { WorkbenchOutput, WorkbenchSource } from "@/lib/types/workbench";
+import { workbenchChanges } from "@/lib/mission/workbenchComparison";
+import { BookmarkSpirit } from "@/components/mascot/BookmarkSpirit";
 import styles from "./ReentryBrief.module.css";
 
 type Receipt = { requestId: string; seenSeq: number; seenOutputRevision: number; handledItemIds: string[] };
 const icons = { NEEDS_DECISION: MessageSquareText, OUTPUT_UPDATED: FileText, SOURCE_CHANGED: BellDot };
 
-export function ReentryBriefPanel({ missionId, projectId, outputs, onOpenRevision, onAddMaterial, onOpenQuestion }: {
+export function ReentryBriefPanel({ missionId, projectId, outputs, sources, onOpenRevision, onAddMaterial, onOpenQuestion }: {
   missionId: string;
   projectId: string;
   outputs: WorkbenchOutput[];
+  sources: WorkbenchSource[];
   onOpenRevision: (revision: number, compare: boolean, baseline?: number) => void;
   onAddMaterial: () => void;
   onOpenQuestion: (questionId: string) => void;
@@ -62,10 +65,10 @@ export function ReentryBriefPanel({ missionId, projectId, outputs, onOpenRevisio
     };
   }, [read]);
 
-  async function acknowledge(handledItemIds: string[] = []) {
+  async function acknowledge(handledItemIds: string[] = [], viewedRevision?: number) {
     if (!brief || busy) return;
-    request.current ??= { requestId: crypto.randomUUID(), seenSeq: brief.cursor.seq,
-      seenOutputRevision: brief.cursor.outputRevision, handledItemIds };
+    request.current ??= { requestId: crypto.randomUUID(), seenSeq: viewedRevision ? 0 : brief.cursor.seq,
+      seenOutputRevision: viewedRevision ?? brief.cursor.outputRevision, handledItemIds };
     const receipt = request.current;
     readInFlight.current?.abort();
     readInFlight.current = null;
@@ -83,7 +86,7 @@ export function ReentryBriefPanel({ missionId, projectId, outputs, onOpenRevisio
       }
       request.current = null;
       setBrief(value); setReadError("");
-      setNotice(receipt.handledItemIds.length ? "已标记这项变化为已处理。" : "已记录你看到了这次变化；任务进度没有因此前进。");
+      setNotice(receipt.handledItemIds.length ? "已标记这项变化为已处理。" : "已记录你的阅读位置。");
     } catch (cause) {
       setWriteError(cause instanceof Error ? cause.message : "回执保存未确认");
     } finally {
@@ -95,16 +98,38 @@ export function ReentryBriefPanel({ missionId, projectId, outputs, onOpenRevisio
   if (!brief && !readError && !writeError) return null;
   if (brief && !brief.items.length && brief.readState === "SEEN" && !notice && !readError && !writeError) return null;
   const unreadCount = brief?.items.filter(item => !item.read).length ?? 0;
-  const pendingQuestion = brief?.items.some(item => item.questionId);
+  const items = brief?.items ?? [];
+  const featured = items.find(item => item.kind === "NEEDS_DECISION") ?? items.findLast(item => item.kind === "OUTPUT_UPDATED") ?? items[0];
+  const featuredOutput = featured?.kind === "OUTPUT_UPDATED" ? outputs.find(row => row.id === featured.outputId) : undefined;
+  const baseline = featuredOutput ? outputs.find(row => row.revision === brief?.lastSeenOutputRevision && row.revision < featuredOutput.revision) : undefined;
+  const changes = baseline && featuredOutput && !baseline.sourceAccessChanged && !featuredOutput.sourceAccessChanged
+    ? workbenchChanges(baseline, featuredOutput, sources) : [];
+  const changedNames = [...new Set(changes.flatMap(change => change.afterSources).map(source => sourceDisplayName(source.id, source.name)))].slice(0, 2);
   return <section className={styles.brief} aria-label="回访变化">
     <header className={styles.head}>
       <div className={styles.heading}><span className={styles.headIcon}><BellDot size={19} aria-hidden /></span>
-        <div><h2>回访简报</h2>{unreadCount ? <p>{unreadCount} 项变化待查看</p> : pendingQuestion && <p>有一个原问题需要答复</p>}</div></div>
+        <h2>回访简报</h2></div>
+    </header>
+    {featuredOutput && !featuredOutput.sourceAccessChanged && <article className={styles.featured} key={featuredOutput.id}>
+      <BookmarkSpirit pose="handoff" size={76} quiet />
+      <div><h3>第 {featuredOutput.revision} 版已备好</h3>
+        <p>{changes.length ? ("已更新 " + changes.length + " 处" + (changedNames.length ? " · 依据 " + changedNames.join("、") : "。"))
+          : `私有稿 · ${evidenceTime(featuredOutput.createdAt, true)}`}</p></div>
+      <button type="button" className={styles.action} onClick={() => {
+        onOpenRevision(featuredOutput.revision, outputs.some(row => row.revision < featuredOutput.revision), baseline?.revision);
+        if (!busy && !retry) void acknowledge([], featuredOutput.revision);
+      }}>{featuredOutput.revision > 1 ? "看改了什么" : "打开首稿"}<ArrowRight size={15} aria-hidden /></button>
+    </article>}
+    {featured?.questionId && <article className={styles.featured}><BookmarkSpirit pose="thinking" size={64} quiet />
+      <div><h3>有一个问题需要你判断</h3><p>你的答复会交回原委托。</p></div>
+      <button type="button" className={styles.action} onClick={() => onOpenQuestion(featured.questionId!)}>回答原问题<ArrowRight size={15} aria-hidden /></button>
+    </article>}
+    {brief && (items.length === 0 ? <p>上次已读后暂无新的成果变化。</p> : <details className={styles.history}>
+      <summary>查看回访记录{unreadCount ? " · " + unreadCount + " 项" : ""}</summary>
       {!!unreadCount && <button type="button" className={styles.secondary} disabled={busy || retry} onClick={() => void acknowledge()}>
         <Check size={15} aria-hidden />我已看过
       </button>}
-    </header>
-    {brief && (brief.items.length === 0 ? <p>上次已读后暂无新的成果变化。</p> : <ol className={styles.items}>{brief.items.map(item => {
+      <ol className={styles.items}>{items.map((item: ReentryItem) => {
       const Icon = icons[item.kind];
       const revision = item.revision;
       const questionId = item.questionId;
@@ -137,7 +162,7 @@ export function ReentryBriefPanel({ missionId, projectId, outputs, onOpenRevisio
             disabled={busy || retry} onClick={() => void acknowledge([item.id])}>标记已处理</button>}
         </div>
       </li>;
-    })}</ol>)}
+    })}</ol></details>)}
     {notice && <p role="status">{notice}</p>}
     {(writeError || readError) && <div className={styles.feedback}>
       <p role="alert">{writeError || readError}</p>

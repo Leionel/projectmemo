@@ -47,6 +47,21 @@ async function cycle(f: Awaited<ReturnType<typeof fixture>>) {
   }
   return missionDetail(f.u.id, f.m.id);
 }
+
+test.each(["PRIVATE", "CONFLICT"] as const)("after a checked draft, optional %s follows the appropriate wait path", async missing => {
+  const f = await fixture("保留待核对条件");
+  const fixtureProvider = f.provider;
+  f.provider = async (context, tools) => {
+    const decision = await fixtureProvider(context, tools);
+    return decision.choice.kind === "await_event"
+      ? { ...decision, choice: { kind: "ask", question: "是否要补充这个细节？", missing, blocking: false } }
+      : decision;
+  };
+  const result = await cycle(f);
+  expect(result.outputs).toHaveLength(1);
+  expect(result.workState.phase).toBe(missing === "PRIVATE" ? "WAITING_OBSERVATION" : "WAITING_USER");
+  expect(await db.agentMissionEvent.count({ where: { missionId: f.m.id, type: "FOLLOWUP_DEFERRED" } })).toBe(missing === "PRIVATE" ? 1 : 0);
+});
 test.each(["独立开发版本", "客户交付项目", "科研实验汇报", "学生课程项目"])("%s: persisted research→creation, restart, new material and same-Mission draft v2", async cohort => {
   const f = await fixture(cohort), first = await cycle(f);
   expect(first.status, JSON.stringify(first.error)).toBe("WAITING_INPUT");

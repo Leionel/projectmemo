@@ -12,6 +12,7 @@ import type { Source } from "./contracts";
 import { ownedMission, validateSources } from "./repository";
 import { missionWorkState } from "./workState";
 import { readReentryReceipt } from "./reentryBrief";
+import { workbenchChanges, workbenchReferenceChanges } from "./workbenchComparison";
 
 /** Authenticated, bounded, read-only view. Historical material is checked against current source-use permission. */
 export async function readMissionWorkbench(userId: string, id: string, selection: { revision?: number; baseline?: number } = {}): Promise<WorkbenchSnapshot> {
@@ -108,6 +109,7 @@ export async function readMissionWorkbench(userId: string, id: string, selection
       events, approvals, unknownSteps });
     const labels: Record<string, string> = { SKILL_ENTERED: "开始读取项目资料", SKILL_HANDOFF: "证据包已交给创作",
       SKILL_OUTPUT_READY: "创作产物已保存", OUTPUT_SAVED: "私有稿已更新", CHECKPOINT_REACHED: "成果备好，继续留意变化",
+      FOLLOWUP_DEFERRED: "补充问题已留待核对，继续关注新资料",
       USER_MATERIAL_ADDED: "你补充的资料已保存", USER_FEEDBACK_ADDED: "你的反馈已保存，等待核对影响", INPUT: "你对原问题的答复已保存",
       CHALLENGE_HANDED_OFF: "成果核查缺口已交回原委托",
       SKILL_ARTIFACT_SAVED: "阶段成果已保存", SKILL_DELIVERABLE_READY: "阶段成果已备好，原报告与行动未改动",
@@ -118,7 +120,21 @@ export async function readMissionWorkbench(userId: string, id: string, selection
       FAILURE: "当前步骤需核对" };
     const usage = record(m.budgetUsedJson);
     const answeredQuestion = record(recentAnswer?.payloadJson).questionId;
+    const target = selection.revision ? outputs.find(output => output.revision === selection.revision) : outputs[0];
+    const baseline = selection.baseline && target && selection.baseline < target.revision
+      ? outputs.find(output => output.revision === selection.baseline) : undefined;
+    const restricted = !!(target?.sourceAccessChanged || baseline?.sourceAccessChanged);
+    const references = target && baseline && !restricted ? workbenchReferenceChanges(baseline, target, sources) : { added: [], removed: [] };
+    const comparison = target && baseline ? {
+      revision: target.revision, baselineRevision: baseline.revision, restricted,
+      changes: restricted ? [] : workbenchChanges(baseline, target, sources).map(change => ({
+        id: change.id, kind: change.kind, before: change.before?.text, after: change.after?.text,
+        beforeKeys: change.beforeSources.map(source => source.key), afterKeys: change.afterSources.map(source => source.key),
+      })),
+      addedKeys: references.added.map(source => source.key), removedKeys: references.removed.map(source => source.key),
+    } : undefined;
     return { id, projectId: m.projectId, projectTitle: project.title, goal: m.goal,
+      comparison,
       lastSeenOutputRevision: m.runtimeProtocolVersion === 2 && isFeatureEnabled("MISSION_V2_ENABLED", false) ? lastSeenOutputRevision : undefined,
       pendingQuestionId: state.exactQuestionRef ?? undefined,
       lastAnsweredQuestionId: typeof answeredQuestion === "string" ? answeredQuestion : undefined,

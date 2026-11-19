@@ -1,0 +1,36 @@
+.shell { position: relative; display: inline-block; flex: none; line-height: 0; vertical-align: middle; }
+.trigger { display: block; width: 100%; height: 100%; padding: 0; border: 0; border-radius: 14px; background: transparent; cursor: pointer; }
+.trigger:focus-visible { outline: 2px solid var(--teal); outline-offset: 4px; }
+.image { display: block; width: 100%; height: 100%; object-fit: contain; transform-origin: 50% 88%; animation: spirit-breathe 7.5s ease-in-out infinite; }
+.avatar { display: block; object-fit: contain; border-radius: 50%; }
+
+.quiet .image { animation: none; }
+.quiet .trigger { cursor: default; }
+
+.hint { position: absolute; z-index: 6; left: 50%; top: calc(100% - 10px); width: max-content; max-width: 248px;
+  transform: translateX(-50%); padding: 10px 12px 9px; border: 1px solid var(--rule); border-radius: 10px;
+  background: var(--card-bg); color: var(--ink-soft); box-shadow: 0 10px 28px rgb(28 46 44 / 12%);
+  font-size: 12px; line-height: 1.75; text-align: left; white-space: normal; animation: spirit-hint 160ms ease-out; }
+.hint::before { position: absolute; top: -5px; left: 50%; width: 8px; height: 8px; border-top: 1px solid var(--rule);
+  border-left: 1px solid var(--rule); background: var(--card-bg); content: ""; transform: translateX(-50%) rotate(45deg); }
+.hintTitle { display: block; margin-bottom: 2px; color: var(--teal-strong); font-size: 10px; font-weight: 700; letter-spacing: .12em; }
+.close { display: block; margin-top: 6px; padding: 0; border: 0; background: transparent; color: var(--teal-strong);
+  font-size: 11px; font-weight: 600; cursor: pointer; }
+.close:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+@keyframes spirit-breathe {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  38% { transform: translateY(-2px) rotate(-.35deg); }
+  68% { transform: translateY(-1px) rotate(.25deg); }
+}
+@keyframes spirit-hint { from { opacity: 0; transform: translate(-50%, -4px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .image, .hint { animation: none !important; }
+  .image { transform: none !important; }
+}
+
+@media (max-width: 760px) {
+  .hint { left: 0; transform: none; max-width: 220px; animation: none; }
+  .hint::before { left: 28px; }
+}

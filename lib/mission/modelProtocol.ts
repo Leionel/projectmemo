@@ -96,10 +96,13 @@ export function missionFailure(error: unknown, phase: MissionPhase) {
 
 export type ProtocolReason = "INVALID_RESPONSE" | "EMPTY_CONTENT" | "INVALID_JSON" | "TRUNCATED" | "INVALID_CHOICE" | "INVALID_TOOL_ARGUMENTS" | "MULTIPLE_TOOL_CALLS" | "UNKNOWN_TOOL";
 export const MISSION_DECISION_TOKENS = 2000;
+export const MISSION_V2_DECISION_TOKENS = 3000;
 export const MISSION_REPAIR_TOKENS = 4000;
-export function decisionTokenLimit(lastError: unknown): 2000 | 4000 {
+/** v2 drafts carry source citations and unknowns, so their single-decision budget is wider. */
+export function decisionTokenLimit(lastError: unknown, protocolVersion = 1): 2000 | 3000 | 4000 {
   const error = lastError as {code?:string;diagnostic?:{reason?:string}} | null;
-  return error?.code === "MODEL_PROTOCOL_ERROR" && error.diagnostic?.reason === "TRUNCATED" ? MISSION_REPAIR_TOKENS : MISSION_DECISION_TOKENS;
+  if (error?.code === "MODEL_PROTOCOL_ERROR" && error.diagnostic?.reason === "TRUNCATED") return MISSION_REPAIR_TOKENS;
+  return protocolVersion === 2 ? MISSION_V2_DECISION_TOKENS : MISSION_DECISION_TOKENS;
 }
 const hints: Record<ProtocolReason, string> = {
   INVALID_RESPONSE: "返回一个包含单次决策的 JSON 对象。",

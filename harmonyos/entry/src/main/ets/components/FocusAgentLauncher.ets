@@ -1,6 +1,6 @@
 import { PMColors, PMFontFamily, PMMotion } from '../common/DesignTokens';
 
-/** 「问忆程」悬浮入口：内容滚动时收成字标，不再压住卡片操作。 */
+/** 「问忆程」悬浮入口：滚动时收成精灵头像。 */
 @Component
 export struct FocusAgentLauncher {
   @Prop collapsed: boolean = false;
@@ -8,8 +8,7 @@ export struct FocusAgentLauncher {
   build() {
     Button({ type: ButtonType.Normal }) {
       Row({ space: this.collapsed ? 0 : 8 }) {
-        Text('忆').fontFamily(PMFontFamily.BRAND_SERIF).fontSize(14).fontWeight(FontWeight.Bold).fontColor(PMColors.BRAND)
-          .width(26).height(26).textAlign(TextAlign.Center).borderRadius(8).backgroundColor(PMColors.BRAND_LIGHT)
+        Image($r('app.media.bookmark_spirit_avatar')).width(32).height(32).objectFit(ImageFit.Contain)
         if (!this.collapsed) {
           Text('问忆程').fontFamily(PMFontFamily.SANS).fontSize(15).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
             .transition(TransitionEffect.OPACITY.animation({ duration: PMMotion.STATE, curve: Curve.EaseOut }))

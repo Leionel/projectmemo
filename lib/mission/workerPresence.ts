@@ -28,7 +28,7 @@ function identity() {
   const url = process.env.DATABASE_URL ?? "file:./prisma/dev.db";
   const database = url.startsWith("file:") ? path.resolve(url.slice(5)) : url;
   const flags = [
-    "MISSION_ENABLED", "MISSION_WRITES_ENABLED", "MISSION_WEB_ENABLED", "MISSION_EVENT_CONTINUATION_ENABLED",
+    "MISSION_ENABLED", "MISSION_V2_ENABLED", "MISSION_CHALLENGES_ENABLED", "MISSION_WRITES_ENABLED", "MISSION_WEB_ENABLED", "MISSION_EVENT_CONTINUATION_ENABLED",
     "MISSION_AUTO_CONTINUATION_ENABLED", "MISSION_INVESTIGATION_DELEGATION_ENABLED", "MISSION_EVIDENCE_FIT_ENABLED",
     "MISSION_ARTIFACT_ADOPTION_ENABLED", "MISSION_SEMANTIC_CHECK_ENABLED", "MISSION_CLAIM_JUDGE_ENABLED", "MISSION_WAIT_EMAIL_ENABLED",
     "FOCUS_AGENT_ENABLED", "FOCUS_AGENT_R4_ENABLED", "FOCUS_WEB_ENABLED", "FOCUS_ASYNC_ENABLED", "FOCUS_CONTINUITY_ENABLED",
@@ -61,8 +61,8 @@ export function recordWorkerPresence(data: {
   const filePath = getPresencePath();
   let existing: Partial<WorkerPresenceInfo> = inMemoryPresence ?? {};
   try {
-    if (fs.existsSync(filePath)) {
-      existing = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    if (fs.existsSync(/* turbopackIgnore: true */ filePath)) {
+      existing = JSON.parse(fs.readFileSync(/* turbopackIgnore: true */ filePath, "utf-8"));
     }
   } catch {}
 
@@ -97,8 +97,8 @@ export function readWorkerPresence(now = Date.now()): WorkerPresenceInfo {
   const filePath = getPresencePath();
   let data: WorkerPresenceInfo | null = null;
   try {
-    if (fs.existsSync(filePath)) {
-      data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    if (fs.existsSync(/* turbopackIgnore: true */ filePath)) {
+      data = JSON.parse(fs.readFileSync(/* turbopackIgnore: true */ filePath, "utf-8"));
     }
   } catch {}
 
@@ -142,7 +142,7 @@ export function clearWorkerPresenceForTest(): void {
   inMemoryPresence = null;
   const filePath = getPresencePath();
   try {
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    if (fs.existsSync(/* turbopackIgnore: true */ filePath)) fs.unlinkSync(filePath);
   } catch {}
 }
 

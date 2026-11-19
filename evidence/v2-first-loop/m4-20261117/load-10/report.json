@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-17T07:19:50.561Z",
+  "count": 10,
+  "states": {
+    "READY": 2,
+    "OBSERVATION": 2,
+    "USER": 2,
+    "STALE_RUNNING": 2,
+    "RUNNING": 2
+  },
+  "target": {
+    "p95AcceptedMs": 2000,
+    "p90FirstLocalResultMs": 120000
+  },
+  "accepted": {
+    "samples": 4,
+    "p50Ms": 317,
+    "p95Ms": 387,
+    "targetMet": true
+  },
+  "queue": {
+    "samples": 4,
+    "p95Ms": 387
+  },
+  "firstLocalResult": {
+    "samples": 4,
+    "p50Ms": 618,
+    "p90Ms": 680,
+    "targetMet": true
+  },
+  "foreground": {
+    "samples": 1,
+    "failures": 0,
+    "p50Ms": 9.644200000000183,
+    "p95Ms": 9.644200000000183
+  },
+  "failureRate": 0,
+  "fairness": {
+    "claimsMin": 0,
+    "claimsMax": 3
+  },
+  "busyErrors": 0,
+  "usage": {
+    "models": 12,
+    "tools": 8,
+    "inputTokens": 120,
+    "outputTokens": 60,
+    "unknownCalls": 0,
+    "reservedOutputTokens": 0
+  },
+  "durationMs": 920,
+  "provider": "INJECTED_LOAD_FIXTURE (in-process, no paid call)",
+  "limitation": "Local mock throughput is not real cloud capacity; RUNNING rows with live leases stay untouched by design."
+}

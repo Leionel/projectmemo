@@ -43,7 +43,7 @@ export async function scanWaitingMaterialBatch(limit=8) {
     await lock(tx,candidate.id);const m=await tx.agentMission.findUniqueOrThrow({where:{id:candidate.id}});
     if(m.status!=="WAITING_INPUT"||m.cancelRequestedAt||m.pauseRequestedAt)return;
     try{await assertOwner(m.ownerUserId,m.projectId,tx);}catch{return;}
-    const wait=m.waitStateJson as unknown as WaitState|null;if(!wait?.startedAt||!wait.questionId)return;
+    const wait=m.waitStateJson as unknown as WaitState|null;if((wait as unknown as {waitingFor?:string}|null)?.waitingFor==="OBSERVATION"||!wait?.startedAt||!wait.questionId)return;
     const since=new Date(new Date(wait.startedAt).getTime()-300000),cursor=wait.sourceCursor??{capture:"",attachment:""};
     const captures=await tx.capture.findMany({where:{projectId:m.projectId,createdAt:{gte:since},id:{gt:cursor.capture}},orderBy:{id:"asc"},take:20});
     // Existing attachments may receive a new extraction/correction after the wait started.

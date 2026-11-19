@@ -1,0 +1,42 @@
+{
+  "item": "非创作 Skill 交付路径",
+  "baseline": "9776f9b",
+  "generatedAt": "2026-11-17T08:25:00+08:00",
+  "behavior": {
+    "planningOnly": "只做计划，报告不要动：阶段成果 PlanDraft，报告版本保持，行动 0",
+    "researchOnly": "先研究，不开始写报告：阶段成果 EvidencePack 摘要，报告版本保持",
+    "reviewOnly": "只复盘，不创建行动：阶段成果 ReviewFindings，行动 0",
+    "stateAfterDelivery": "PAUSED + pauseReason=SKILL_DELIVERABLE_READY；WorkState reasonCode=SKILL_DELIVERABLE_READY；lastErrorJson=null",
+    "resume": "恢复为 WAITING_INPUT + waitingFor=OBSERVATION，等待新资料/新指令，不重复运行同一阶段",
+    "storage": "AgentMission.planJson.skillArtifacts（无迁移）",
+    "reportAndActions": "未写 AgentMissionOutput、未创建 ActionItem/外部写入"
+  },
+  "validation": {
+    "unitTests": { "command": "npm.cmd test -- tests/v2SkillArtifacts.test.ts tests/v2FirstSlice.test.ts tests/v2DelegationIdempotency.test.ts tests/v2DelegationEntry.test.ts tests/missionRuntime.test.ts", "tests": 55, "exitCode": 0, "log": "tests.log" },
+    "browser": {
+      "command": "npm.cmd exec tsx -- scripts/v2-entry-demo.ts  然后  npm.cmd exec tsx -- scripts/verify-v2-stage-artifacts.ts（全新演示库）",
+      "exitCode": 0, "receipt": "browser/receipt.json", "log": "browser-check.log",
+      "checks": [
+        "normal entry: plan-only delegation delivered a viewable, source-backed stage artifact and no report revision",
+        "stage artifact sources resolve to the original imported material",
+        "resume is explicit and recoverable; delivered artifact and report stay untouched",
+        "360px: no horizontal overflow"
+      ],
+      "screenshots": ["browser/desktop.png", "browser/mobile.png"]
+    },
+    "fullSuite": { "files": 268, "tests": 2099, "exitCode": 0, "log": "full-tests.log" },
+    "types": { "command": "npm.cmd exec tsc -- --noEmit", "exitCode": 0, "log": "tsc.log" },
+    "lint": { "command": "npm.cmd exec eslint -- lib/skills lib/mission lib/evaluation components/v2 scripts/v2-entry-demo.ts scripts/verify-v2-stage-artifacts.ts tests/v2SkillArtifacts.test.ts", "exitCode": 0, "log": "eslint.log" },
+    "build": { "command": "NEXT_DIST_DIR=.next-v2-build + isolated DATABASE_URL, LLM_MODE=mock: npm.cmd run build -- --webpack", "exitCode": 0, "log": "build.log" }
+  },
+  "migration": { "newMigrations": 0 },
+  "compatibility": {
+    "web": "工作台新增 stageArtifacts/reasonCode；只读页面构建通过",
+    "harmonyos": "未改 ArkTS 契约；新增字段可忽略",
+    "v1": "v1 finish 语义未改；非 v2 路径不走阶段成果"
+  },
+  "remaining": [
+    "阶段成果暂不进入采纳/外发流程（本轮刻意保持只读）",
+    "未用真实模型验证该路径（本轮无付费授权）"
+  ]
+}

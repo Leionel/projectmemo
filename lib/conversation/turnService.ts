@@ -47,6 +47,7 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
       return { turn: prior, replay: true };
     }
     let directiveAdmission: { status: string; question?: string } | undefined;
+    let missionControlApplied = false;
     const ctAdmissionEnabled = isFeatureEnabled("FOCUS_CONTINUITY_ENABLED", false);
     const ctEnabled = ctAdmissionEnabled || (await tx.user.findUniqueOrThrow({ where: { id: actor.userId }, select: { continuitySeq: true } })).continuitySeq > 0;
     const ctProject = input.entityRef?.projectId ?? input.projectId ?? c.homeProjectId;
@@ -58,6 +59,7 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
         if (c.scope === "PROJECT" && c.homeProjectId !== ctProject) throw new AppError("DIRECTIVE_SCOPE_CHANGED", "指令的适用范围已变化，请在对应项目的讨论里重新说明", 409);
         directiveAdmission = admission;
         const admitted = await admitDirectiveInTx(actor, command, tx, { conversationId: id, requestId: input.requestId });
+        missionControlApplied = admitted.missionControlApplied === true;
         if (c.activeTurnId && admitted.events.length) {
           const active = await tx.conversationTurn.findUniqueOrThrow({ where: { id: c.activeTurnId } });
           return { turn: active, replay: true };
@@ -87,22 +89,27 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
       throw new AppError("BINDING_NOT_FOUND", "讨论对象已不可访问", 404);
     const ctScopes = ctEnabled ? (c.scope === "PROJECT" && c.homeProjectId ? [c.homeProjectId] : [...new Set([...(await tx.projectMembership.findMany({ where: { userId: actor.userId, project: { archivedAt: null } }, orderBy: { projectId: "asc" }, take: 60 })).map(m => m.projectId), ...(ctProject ? [ctProject] : [])])])
       .map(projectId => ({ projectId, conversationId: id, ...(input.entityRef?.kind === "MISSION" && input.entityRef.projectId === projectId ? { missionId: input.entityRef.id } : {}) })) : [];
-    const coord = ctEnabled ? await initialCoordination(actor.userId, ctScopes, tx) : null;
-    const leaseToken = coord && !options?.defer ? newTurnLease() : null;
+    const coord = ctEnabled && !missionControlApplied ? await initialCoordination(actor.userId, ctScopes, tx) : null;
+    const deferred = !!options?.defer && !missionControlApplied;
+    const leaseToken = coord && !deferred ? newTurnLease() : null;
     const turn = await tx.conversationTurn.create({ data: { conversationId: id, requestId: input.requestId,
-      inputHash: hash, inputJson: json(input), baseVersion: c.version, status: "OBSERVING", sessionId: actor.sessionId,
+      inputHash: hash, inputJson: json(input), baseVersion: c.version, status: missionControlApplied ? "ANSWERED" : "OBSERVING", sessionId: actor.sessionId,
+      finishedAt: missionControlApplied ? new Date() : null,
       leaseToken, leaseUntil: leaseToken ? new Date(Date.now() + 30000) : null,
-      readManifestJson: json({ ...(directiveAdmission ? { directiveAdmission } : {}), ...(options?.defer ? { deferred: true } : {}), ...(coord ? { coordination: coord } : {}) }) } });
+      readManifestJson: json({ ...(directiveAdmission ? { directiveAdmission } : {}), ...(deferred ? { deferred: true } : {}), ...(coord ? { coordination: coord } : {}) }) } });
     if (target) await tx.conversationProject.upsert({ where: { conversationId_projectId: { conversationId: id, projectId: target } },
       create: { conversationId: id, projectId: target }, update: {} });
     const attached = input.attachmentIds?.length ? await tx.conversationAttachment.findMany({ where: { id: { in: input.attachmentIds }, conversationId: id, ownerUserId: actor.userId }, select: { fileName: true } }) : [];
     if (input.attachmentIds?.length && attached.length !== input.attachmentIds.length) throw new AppError("ATTACHMENT_NOT_FOUND", "有附件已移除，请重新选择", 404);
     await appendConversationMessage(tx, id, actor.userId, "USER", input.message + (attached.length ? "\n\n附件：" + attached.map(a => "《" + a.fileName + "》").join("、") : ""),
       { ...emptyBlocks(), observedProjectIds: target ? [target] : [] }, turn.id);
-    await tx.conversation.update({ where: { id }, data: { activeTurnId: turn.id, version: { increment: 1 } } });
+    // A committed control has its own receipt. The resumed Worker can change the Mission version immediately.
+    if (missionControlApplied) await appendConversationMessage(tx, id, actor.userId, "ASSISTANT", "已调整原委托，后续按现有许可跟进。",
+      { ...emptyBlocks(), observedProjectIds: target ? [target] : [] }, turn.id);
+    await tx.conversation.update({ where: { id }, data: { activeTurnId: missionControlApplied ? null : turn.id, version: { increment: missionControlApplied ? 2 : 1 } } });
     return { turn, replay: false };
   });
-  if (reserved.replay) return { turnId: reserved.turn.id, status: reserved.turn.status, conversation: await readConversation(actor, id) };
+  if (reserved.replay || reserved.turn.status === "ANSWERED") return { turnId: reserved.turn.id, status: reserved.turn.status, conversation: await readConversation(actor, id) };
   if (!evaluation) await suggestFromExpression(actor.userId, input.message, { via: "CONVERSATION", conversationId: id });
   if (options?.defer) return { turnId: reserved.turn.id, status: reserved.turn.status, conversation: await readConversation(actor, id) };
   return reserved.turn.leaseToken ? withTurnLease(reserved.turn.id, reserved.turn.leaseToken, () => executeAcceptedConversationTurn(actor, id, reserved.turn, evaluation)) : executeAcceptedConversationTurn(actor, id, reserved.turn, evaluation);

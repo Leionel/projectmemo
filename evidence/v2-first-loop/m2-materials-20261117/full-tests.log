@@ -1,0 +1,54 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ❯ tests/v2FaultInjection.test.ts (8 tests | 1 failed) 32565ms
+   × two worker processes racing one READY mission: exactly one claims and writes once 3674ms
+ ❯ tests/contentQuality.test.ts (8 tests | 1 failed) 10ms
+   × an unrelated generic unknown cannot cover a missing specific condition 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/contentQuality.test.ts > an unrelated generic unknown cannot cover a missing specific condition
+AssertionError: expected 'PASS' to be 'FAIL' // Object.is equality
+
+Expected: "FAIL"
+Received: "PASS"
+
+ ❯ tests/contentQuality.test.ts:84:76
+     82|   const checks = assessRevision({ previous: first, current: goodRevisi…
+     83|     requiredUnknowns: ["分享入口未验证", "审批人未给出"] });
+     84|   expect(checks.find(check => check.name === "UNKNOWN_PRESERVED")?.sta…
+       |                                                                            ^
+     85| });
+     86|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/v2FaultInjection.test.ts > two worker processes racing one READY mission: exactly one claims and writes once
+AssertionError: expected 2 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ tests/v2FaultInjection.test.ts:136:19
+    134|   const [left, right] = await Promise.all(attempts);
+    135|   expect(loser.result?.claimed).toBe(false);
+    136|   expect(left.code).toBe(0);
+       |                   ^
+    137|   expect(right.code).toBe(0);
+    138|   const claimed = [left.result?.claimed, right.result?.claimed].filter…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 273 passed (275)
+      Tests  2 failed | 2143 passed (2145)
+   Start at  12:08:03
+   Duration  545.36s (transform 9.32s, setup 0ms, import 172.88s, tests 268.90s, environment 46.92s)

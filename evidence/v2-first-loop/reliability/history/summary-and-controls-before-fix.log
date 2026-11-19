@@ -1,0 +1,40 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2ControlConcurrency.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ❯ tests/v2ControlConcurrency.test.ts (7 tests | 1 failed) 2026ms
+   ✓ new material arriving concurrently with pause never dispatches after the stop  373ms
+   ✓ new material arriving concurrently with cancel cannot produce a draft 175ms
+   ✓ a redirect directive racing a new material wake produces one revision with the new objective bound  314ms
+   ✓ explicit ownership revocation stops the mission before dispatch and keeps the draft 149ms
+   ✓ expired bounded permission holds the next check instead of consuming a model call 146ms
+   ✓ long-running cycles settle reservations, known usage and unknown calls without resetting budgets  834ms
+   × many observation-waiting missions cannot crowd a real user decision out of the project summary 26ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/v2ControlConcurrency.test.ts > many observation-waiting missions cannot crowd a real user decision out of the project summary
+AssertionError: expected 'cmwjywufr009rdc8ohar4bbsb' to be 'cmwjywufd008odc8octcoc3ra' // Object.is equality
+
+Expected: "cmwjywufd008odc8octcoc3ra"
+Received: "cmwjywufr009rdc8ohar4bbsb"
+
+ ❯ tests/v2ControlConcurrency.test.ts:196:31
+    194|   const summary = await missionWorkspaceSummary(user.id, project.id);
+    195|   expect(summary.items.length).toBeGreaterThan(0);
+    196|   expect(summary.items[0].id).toBe(question.id);
+       |                               ^
+    197|   expect(summary.items.some(item => item.id === question.id)).toBe(tru…
+    198| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  08:42:16
+   Duration  4.69s (transform 1.50s, setup 0ms, import 2.31s, tests 2.03s, environment 0ms)
+

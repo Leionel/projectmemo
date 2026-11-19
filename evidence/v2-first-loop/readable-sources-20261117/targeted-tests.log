@@ -1,0 +1,12 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2FirstSlice.test.ts tests/v2SkillArtifacts.test.ts tests/missionPanel.test.ts tests/missionArtifactAdoptionPanel.test.ts tests/missionNativeContract.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+
+ Test Files  5 passed (5)
+      Tests  55 passed (55)
+   Start at  14:19:45
+   Duration  82.86s (transform 13.26s, setup 0ms, import 30.43s, tests 43.83s, environment 5.88s)

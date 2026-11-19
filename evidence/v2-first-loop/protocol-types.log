@@ -1,0 +1,9 @@
+lib/mission/contextBuilder.ts(126,145): error TS2339: Property 'connectionIds' does not exist on type '{ candidateSources?: unknown; }'.
+lib/mission/contextBuilder.ts(126,163): error TS7006: Parameter 'id' implicitly has an 'any' type.
+lib/mission/runner.ts(124,14): error TS2339: Property 'experienceUse' does not exist on type '{ kind: "tool"; tool: string; args: unknown; summary: string; experienceUse?: { experienceId: string; disposition: "INVESTIGATE" | "ADOPT" | "ADAPT" | "REJECT"; reason?: string | undefined; }[] | undefined; } | { ...; } | { ...; } | { ...; }'.
+  Property 'experienceUse' does not exist on type '{ kind: "await_event"; outputId: string; reason: "NO_NEW_INFORMATION" | "DELIVERABLE_READY"; subscriptionIds: string[]; }'.
+lib/mission/runner.ts(124,34): error TS7006: Parameter 'use' implicitly has an 'any' type.
+lib/mission/runner.ts(164,14): error TS2339: Property 'experienceUse' does not exist on type '{ kind: "tool"; tool: string; args: unknown; summary: string; experienceUse?: { experienceId: string; disposition: "INVESTIGATE" | "ADOPT" | "ADAPT" | "REJECT"; reason?: string | undefined; }[] | undefined; } | { ...; } | { ...; } | { ...; }'.
+  Property 'experienceUse' does not exist on type '{ kind: "await_event"; outputId: string; reason: "NO_NEW_INFORMATION" | "DELIVERABLE_READY"; subscriptionIds: string[]; }'.
+lib/mission/runner.ts(165,29): error TS2339: Property 'experienceUse' does not exist on type '{ kind: "tool"; tool: string; args: unknown; summary: string; experienceUse?: { experienceId: string; disposition: "INVESTIGATE" | "ADOPT" | "ADAPT" | "REJECT"; reason?: string | undefined; }[] | undefined; } | { ...; } | { ...; } | { ...; }'.
+  Property 'experienceUse' does not exist on type '{ kind: "await_event"; outputId: string; reason: "NO_NEW_INFORMATION" | "DELIVERABLE_READY"; subscriptionIds: string[]; }'.

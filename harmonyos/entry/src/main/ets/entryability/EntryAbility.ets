@@ -3,6 +3,7 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import { font, window } from '@kit.ArkUI';
 import { PMWindowMetrics } from '../common/WindowMetrics';
 import { DeviceIdentity } from '../common/DeviceIdentity';
+import { nativeFileDisplayName, nativeShareFileUri } from '../common/NativeMaterialContract';
 
 const DOMAIN = 0x0000;
 
@@ -17,6 +18,21 @@ export default class EntryAbility extends UIAbility {
     AppStorage.setOrCreate<string>('pendingReceiptId', '');
     AppStorage.setOrCreate<string>('pendingMissionVersion', '');
     AppStorage.setOrCreate<string>('pendingHandoffExpiresAt', '');
+  }
+
+  private clearShareIntent(): void {
+    AppStorage.setOrCreate<string>('pendingShareUri', '');
+    AppStorage.setOrCreate<string>('pendingShareName', '');
+  }
+
+  private captureShareRoute(want: Want): void {
+    const uri = nativeShareFileUri(want.uri ?? '', want.parameters);
+    if (uri === '') { this.clearShareIntent(); return; }
+    // A share enters the same Mission-scoped preview as a file picker; ownership and scope are checked server-side.
+    AppStorage.setOrCreate<string>('pendingShareUri', uri);
+    AppStorage.setOrCreate<string>('pendingShareName', nativeFileDisplayName(uri, '分享的材料'));
+    const seq = (AppStorage.get<number>('pm.shareSeq') ?? 0) + 1;
+    AppStorage.setOrCreate<number>('pm.shareSeq', seq);
   }
 
   private clearNotificationIntent(): void {
@@ -73,6 +89,7 @@ export default class EntryAbility extends UIAbility {
   }
 
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+    this.captureShareRoute(want);
     this.captureNotificationRoute(want);
     DeviceIdentity.init(this.context);
     // 品牌名用思源宋体子集（Noto Serif SC，SIL OFL 1.1）；系统无 CJK 衬线时保证衬线生效

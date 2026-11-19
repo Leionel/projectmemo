@@ -1,0 +1,38 @@
+{
+  "date": "2026-11-17",
+  "baseline": "191cc0c",
+  "branch": "codex/v2-first-loop",
+  "workspace": "D:/Projects/hongmen-worktrees/v2-first-loop",
+  "data": "isolated synthetic SQLite only",
+  "provider": "injected fixture or localhost HTTP mock",
+  "paidCallsThisRound": 0,
+  "schemaChanges": false,
+  "migrationChanges": false,
+  "schemaMigrationOwner": "Codex root agent",
+  "deployed": false,
+  "v2DefaultEnabled": false,
+  "checks": [
+    { "command": "npm.cmd test", "result": "PASS", "files": 275, "tests": 2145, "seconds": 522.36, "log": "full-final.log" },
+    { "command": "npm.cmd test -- tests/contentQuality.test.ts tests/v2WorkerLifecycle.test.ts tests/v2SkillArtifacts.test.ts tests/v2RuntimeReliability.test.ts tests/s0WorkerIdentity.test.ts", "result": "PASS", "files": 5, "tests": 24, "log": "review-fixes-final.log" },
+    { "command": "npm.cmd test -- tests/v2MaterialsJourney.test.ts tests/v2DocxImport.test.ts tests/v2Journey.test.ts tests/contentQuality.test.ts", "result": "PASS", "files": 4, "tests": 26, "log": "material-tests.log" },
+    { "command": "npm.cmd exec tsc -- --noEmit", "result": "PASS", "log": "types.log" },
+    { "command": "npm.cmd exec eslint -- <git diff/new TS, TSX, CJS files excluding generated next-env.d.ts>", "result": "PASS", "log": "lint.log" },
+    { "command": "$env:NEXT_DIST_DIR='.next-m2-build'; npm.cmd run build -- --webpack", "result": "PASS", "log": "build-production.log", "existingWarning": "lib/browser/reader.ts module.createRequire argument parsing" },
+    { "command": "npm.cmd run harmony:test", "result": "PASS", "tests": 155, "log": "harmony.log", "scope": "local contract tests and Hvigor testbuild; no device/HAP acceptance" },
+    { "command": "npm.cmd exec tsx -- scripts/verify-v2-m2.ts", "result": "PASS", "log": "browser-production.log", "receipt": "browser/receipt.json", "scope": "production Next build, original scanner and Mission Runner, localhost mock HTTP" },
+    { "command": "$env:NEXT_DIST_DIR='.next-m2-build'; npm.cmd exec tsx -- scripts/verify-docx-trace.ts", "result": "PASS", "scope": "Worker and all 24 runtime dependency package entries", "log": "docx-trace.log" },
+    { "command": "npm.cmd exec eslint -- scripts/verify-docx-trace.ts lib/intake/docxWorker.cjs", "result": "PASS", "log": "final-script-lint.log" }
+  ],
+  "history": {
+    "full-tests.log": "First full run: 2 failed, 2143 passed. Repaired the unsynchronized competing-process test and tightened the specific-unknown scorer; stable rerun passes all 2145.",
+    "history/browser-production.log": "Missing filename on report citation button; corrected and production browser rerun passes.",
+    "history/browser-dev": "Earlier dev-browser evidence; final evidence is browser/receipt.json and browser-production.log."
+  },
+  "notVerified": [
+    "M2 new intake real-provider output quality and cost",
+    "real-user segment fit and retention",
+    "clean npm ci under all versions declared in the pre-existing manifest",
+    "HarmonyOS native file picker and physical-device/HAP acceptance",
+    "72-hour wall-clock run and production rolling upgrade"
+  ]
+}

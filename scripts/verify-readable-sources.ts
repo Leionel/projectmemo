@@ -1,0 +1,53 @@
+/** Read-only UI check against the already-running isolated demo. */
+import fs from "node:fs";
+import path from "node:path";
+import assert from "node:assert/strict";
+import { chromium } from "playwright";
+import { evidenceTime } from "../lib/client/sourceDisplay";
+import type { WorkbenchSnapshot } from "../lib/types/workbench";
+const origin = process.env.SOURCE_PREVIEW_ORIGIN ?? "http://127.0.0.1:4450";
+const control = process.env.SOURCE_PREVIEW_CONTROL ?? "http://127.0.0.1:4441/open";
+const missionId = process.env.SOURCE_PREVIEW_MISSION;
+assert.ok(missionId, "SOURCE_PREVIEW_MISSION required");
+assert.equal(new URL(origin).hostname, "127.0.0.1"); assert.equal(new URL(control).hostname, "127.0.0.1");
+const out = path.resolve("evidence/v2-first-loop/readable-sources-20261117/browser"); fs.mkdirSync(out, { recursive: true });
+const browser = await chromium.launch({ headless: true }), context = await browser.newContext({ viewport: { width: 1440, height: 1100 } });
+const page = await context.newPage(), errors: string[] = [];
+page.on("pageerror", error => errors.push(error.message));
+try {
+  await context.request.get(control);
+  const url = origin + "/v2/workbench?missionId=" + encodeURIComponent(missionId);
+  await page.goto(url);
+  await page.getByRole("heading", { level: 1 }).waitFor({ timeout: 90000 });
+  const response = await context.request.get(origin + "/api/missions/" + missionId + "/workbench");
+  assert.equal(response.ok(), true);
+  const view: WorkbenchSnapshot = await response.json(), source = view.sources[0];
+  assert.ok(source?.observedAt);
+  const side = page.getByRole("complementary", { name: "证据定位" });
+  await side.getByText(evidenceTime(source.observedAt), { exact: true }).first().waitFor();
+  assert.equal(await side.getByText(source.id, { exact: true }).isVisible(), false);
+  assert.equal(await side.getByText(source.hash, { exact: true }).isVisible(), false);
+  assert.ok(await side.locator("svg").count() >= 4);
+  assert.ok(await page.getByRole("button", { name: "第 1 版", exact: true }).locator("time").count());
+  await page.getByRole("heading", { level: 1 }).click(); await page.evaluate(() => scrollTo(0, 0));
+  await page.screenshot({ path: path.join(out, "desktop.png"), fullPage: true });
+  await side.screenshot({ path: path.join(out, "source-panel.png") });
+  await side.getByText("技术信息", { exact: true }).click();
+  await side.getByText(source.id, { exact: true }).waitFor({ state: "visible" });
+  await side.getByText("技术信息", { exact: true }).click();
+  await side.getByText(source.id, { exact: true }).waitFor({ state: "hidden" });
+  await page.setViewportSize({ width: 360, height: 900 }); await page.evaluate(() => scrollTo(0, 0));
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+  await page.screenshot({ path: path.join(out, "mobile.png"), fullPage: true });
+  await side.getByText("技术信息", { exact: true }).click();
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+  const legacy = await context.newPage();
+  await legacy.goto(origin + "/projects/" + view.projectId + "/missions?mission=" + missionId);
+  await legacy.getByRole("region", { name: "委托成果" }).waitFor({ timeout: 60000 });
+  assert.equal((await legacy.getByRole("region", { name: "委托成果" }).innerText()).includes(source.id), false);
+  assert.deepEqual(errors, []);
+  const checks = ["stored source time and draft time shown with icons", "source id/hash hidden until technical details expanded", "360px collapsed/expanded metadata has no overflow", "legacy outcome hides raw source ids", "no material/mission write requests from this inspection"];
+  fs.writeFileSync(path.join(out, "receipt.json"), JSON.stringify({ at: new Date().toISOString(), url, checks, errors, provider: "existing isolated localhost demo; no model requested" }, null, 2));
+  console.log("READABLE_SOURCES_PASS\n" + checks.join("\n"));
+} catch (error) { await page.screenshot({ path: path.join(out, "failure-" + Date.now() + ".png"), fullPage: true }); throw error; }
+finally { await browser.close(); }

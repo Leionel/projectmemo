@@ -109,6 +109,8 @@ async function selectGoalQuestion(
         a.id.localeCompare(b.id),
     );
   for (const m of candidates) {
+    const currentWait=await tx.agentMission.findUnique({where:{id:m.id},select:{waitStateJson:true}});
+    if(record(currentWait?.waitStateJson).waitingFor==="OBSERVATION")continue;
     const q =
       m.status === "WAITING_INPUT"
         ? await tx.agentMissionEvent.findFirst({

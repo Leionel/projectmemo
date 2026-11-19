@@ -1,0 +1,122 @@
+{
+  "slice": "M4 成本、容量与恢复",
+  "baseline": "95fcc4f",
+  "generatedAt": "2026-11-17T16:00:00+08:00",
+  "environment": {
+    "status": "FAIL",
+    "node": "v24.16.0",
+    "installedMismatches": 29,
+    "keyMismatches": [
+      {
+        "name": "next",
+        "declared": "16.4.3",
+        "installed": "16.2.11"
+      },
+      {
+        "name": "prisma",
+        "declared": "7.10.1",
+        "installed": "7.8.0"
+      },
+      {
+        "name": "@prisma/client",
+        "declared": "7.10.1",
+        "installed": "7.8.0"
+      },
+      {
+        "name": "zod",
+        "declared": "4.6.7",
+        "installed": "4.4.3"
+      },
+      {
+        "name": "vitest",
+        "declared": "4.1.12",
+        "installed": "4.1.10"
+      }
+    ],
+    "cleanInstall": {
+      "status": "BLOCKED",
+      "exitCode": 1,
+      "reason": "EUSAGE lock out of sync; missing lie/immediate/duck/underscore",
+      "log": "env/clean-install.log"
+    },
+    "productionBuildWithExistingNodeModules": {
+      "exitCode": 0,
+      "log": "web-build.log"
+    },
+    "note": "Existing node_modules is not reproducible; do not enable trial from this environment."
+  },
+  "cost": {
+    "test": "tests/v2M4CostAudit.test.ts",
+    "passed": 3,
+    "total": 3,
+    "log": "cost-audit.log",
+    "scenarios": [
+      "model hard gate before provider",
+      "tool hard gate",
+      "unknown usage/reservation isolation"
+    ]
+  },
+  "load": {
+    "10": {
+      "report": "load-10/report.json",
+      "acceptedP95Ms": 387,
+      "firstLocalResultP90Ms": 680,
+      "foregroundP95Ms": 9.6,
+      "failureRate": 0,
+      "busyErrors": 0,
+      "claimsMax": 3
+    },
+    "30": {
+      "report": "load-30/report.json",
+      "acceptedP95Ms": 1028,
+      "firstLocalResultP90Ms": 1776,
+      "foregroundP95Ms": 9.8,
+      "failureRate": 0,
+      "busyErrors": 0
+    },
+    "script": "scripts/v2-load.ts",
+    "provider": "INJECTED_LOAD_FIXTURE (no paid call)",
+    "targetsMetLocally": true,
+    "limitation": "Local mock throughput is not real cloud capacity; foreground samples only 1 per run; live-lease RUNNING rows are intentionally not stolen."
+  },
+  "longRun": {
+    "status": "RUNNING",
+    "out": "long-run-72h",
+    "startedAt": "2026-11-17T15:25:25+08:00",
+    "durationHours": 72,
+    "intervalMs": 60000,
+    "wallClockComplete": false,
+    "provider": "fixture, no paid call",
+    "controls": [
+      "status",
+      "resume",
+      "stop",
+      "report"
+    ],
+    "note": "Started is not passed. Natural wall-clock and per-day/gap evidence are required."
+  },
+  "gate": {
+    "buildRegression": "PASS (full 281 files / 2179 tests; web build exit 0)",
+    "permissions": "PASS (targeted tests)",
+    "realModel": "UNVERIFIED",
+    "capacity": "LOCAL PASS / CLOUD UNVERIFIED",
+    "72h": "RUNNING",
+    "device": "UNVERIFIED",
+    "cleanInstall": "FAIL",
+    "trial": "NOT READY"
+  },
+  "limits": [
+    "no paid model call",
+    "no production deployment",
+    "no real database change",
+    "no device install",
+    "72h not complete",
+    "clean install blocked"
+  ],
+  "targeted": {
+    "files": 9,
+    "tests": 60,
+    "exitCode": 0,
+    "log": "m3-m4-targeted-tests.log"
+  }
+}

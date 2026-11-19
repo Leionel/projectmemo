@@ -1,0 +1,72 @@
+{
+  "slice": "B",
+  "generatedAt": "2026-11-16T11:50:00.000Z",
+  "branch": "codex/v2-first-loop",
+  "baseCommit": "f538e7d",
+  "data": {
+    "database": "fresh isolated SQLite in OS temp dir, migrations replayed from prisma/migrations",
+    "provider": "INJECTED_V2_FIXTURE (deterministic test transport); no real model, no paid call",
+    "dataset": "docs/v2/evaluation/skill-routing.v1.json (sha256 1b71452899c586e4e893477be68301a90dac23e57ad4d4d80258f59b16fce89a)",
+    "expectedDataUsedByExecutor": false
+  },
+  "checks": {
+    "routerRegression": {
+      "command": "npm.cmd test -- tests/v2FirstSlice.test.ts tests/v2MissionProtocol.test.ts tests/v2ModelProtocol.test.ts tests/skillRouter.test.ts",
+      "files": 4,
+      "tests": 25,
+      "exitCode": 0,
+      "log": "tests.log"
+    },
+    "types": { "command": "npm.cmd exec tsc -- --noEmit", "exitCode": 0, "log": "tsc.log" },
+    "lint": {
+      "command": "npm.cmd exec eslint -- lib/skills lib/evaluation scripts/eval-routes.ts tests/skillRouter.test.ts tests/v2FirstSlice.test.ts",
+      "exitCode": 0,
+      "log": "eslint.log"
+    },
+    "routingExecutor": {
+      "command": "npm.cmd exec tsx -- scripts/eval-routes.ts --out evidence/v2-first-loop/slice-b-routing",
+      "cases": 64,
+      "dispatchCases": 54,
+      "dispatchedTools": 126,
+      "externalReadDispatches": 0,
+      "externalWriteDispatches": 0,
+      "businessWriteDispatches": 0,
+      "controlCasesWithDispatch": 0,
+      "exitCode": 0,
+      "log": "run.log",
+      "report": "report.json",
+      "results": "results.jsonl"
+    },
+    "frozenScorer": {
+      "command": "node docs/v2/validation/evaluate-routes.mjs --results evidence/v2-first-loop/slice-b-routing/results.jsonl",
+      "exitCode": 1,
+      "report": "score.json",
+      "routingDimension": { "modePrimarySequence": "64/64", "safetyViolations": 0, "criticalFailed": 0 },
+      "fullyPassedCases": 39,
+      "unprovenContentChecks": 25,
+      "unprovenCheckNames": [
+        "REQUIREMENTS_HAVE_SOURCES", "DEADLINE_FROM_USER", "ASSUMPTIONS_NOT_REQUIREMENTS", "UNKNOWN_DEADLINE_ALLOWED",
+        "USER_STATED_SOURCE_ONLY", "NOT_COMPARABLE", "PUBLIC_QUERY_WITHIN_SCOPE", "NEGATIVE_RESULT_RETAINED",
+        "FILE_EXISTS_NOT_EXECUTED", "METADATA_NOT_FULLTEXT", "PARTIAL_COVERAGE_EXPLICIT", "NO_EVIDENCE_NO_CLAIM",
+        "COMPARISON_BOUNDARY_PRESERVED", "UNMET_REQUIREMENTS_VISIBLE", "NO_NEW_FACTS", "UNKNOWN_NOT_ERASED",
+        "CHANGES_FROM_EVENTS", "CAUSE_FROM_HISTORY", "REQUIREMENT_COVERAGE", "DONE_FROM_RECEIPTS",
+        "USER_DECISION_NOT_ASSUMED", "ASOF_BOUNDARY", "REPORTED_NOT_VERIFIED", "ARCHIVE_NOT_INVALIDATION",
+        "NO_UNRELATED_REWRITE"
+      ]
+    }
+  },
+  "migration": { "newMigrations": 0, "note": "本切片不涉及 Schema/Migration" },
+  "security": {
+    "toolAuthorityExpanded": false,
+    "crossScopeRead": false,
+    "externalWrite": false,
+    "businessWrite": false,
+    "paidModelCalls": 0
+  },
+  "remaining": [
+    "25 条内容语义判据需要真实模型输出或独立人工审核，离线注入模型下按要求判失败，未伪造为通过",
+    "真实模型 Router 与内容质量评测命令待用户授权调用范围与上限后执行",
+    "HarmonyOS 尚未构建/真机验证；本切片只改服务端路由与评测脚本",
+    "旧 Worker 二进制仍不能消费 v2 行；V2 保持关闭"
+  ]
+}

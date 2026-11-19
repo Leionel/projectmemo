@@ -8,6 +8,7 @@
     "pages/FeatureGuide",
     "pages/LoginPage",
     "pages/MissionDetail",
+    "pages/OutcomeWorkbench",
     "pages/AttachmentViewer",
     "pages/FocusConversation",
     "pages/ConversationHistory",

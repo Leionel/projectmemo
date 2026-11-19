@@ -1,0 +1,23 @@
+
+D:\Projects\hongmen-worktrees\v2-first-loop\lib\mission\workspaceSummary.ts
+  26:9  warning  'attentionStates' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-worktrees\v2-first-loop\scripts\final-a\generate-samples.ts
+  59:6  warning  'PrismaLike' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-worktrees\v2-first-loop\scripts\final-a\probe-fs-a.ts
+  514:9  warning  'step' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-worktrees\v2-first-loop\scripts\final-a\probe-fs-a07-concurrency.ts
+  24:3  warning  'writeEvidence' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-worktrees\v2-first-loop\scripts\final-c\capture-web-evidence.mjs
+   144:10  warning  'notRun' is defined but never used                       @typescript-eslint/no-unused-vars
+   688:15  warning  'readback' is assigned a value but never used            @typescript-eslint/no-unused-vars
+   734:13  warning  'questionNavigation' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   965:15  warning  'readback' is assigned a value but never used            @typescript-eslint/no-unused-vars
+  1419:13  warning  'readback' is assigned a value but never used            @typescript-eslint/no-unused-vars
+  1528:15  warning  'readback' is assigned a value but never used            @typescript-eslint/no-unused-vars
+
+✖ 10 problems (0 errors, 10 warnings)
+

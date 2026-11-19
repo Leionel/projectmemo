@@ -18,6 +18,8 @@ import widgetHandoffTest from './WidgetHandoff.test';
 import loginIdentifierTest from './LoginIdentifier.test';
 import workStateBadgeTest from './WorkStateBadge.test';
 import missionRecoveryRegressionTest from './MissionRecoveryRegression.test';
+import missionWorkbenchTest from './MissionWorkbench.test';
+import nativeMaterialContractTest from './NativeMaterialContract.test';
 
 export default function testsuite() {
   localUnitTest();
@@ -40,6 +42,8 @@ export default function testsuite() {
   loginIdentifierTest();
   workStateBadgeTest();
   missionRecoveryRegressionTest();
+  missionWorkbenchTest();
+  nativeMaterialContractTest();
 }
 
 

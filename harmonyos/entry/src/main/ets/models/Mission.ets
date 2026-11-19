@@ -30,6 +30,7 @@ export class MissionPolicy { mode: string = 'MANUAL'; schemaVersion?: number; ex
 export interface MissionSourceCountCriterion { type: string; minimum: number; }
 export type MissionSuccessCriterion = string | MissionSourceCountCriterion;
 export class MissionCreate {
+  runtimeProtocolVersion?: number;
   successCriteria: string[] = ['DRAFT_EXISTS'];
   projectId: string = '';
   requestId: string = '';
@@ -45,7 +46,7 @@ export interface MissionReply { mission: MissionSummary; }
 export interface MissionDetailReply { mission: Mission; }
 export interface MissionBackgroundState { worker: string; inspecting: boolean; lastHeartbeatAt: string | null; }
 export interface MissionCloudState { available: boolean; reason: string; }
-export interface MissionCapabilities { enabled: boolean; widgetEnabled: boolean; background?: MissionBackgroundState; cloud?: MissionCloudState; }
+export interface MissionCapabilities { enabled: boolean; widgetEnabled: boolean; workbenchEnabled?: boolean; background?: MissionBackgroundState; cloud?: MissionCloudState; }
 export interface MissionQuestionPayload { question: string; missing: string; gapId?: string; }
 export interface MissionQuestion { id: string; seq: number; payloadJson: MissionQuestionPayload; }
 export interface MissionSource {
@@ -93,6 +94,7 @@ export interface MissionAttention { level: string; reason: string; decisionId?: 
 export interface MissionAttentionDelivery { status: string; seenAt?: string | null; platformAcceptedAt?: string | null; channel?: string; }
 export interface MissionDelegation { attention?: MissionAttention | null; }
 export class Mission {workingObjective?:string|null;nextBoundary?:string|null; workState?:WorkState;
+  runtimeProtocolVersion?: number;
   experimentObserverEnabled?: boolean; academicResearchEnabled?: boolean; sandboxVerificationEnabled?: boolean;
   documentDeepReadEnabled?: boolean;
   delegation?: MissionDelegation | null;

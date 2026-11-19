@@ -1,0 +1,41 @@
+{
+  "ok": false,
+  "verdict": "BLOCKED",
+  "reason": "V2_ROWS_PRESENT_WHILE_DISABLED",
+  "v2Rows": 1,
+  "v2Enabled": false,
+  "workerVersion": null,
+  "workerStatus": "UNOBSERVED",
+  "checks": [
+    {
+      "name": "SCHEMA_PROTOCOL_COLUMN",
+      "status": "PASS",
+      "detail": "AgentMission.runtimeProtocolVersion 已存在"
+    },
+    {
+      "name": "V2_FEATURE_FLAG",
+      "status": "WARN",
+      "detail": "MISSION_V2_ENABLED 关闭（v2 行应保持冻结）"
+    },
+    {
+      "name": "V2_ROWS",
+      "status": "PASS",
+      "detail": "v2 行 1 条"
+    },
+    {
+      "name": "WORKER_BUILD",
+      "status": "WARN",
+      "detail": "尚未观察到 Worker 心跳"
+    },
+    {
+      "name": "WORKER_IDENTITY",
+      "status": "PASS",
+      "detail": "Worker 身份与当前配置一致或未观察"
+    },
+    {
+      "name": "VERDICT",
+      "status": "BLOCK",
+      "detail": "V2_ROWS_PRESENT_WHILE_DISABLED"
+    }
+  ]
+}

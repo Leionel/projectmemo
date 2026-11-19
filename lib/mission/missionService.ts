@@ -17,6 +17,7 @@ import type {Prisma} from "@/lib/generated/prisma/client";
 import { premiseFor, assessEvidenceFit, requireFitReview, recordFitReview } from "./evidenceFitService";
 import type { WaitState } from "./gaps";
 import { initializeDelegation, boundedPolicy } from "./investigationDelegation";
+import { readSkillArtifacts } from "@/lib/skills/artifacts";
 export function requireMissions() { if (!isFeatureEnabled("MISSION_ENABLED", false)) throw new AppError("MISSION_DISABLED", "委托功能尚未启用", 503); }
 export async function createMission(userId: string, input: unknown) {
   requireMissions(); const body=createMissionSchema.parse(input); await assertOwner(userId,body.projectId); const hash=jsonHash(body);
@@ -28,8 +29,9 @@ export async function createMission(userId: string, input: unknown) {
 /** Shared creation path for confirmed Copilot handoff; caller owns the atomic receipt transaction. */
 export async function createMissionInTx(tx:Prisma.TransactionClient,userId:string,input:unknown){
     requireMissions();const body=createMissionSchema.parse(input);await assertOwner(userId,body.projectId,tx);const hash=jsonHash(body);
+    if(body.runtimeProtocolVersion===2&&!isFeatureEnabled("MISSION_V2_ENABLED",false))throw new AppError("MISSION_V2_DISABLED","持续成果试验尚未启用",409);
     if(body.continuationPolicy.mode==="BOUNDED_INVESTIGATION")throw new AppError("DELEGATION_CONFIRMATION_REQUIRED","请先创建原委托，再核对持续调查的范围和预算",409);
-    const m=await tx.agentMission.create({data:{ownerUserId:userId,projectId:body.projectId,createRequestId:body.requestId,createPayloadHash:hash,goal:body.goal,successCriteriaJson:body.successCriteria,constraintsJson:json({...body.missionConstraints,llmContextApproved:body.llmContextApproved}),researchScopeJson:json(body.researchScope),continuationPolicyJson:body.continuationPolicy,budgetJson:defaultBudget}});
+    const m=await tx.agentMission.create({data:{runtimeProtocolVersion:body.runtimeProtocolVersion??1,ownerUserId:userId,projectId:body.projectId,createRequestId:body.requestId,createPayloadHash:hash,goal:body.goal,successCriteriaJson:body.successCriteria,constraintsJson:json({...body.missionConstraints,llmContextApproved:body.llmContextApproved}),researchScopeJson:json(body.researchScope),continuationPolicyJson:body.continuationPolicy,budgetJson:defaultBudget}});
     const continuity = await effectiveContinuity(userId, { projectId: m.projectId, missionId: m.id }, tx);
     await tx.agentMission.update({ where: { id: m.id }, data: { planJson: json({ ...(m.planJson as object), continuityBinding: { intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash } }) } });
     await event(tx,m.id,"CREATED",{goal:m.goal,constraints:body.missionConstraints,researchScope:body.researchScope,llmContextApproved:body.llmContextApproved});return m;
@@ -58,15 +60,20 @@ export async function missionDetail(userId:string,id:string){
     return {id:s.id,ordinal:s.ordinal,toolName:s.toolName,status:s.status,result:s.resultJson,execution};
   }));
   const completion=await readMissionCompletion(id,outputs[0]?.verificationStatus??null);
+  const stageArtifacts=readSkillArtifacts(m.planJson).map(artifact=>({id:artifact.id,skillId:artifact.skillId,label:artifact.skillId,createdAt:artifact.createdAt,blocks:artifact.blocks,sources:artifact.sources,checks:artifact.checks,unknowns:artifact.unknowns}));
   const continuity=await effectiveContinuity(userId,{projectId:m.projectId,missionId:m.id});
   const workState=missionWorkState({...m,delegationEnabled:isFeatureEnabled("MISSION_INVESTIGATION_DELEGATION_ENABLED",false),events:questions,approvals,unknownSteps:steps.filter(s=>s.status==="UNKNOWN").length});
   const currentQuestion=workState.exactQuestionRef?await db.agentMissionEvent.findFirst({where:{id:workState.exactQuestionRef,missionId:id,type:"QUESTION"}}):null;
-  const fitPremise=m.waitStateJson&&m.status==="WAITING_INPUT"?premiseFor(m,m.waitStateJson as unknown as WaitState):null;
+  const fitPremise=m.waitStateJson&&m.status==="WAITING_INPUT"&&workState.phase==="WAITING_USER"?premiseFor(m,m.waitStateJson as unknown as WaitState):null;
   const experience=isFeatureEnabled("PROJECT_EXPERIENCE_ENABLED",true)?{enabled:true as const,suggestions:await suggestionsForMission(m),note:"建议不改变权限；影子观察不注入模型上下文。"}:{enabled:false as const,suggestions:[],note:"项目经验复用当前未开启。"};
-  return {workState,workingObjective:continuity.workingObjective,nextBoundary:continuity.nextBoundary,experimentObserverEnabled:isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false),academicResearchEnabled:isFeatureEnabled("ACADEMIC_RESEARCH_ENABLED",false),sandboxVerificationEnabled:isFeatureEnabled("SANDBOX_VERIFICATION_ENABLED",false),documentDeepReadEnabled:isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false),investigationDelegationEnabled:isFeatureEnabled("MISSION_INVESTIGATION_DELEGATION_ENABLED",false),delegation:(m.planJson as {delegation?:unknown}).delegation??null,evidencePremise:fitPremise,completion,experience,semanticCheckEnabled:isFeatureEnabled("MISSION_SEMANTIC_CHECK_ENABLED",false),artifactAdoptionEnabled:isFeatureEnabled("MISSION_ARTIFACT_ADOPTION_ENABLED",false),id:m.id,projectId:m.projectId,goal:m.goal,status:m.status,version:m.version,contextVersion:m.contextVersion,planRevision:m.planRevision,continuationPolicy:m.continuationPolicyJson,autoContinuationEnabled:isFeatureEnabled("MISSION_AUTO_CONTINUATION_ENABLED",false),successCriteria:m.successCriteriaJson,constraints:m.constraintsJson,constraintsVersion:m.constraintsVersion,researchScope:m.researchScopeJson,researchScopeVersion:m.researchScopeVersion,pauseReason:m.pauseReason,pauseRequestedAt:m.pauseRequestedAt?.toISOString()??null,cancelRequestedAt:m.cancelRequestedAt?.toISOString()??null,error:m.lastErrorJson,budget:m.budgetJson,used:m.budgetUsedJson,question:currentQuestion,steps:projectedSteps,approvals:approvals.map(a=>({id:a.id,proposal:a.proposalJson,proposalHash:a.proposalHash,expiresAt:a.expiresAt})),outputs};
+  return {workState,workingObjective:continuity.workingObjective,nextBoundary:continuity.nextBoundary,experimentObserverEnabled:isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false),academicResearchEnabled:isFeatureEnabled("ACADEMIC_RESEARCH_ENABLED",false),sandboxVerificationEnabled:isFeatureEnabled("SANDBOX_VERIFICATION_ENABLED",false),documentDeepReadEnabled:isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false),investigationDelegationEnabled:isFeatureEnabled("MISSION_INVESTIGATION_DELEGATION_ENABLED",false),delegation:(m.planJson as {delegation?:unknown}).delegation??null,evidencePremise:fitPremise,completion,experience,semanticCheckEnabled:isFeatureEnabled("MISSION_SEMANTIC_CHECK_ENABLED",false),artifactAdoptionEnabled:isFeatureEnabled("MISSION_ARTIFACT_ADOPTION_ENABLED",false),id:m.id,projectId:m.projectId,goal:m.goal,status:m.status,version:m.version,runtimeProtocolVersion:m.runtimeProtocolVersion,checkpoint:(m.planJson as {checkpoint?:unknown}).checkpoint??null,contextVersion:m.contextVersion,planRevision:m.planRevision,continuationPolicy:m.continuationPolicyJson,autoContinuationEnabled:isFeatureEnabled("MISSION_AUTO_CONTINUATION_ENABLED",false),successCriteria:m.successCriteriaJson,constraints:m.constraintsJson,constraintsVersion:m.constraintsVersion,researchScope:m.researchScopeJson,researchScopeVersion:m.researchScopeVersion,pauseReason:m.pauseReason,pauseRequestedAt:m.pauseRequestedAt?.toISOString()??null,cancelRequestedAt:m.cancelRequestedAt?.toISOString()??null,error:m.lastErrorJson,budget:m.budgetJson,used:m.budgetUsedJson,question:currentQuestion,steps:projectedSteps,approvals:approvals.map(a=>({id:a.id,proposal:a.proposalJson,proposalHash:a.proposalHash,expiresAt:a.expiresAt})),outputs,stageArtifacts};
 }
 export async function readOutput(userId:string,id:string,outputId:string){await ownedMission(userId,id);const output=await db.agentMissionOutput.findFirst({where:{id:outputId,missionId:id}});if(!output)throw new AppError("OUTPUT_NOT_FOUND","没有找到成果草稿",404);return output;}
-export async function missionEvents(userId:string,id:string,after=0){await ownedMission(userId,id);const events=await db.agentMissionEvent.findMany({where:{missionId:id,seq:{gt:after}},orderBy:{seq:"asc"},take:100});return{events,nextAfterSeq:events.at(-1)?.seq??after};}
+export async function missionEvents(userId:string,id:string,after=0){await ownedMission(userId,id);const rows=await db.agentMissionEvent.findMany({where:{missionId:id,seq:{gt:after}},orderBy:{seq:"asc"},take:100});
+ // Challenge text/answer keys are only read through the version- and permission-checked challenge view.
+ const events=rows.map(row=>row.type.startsWith("CHALLENGE_")?{...row,payloadJson:{challengeId:row.type==="CHALLENGE_STARTED"?row.id:String(record(row.payloadJson).challengeId??"")}}:
+   row.type==="SPRINT_SOURCE_OPENED"?{...row,payloadJson:{sprintId:String(record(row.payloadJson).sprintId??"")}}:row);
+ return{events,nextAfterSeq:rows.at(-1)?.seq??after};}
 export async function commandMission(userId:string,id:string,action:string,raw:unknown,approvalId?:string,guard?:(mission:Awaited<ReturnType<typeof ownedMission>>)=>void, transaction?:Prisma.TransactionClient){
   requireMissions();const body=commandSchema.parse(raw),hash=jsonHash({action,approvalId,body});
   const apply = async (tx:Prisma.TransactionClient) => {
@@ -76,7 +83,7 @@ export async function commandMission(userId:string,id:string,action:string,raw:u
     if(action==="input"){
       const wait=m.waitStateJson as unknown as WaitState|null;
       // 必须是仍未解决的原问题绑定。缺失绑定不能从最近观察事件推断，也不把 null 传入证据核对。
-      if(m.status!=="WAITING_INPUT"||!body.answer||!wait||typeof wait!=="object"||Array.isArray(wait)
+      if(m.status!=="WAITING_INPUT"||(wait as unknown as {waitingFor?:string}|null)?.waitingFor==="OBSERVATION"||!body.answer||!wait||typeof wait!=="object"||Array.isArray(wait)
         ||wait.resolved===true||typeof wait.questionId!=="string"||wait.questionId!==body.questionId)
         throw new AppError("INPUT_CHANGED","问题已变化或等待记录不完整，请刷新原委托后核对",409);
       // 等待期间追加观察事件不影响同一 QUESTION；观察本身不能成为可回答的问题。
@@ -107,12 +114,18 @@ export async function commandMission(userId:string,id:string,action:string,raw:u
       await tx.agentMissionStep.updateMany({where:{missionId:id,status:{in:["WAITING_APPROVAL","READY"]}},data:{status:"OBSOLETE"}});
       await tx.agentMission.update({where:{id},data:{planRevision:{increment:1}}});status="READY";
     }else if(action==="resume"){
-      if(m.status!=="PAUSED")throw new AppError("MISSION_NOT_PAUSED","仅暂停的委托可以继续；失败任务需先修复原因",409);const previous=(m.planJson as {resumeStatus?:string}).resumeStatus;status=previous&&["WAITING_INPUT","WAITING_APPROVAL"].includes(previous)?previous:"READY";
+      if(m.status!=="PAUSED")throw new AppError("MISSION_NOT_PAUSED","仅暂停的委托可以继续；失败任务需先修复原因",409);const previous=(m.planJson as {resumeStatus?:string}).resumeStatus;
+      // A delivered stage artifact waits for a new instruction or material; resuming must not
+      // immediately re-run the same stage (which would only dedupe the same artifact again).
+      if(m.pauseReason==="SKILL_DELIVERABLE_READY")status="WAITING_INPUT";
+      else status=previous&&["WAITING_INPUT","WAITING_APPROVAL"].includes(previous)?previous:"READY";
     }else if(action==="pause"){if(!["READY","RUNNING","WAITING_INPUT","WAITING_APPROVAL"].includes(m.status))throw new AppError("INVALID_TRANSITION","当前状态无法暂停",409);status=m.status==="RUNNING"?"RUNNING":"PAUSED";}
     else if(action==="cancel")status=m.status==="RUNNING"?"RUNNING":"CANCELLED";
     else throw new AppError("INVALID_COMMAND","不支持此操作",422);
     const continuity = await effectiveContinuity(userId, { projectId: m.projectId, missionId: m.id }, tx);
-    const updated=await tx.agentMission.update({where:{id},data:{status,...(action==="pause"?{planJson:json({...m.planJson as object,resumeStatus:m.status==="RUNNING"?"READY":m.status})}:{}),...( ["resume","input","approval","replan"].includes(action)?{planJson:json({...m.planJson as object,resumeStatus:null,automaticContinuation:null,continuityBinding:{intentHash:continuity.intentHash,reusePolicyHash:continuity.reusePolicyHash},...((m.planJson as {dynamicReview?:{completed?:boolean}}).dynamicReview?.completed&&["resume","input"].includes(action)?{dynamicReview:null}:{})})}:{}),version:{increment:1},...(action==="input"?{contextVersion:{increment:1}}:{}),pauseRequestedAt:action==="pause"?new Date():null,cancelRequestedAt:action==="cancel"?new Date():m.cancelRequestedAt,pauseReason:action==="pause"?"USER":null}});
+    // An explicit answer resumes V2 work immediately. The previous observation timer belongs to the waiting cycle.
+    const wakeForAnswer=action==="input"&&m.runtimeProtocolVersion===2?{nextAttemptAt:null}:{};
+    const updated=await tx.agentMission.update({where:{id},data:{status,...wakeForAnswer,...(action==="pause"?{planJson:json({...m.planJson as object,resumeStatus:m.status==="RUNNING"?"READY":m.status})}:{}),...( ["resume","input","approval","replan"].includes(action)?{planJson:json({...m.planJson as object,resumeStatus:null,automaticContinuation:null,continuityBinding:{intentHash:continuity.intentHash,reusePolicyHash:continuity.reusePolicyHash},...((m.planJson as {dynamicReview?:{completed?:boolean}}).dynamicReview?.completed&&["resume","input"].includes(action)?{dynamicReview:null}:{})})}:{}),...(action==="resume"&&status==="WAITING_INPUT"&&m.pauseReason==="SKILL_DELIVERABLE_READY"?{waitStateJson:json({waitingFor:"OBSERVATION",startedAt:new Date().toISOString(),artifactId:(m.planJson as {skillCursor?:{artifactId?:string}}).skillCursor?.artifactId??null,subscriptionIds:["project-materials"]}),nextAttemptAt:null}:{}),version:{increment:1},...(action==="input"?{contextVersion:{increment:1}}:{}),pauseRequestedAt:action==="pause"?new Date():null,cancelRequestedAt:action==="cancel"?new Date():m.cancelRequestedAt,pauseReason:action==="pause"?"USER":null}});
     await event(tx,id,action.toUpperCase(),json(body),{id:`cmd:${body.requestId}`,hash});return updated;
   };
   return transaction ? apply(transaction) : db.$transaction(apply);
@@ -132,9 +145,9 @@ export async function editMission(userId:string,id:string,kind:"constraints"|"re
   });
 }
 const policyEditSchema=z.object({requestId:z.string().min(1).max(128),expectedVersion:z.number().int().positive(),policy:continuationPolicySchema}).strict();
-export async function editContinuationPolicy(userId:string,id:string,raw:unknown){
+export async function editContinuationPolicy(userId:string,id:string,raw:unknown,transaction?:Prisma.TransactionClient){
  requireMissions();const body=policyEditSchema.parse(raw),hash=jsonHash(body);
- return db.$transaction(async tx=>{
+ const apply=async(tx:Prisma.TransactionClient)=>{
   await lock(tx,id);const m=await ownedMission(userId,id,tx);if(await commandReplay(tx,id,body.requestId,hash))return m;
   if(m.version!==body.expectedVersion||terminal.includes(m.status))throw new AppError("MISSION_CHANGED","委托已变化，请刷新",409);
   const active=!!(m.planJson as {automaticContinuation?:unknown}).automaticContinuation||!!boundedPolicy(m);
@@ -144,5 +157,6 @@ export async function editContinuationPolicy(userId:string,id:string,raw:unknown
   const status=active&&m.status==="READY"?"PAUSED":m.status==="WAITING_APPROVAL"?"READY":m.status;
   const updated=await tx.agentMission.update({where:{id},data:{continuationPolicyJson:json(body.policy),contextVersion:{increment:1},planRevision:{increment:1},version:{increment:1},status:delegation&&m.status==="WAITING_INPUT"?"READY":status,nextAttemptAt:null,pauseRequestedAt:active&&m.status==="RUNNING"?new Date():m.pauseRequestedAt,planJson:json({...m.planJson as object,automaticContinuation:null,delegation,...(status==="PAUSED"?{resumeStatus:"READY"}:{})})}});
   await event(tx,id,"CONTINUATION_POLICY_CHANGED",{policy:body.policy,source:"USER_CONFIRMED"},{id:`cmd:${body.requestId}`,hash});return updated;
- });
+ };
+ return transaction?apply(transaction):db.$transaction(apply);
 }

@@ -1160,6 +1160,7 @@ model AgentMission {
  planRevision Int @default(1)
  planJson Json @default("{}")
  contextSchemaVersion Int @default(1)
+ runtimeProtocolVersion Int @default(1)
  budgetJson Json
  budgetUsedJson Json @default("{}")
  nextEventSeq Int @default(0)

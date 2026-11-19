@@ -1,0 +1,7 @@
+
+D:\Projects\hongmen-worktrees\v2-first-loop\scripts\eval-v2.ts
+  21:8   warning  'http' is defined but never used        @typescript-eslint/no-unused-vars
+  23:10  warning  'randomUUID' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 2 problems (0 errors, 2 warnings)
+

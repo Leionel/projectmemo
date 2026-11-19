@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-17T11:05:12.031Z",
+  "count": 10,
+  "states": {
+    "READY": 2,
+    "OBSERVATION": 2,
+    "USER": 2,
+    "STALE_RUNNING": 2,
+    "RUNNING": 2
+  },
+  "target": {
+    "p95AcceptedMs": 2000,
+    "p90FirstLocalResultMs": 120000
+  },
+  "accepted": {
+    "samples": 10,
+    "p50Ms": 14,
+    "p95Ms": 69,
+    "targetMet": true
+  },
+  "queue": {
+    "samples": 4,
+    "p95Ms": 2505
+  },
+  "firstLocalResult": {
+    "samples": 4,
+    "p50Ms": 2552,
+    "p90Ms": 2889,
+    "targetMet": true
+  },
+  "foreground": {
+    "samples": 46,
+    "failures": 0,
+    "p50Ms": 11.494200000000092,
+    "p95Ms": 15.536000000000058
+  },
+  "workerProcesses": [
+    {
+      "pid": 61812,
+      "code": 0
+    },
+    {
+      "pid": 38712,
+      "code": 0
+    }
+  ],
+  "errors": [],
+  "runnable": 4,
+  "incompleteMissions": 0,
+  "failureRate": 0,
+  "fairness": {
+    "claimsMin": 3,
+    "claimsMax": 3
+  },
+  "busyErrors": 0,
+  "usage": {
+    "models": 12,
+    "tools": 8,
+    "inputTokens": 120,
+    "outputTokens": 60,
+    "unknownCalls": 0,
+    "reservedOutputTokens": 0
+  },
+  "durationMs": 3148,
+  "provider": "INJECTED_LOAD_FIXTURE (two OS processes, no paid call)",
+  "limitation": "Local mock throughput is not real cloud capacity; RUNNING rows with live leases stay untouched by design."
+}

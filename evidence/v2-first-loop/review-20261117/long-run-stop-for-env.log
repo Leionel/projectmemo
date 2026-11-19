@@ -1,0 +1,7 @@
+{
+  "stopRequested": true,
+  "workerPid": 29776,
+  "out": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\evidence\\v2-first-loop\\m4-20261117\\long-run-72h",
+  "mode": "COOPERATIVE",
+  "note": "下一个心跳检查停止标志；用 status 确认退出"
+}

@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2LongRunCoverage.test.ts tests/v2ProjectSprint.test.ts tests/v2ReentryBrief.test.ts tests/v2ChallengeMetricPrivacy.test.ts tests/v2Challenges.test.ts tests/v2NativeMaterials.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+
+ Test Files  6 passed (6)
+      Tests  39 passed (39)
+   Start at  18:06:34
+   Duration  16.34s (transform 3.78s, setup 0ms, import 8.30s, tests 6.29s, environment 1ms)
+

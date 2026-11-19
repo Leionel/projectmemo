@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-17",
+  "baseline": "97d2c15",
+  "challengeCommit": "629c32f",
+  "workspace": "D:/Projects/hongmen-worktrees/v2-first-loop",
+  "data": "isolated synthetic SQLite",
+  "provider": "injected fixture / localhost HTTP mock",
+  "paidModelCalls": 0,
+  "schemaChanges": false,
+  "migrationChanges": false,
+  "schemaMigrationOwner": "Codex root agent",
+  "deployed": false,
+  "defaultChallengeEnabled": false,
+  "checks": [
+    { "command": "npm.cmd test", "files": 276, "tests": 2162, "seconds": 525.80, "result": "PASS", "log": "full-tests.log" },
+    { "command": "npm.cmd test -- tests/v2Challenges.test.ts tests/v2MaterialsJourney.test.ts tests/continuitySuppression.test.ts tests/v2SkillArtifacts.test.ts tests/s0WorkerIdentity.test.ts", "files": 5, "tests": 34, "result": "PASS", "log": "targeted-tests.log" },
+    { "command": "npm.cmd exec tsc -- --noEmit", "result": "PASS", "log": "types.log" },
+    { "command": "npm.cmd exec eslint -- <changed/new TS and TSX files excluding generated next-env.d.ts>", "result": "PASS", "log": "lint.log" },
+    { "command": "npm.cmd exec eslint -- scripts/verify-v2-m3.ts components/v2/OutcomeChallenges.tsx lib/challenges lib/mission/materialService.ts", "result": "PASS", "log": "final-lint.log" },
+    { "command": "$env:NEXT_DIST_DIR='.next-m3-build'; npm.cmd run build -- --webpack", "result": "PASS", "log": "build.log", "existingWarning": "lib/browser/reader.ts createRequire argument parsing" },
+    { "command": "npm.cmd exec tsx -- scripts/verify-v2-m3.ts", "result": "PASS", "log": "browser-final.log", "receipt": "browser-final/receipt.json", "scope": "production build, five check groups, mock HTTP model; screenshots visually inspected" },
+    { "command": "npm.cmd run harmony:test", "result": "PASS", "tests": 160, "log": "harmony-test.log" },
+    { "command": "npm.cmd run harmony:build", "result": "PASS", "log": "harmony-build-final.log", "signed": false, "bytes": 8870084, "sha256": "e613c07ed4d05a6575e41e662c9c009c45ffa780119799a10d288717db74812f" },
+    { "command": "npm.cmd exec tsc -- --noEmit", "scope": "final demo deep-link change", "result": "PASS", "log": "types-final.log" },
+    { "command": "npm.cmd exec eslint -- scripts/v2-entry-demo.ts", "result": "PASS", "log": "demo-lint.log" },
+    { "check": "fresh playable preview through normal delegation APIs; owned/foreign demo target checks", "result": "PASS", "receipt": "playable-preview.json" }
+  ],
+  "historicalFailures": [
+    "browser-dev.log: acceptance helper expected 200 instead of valid pause 202; helper corrected and full production acceptance passed twice",
+    "harmony-build.log: local method key collided with ArkUI base method; renamed newRequestId and final native build passes"
+  ],
+  "notVerified": [
+    "M3 real-provider quality/cost and real-user value",
+    "physical HarmonyOS installation, cross-device UI/network tests, system sharing or notifications",
+    "native file picker / DOCX import",
+    "72-hour real-time run, capacity and production rolling upgrade",
+    "full M3 experimental scope: sprint, revisit capsule, metric comparability challenges, independent attempt deletion policy"
+  ]
+}

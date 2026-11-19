@@ -62,6 +62,15 @@ async function control(f: {actor: Fixture["actor"]; id: string}, action: "FOLLOW
   const a = (await listConversationAnchors(f.actor, f.id)).anchors[0];
   return commandConversationAnchor(f.actor, f.id, a.id, { requestId: crypto.randomUUID(), expectedVersion: a.version, action, ...extra });
 }
+it("observation checkpoint projects a changed state without resurrecting an old user question", async () => {
+  const f = await missionFixture(); await control(f, "FOLLOW");
+  await db.agentMission.update({ where: { id: f.m.id }, data: { runtimeProtocolVersion: 2, waitStateJson: { waitingFor: "OBSERVATION" }, contextVersion: { increment: 1 } } });
+  const result = await syncConversationAnchors(f.actor, f.id);
+  const message = result.conversation.messages.at(-1)!;
+  expect(message.content).toContain("等待新变化");
+  expect(message.content).not.toContain("请补充10月");
+  expect(message.content).not.toContain("等待补充");
+});
 it("binds an actual relevant SOURCE_ARRIVED event to a current goal and an inert follow-up action", async () => {
   vi.stubEnv("FOCUS_AGENT_R4_ENABLED", "true");
   try {

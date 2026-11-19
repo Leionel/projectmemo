@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-17T11:00:28.426Z",
+  "startedAt": "2026-11-17T11:00:28.426Z",
+  "dbPath": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\evidence\\v2-first-loop\\review-20261117\\long-run-72h-verified\\long-run.db",
+  "ownerUserId": "cmwkkzqqp0000mk8ojhexlhml",
+  "projectId": "cmwkkzqre0001mk8o4fn8atyq",
+  "captureId": "cmwkkzqri0003mk8o0asvf81a",
+  "missionId": "cmwkkzqry0004mk8oyw32mtl6",
+  "intervalMs": 60000,
+  "cycles": 0,
+  "materialEvery": 60,
+  "durationHours": 72,
+  "workerPid": 61804
+}

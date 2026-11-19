@@ -1,0 +1,74 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2FirstSlice.test.ts tests/v2MissionProtocol.test.ts tests/v2ModelProtocol.test.ts tests/missionRuntime.test.ts tests/missionNativeContract.test.ts tests/missionWaitNotice.test.ts tests/missionModelProtocol.test.ts tests/missionProtocolRecovery.integration.test.ts tests/missionContinuation.test.ts tests/agentUxWorkState.test.ts tests/agentUxJourney.test.ts tests/missionPanel.test.ts tests/ux3ThreeDayContinuity.test.ts tests/ux3ResponsibilityRevision.test.ts tests/continuityIntent.test.ts tests/continuityStages23.test.ts tests/continuitySuppression.test.ts tests/conversationAnchor.test.ts tests/conversationAnchorContract.test.ts tests/skillRouter.test.ts tests/v2Journey.test.ts tests/v2DelegationEntry.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ✓ tests/missionRuntime.test.ts (32 tests) 7740ms
+     ✓ 观察→草稿→完成，来源版本与步骤保留  411ms
+     ✓ 重新读取后的来源版本不会被历史草稿覆盖  377ms
+     ✓ 子进程提交后未回包即退出，恢复后只保留一个Action  1311ms
+     ✓ 事务中断10次均不遗留Action或消费回执，修复后仅提交一次  622ms
+     ✓ 连续无进展调用达到上限后停止  306ms
+     ✓ 成功进展和人工继续后各允许一次纠错，不重做已有步骤  388ms
+ ✓ tests/v2FirstSlice.test.ts (12 tests) 7956ms
+   ✓ 独立开发版本: persisted research→creation, restart, new material and same-Mission draft v2  1400ms
+   ✓ 客户交付项目: persisted research→creation, restart, new material and same-Mission draft v2  917ms
+   ✓ 科研实验汇报: persisted research→creation, restart, new material and same-Mission draft v2  857ms
+   ✓ 学生课程项目: persisted research→creation, restart, new material and same-Mission draft v2  818ms
+   ✓ natural compound veto persists through original Conversation/Directive services  896ms
+   ✓ bounded literal objective redirects v2 immediately without changing authority or resetting usage  802ms
+   ✓ natural continue never revives a deliberately paused v2 Mission  438ms
+   ✓ workbench reads frozen versions without writes, rejects outsiders and withholds suppressed material  1006ms
+ ✓ tests/conversationAnchor.test.ts (22 tests) 4340ms
+   ✓ rotates workspace synchronization past the first eight conversations  597ms
+   ✓ does not discard valid output revisions behind the per-sync event limit  583ms
+   ✓ follows completion of an older existing Action beyond the initial eight  318ms
+ ✓ tests/missionPanel.test.ts (18 tests) 6884ms
+     ✓ 选择的核算、论文和行动结果完成条件进入真实创建请求，不扩大研究许可  1399ms
+     ✓ 额度用完时一个按钮提高上限并继续，只提交原版本，不消费批准  456ms
+     ✓ 其他原因暂停时只继续，不提高额度  371ms
+     ✓ 模板写入真实只读约束但不代勾云模型许可；丢失响应先读回并保留请求编号  707ms
+     ✓ 过期批准保留内容但不允许再次提交，提示重新预览  303ms
+     ✓ 临时读取失败保留标时历史并阻止写入，重新读取后恢复  436ms
+     ✓ 自动接续许可由用户显式提交，包含当前版本  343ms
+     ✓ 多行约束和多个公开概念完整提交，不在逐键编辑时丢分隔符  706ms
+     ✓ 批准展示完整参数；行动回执可定位，重复读取不反复刷新行动板  343ms
+ ✓ tests/v2Journey.test.ts (2 tests) 1731ms
+   ✓ continuous revision journey: first draft, new material, restriction, redirect, delivered versions and pause  1278ms
+   ✓ pause and cancel end dispatch while delivered versions stay readable  444ms
+ ✓ tests/missionContinuation.test.ts (10 tests) 1562ms
+     ✓ 缺单位/时间、无关内容和冲突均继续等待  367ms
+ ✓ tests/conversationAnchorContract.test.ts (3 tests) 3132ms
+   ✓ upgrades populated F1 GoalQuestion/Intervention anchors while preserving original messages and manual policy  2099ms
+   ✓ executes the real ArkTS entry/follow/sync/ACK/reconcile contract and respects STOP from the original UI  791ms
+ ✓ tests/continuityStages23.test.ts (11 tests) 1264ms
+   ✓ CT2 original Mission dynamically reads pinned CI, jobs and redacted log; revoke blocks derived Artifact reuse  436ms
+   ✓ CT3 original Runner polls declared fixed SHA; stable CI uses zero models, changed CI resumes reasoning  334ms
+ ✓ tests/missionNativeContract.test.ts (15 tests) 1249ms
+ ✓ tests/skillRouter.test.ts (5 tests) 834ms
+   ✓ frozen 64 routing cases are answered from real isolated fixture records  818ms
+ ✓ tests/v2MissionProtocol.test.ts (6 tests) 732ms
+ ✓ tests/missionWaitNotice.test.ts (2 tests) 690ms
+   ✓ 同一个等待只提醒一次；新问题再提醒；邮件不含问题正文  592ms
+ ✓ tests/v2DelegationEntry.test.ts (4 tests) 565ms
+   ✓ preview writes nothing and shows the bounded scope  379ms
+ ✓ tests/continuitySuppression.test.ts (2 tests) 468ms
+   ✓ one root suppression closes memory, Investigation sources, dialogue, Artifact, Mission context and ACTIVE experience consumers  414ms
+ ✓ tests/ux3ResponsibilityRevision.test.ts (12 tests) 445ms
+ ✓ tests/continuityIntent.test.ts (6 tests) 420ms
+ ✓ tests/missionProtocolRecovery.integration.test.ts (1 test) 395ms
+     ✓ two invalid decisions pause; explicit resume keeps Mission, successful reads and cumulative budget  387ms
+ ✓ tests/ux3ThreeDayContinuity.test.ts (2 tests) 329ms
+   ✓ UX-3D: 三日纵向完整旅程 (D1交代->D2动态调查与重启保持->D3手机纠正与Web读回) 及跨天预算不变量  301ms
+ ✓ tests/agentUxJourney.test.ts (1 test) 213ms
+ ✓ tests/agentUxWorkState.test.ts (7 tests) 49ms
+ ✓ tests/missionModelProtocol.test.ts (10 tests) 33ms
+ ✓ tests/v2ModelProtocol.test.ts (2 tests) 18ms
+
+ Test Files  22 passed (22)
+      Tests  185 passed (185)
+   Start at  20:52:19
+   Duration  71.10s (transform 6.45s, setup 0ms, import 24.37s, tests 41.05s, environment 1.03s)
+

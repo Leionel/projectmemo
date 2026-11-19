@@ -1,0 +1,13 @@
+{
+  "at": "2026-11-17T06:32:35.182Z",
+  "url": "http://127.0.0.1:4450/v2/workbench?missionId=cmwkbcc0h0001q48o1d1tx643",
+  "checks": [
+    "stored source time and draft time shown with icons",
+    "source id/hash hidden until technical details expanded",
+    "360px collapsed/expanded metadata has no overflow",
+    "legacy outcome hides raw source ids",
+    "no material/mission write requests from this inspection"
+  ],
+  "errors": [],
+  "provider": "existing isolated localhost demo; no model requested"
+}

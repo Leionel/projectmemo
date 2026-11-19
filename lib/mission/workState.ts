@@ -91,6 +91,7 @@ export function missionWorkState(m: MissionStateInput, now = new Date()): WorkSt
     set("RUNNING", "SYSTEM", "STOP_REQUESTED_IN_FLIGHT", STOP_IN_FLIGHT_TEXT, STOP_IN_FLIGHT_ACTION);
   }
   else if (unknownByError) set("UNKNOWN", "SYSTEM", String(errorCode), "原请求状态待核对，已用预算保留", "查询原请求");
+  else if (m.status === "PAUSED" && m.pauseReason === "SKILL_DELIVERABLE_READY") set("PAUSED", "USER", "SKILL_DELIVERABLE_READY", "阶段成果已备好；原报告与业务行动未改动，查看后可继续跟进", "查看阶段成果");
   else if (m.status === "PAUSED" || m.status === "FAILED") set(m.status, m.status === "PAUSED" ? "USER" : "SYSTEM", String(error.code ?? m.status), typeof error.message === "string" ? error.message : m.status === "PAUSED" ? "调查已暂停，恢复前需核对原条件" : "这一步未完成，已保存进度", "查看原因与恢复条件");
   else if (m.status === "READY" && latest?.type === "DAILY_BUDGET_WAITING" && m.nextAttemptAt && +m.nextAttemptAt > +now) set("QUEUED", "AGENT", "DAILY_BUDGET_WAITING", "今日调用额度已用完，等待许可时区的次日；累计用量保留", "查看下次检查时间");
   else if (m.status === "READY") set("QUEUED", "AGENT", "READY", "委托已保存，等待执行", "查看委托进展");

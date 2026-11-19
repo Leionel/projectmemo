@@ -13,15 +13,31 @@ import { recordWorkerPresence } from "../lib/mission/workerPresence";
 import { processProjectDeletions } from "../lib/services/projectDeletionService";
 import { expireIntakeDrafts } from "../lib/services/projectIntakeService";
 import { isFeatureEnabled } from "../lib/config/features";
+import { WORKER_CAPABILITY_VERSION } from "../lib/mission/workerRelease";
 
+// This build claims only enabled protocol versions. Rollback keeps v1 consumption available while
+// v2 rows remain frozen; deployment readiness is inspected separately by v2-rollout-check.
+try {
+  const columns = await db.$queryRaw<Array<{ name: string }>>`PRAGMA table_info("AgentMission")`;
+  if (!columns.some(column => column.name === "runtimeProtocolVersion")) {
+    console.error("委托 Worker 启动中止：数据库缺少 runtimeProtocolVersion 迁移，请先完成迁移并升级全部 Worker。");
+    process.exit(1);
+  }
+  if (!isFeatureEnabled("MISSION_V2_ENABLED", false) && await db.agentMission.count({ where: { runtimeProtocolVersion: 2 } }) > 0) {
+    console.warn("V2 当前关闭：本 Worker 仅消费 v1 委托，v2 委托保持冻结。重新启用前请核对 v2-rollout-check。");
+  }
+} catch (error) {
+  console.error("委托 Worker 启动检查失败，未继续消费任务：" + (error instanceof Error ? error.message : "unknown"));
+  process.exit(1);
+}
 const workerId = randomUUID();
 let stopping = false;
 const state: WorkerCycleState = { first: "CONVERSATION", nextScanAt: 0 };
 process.on("SIGTERM", () => { stopping = true; });
 process.on("SIGINT", () => { stopping = true; });
 
-recordWorkerPresence({workerId,version:"r4-ux3-worker"});
-const heartbeat=setInterval(()=>recordWorkerPresence({workerId,version:"r4-ux3-worker"}),10000);heartbeat.unref();
+recordWorkerPresence({workerId,version:WORKER_CAPABILITY_VERSION});
+const heartbeat=setInterval(()=>recordWorkerPresence({workerId,version:WORKER_CAPABILITY_VERSION}),10000);heartbeat.unref();
 try {
   do {
     let successfulScans=0;

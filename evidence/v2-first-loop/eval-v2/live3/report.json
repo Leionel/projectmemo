@@ -1,0 +1,2021 @@
+{
+  "provider": "live",
+  "providerLabel": "LIVE_MODEL",
+  "generatedAt": "2026-11-16T14:04:20.147Z",
+  "durationMs": 132108,
+  "journeys": [
+    {
+      "id": "developer",
+      "label": "独立开发发布",
+      "protocol": {
+        "passed": 8,
+        "total": 10,
+        "checks": [
+          {
+            "name": "SAME_MISSION_CONTINUATION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "新资料由既有扫描器唤醒同一 Mission（woken=1）",
+            "evidenceRef": "mission:cmwjc1ifz0004hg8o41nz4dbw:wake"
+          },
+          {
+            "name": "VERSION_CHAIN_WITH_CHECKPOINTS",
+            "passed": false,
+            "judge": "DETERMINISTIC",
+            "detail": "版本 1,2；checkpoint 1,2",
+            "evidenceRef": "mission:cmwjc1ifz0004hg8o41nz4dbw:versions"
+          },
+          {
+            "name": "EVIDENCE_AND_TOOL_RECEIPTS",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "Skill 进入/交接与读取/创作步骤均有持久回执",
+            "evidenceRef": "mission:cmwjc1ifz0004hg8o41nz4dbw:steps:5"
+          },
+          {
+            "name": "BUDGET_MONOTONIC_NO_RESET",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型/工具累计用量不重置：3→6→6→9→9 / 2→4→4→5→5",
+            "evidenceRef": "mission:cmwjc1ifz0004hg8o41nz4dbw:budget"
+          },
+          {
+            "name": "RESTRICTION_BEFORE_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "限制先落库并禁止外部读取，之后没有新增稿（ids=1，blocked=true，unchanged=true）",
+            "evidenceRef": "directive:51d2f4b2-cfa3-4dbf-a84e-7360c0a3a6b0"
+          },
+          {
+            "name": "REDIRECT_SAME_MISSION",
+            "passed": false,
+            "judge": "DETERMINISTIC",
+            "detail": "有限目标改道后同一 Mission 产出第 3 版",
+            "evidenceRef": "directive:601320d6-bb36-4201-8247-44fca3d3583e"
+          },
+          {
+            "name": "ENDING_STOPS_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "暂停/取消后不再派发（pause → PAUSED）",
+            "evidenceRef": "mission:cmwjc1ifz0004hg8o41nz4dbw:ending"
+          },
+          {
+            "name": "NO_LEGACY_FINISH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "持续委托没有用旧 finish 结束",
+            "evidenceRef": "mission:cmwjc1ifz0004hg8o41nz4dbw:events"
+          },
+          {
+            "name": "TOOL_BOUNDARY_PRIVATE_ONLY",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "工具只使用项目读取与私有稿：inspect_project,save_mission_output,read_project_material",
+            "evidenceRef": "mission:cmwjc1ifz0004hg8o41nz4dbw:steps"
+          },
+          {
+            "name": "PROVIDER_RECORDED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型 provider 与用量留痕：deepseek",
+            "evidenceRef": "mission:cmwjc1ifz0004hg8o41nz4dbw:runs"
+          }
+        ]
+      },
+      "content": {
+        "passed": 5,
+        "total": 6,
+        "checks": [
+          {
+            "name": "NEW_MATERIAL_CHANGED_DRAFT",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "新增材料进入第 2 版且正文变化（hash=9a4e956e→176aeb2b；refs=capture:cmwjc1n2x000thg8o9vjmyt6h,project:cmwjc1ifj0001hg8osjkljx8v）",
+            "evidenceRef": "mission:cmwjc1ifz0004hg8o41nz4dbw:output:cmwjc1skr0018hg8oqws3b6if"
+          },
+          {
+            "name": "OLD_EVIDENCE_RETAINED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "第 2 版仍保留旧依据：capture:cmwjc1n2x000thg8o9vjmyt6h,project:cmwjc1ifj0001hg8osjkljx8v",
+            "evidenceRef": "mission:cmwjc1ifz0004hg8o41nz4dbw:output:cmwjc1skr0018hg8oqws3b6if"
+          },
+          {
+            "name": "UNKNOWN_NOT_WRITTEN_AS_FACT",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "未知条件按未知保留，没有写成已验证事实",
+            "evidenceRef": "mission:cmwjc1ifz0004hg8o41nz4dbw:outputs"
+          },
+          {
+            "name": "USER_REDIRECT_APPLIED",
+            "passed": false,
+            "judge": "DETERMINISTIC",
+            "detail": "第 3 版是否体现改道重点（命中=，需至少一项）",
+            "evidenceRef": "mission:cmwjc1ifz0004hg8o41nz4dbw:output:none"
+          },
+          {
+            "name": "NO_MEANINGLESS_REPETITION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "相邻版本正文不重复，且每版都有创作保存（版本 2，保存 2）",
+            "evidenceRef": "mission:cmwjc1ifz0004hg8o41nz4dbw:versions"
+          },
+          {
+            "name": "CITATIONS_RESOLVE",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "每版引用均落在该版来源清单内",
+            "evidenceRef": "mission:cmwjc1ifz0004hg8o41nz4dbw:outputs"
+          }
+        ]
+      },
+      "missionId": "cmwjc1ifz0004hg8o41nz4dbw",
+      "versions": [
+        {
+          "revision": 1,
+          "outputId": "cmwjc1mf8000khg8oerchvszw",
+          "checkpointSeq": 16,
+          "sourceRefs": [
+            {
+              "id": "project:cmwjc1ifj0001hg8osjkljx8v",
+              "hash": "110c7aa90017baa042220a377004c502891522f031b69be1cfe1ffaa6fb3c55b"
+            },
+            {
+              "id": "project:cmwjc1ifj0001hg8osjkljx8v",
+              "hash": "110c7aa90017baa042220a377004c502891522f031b69be1cfe1ffaa6fb3c55b"
+            },
+            {
+              "id": "project:cmwjc1ifj0001hg8osjkljx8v",
+              "hash": "110c7aa90017baa042220a377004c502891522f031b69be1cfe1ffaa6fb3c55b"
+            }
+          ]
+        },
+        {
+          "revision": 2,
+          "outputId": "cmwjc1skr0018hg8oqws3b6if",
+          "checkpointSeq": 31,
+          "sourceRefs": [
+            {
+              "id": "capture:cmwjc1n2x000thg8o9vjmyt6h",
+              "hash": "930015ae53422c8029ccb9a06a21912af9be816d900992bdebc8552e37d92c35"
+            },
+            {
+              "id": "project:cmwjc1ifj0001hg8osjkljx8v",
+              "hash": "110c7aa90017baa042220a377004c502891522f031b69be1cfe1ffaa6fb3c55b"
+            },
+            {
+              "id": "project:cmwjc1ifj0001hg8osjkljx8v",
+              "hash": "110c7aa90017baa042220a377004c502891522f031b69be1cfe1ffaa6fb3c55b"
+            },
+            {
+              "id": "capture:cmwjc1n2x000thg8o9vjmyt6h",
+              "hash": "930015ae53422c8029ccb9a06a21912af9be816d900992bdebc8552e37d92c35"
+            },
+            {
+              "id": "capture:cmwjc1n2x000thg8o9vjmyt6h",
+              "hash": "930015ae53422c8029ccb9a06a21912af9be816d900992bdebc8552e37d92c35"
+            },
+            {
+              "id": "project:cmwjc1ifj0001hg8osjkljx8v",
+              "hash": "110c7aa90017baa042220a377004c502891522f031b69be1cfe1ffaa6fb3c55b"
+            },
+            {
+              "id": "capture:cmwjc1n2x000thg8o9vjmyt6h",
+              "hash": "930015ae53422c8029ccb9a06a21912af9be816d900992bdebc8552e37d92c35"
+            }
+          ]
+        }
+      ],
+      "phases": [
+        {
+          "phase": "INITIAL_DRAFT",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 1,
+          "checkpointCount": 1,
+          "modelCalls": 3,
+          "toolCalls": 2,
+          "budgetUsed": {
+            "models": 3,
+            "tools": 2,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 5747,
+            "reservedOutputTokens": 6000,
+            "inputTokens": 22458,
+            "outputTokens": 718,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "NEW_MATERIAL_CONTINUATION",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 6,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 6,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 13805,
+            "reservedOutputTokens": 12000,
+            "inputTokens": 55898,
+            "outputTokens": 2156,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "RESTRICTION_APPLIED",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 6,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 6,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 13805,
+            "reservedOutputTokens": 12000,
+            "inputTokens": 55898,
+            "outputTokens": 2156,
+            "unknownCalls": 0
+          },
+          "lastError": {}
+        },
+        {
+          "phase": "REDIRECTED_DELIVERY",
+          "missionStatus": "PAUSED",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 9,
+          "toolCalls": 5,
+          "budgetUsed": {
+            "models": 9,
+            "tools": 5,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 28162,
+            "reservedOutputTokens": 18000,
+            "inputTokens": 99381,
+            "outputTokens": 5932,
+            "unknownCalls": 0
+          },
+          "lastError": {
+            "code": "MODEL_PROTOCOL_ERROR",
+            "message": "模型回复达到长度上限，未执行截断内容",
+            "diagnostic": {
+              "reason": "TRUNCATED",
+              "repairHint": "上次回复超出长度限制。压缩草稿和摘要，减少内容块，返回完整 JSON；不要续写残缺回复。",
+              "finishReason": "length",
+              "responseChars": 3754
+            },
+            "phase": "DECISION",
+            "category": "MODEL_PROTOCOL",
+            "recovery": {
+              "kind": "REVIEW_REQUIRED",
+              "automatic": false,
+              "message": "模型格式纠错仍未通过，请检查模型配置后人工继续。",
+              "attempt": 2,
+              "maxAttempts": 2
+            }
+          }
+        },
+        {
+          "phase": "ENDED",
+          "missionStatus": "PAUSED",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 9,
+          "toolCalls": 5,
+          "budgetUsed": {
+            "models": 9,
+            "tools": 5,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 28162,
+            "reservedOutputTokens": 18000,
+            "inputTokens": 99381,
+            "outputTokens": 5932,
+            "unknownCalls": 0
+          },
+          "lastError": {
+            "code": "MODEL_PROTOCOL_ERROR",
+            "message": "模型回复达到长度上限，未执行截断内容",
+            "diagnostic": {
+              "reason": "TRUNCATED",
+              "repairHint": "上次回复超出长度限制。压缩草稿和摘要，减少内容块，返回完整 JSON；不要续写残缺回复。",
+              "finishReason": "length",
+              "responseChars": 3754
+            },
+            "phase": "DECISION",
+            "category": "MODEL_PROTOCOL",
+            "recovery": {
+              "kind": "REVIEW_REQUIRED",
+              "automatic": false,
+              "message": "模型格式纠错仍未通过，请检查模型配置后人工继续。",
+              "attempt": 2,
+              "maxAttempts": 2
+            }
+          }
+        }
+      ],
+      "tools": [
+        {
+          "tool": "inspect_project",
+          "status": "SUCCEEDED",
+          "ordinal": 1
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 2
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 3
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 4
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 5
+        }
+      ],
+      "modelRuns": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 6069,
+            "outputTokens": 30
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 7220,
+            "outputTokens": 643
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 9169,
+            "outputTokens": 45
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 9220,
+            "outputTokens": 86
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 10147,
+            "outputTokens": 1307
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 14073,
+            "outputTokens": 45
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 13187,
+            "outputTokens": 90
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 14171,
+            "outputTokens": 1686
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 16125,
+            "outputTokens": 2000
+          }
+        }
+      ],
+      "wake": {
+        "woken": 1,
+        "sameMission": true,
+        "inputChanged": true
+      },
+      "control": {
+        "restriction": {
+          "directiveIds": [
+            "51d2f4b2-cfa3-4dbf-a84e-7360c0a3a6b0"
+          ],
+          "constraints": [
+            "继续整理，但不要联网"
+          ],
+          "externalReadBlocked": true,
+          "outputsUnchanged": true
+        },
+        "redirect": {
+          "directiveIds": [
+            "601320d6-bb36-4201-8247-44fca3d3583e"
+          ],
+          "workingObjective": "今天先核对第二版交付依据",
+          "outputCountAfter": 2
+        },
+        "ending": {
+          "action": "pause",
+          "status": "PAUSED",
+          "extraDispatch": false,
+          "outputCountAfter": 2
+        }
+      },
+      "failures": [
+        "REDIRECT_OUTPUT_COUNT:2"
+      ],
+      "budget": {
+        "before": {},
+        "after": {
+          "models": 9,
+          "tools": 5,
+          "searches": 0,
+          "fetches": 0,
+          "browserRequests": 0,
+          "browserBytes": 0,
+          "calendarRequests": 0,
+          "externalWrites": 0,
+          "metadataRequests": 0,
+          "activeMs": 28162,
+          "reservedOutputTokens": 18000,
+          "inputTokens": 99381,
+          "outputTokens": 5932,
+          "unknownCalls": 0
+        }
+      },
+      "tokens": 71331
+    },
+    {
+      "id": "freelancer",
+      "label": "客户交付",
+      "protocol": {
+        "passed": 10,
+        "total": 10,
+        "checks": [
+          {
+            "name": "SAME_MISSION_CONTINUATION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "新资料由既有扫描器唤醒同一 Mission（woken=1）",
+            "evidenceRef": "mission:cmwjc24q60026hg8o1rxu3nma:wake"
+          },
+          {
+            "name": "VERSION_CHAIN_WITH_CHECKPOINTS",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "版本 1,2,3；checkpoint 1,2,3",
+            "evidenceRef": "mission:cmwjc24q60026hg8o1rxu3nma:versions"
+          },
+          {
+            "name": "EVIDENCE_AND_TOOL_RECEIPTS",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "Skill 进入/交接与读取/创作步骤均有持久回执",
+            "evidenceRef": "mission:cmwjc24q60026hg8o1rxu3nma:steps:6"
+          },
+          {
+            "name": "BUDGET_MONOTONIC_NO_RESET",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型/工具累计用量不重置：4→8→8→12→12 / 2→4→4→6→6",
+            "evidenceRef": "mission:cmwjc24q60026hg8o1rxu3nma:budget"
+          },
+          {
+            "name": "RESTRICTION_BEFORE_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "限制先落库并禁止外部读取，之后没有新增稿（ids=1，blocked=true，unchanged=true）",
+            "evidenceRef": "directive:53dc89e1-b743-46e0-aeea-4438b777e7e7"
+          },
+          {
+            "name": "REDIRECT_SAME_MISSION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "有限目标改道后同一 Mission 产出第 3 版",
+            "evidenceRef": "directive:1c9f49e8-e368-4116-8b95-c415226074a9"
+          },
+          {
+            "name": "ENDING_STOPS_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "暂停/取消后不再派发（cancel → CANCELLED）",
+            "evidenceRef": "mission:cmwjc24q60026hg8o1rxu3nma:ending"
+          },
+          {
+            "name": "NO_LEGACY_FINISH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "持续委托没有用旧 finish 结束",
+            "evidenceRef": "mission:cmwjc24q60026hg8o1rxu3nma:events"
+          },
+          {
+            "name": "TOOL_BOUNDARY_PRIVATE_ONLY",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "工具只使用项目读取与私有稿：inspect_project,save_mission_output,read_project_material",
+            "evidenceRef": "mission:cmwjc24q60026hg8o1rxu3nma:steps"
+          },
+          {
+            "name": "PROVIDER_RECORDED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型 provider 与用量留痕：deepseek",
+            "evidenceRef": "mission:cmwjc24q60026hg8o1rxu3nma:runs"
+          }
+        ]
+      },
+      "content": {
+        "passed": 6,
+        "total": 6,
+        "checks": [
+          {
+            "name": "NEW_MATERIAL_CHANGED_DRAFT",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "新增材料进入第 2 版且正文变化（hash=c7bcb895→9d4ed620；refs=capture:cmwjc2d520030hg8osm6j9w2l,project:cmwjc24q40023hg8orhfooms4）",
+            "evidenceRef": "mission:cmwjc24q60026hg8o1rxu3nma:output:cmwjc2l5r003ihg8o46a0ravc"
+          },
+          {
+            "name": "OLD_EVIDENCE_RETAINED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "第 2 版仍保留旧依据：capture:cmwjc2d520030hg8osm6j9w2l,project:cmwjc24q40023hg8orhfooms4",
+            "evidenceRef": "mission:cmwjc24q60026hg8o1rxu3nma:output:cmwjc2l5r003ihg8o46a0ravc"
+          },
+          {
+            "name": "UNKNOWN_NOT_WRITTEN_AS_FACT",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "未知条件按未知保留，没有写成已验证事实",
+            "evidenceRef": "mission:cmwjc24q60026hg8o1rxu3nma:outputs"
+          },
+          {
+            "name": "USER_REDIRECT_APPLIED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "第 3 版是否体现改道重点（命中=客户反馈|交付说明，需至少一项）",
+            "evidenceRef": "mission:cmwjc24q60026hg8o1rxu3nma:output:cmwjc2ud5004bhg8oi96d7g3g"
+          },
+          {
+            "name": "NO_MEANINGLESS_REPETITION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "相邻版本正文不重复，且每版都有创作保存（版本 3，保存 3）",
+            "evidenceRef": "mission:cmwjc24q60026hg8o1rxu3nma:versions"
+          },
+          {
+            "name": "CITATIONS_RESOLVE",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "每版引用均落在该版来源清单内",
+            "evidenceRef": "mission:cmwjc24q60026hg8o1rxu3nma:outputs"
+          }
+        ]
+      },
+      "missionId": "cmwjc24q60026hg8o1rxu3nma",
+      "versions": [
+        {
+          "revision": 1,
+          "outputId": "cmwjc2cfi002phg8oab5g4dou",
+          "checkpointSeq": 18,
+          "sourceRefs": [
+            {
+              "id": "project:cmwjc24q40023hg8orhfooms4",
+              "hash": "a810cf9f85afc97e0c58d5888d2ea283b6d49855ddea96f82e42e790d5e4204c"
+            },
+            {
+              "id": "project:cmwjc24q40023hg8orhfooms4",
+              "hash": "a810cf9f85afc97e0c58d5888d2ea283b6d49855ddea96f82e42e790d5e4204c"
+            },
+            {
+              "id": "project:cmwjc24q40023hg8orhfooms4",
+              "hash": "a810cf9f85afc97e0c58d5888d2ea283b6d49855ddea96f82e42e790d5e4204c"
+            },
+            {
+              "id": "project:cmwjc24q40023hg8orhfooms4",
+              "hash": "a810cf9f85afc97e0c58d5888d2ea283b6d49855ddea96f82e42e790d5e4204c"
+            }
+          ]
+        },
+        {
+          "revision": 2,
+          "outputId": "cmwjc2l5r003ihg8o46a0ravc",
+          "checkpointSeq": 35,
+          "sourceRefs": [
+            {
+              "id": "capture:cmwjc2d520030hg8osm6j9w2l",
+              "hash": "80449ba02507c88dfdd1cb0e5f32623356538b846f4e64a8809841463435fd49"
+            },
+            {
+              "id": "project:cmwjc24q40023hg8orhfooms4",
+              "hash": "a810cf9f85afc97e0c58d5888d2ea283b6d49855ddea96f82e42e790d5e4204c"
+            },
+            {
+              "id": "capture:cmwjc2d520030hg8osm6j9w2l",
+              "hash": "80449ba02507c88dfdd1cb0e5f32623356538b846f4e64a8809841463435fd49"
+            },
+            {
+              "id": "capture:cmwjc2d520030hg8osm6j9w2l",
+              "hash": "80449ba02507c88dfdd1cb0e5f32623356538b846f4e64a8809841463435fd49"
+            },
+            {
+              "id": "project:cmwjc24q40023hg8orhfooms4",
+              "hash": "a810cf9f85afc97e0c58d5888d2ea283b6d49855ddea96f82e42e790d5e4204c"
+            },
+            {
+              "id": "capture:cmwjc2d520030hg8osm6j9w2l",
+              "hash": "80449ba02507c88dfdd1cb0e5f32623356538b846f4e64a8809841463435fd49"
+            },
+            {
+              "id": "project:cmwjc24q40023hg8orhfooms4",
+              "hash": "a810cf9f85afc97e0c58d5888d2ea283b6d49855ddea96f82e42e790d5e4204c"
+            },
+            {
+              "id": "capture:cmwjc2d520030hg8osm6j9w2l",
+              "hash": "80449ba02507c88dfdd1cb0e5f32623356538b846f4e64a8809841463435fd49"
+            }
+          ]
+        },
+        {
+          "revision": 3,
+          "outputId": "cmwjc2ud5004bhg8oi96d7g3g",
+          "checkpointSeq": 53,
+          "sourceRefs": [
+            {
+              "id": "capture:cmwjc24q40025hg8o128w98ar",
+              "hash": "b3c96bd354e9ac1ba3143649c07bc3b76b85cd0d6ff2dd773635906fbd5b6659"
+            },
+            {
+              "id": "capture:cmwjc2d520030hg8osm6j9w2l",
+              "hash": "80449ba02507c88dfdd1cb0e5f32623356538b846f4e64a8809841463435fd49"
+            },
+            {
+              "id": "project:cmwjc24q40023hg8orhfooms4",
+              "hash": "a810cf9f85afc97e0c58d5888d2ea283b6d49855ddea96f82e42e790d5e4204c"
+            },
+            {
+              "id": "capture:cmwjc2d520030hg8osm6j9w2l",
+              "hash": "80449ba02507c88dfdd1cb0e5f32623356538b846f4e64a8809841463435fd49"
+            },
+            {
+              "id": "capture:cmwjc2d520030hg8osm6j9w2l",
+              "hash": "80449ba02507c88dfdd1cb0e5f32623356538b846f4e64a8809841463435fd49"
+            },
+            {
+              "id": "project:cmwjc24q40023hg8orhfooms4",
+              "hash": "a810cf9f85afc97e0c58d5888d2ea283b6d49855ddea96f82e42e790d5e4204c"
+            },
+            {
+              "id": "capture:cmwjc24q40025hg8o128w98ar",
+              "hash": "b3c96bd354e9ac1ba3143649c07bc3b76b85cd0d6ff2dd773635906fbd5b6659"
+            },
+            {
+              "id": "capture:cmwjc2d520030hg8osm6j9w2l",
+              "hash": "80449ba02507c88dfdd1cb0e5f32623356538b846f4e64a8809841463435fd49"
+            },
+            {
+              "id": "project:cmwjc24q40023hg8orhfooms4",
+              "hash": "a810cf9f85afc97e0c58d5888d2ea283b6d49855ddea96f82e42e790d5e4204c"
+            },
+            {
+              "id": "capture:cmwjc24q40025hg8o128w98ar",
+              "hash": "b3c96bd354e9ac1ba3143649c07bc3b76b85cd0d6ff2dd773635906fbd5b6659"
+            },
+            {
+              "id": "capture:cmwjc2d520030hg8osm6j9w2l",
+              "hash": "80449ba02507c88dfdd1cb0e5f32623356538b846f4e64a8809841463435fd49"
+            }
+          ]
+        }
+      ],
+      "phases": [
+        {
+          "phase": "INITIAL_DRAFT",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 1,
+          "checkpointCount": 1,
+          "modelCalls": 4,
+          "toolCalls": 2,
+          "budgetUsed": {
+            "models": 4,
+            "tools": 2,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 10707,
+            "reservedOutputTokens": 8000,
+            "inputTokens": 32924,
+            "outputTokens": 1709,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "NEW_MATERIAL_CONTINUATION",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 8,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 8,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 22118,
+            "reservedOutputTokens": 16000,
+            "inputTokens": 83066,
+            "outputTokens": 3853,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "RESTRICTION_APPLIED",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 8,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 8,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 22118,
+            "reservedOutputTokens": 16000,
+            "inputTokens": 83066,
+            "outputTokens": 3853,
+            "unknownCalls": 0
+          },
+          "lastError": {}
+        },
+        {
+          "phase": "REDIRECTED_DELIVERY",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 3,
+          "checkpointCount": 3,
+          "modelCalls": 12,
+          "toolCalls": 6,
+          "budgetUsed": {
+            "models": 12,
+            "tools": 6,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 33550,
+            "reservedOutputTokens": 24000,
+            "inputTokens": 140044,
+            "outputTokens": 6477,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "ENDED",
+          "missionStatus": "CANCELLED",
+          "outputCount": 3,
+          "checkpointCount": 3,
+          "modelCalls": 12,
+          "toolCalls": 6,
+          "budgetUsed": {
+            "models": 12,
+            "tools": 6,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 33550,
+            "reservedOutputTokens": 24000,
+            "inputTokens": 140044,
+            "outputTokens": 6477,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        }
+      ],
+      "tools": [
+        {
+          "tool": "inspect_project",
+          "status": "SUCCEEDED",
+          "ordinal": 1
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 2
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 3
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 4
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 5
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 6
+        }
+      ],
+      "modelRuns": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 6059,
+            "outputTokens": 31
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 7231,
+            "outputTokens": 860
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 9184,
+            "outputTokens": 773
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 10450,
+            "outputTokens": 45
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 10492,
+            "outputTokens": 83
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 11462,
+            "outputTokens": 927
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 13417,
+            "outputTokens": 1088
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 14771,
+            "outputTokens": 46
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 13279,
+            "outputTokens": 89
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 14253,
+            "outputTokens": 1166
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 14952,
+            "outputTokens": 1323
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 14494,
+            "outputTokens": 46
+          }
+        }
+      ],
+      "wake": {
+        "woken": 1,
+        "sameMission": true,
+        "inputChanged": true
+      },
+      "control": {
+        "restriction": {
+          "directiveIds": [
+            "53dc89e1-b743-46e0-aeea-4438b777e7e7"
+          ],
+          "constraints": [
+            "继续整理，但不要联网"
+          ],
+          "externalReadBlocked": true,
+          "outputsUnchanged": true
+        },
+        "redirect": {
+          "directiveIds": [
+            "1c9f49e8-e368-4116-8b95-c415226074a9"
+          ],
+          "workingObjective": "今天先核对客户反馈对应的交付说明",
+          "outputCountAfter": 3
+        },
+        "ending": {
+          "action": "cancel",
+          "status": "CANCELLED",
+          "extraDispatch": false,
+          "outputCountAfter": 3
+        }
+      },
+      "failures": [],
+      "budget": {
+        "before": {},
+        "after": {
+          "models": 12,
+          "tools": 6,
+          "searches": 0,
+          "fetches": 0,
+          "browserRequests": 0,
+          "browserBytes": 0,
+          "calendarRequests": 0,
+          "externalWrites": 0,
+          "metadataRequests": 0,
+          "activeMs": 33550,
+          "reservedOutputTokens": 24000,
+          "inputTokens": 140044,
+          "outputTokens": 6477,
+          "unknownCalls": 0
+        }
+      },
+      "tokens": 110622
+    },
+    {
+      "id": "research",
+      "label": "科研阶段汇报",
+      "protocol": {
+        "passed": 8,
+        "total": 10,
+        "checks": [
+          {
+            "name": "SAME_MISSION_CONTINUATION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "新资料由既有扫描器唤醒同一 Mission（woken=1）",
+            "evidenceRef": "mission:cmwjc2v9b004phg8os2fa35p9:wake"
+          },
+          {
+            "name": "VERSION_CHAIN_WITH_CHECKPOINTS",
+            "passed": false,
+            "judge": "DETERMINISTIC",
+            "detail": "版本 1；checkpoint 1",
+            "evidenceRef": "mission:cmwjc2v9b004phg8os2fa35p9:versions"
+          },
+          {
+            "name": "EVIDENCE_AND_TOOL_RECEIPTS",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "Skill 进入/交接与读取/创作步骤均有持久回执",
+            "evidenceRef": "mission:cmwjc2v9b004phg8os2fa35p9:steps:8"
+          },
+          {
+            "name": "BUDGET_MONOTONIC_NO_RESET",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型/工具累计用量不重置：3→11→12→12→12 / 2→8→8→8→8",
+            "evidenceRef": "mission:cmwjc2v9b004phg8os2fa35p9:budget"
+          },
+          {
+            "name": "RESTRICTION_BEFORE_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "限制先落库并禁止外部读取，之后没有新增稿（ids=1，blocked=true，unchanged=true）",
+            "evidenceRef": "directive:e0eeb4ac-cf6e-4ec5-acb1-67f5fd6f0b45"
+          },
+          {
+            "name": "REDIRECT_SAME_MISSION",
+            "passed": false,
+            "judge": "DETERMINISTIC",
+            "detail": "有限目标改道后同一 Mission 产出第 3 版",
+            "evidenceRef": "directive:733e69c4-40e9-47bb-af16-150aedcc4bb5"
+          },
+          {
+            "name": "ENDING_STOPS_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "暂停/取消后不再派发（pause → PAUSED）",
+            "evidenceRef": "mission:cmwjc2v9b004phg8os2fa35p9:ending"
+          },
+          {
+            "name": "NO_LEGACY_FINISH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "持续委托没有用旧 finish 结束",
+            "evidenceRef": "mission:cmwjc2v9b004phg8os2fa35p9:events"
+          },
+          {
+            "name": "TOOL_BOUNDARY_PRIVATE_ONLY",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "工具只使用项目读取与私有稿：inspect_project,save_mission_output,read_project_material",
+            "evidenceRef": "mission:cmwjc2v9b004phg8os2fa35p9:steps"
+          },
+          {
+            "name": "PROVIDER_RECORDED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型 provider 与用量留痕：deepseek,mission-adapter",
+            "evidenceRef": "mission:cmwjc2v9b004phg8os2fa35p9:runs"
+          }
+        ]
+      },
+      "content": {
+        "passed": 2,
+        "total": 6,
+        "checks": [
+          {
+            "name": "NEW_MATERIAL_CHANGED_DRAFT",
+            "passed": false,
+            "judge": "DETERMINISTIC",
+            "detail": "新增材料进入第 2 版且正文变化（hash=3198ab77→-；refs=）",
+            "evidenceRef": "mission:cmwjc2v9b004phg8os2fa35p9:output:none"
+          },
+          {
+            "name": "OLD_EVIDENCE_RETAINED",
+            "passed": false,
+            "judge": "DETERMINISTIC",
+            "detail": "第 2 版仍保留旧依据：",
+            "evidenceRef": "mission:cmwjc2v9b004phg8os2fa35p9:output:none"
+          },
+          {
+            "name": "UNKNOWN_NOT_WRITTEN_AS_FACT",
+            "passed": false,
+            "judge": "DETERMINISTIC",
+            "detail": "没有保留未知条件",
+            "evidenceRef": "mission:cmwjc2v9b004phg8os2fa35p9:outputs"
+          },
+          {
+            "name": "USER_REDIRECT_APPLIED",
+            "passed": false,
+            "judge": "DETERMINISTIC",
+            "detail": "第 3 版是否体现改道重点（命中=，需至少一项）",
+            "evidenceRef": "mission:cmwjc2v9b004phg8os2fa35p9:output:none"
+          },
+          {
+            "name": "NO_MEANINGLESS_REPETITION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "相邻版本正文不重复，且每版都有创作保存（版本 1，保存 4）",
+            "evidenceRef": "mission:cmwjc2v9b004phg8os2fa35p9:versions"
+          },
+          {
+            "name": "CITATIONS_RESOLVE",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "每版引用均落在该版来源清单内",
+            "evidenceRef": "mission:cmwjc2v9b004phg8os2fa35p9:outputs"
+          }
+        ]
+      },
+      "missionId": "cmwjc2v9b004phg8os2fa35p9",
+      "versions": [
+        {
+          "revision": 1,
+          "outputId": "cmwjc2ztd0055hg8otztmcp23",
+          "checkpointSeq": 16,
+          "sourceRefs": [
+            {
+              "id": "project:cmwjc2v99004mhg8o2d0nmxpo",
+              "hash": "8710a897c5d05851c922af12c31f781d7f64f92d5260f965e7e3c90b7e34661c"
+            },
+            {
+              "id": "project:cmwjc2v99004mhg8o2d0nmxpo",
+              "hash": "8710a897c5d05851c922af12c31f781d7f64f92d5260f965e7e3c90b7e34661c"
+            },
+            {
+              "id": "project:cmwjc2v99004mhg8o2d0nmxpo",
+              "hash": "8710a897c5d05851c922af12c31f781d7f64f92d5260f965e7e3c90b7e34661c"
+            }
+          ]
+        }
+      ],
+      "phases": [
+        {
+          "phase": "INITIAL_DRAFT",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 1,
+          "checkpointCount": 1,
+          "modelCalls": 3,
+          "toolCalls": 2,
+          "budgetUsed": {
+            "models": 3,
+            "tools": 2,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 6505,
+            "reservedOutputTokens": 6000,
+            "inputTokens": 23384,
+            "outputTokens": 792,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "NEW_MATERIAL_CONTINUATION",
+          "missionStatus": "READY",
+          "outputCount": 1,
+          "checkpointCount": 1,
+          "modelCalls": 11,
+          "toolCalls": 8,
+          "budgetUsed": {
+            "models": 11,
+            "tools": 8,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 43864,
+            "reservedOutputTokens": 22000,
+            "inputTokens": 126038,
+            "outputTokens": 9585,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "RESTRICTION_APPLIED",
+          "missionStatus": "PAUSED",
+          "outputCount": 1,
+          "checkpointCount": 1,
+          "modelCalls": 12,
+          "toolCalls": 8,
+          "budgetUsed": {
+            "models": 12,
+            "tools": 8,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 50325,
+            "reservedOutputTokens": 24000,
+            "inputTokens": 139376,
+            "outputTokens": 11461,
+            "unknownCalls": 0
+          },
+          "lastError": {
+            "code": "BUDGET_EXHAUSTED",
+            "message": "委托预算已用完，请检查后处理",
+            "phase": "DECISION",
+            "category": "DOMAIN",
+            "recovery": {
+              "kind": "BUDGET_REVIEW",
+              "automatic": false,
+              "message": "任务预算已用完；继续不会重置预算，请核对目标和额度。"
+            }
+          }
+        },
+        {
+          "phase": "REDIRECTED_DELIVERY",
+          "missionStatus": "PAUSED",
+          "outputCount": 1,
+          "checkpointCount": 1,
+          "modelCalls": 12,
+          "toolCalls": 8,
+          "budgetUsed": {
+            "models": 12,
+            "tools": 8,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 50325,
+            "reservedOutputTokens": 24000,
+            "inputTokens": 139376,
+            "outputTokens": 11461,
+            "unknownCalls": 0
+          },
+          "lastError": {
+            "code": "BUDGET_EXHAUSTED",
+            "message": "委托预算已用完，请检查后处理",
+            "phase": "DECISION",
+            "category": "DOMAIN",
+            "recovery": {
+              "kind": "BUDGET_REVIEW",
+              "automatic": false,
+              "message": "任务预算已用完；继续不会重置预算，请核对目标和额度。"
+            }
+          }
+        },
+        {
+          "phase": "ENDED",
+          "missionStatus": "PAUSED",
+          "outputCount": 1,
+          "checkpointCount": 1,
+          "modelCalls": 12,
+          "toolCalls": 8,
+          "budgetUsed": {
+            "models": 12,
+            "tools": 8,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 50325,
+            "reservedOutputTokens": 24000,
+            "inputTokens": 139376,
+            "outputTokens": 11461,
+            "unknownCalls": 0
+          },
+          "lastError": {
+            "code": "BUDGET_EXHAUSTED",
+            "message": "委托预算已用完，请检查后处理",
+            "phase": "DECISION",
+            "category": "DOMAIN",
+            "recovery": {
+              "kind": "BUDGET_REVIEW",
+              "automatic": false,
+              "message": "任务预算已用完；继续不会重置预算，请核对目标和额度。"
+            }
+          }
+        }
+      ],
+      "tools": [
+        {
+          "tool": "inspect_project",
+          "status": "SUCCEEDED",
+          "ordinal": 1
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 2
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 3
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "OBSOLETE",
+          "ordinal": 4
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 5
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "OBSOLETE",
+          "ordinal": 6
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 7
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "OBSOLETE",
+          "ordinal": 8
+        }
+      ],
+      "modelRuns": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 6070,
+            "outputTokens": 29
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 7268,
+            "outputTokens": 719
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 10046,
+            "outputTokens": 44
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 10100,
+            "outputTokens": 87
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 11113,
+            "outputTokens": 1412
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 13077,
+            "outputTokens": 1491
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 12803,
+            "outputTokens": 88
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 13831,
+            "outputTokens": 1877
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 13919,
+            "outputTokens": 93
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 13949,
+            "outputTokens": 1873
+          }
+        },
+        {
+          "provider": "mission-adapter",
+          "model": null,
+          "usage": null
+        }
+      ],
+      "wake": {
+        "woken": 1,
+        "sameMission": true,
+        "inputChanged": true
+      },
+      "control": {
+        "restriction": {
+          "directiveIds": [
+            "e0eeb4ac-cf6e-4ec5-acb1-67f5fd6f0b45"
+          ],
+          "constraints": [
+            "继续整理，但不要联网"
+          ],
+          "externalReadBlocked": true,
+          "outputsUnchanged": true
+        },
+        "redirect": {
+          "directiveIds": [
+            "733e69c4-40e9-47bb-af16-150aedcc4bb5"
+          ],
+          "workingObjective": "今天先核对第二版资料中的限制条件",
+          "outputCountAfter": 1
+        },
+        "ending": {
+          "action": "pause",
+          "status": "PAUSED",
+          "extraDispatch": false,
+          "outputCountAfter": 1
+        }
+      },
+      "failures": [
+        "CONTINUATION_OUTPUT_COUNT:1",
+        "REDIRECT_OUTPUT_COUNT:1"
+      ],
+      "budget": {
+        "before": {},
+        "after": {
+          "models": 12,
+          "tools": 8,
+          "searches": 0,
+          "fetches": 0,
+          "browserRequests": 0,
+          "browserBytes": 0,
+          "calendarRequests": 0,
+          "externalWrites": 0,
+          "metadataRequests": 0,
+          "activeMs": 50325,
+          "reservedOutputTokens": 24000,
+          "inputTokens": 139376,
+          "outputTokens": 11461,
+          "unknownCalls": 0
+        }
+      },
+      "tokens": 138312
+    },
+    {
+      "id": "course",
+      "label": "学生课程项目",
+      "protocol": {
+        "passed": 8,
+        "total": 10,
+        "checks": [
+          {
+            "name": "SAME_MISSION_CONTINUATION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "新资料由既有扫描器唤醒同一 Mission（woken=1）",
+            "evidenceRef": "mission:cmwjc3ynx007dhg8o0cpyxoo2:wake"
+          },
+          {
+            "name": "VERSION_CHAIN_WITH_CHECKPOINTS",
+            "passed": false,
+            "judge": "DETERMINISTIC",
+            "detail": "版本 1,2；checkpoint 1,2",
+            "evidenceRef": "mission:cmwjc3ynx007dhg8o0cpyxoo2:versions"
+          },
+          {
+            "name": "EVIDENCE_AND_TOOL_RECEIPTS",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "Skill 进入/交接与读取/创作步骤均有持久回执",
+            "evidenceRef": "mission:cmwjc3ynx007dhg8o0cpyxoo2:steps:4"
+          },
+          {
+            "name": "BUDGET_MONOTONIC_NO_RESET",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型/工具累计用量不重置：4→7→7→9→9 / 2→4→4→4→4",
+            "evidenceRef": "mission:cmwjc3ynx007dhg8o0cpyxoo2:budget"
+          },
+          {
+            "name": "RESTRICTION_BEFORE_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "限制先落库并禁止外部读取，之后没有新增稿（ids=1，blocked=true，unchanged=true）",
+            "evidenceRef": "directive:41679d4d-a2e4-4629-a838-dce29e5fded8"
+          },
+          {
+            "name": "REDIRECT_SAME_MISSION",
+            "passed": false,
+            "judge": "DETERMINISTIC",
+            "detail": "有限目标改道后同一 Mission 产出第 3 版",
+            "evidenceRef": "directive:c236c6fe-ff8f-4ee7-abe6-8b90ba4e88b2"
+          },
+          {
+            "name": "ENDING_STOPS_DISPATCH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "暂停/取消后不再派发（cancel → CANCELLED）",
+            "evidenceRef": "mission:cmwjc3ynx007dhg8o0cpyxoo2:ending"
+          },
+          {
+            "name": "NO_LEGACY_FINISH",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "持续委托没有用旧 finish 结束",
+            "evidenceRef": "mission:cmwjc3ynx007dhg8o0cpyxoo2:events"
+          },
+          {
+            "name": "TOOL_BOUNDARY_PRIVATE_ONLY",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "工具只使用项目读取与私有稿：inspect_project,save_mission_output,read_project_material",
+            "evidenceRef": "mission:cmwjc3ynx007dhg8o0cpyxoo2:steps"
+          },
+          {
+            "name": "PROVIDER_RECORDED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "模型 provider 与用量留痕：deepseek,mission-adapter",
+            "evidenceRef": "mission:cmwjc3ynx007dhg8o0cpyxoo2:runs"
+          }
+        ]
+      },
+      "content": {
+        "passed": 5,
+        "total": 6,
+        "checks": [
+          {
+            "name": "NEW_MATERIAL_CHANGED_DRAFT",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "新增材料进入第 2 版且正文变化（hash=0e29d1a5→3c11d0f7；refs=capture:cmwjc42wq0085hg8o54l0mqdr,project:cmwjc3ynv007ahg8od4fdnhxl）",
+            "evidenceRef": "mission:cmwjc3ynx007dhg8o0cpyxoo2:output:cmwjc46ke008khg8oee1m3z75"
+          },
+          {
+            "name": "OLD_EVIDENCE_RETAINED",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "第 2 版仍保留旧依据：capture:cmwjc42wq0085hg8o54l0mqdr,project:cmwjc3ynv007ahg8od4fdnhxl",
+            "evidenceRef": "mission:cmwjc3ynx007dhg8o0cpyxoo2:output:cmwjc46ke008khg8oee1m3z75"
+          },
+          {
+            "name": "UNKNOWN_NOT_WRITTEN_AS_FACT",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "未知条件按未知保留，没有写成已验证事实",
+            "evidenceRef": "mission:cmwjc3ynx007dhg8o0cpyxoo2:outputs"
+          },
+          {
+            "name": "USER_REDIRECT_APPLIED",
+            "passed": false,
+            "judge": "DETERMINISTIC",
+            "detail": "第 3 版是否体现改道重点（命中=，需至少一项）",
+            "evidenceRef": "mission:cmwjc3ynx007dhg8o0cpyxoo2:output:none"
+          },
+          {
+            "name": "NO_MEANINGLESS_REPETITION",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "相邻版本正文不重复，且每版都有创作保存（版本 2，保存 2）",
+            "evidenceRef": "mission:cmwjc3ynx007dhg8o0cpyxoo2:versions"
+          },
+          {
+            "name": "CITATIONS_RESOLVE",
+            "passed": true,
+            "judge": "DETERMINISTIC",
+            "detail": "每版引用均落在该版来源清单内",
+            "evidenceRef": "mission:cmwjc3ynx007dhg8o0cpyxoo2:outputs"
+          }
+        ]
+      },
+      "missionId": "cmwjc3ynx007dhg8o0cpyxoo2",
+      "versions": [
+        {
+          "revision": 1,
+          "outputId": "cmwjc424r007whg8oglziqv94",
+          "checkpointSeq": 18,
+          "sourceRefs": [
+            {
+              "id": "project:cmwjc3ynv007ahg8od4fdnhxl",
+              "hash": "d5e3a05d72e770118f0b44e998223cf130ac1cb2db87f4421a47455afc56b6af"
+            },
+            {
+              "id": "project:cmwjc3ynv007ahg8od4fdnhxl",
+              "hash": "d5e3a05d72e770118f0b44e998223cf130ac1cb2db87f4421a47455afc56b6af"
+            }
+          ]
+        },
+        {
+          "revision": 2,
+          "outputId": "cmwjc46ke008khg8oee1m3z75",
+          "checkpointSeq": 33,
+          "sourceRefs": [
+            {
+              "id": "capture:cmwjc42wq0085hg8o54l0mqdr",
+              "hash": "c3b186dff79d4ddbe66eb98f829eedc29bb0483eb2d9b6677423f7f5c6595606"
+            },
+            {
+              "id": "project:cmwjc3ynv007ahg8od4fdnhxl",
+              "hash": "d5e3a05d72e770118f0b44e998223cf130ac1cb2db87f4421a47455afc56b6af"
+            },
+            {
+              "id": "project:cmwjc3ynv007ahg8od4fdnhxl",
+              "hash": "d5e3a05d72e770118f0b44e998223cf130ac1cb2db87f4421a47455afc56b6af"
+            },
+            {
+              "id": "capture:cmwjc42wq0085hg8o54l0mqdr",
+              "hash": "c3b186dff79d4ddbe66eb98f829eedc29bb0483eb2d9b6677423f7f5c6595606"
+            }
+          ]
+        }
+      ],
+      "phases": [
+        {
+          "phase": "INITIAL_DRAFT",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 1,
+          "checkpointCount": 1,
+          "modelCalls": 4,
+          "toolCalls": 2,
+          "budgetUsed": {
+            "models": 4,
+            "tools": 2,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 5340,
+            "reservedOutputTokens": 8000,
+            "inputTokens": 30399,
+            "outputTokens": 606,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "NEW_MATERIAL_CONTINUATION",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 7,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 7,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 11110,
+            "reservedOutputTokens": 14000,
+            "inputTokens": 61017,
+            "outputTokens": 1393,
+            "unknownCalls": 0
+          },
+          "lastError": null
+        },
+        {
+          "phase": "RESTRICTION_APPLIED",
+          "missionStatus": "WAITING_INPUT",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 7,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 7,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 11110,
+            "reservedOutputTokens": 14000,
+            "inputTokens": 61017,
+            "outputTokens": 1393,
+            "unknownCalls": 0
+          },
+          "lastError": {}
+        },
+        {
+          "phase": "REDIRECTED_DELIVERY",
+          "missionStatus": "PAUSED",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 9,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 9,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 17225,
+            "reservedOutputTokens": 18000,
+            "inputTokens": 84838,
+            "outputTokens": 2698,
+            "unknownCalls": 0
+          },
+          "lastError": {
+            "code": "SKILL_GATE_NOT_MET",
+            "message": "本轮计划未进入创作阶段，先完成研究并形成证据包",
+            "phase": "TOOL",
+            "category": "DOMAIN",
+            "recovery": {
+              "kind": "REVIEW_REQUIRED",
+              "automatic": false,
+              "message": "请核对当前失败原因后继续，已有步骤和结果保留。"
+            }
+          }
+        },
+        {
+          "phase": "ENDED",
+          "missionStatus": "CANCELLED",
+          "outputCount": 2,
+          "checkpointCount": 2,
+          "modelCalls": 9,
+          "toolCalls": 4,
+          "budgetUsed": {
+            "models": 9,
+            "tools": 4,
+            "searches": 0,
+            "fetches": 0,
+            "browserRequests": 0,
+            "browserBytes": 0,
+            "calendarRequests": 0,
+            "externalWrites": 0,
+            "metadataRequests": 0,
+            "activeMs": 17225,
+            "reservedOutputTokens": 18000,
+            "inputTokens": 84838,
+            "outputTokens": 2698,
+            "unknownCalls": 0
+          },
+          "lastError": {
+            "code": "SKILL_GATE_NOT_MET",
+            "message": "本轮计划未进入创作阶段，先完成研究并形成证据包",
+            "phase": "TOOL",
+            "category": "DOMAIN",
+            "recovery": {
+              "kind": "REVIEW_REQUIRED",
+              "automatic": false,
+              "message": "请核对当前失败原因后继续，已有步骤和结果保留。"
+            }
+          }
+        }
+      ],
+      "tools": [
+        {
+          "tool": "inspect_project",
+          "status": "SUCCEEDED",
+          "ordinal": 1
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 2
+        },
+        {
+          "tool": "read_project_material",
+          "status": "SUCCEEDED",
+          "ordinal": 3
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED",
+          "ordinal": 4
+        }
+      ],
+      "modelRuns": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 6068,
+            "outputTokens": 34
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 8086,
+            "outputTokens": 94
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 7429,
+            "outputTokens": 436
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 8816,
+            "outputTokens": 42
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 8873,
+            "outputTokens": 88
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 9805,
+            "outputTokens": 654
+          }
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "usage": {
+            "inputTokens": 11940,
+            "outputTokens": 45
+          }
+        },
+        {
+          "provider": "mission-adapter",
+          "model": null,
+          "usage": null
+        }
+      ],
+      "wake": {
+        "woken": 1,
+        "sameMission": true,
+        "inputChanged": true
+      },
+      "control": {
+        "restriction": {
+          "directiveIds": [
+            "41679d4d-a2e4-4629-a838-dce29e5fded8"
+          ],
+          "constraints": [
+            "继续整理，但不要联网"
+          ],
+          "externalReadBlocked": true,
+          "outputsUnchanged": true
+        },
+        "redirect": {
+          "directiveIds": [
+            "c236c6fe-ff8f-4ee7-abe6-8b90ba4e88b2"
+          ],
+          "workingObjective": "今天先核对课程要求对应的交付材料",
+          "outputCountAfter": 2
+        },
+        "ending": {
+          "action": "cancel",
+          "status": "CANCELLED",
+          "extraDispatch": false,
+          "outputCountAfter": 2
+        }
+      },
+      "failures": [
+        "REDIRECT_OUTPUT_COUNT:2"
+      ],
+      "budget": {
+        "before": {},
+        "after": {
+          "models": 9,
+          "tools": 4,
+          "searches": 0,
+          "fetches": 0,
+          "browserRequests": 0,
+          "browserBytes": 0,
+          "calendarRequests": 0,
+          "externalWrites": 0,
+          "metadataRequests": 0,
+          "activeMs": 17225,
+          "reservedOutputTokens": 18000,
+          "inputTokens": 84838,
+          "outputTokens": 2698,
+          "unknownCalls": 0
+        }
+      },
+      "tokens": 81434
+    }
+  ],
+  "totals": {
+    "protocolPassed": 34,
+    "protocolTotal": 40,
+    "contentPassed": 18,
+    "contentTotal": 24
+  },
+  "tokensUsed": 401699,
+  "decisionCalls": 35,
+  "tracedTokens": 434133,
+  "limits": {
+    "maxModels": 20,
+    "maxTokens": 200000
+  },
+  "pendingRealModelCommand": null,
+  "note": "内容维度在 fixture/http 模式下证明材料、证据与用户控制确实进入持久草稿；不代表真实模型写作质量，真实模型质量需 --provider=live 单独验收。"
+}

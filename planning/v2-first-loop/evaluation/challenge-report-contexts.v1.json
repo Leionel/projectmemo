@@ -1,0 +1,885 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-11-17",
+  "sourceTruth": "SYNTHETIC_ONLY",
+  "realAuthorizedSources": 0,
+  "note": "Synthetic report contexts for deterministic scoring only; no real authorized report or human semantic verdict.",
+  "cases": [
+    {
+      "id": "report-good",
+      "synthetic": true,
+      "realAuthorized": false,
+      "previous": {
+        "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。未知项：分享入口未验证。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "未知项：分享入口未验证。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:q1"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "current": {
+        "text": "本轮工作重点：今天先核对第二版交付依据。项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。补测记录：移动端输入回归已补测，分享入口仍未验证，结果尚未独立复现。分享入口未验证仍按未知保留。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          },
+          {
+            "blockId": "b",
+            "text": "补测记录：移动端输入回归已补测，分享入口仍未验证，结果尚未独立复现。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q2"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q2"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "本轮工作重点：今天先核对第二版交付依据。分享入口未验证仍按未知保留。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:q1",
+          "capture:q2"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "redirectQuote": "今天先核对第二版交付依据",
+      "requiredUnknowns": [
+        "分享入口未验证"
+      ],
+      "expectedFailed": []
+    },
+    {
+      "id": "report-copy-request",
+      "synthetic": true,
+      "realAuthorized": false,
+      "previous": {
+        "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。未知项：分享入口未验证。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "未知项：分享入口未验证。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:q1"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "current": {
+        "text": "今天先核对第二版交付依据。今天先核对第二版交付依据。今天先核对第二版交付依据。今天先核对第二版交付依据。今天先核对第二版交付依据。今天先核对第二版交付依据。今天先核对第二版交付依据。今天先核对第二版交付依据。",
+        "blocks": [
+          {
+            "blockId": "copy",
+            "text": "今天先核对第二版交付依据。今天先核对第二版交付依据。今天先核对第二版交付依据。今天先核对第二版交付依据。今天先核对第二版交付依据。今天先核对第二版交付依据。今天先核对第二版交付依据。今天先核对第二版交付依据。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [],
+        "missingInformation": []
+      },
+      "redirectQuote": "今天先核对第二版交付依据",
+      "requiredUnknowns": [
+        "分享入口未验证"
+      ],
+      "expectedFailed": [
+        "CITATIONS_RESOLVE",
+        "EVIDENCE_BOUND",
+        "NEW_EVIDENCE_ADDED",
+        "NOT_COPY_OF_USER_REQUEST",
+        "OLD_EVIDENCE_RETAINED",
+        "REDIRECT_ADDRESSED",
+        "UNKNOWN_PRESERVED"
+      ]
+    },
+    {
+      "id": "report-title-only",
+      "synthetic": true,
+      "realAuthorized": false,
+      "previous": {
+        "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。未知项：分享入口未验证。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "未知项：分享入口未验证。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:q1"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "current": {
+        "text": "本轮工作重点：今天先核对第二版交付依据。今天午饭吃面条，下午去操场散步。",
+        "blocks": [
+          {
+            "blockId": "title",
+            "text": "本轮工作重点：今天先核对第二版交付依据。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          },
+          {
+            "blockId": "filler",
+            "text": "今天午饭吃面条，下午去操场散步。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "redirectQuote": "今天先核对第二版交付依据",
+      "requiredUnknowns": [
+        "分享入口未验证"
+      ],
+      "expectedFailed": [
+        "CITATIONS_RESOLVE",
+        "CURRENT_HAS_CONTENT",
+        "EVIDENCE_BOUND",
+        "NEW_EVIDENCE_ADDED",
+        "OLD_EVIDENCE_RETAINED",
+        "REDIRECT_ADDRESSED"
+      ]
+    },
+    {
+      "id": "report-unrelated-citation",
+      "synthetic": true,
+      "realAuthorized": false,
+      "previous": {
+        "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。未知项：分享入口未验证。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "未知项：分享入口未验证。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:q1"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "current": {
+        "text": "本轮工作重点：今天先核对第二版交付依据。项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。补测记录：移动端输入回归已补测，分享入口仍未验证，结果尚未独立复现。分享入口未验证仍按未知保留。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:foreign"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:foreign"
+              }
+            ]
+          },
+          {
+            "blockId": "b",
+            "text": "补测记录：移动端输入回归已补测，分享入口仍未验证，结果尚未独立复现。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q2"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q2"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "本轮工作重点：今天先核对第二版交付依据。分享入口未验证仍按未知保留。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:foreign"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "redirectQuote": "今天先核对第二版交付依据",
+      "requiredUnknowns": [
+        "分享入口未验证"
+      ],
+      "expectedFailed": [
+        "CITATIONS_RELEVANT",
+        "CITATIONS_RESOLVE",
+        "OLD_EVIDENCE_RETAINED"
+      ]
+    },
+    {
+      "id": "report-trivial-edit",
+      "synthetic": true,
+      "realAuthorized": false,
+      "previous": {
+        "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。未知项：分享入口未验证。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "未知项：分享入口未验证。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:q1"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "current": {
+        "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。未知项：分享入口仍未验证。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "未知项：分享入口未验证。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:q1"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "redirectQuote": "今天先核对第二版交付依据",
+      "requiredUnknowns": [
+        "分享入口未验证"
+      ],
+      "expectedFailed": [
+        "CURRENT_HAS_CONTENT",
+        "EFFECTIVE_REVISION",
+        "NEW_EVIDENCE_ADDED",
+        "REDIRECT_ADDRESSED"
+      ]
+    },
+    {
+      "id": "report-missing-unknown",
+      "synthetic": true,
+      "realAuthorized": false,
+      "previous": {
+        "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。未知项：分享入口未验证。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "未知项：分享入口未验证。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:q1"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "current": {
+        "text": "本轮工作重点：今天先核对第二版交付依据。项目资料记载：登录流程已完成；移动端输入回归已补测。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          },
+          {
+            "blockId": "clean",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归已补测。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          }
+        ],
+        "sourceIds": [
+          "capture:q1"
+        ],
+        "missingInformation": []
+      },
+      "redirectQuote": "今天先核对第二版交付依据",
+      "requiredUnknowns": [
+        "分享入口未验证"
+      ],
+      "expectedFailed": [
+        "CURRENT_HAS_CONTENT",
+        "NEW_EVIDENCE_ADDED",
+        "UNKNOWN_PRESERVED"
+      ]
+    },
+    {
+      "id": "report-drop-old-evidence",
+      "synthetic": true,
+      "realAuthorized": false,
+      "previous": {
+        "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。未知项：分享入口未验证。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "未知项：分享入口未验证。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:q1"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "current": {
+        "text": "本轮工作重点：今天先核对第二版交付依据。项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。补测记录：移动端输入回归已补测，分享入口仍未验证，结果尚未独立复现。分享入口未验证仍按未知保留。",
+        "blocks": [
+          {
+            "blockId": "b",
+            "text": "补测记录：移动端输入回归已补测，分享入口仍未验证，结果尚未独立复现。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q2"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q2"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "本轮工作重点：今天先核对第二版交付依据。分享入口未验证仍按未知保留。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:q2"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "redirectQuote": "今天先核对第二版交付依据",
+      "requiredUnknowns": [
+        "分享入口未验证"
+      ],
+      "expectedFailed": [
+        "OLD_EVIDENCE_RETAINED"
+      ]
+    },
+    {
+      "id": "report-weak-evidence",
+      "synthetic": true,
+      "realAuthorized": false,
+      "previous": {
+        "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。未知项：分享入口未验证。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "未知项：分享入口未验证。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:q1"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "current": {
+        "text": "移动端输入回归已补测。",
+        "blocks": [
+          {
+            "blockId": "short",
+            "text": "移动端输入回归已补测。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q2"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q2"
+              }
+            ]
+          }
+        ],
+        "sourceIds": [
+          "capture:q2"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "redirectQuote": "今天先核对第二版交付依据",
+      "requiredUnknowns": [
+        "分享入口未验证"
+      ],
+      "expectedFailed": [
+        "CURRENT_HAS_CONTENT",
+        "OLD_EVIDENCE_RETAINED",
+        "REDIRECT_ADDRESSED"
+      ]
+    },
+    {
+      "id": "report-no-redirect",
+      "synthetic": true,
+      "realAuthorized": false,
+      "previous": {
+        "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。未知项：分享入口未验证。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "未知项：分享入口未验证。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:q1"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "current": {
+        "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。补测记录：移动端输入回归已补测，分享入口仍未验证，结果尚未独立复现。分享入口未验证仍按未知保留。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          },
+          {
+            "blockId": "b",
+            "text": "补测记录：移动端输入回归已补测，分享入口仍未验证，结果尚未独立复现。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q2"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q2"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "分享入口未验证仍按未知保留。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:q1",
+          "capture:q2"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "redirectQuote": "今天先核对第二版交付依据",
+      "requiredUnknowns": [
+        "分享入口未验证"
+      ],
+      "expectedFailed": [
+        "CURRENT_HAS_CONTENT",
+        "REDIRECT_ADDRESSED"
+      ]
+    },
+    {
+      "id": "report-irrelevant-citation",
+      "synthetic": true,
+      "realAuthorized": false,
+      "previous": {
+        "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。未知项：分享入口未验证。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "未知项：分享入口未验证。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:q1"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "current": {
+        "text": "本轮工作重点：今天先核对第二版交付依据。项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。补测记录：移动端输入回归已补测，分享入口仍未验证，结果尚未独立复现。分享入口未验证仍按未知保留。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          },
+          {
+            "blockId": "b",
+            "text": "今天午饭吃面条，下午散步。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q2"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q2"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "本轮工作重点：今天先核对第二版交付依据。分享入口未验证仍按未知保留。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:q1",
+          "capture:q2"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "redirectQuote": "今天先核对第二版交付依据",
+      "requiredUnknowns": [
+        "分享入口未验证"
+      ],
+      "expectedFailed": [
+        "CITATIONS_RELEVANT"
+      ]
+    },
+    {
+      "id": "report-empty",
+      "synthetic": true,
+      "realAuthorized": false,
+      "previous": {
+        "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。未知项：分享入口未验证。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "未知项：分享入口未验证。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:q1"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "current": {
+        "text": "",
+        "blocks": [],
+        "sourceIds": [],
+        "missingInformation": []
+      },
+      "redirectQuote": "今天先核对第二版交付依据",
+      "requiredUnknowns": [
+        "分享入口未验证"
+      ],
+      "expectedFailed": [
+        "CITATIONS_RESOLVE",
+        "CURRENT_HAS_CONTENT",
+        "EVIDENCE_BOUND",
+        "NEW_EVIDENCE_ADDED",
+        "OLD_EVIDENCE_RETAINED",
+        "REDIRECT_ADDRESSED",
+        "UNKNOWN_PRESERVED"
+      ]
+    },
+    {
+      "id": "report-unknown-and-evidence",
+      "synthetic": true,
+      "realAuthorized": false,
+      "previous": null,
+      "current": {
+        "text": "本轮工作重点：今天先核对第二版交付依据。项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。补测记录：移动端输入回归已补测，分享入口仍未验证，结果尚未独立复现。分享入口未验证仍按未知保留。",
+        "blocks": [
+          {
+            "blockId": "a",
+            "text": "项目资料记载：登录流程已完成；移动端输入回归尚未记录；分享入口未验证。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q1"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q1"
+              }
+            ]
+          },
+          {
+            "blockId": "b",
+            "text": "补测记录：移动端输入回归已补测，分享入口仍未验证，结果尚未独立复现。",
+            "kind": "PROJECT_OBSERVATION",
+            "sourceIds": [
+              "capture:q2"
+            ],
+            "citations": [
+              {
+                "sourceId": "capture:q2"
+              }
+            ]
+          },
+          {
+            "blockId": "n",
+            "text": "本轮工作重点：今天先核对第二版交付依据。分享入口未验证仍按未知保留。",
+            "kind": "INFERENCE",
+            "sourceIds": []
+          }
+        ],
+        "sourceIds": [
+          "capture:q1",
+          "capture:q2"
+        ],
+        "missingInformation": [
+          "分享入口未验证"
+        ]
+      },
+      "redirectQuote": "今天先核对第二版交付依据",
+      "requiredUnknowns": [
+        "分享入口未验证"
+      ],
+      "expectedFailed": []
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2FaultInjection.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ✓ tests/v2FaultInjection.test.ts (8 tests) 26424ms
+   ✓ crash after read: a new process resumes the same Mission and reaches the next checkpoint  4404ms
+   ✓ crash before output commit: restart re-runs the unfinished step and commits one revision  4308ms
+   ✓ crash after receipt commit: restart scans never re-trigger the delivered output  3459ms
+   ✓ two worker processes racing one READY mission: exactly one claims and writes once  2905ms
+   ✓ a second process recovers the delivery of 这次只做计划，报告不要动  2906ms
+   ✓ a second process recovers the delivery of 先研究，不开始写报告  2776ms
+   ✓ a second process recovers the delivery of 只复盘，不创建行动  2772ms
+   ✓ a second process recovers the delivery of 整理持续报告  2885ms
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  08:41:00
+   Duration  28.06s (transform 790ms, setup 0ms, import 1.44s, tests 26.42s, environment 0ms)
+

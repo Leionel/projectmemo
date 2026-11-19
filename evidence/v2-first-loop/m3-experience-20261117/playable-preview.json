@@ -1,0 +1,12 @@
+{
+  "at": "2026-11-17T05:07:36.242Z",
+  "url": "http://127.0.0.1:4441/open?mission=cmwk8dvtd0001ew8odaotmxnk",
+  "missionId": "cmwk8dvtd0001ew8odaotmxnk",
+  "data": "fresh synthetic SQLite",
+  "provider": "localhost mock HTTP",
+  "checks": [
+    "normal preview + confirmation + first draft",
+    "owned demo deep link",
+    "foreign target falls back to project"
+  ]
+}

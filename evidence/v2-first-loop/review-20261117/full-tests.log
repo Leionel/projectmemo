@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-worktrees/v2-first-loop/tmp/m4-review-verified-20261117
+
+
+ Test Files  283 passed (283)
+      Tests  2193 passed (2193)
+   Start at  18:30:37
+   Duration  1127.03s (transform 27.69s, setup 0ms, import 405.25s, tests 549.37s, environment 76.91s)
+

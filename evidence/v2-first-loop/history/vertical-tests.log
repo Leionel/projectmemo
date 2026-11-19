@@ -1,0 +1,12 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2FirstSlice.test.ts tests/v2MissionProtocol.test.ts
+
+
+ RUN  v4.1.10 C:/Users/Administrator/.codex/worktrees/v2-first-loop/hongmen
+
+
+ Test Files  2 passed (2)
+      Tests  14 passed (14)
+   Start at  18:13:37
+   Duration  7.28s (transform 2.46s, setup 0ms, import 4.25s, tests 2.64s, environment 0ms)

@@ -1,0 +1,266 @@
+tests\agentUxJourney.test.ts:18:  const pending=await make(project.id,"原问题","WAITING_INPUT");
+tests\agentUxJourney.test.ts:20:  const observation=await make(project.id,"等待观察","WAITING_INPUT");
+tests\agentUxWorkState.test.ts:10:const base={id:"original",version:3,status:"WAITING_INPUT"};
+tests\agentUxWorkState.test.ts:46:  const primaryContext=selectProjectAgentContext({projectId:"p",projectTitle:"竞赛",projectGoal:"演示",projectUpdatedAt:now.toISOString(),candidates:[{kind:"MISSION",id:"original",status:"WAITING_INPUT",title:"当前委托",reason:workState.reasonText,updatedAt:now.toISOString(),workState}]});
+app\focus\page.tsx:24:  const judgment = focus.waiting.find(item => item.workState ? item.workState.requiresUser : item.status === "WAITING_INPUT" || item.status === "WAITING_APPROVAL");
+app\focus\page.tsx:65:    const question = item.status === "WAITING_INPUT", approval = item.status === "WAITING_APPROVAL";
+app\focus\page.tsx:104:  const question=item.status==="WAITING_INPUT", approval=item.status==="WAITING_APPROVAL";
+app\focus\page.tsx:111:  const pending=items.filter(item=>item.status==="WAITING_INPUT"||item.status==="WAITING_APPROVAL");
+tests\continuityJourney.test.ts:60:  expect((await missionDetail(user.id, mission.id)).status).toBe("WAITING_INPUT");
+tests\continuityStages23.test.ts:69:  await poll();const stable=await missionDetail(f.u.id,f.m.id);expect(stable.status,JSON.stringify(stable.error)).toBe("WAITING_INPUT");expect(stable.used).toMatchObject({models:record(before).models,metadataRequests:6,tools:2});
+tests\continuityStages23.test.ts:101:  let m=await db.agentMission.findUniqueOrThrow({where:{id:f.m.id}});expect(await db.$transaction(tx=>scopedDelegationAttention(tx,m,"WAITING_INPUT"))).toMatchObject({level:"QUEUE"});
+tests\continuityStages23.test.ts:103:  const attention=await db.$transaction(tx=>scopedDelegationAttention(tx,m,"WAITING_INPUT"));expect(attention).toMatchObject({level:"URGENT",systemPush:false,delivery:{status:"AVAILABLE"}});
+tests\continuityStages23.test.ts:105:  const second={...m,id:other.id,contextVersion:99};expect(await db.$transaction(tx=>scopedDelegationAttention(tx,second,"WAITING_INPUT"))).toMatchObject({level:"QUEUE",reasonCode:"BUDGET_EXHAUSTED"});
+tests\continuityStages23.test.ts:140:  expect(await db.$transaction(tx=>scopedDelegationAttention(tx,m,"WAITING_INPUT"))).toMatchObject({level:"QUEUE",systemPush:false});
+tests\continuityStages23.test.ts:142:  expect(await db.$transaction(tx=>scopedDelegationAttention(tx,m,"WAITING_INPUT"))).toMatchObject({level:"SUPPRESS"});
+tests\continuityStages23.test.ts:158:  for(let i=0;i<9;i++){const legacy=await createMission(f.u.id,{projectId:f.p.id,requestId:"manual-"+i,goal:"人工等待不阻塞持续调查"});await db.agentMission.update({where:{id:legacy.id},data:{status:"WAITING_INPUT"}});}
+tests\conversationAnchor.test.ts:151:  expect((await db.agentMission.findUniqueOrThrow({ where: { id: f.m.id } })).status).toBe("WAITING_INPUT");
+scripts\final-a\probe-fs-a.ts:507:  const mission = await createMission(db, owner, { status: "WAITING_INPUT", version: 2 });
+scripts\final-a\probe-fs-a.ts:766:  const mission = await createMission(db, owner, { status: "WAITING_INPUT", version: 2 });
+scripts\final-a\perf-readback.ts:348:    status: "WAITING_INPUT",
+tests\decisionEvolution.test.ts:548:      data: { status: "WAITING_INPUT" },
+tests\decisionEvolution.test.ts:620:    ).toBe("WAITING_INPUT");
+tests\decisionEvolution.test.ts:836:      data: { status: "WAITING_INPUT" },
+tests\decisionEvolution.test.ts:1036:    data: { status: "WAITING_INPUT" },
+tests\decisionEvolution.test.ts:1074: const q=await db.$transaction(tx=>event(tx,f.m.id,"QUESTION",{question:"补充同条件指标"}));await db.agentMission.update({where:{id:f.m.id},data:{status:"WAITING_INPUT"}});
+tests\decisionEvolution.test.ts:1076: expect((await db.agentMission.findUniqueOrThrow({where:{id:f.m.id}})).status).toBe("WAITING_INPUT");expect((await currentGoalQuestion(f.actor,f.p.id)).question?.questionId).toBe(q.id);
+scripts\final-a\generate-samples.ts:100:  { name: "等待用户", file: "a2-waiting-user.json", missionStatus: "WAITING_INPUT", phaseHint: "WAITING_USER",
+scripts\final-a\generate-samples.ts:102:      const mission = await createMissionRow(owner, { status: "WAITING_INPUT", waitStateJson: { questionId: "q-sample-user", question: "请补充同条件下的对照组指标", waitingFor: "USER", missing: "PRIVATE", resolved: false } });
+scripts\final-a\generate-samples.ts:113:  { name: "观察无变化", file: "a2-observation-no-change.json", missionStatus: "WAITING_INPUT", phaseHint: "WAITING_OBSERVATION",
+scripts\final-a\generate-samples.ts:116:      const mission = await createMissionRow(owner, { status: "WAITING_INPUT", planJson: { delegation: { lastObservedAt: observedAt.toISOString() } }, continuationPolicyJson: boundedPolicy(new Date(Date.now() + 3_600_000)), waitStateJson: { questionId: "q-sample-observation", resolved: true, waitingFor: "OBSERVATION" } });
+scripts\final-a\a1-contract-samples.ts:176:const stableState = workState({ status: "WAITING_INPUT", waitStateJson: { resolved: true, waitingFor: "OBSERVATION" }, continuationPolicyJson: { mode: "BOUNDED_INVESTIGATION", expiresAt: "2026-11-06T12:00:00.000Z" } }, NOW);
+scripts\final-a\a1-contract-samples.ts:177:const laterState = workState({ status: "WAITING_INPUT", waitStateJson: { resolved: true, waitingFor: "OBSERVATION" }, continuationPolicyJson: { mode: "BOUNDED_INVESTIGATION", expiresAt: "2026-11-06T12:00:00.000Z" } }, new Date("2026-11-03T04:00:00.000Z"));
+lib\decision\scenarios.ts:568:      resumeStatus: m.status === "WAITING_INPUT" ? "WAITING_INPUT" : "READY",
+lib\decision\scenarios.ts:592:        status: m.status === "WAITING_INPUT" ? "WAITING_INPUT" : "PAUSED",
+tests\deploymentRuntime.test.ts:61:  await db.agentMission.update({where:{id:m.id},data:{status:"WAITING_INPUT",nextAttemptAt:null}});
+tests\deploymentRuntime.test.ts:65:  await db.agentMission.update({where:{id:m.id},data:{status:"WAITING_INPUT",nextAttemptAt:null}});
+tests\deploymentRuntime.test.ts:68:  const current=await db.agentMission.findUniqueOrThrow({where:{id:m.id}});expect(current.status).toBe("WAITING_INPUT");expect(current.budgetUsedJson).toMatchObject({models:0,tools:2,metadataRequests:4});
+tests\deploymentRuntime.test.ts:127:    expect((await db.agentMission.findUniqueOrThrow({ where: { id: m.id } })).status).toBe("WAITING_INPUT");
+lib\decision\questions.ts:98:        m.status === "WAITING_INPUT" ||
+lib\decision\questions.ts:103:        Number(b.status === "WAITING_INPUT") -
+lib\decision\questions.ts:104:          Number(a.status === "WAITING_INPUT") ||
+lib\decision\questions.ts:113:      m.status === "WAITING_INPUT"
+lib\decision\questions.ts:119:    if (m.status === "WAITING_INPUT" && !q) continue;
+lib\decision\questions.ts:231:        kind: q ? "WAITING_INPUT" : "REVIEW",
+lib\decision\questions.ts:324:      const m=await ownedMission(actor.userId,q.missionId,tx),attention=await scopedDelegationAttention(tx,m,"WAITING_INPUT");
+lib\decision\impactJobs.ts:107:                  m.status === "WAITING_INPUT" ? "WAITING_INPUT" : "PAUSED",
+lib\decision\impactJobs.ts:115:                    m.status === "WAITING_INPUT" ? "WAITING_INPUT" : "READY",
+scripts\final-c\seed-web-fixture.ts:6: *   1) WAITING_INPUT + 原问题（当前问题 + 历史旧问题）
+scripts\final-c\seed-web-fixture.ts:12: *   7) WAITING_INPUT + 三条来源状态：SUPPRESSED / CHANGED / UNKNOWN（+ 一条 ALLOWED 对照）
+scripts\final-c\seed-web-fixture.ts:408:    // 1) WAITING_INPUT + 原问题（当前问题 + 历史旧问题 + 一条可用资料）
+scripts\final-c\seed-web-fixture.ts:413:      status: "WAITING_INPUT",
+scripts\final-c\seed-web-fixture.ts:483:      status: "WAITING_INPUT",
+scripts\final-c\seed-web-fixture.ts:1021:      status: "WAITING_INPUT",
+scripts\final-c\seed-web-fixture.ts:1155:      status: "WAITING_INPUT",
+scripts\final-c\seed-web-fixture.ts:1271:      status: "WAITING_INPUT",
+scripts\final-c\seed-web-fixture.ts:1299:      status: "WAITING_INPUT",
+tests\finalAConcurrencyService.test.ts:122:    const mission = await db.agentMission.create({ data: { ownerUserId: user.id, projectId: project.id, goal: "核对来源", createRequestId: crypto.randomUUID(), createPayloadHash: "test", status: "WAITING_INPUT", successCriteriaJson: [], constraintsJson: {}, budgetJson: {}, waitStateJson: { questionId: "q-control-race", waitingFor: "USER" } } });
+tests\finalARequiresGuards.test.ts:160:      status: "WAITING_INPUT",
+tests\finalARequiresGuards.test.ts:264:    // 合法推进版本且保持 WAITING_INPUT。
+tests\finalARequiresGuards.test.ts:269:    expect(current.status).toBe("WAITING_INPUT");
+tests\final-e\controlAuthority.test.ts:49:    where: { id: mission.id }, data: { status: "WAITING_INPUT", nextEventSeq: { increment: 1 } },
+tests\final-e\isolationAndSource.test.ts:49:/** 合成 WAITING_INPUT：QUESTION 事件 id 就是原问题身份。 */
+tests\final-e\isolationAndSource.test.ts:58:    data: { status: "WAITING_INPUT", nextEventSeq: { increment: 1 } },
+lib\decision\boundedReview.ts:43:      if (["WAITING_INPUT", "WAITING_APPROVAL"].includes(String((m.planJson as { resumeStatus?: string }).resumeStatus ?? "")))
+tests\final-e\missionCommandsIsolation.test.ts:42:/** 合成 WAITING_INPUT：真实事件表 + waitState，和 Runner 写入的形状一致。 */
+tests\final-e\missionCommandsIsolation.test.ts:53:    data: { status: "WAITING_INPUT", nextEventSeq: { increment: 1 } },
+tests\final-e\observationAndSourceUse.test.ts:53:    data: { status: "WAITING_INPUT", nextEventSeq: { increment: 1 } },
+tests\final-e\projectionBoundaries.test.ts:90:        status: "WAITING_INPUT",
+tests\final-e\projectionBoundaries.test.ts:105:        status: "WAITING_INPUT",
+lib\types\projectAgentContext.ts:2:export type AgentAttentionKind = "WAITING_INPUT" | "WAITING_APPROVAL" | "SOURCE_CHANGED" | "STOPPED" | "RUNNING" | "READY" | "REMINDER" | "ACTION" | "CAPTURE" | "UNAVAILABLE";
+lib\conversation\workService.ts:65:    m.status === "WAITING_INPUT" ? db.agentMissionEvent.findFirst({ where: { missionId: m.id, type: "QUESTION" }, orderBy: { seq: "desc" } }) : null,
+lib\conversation\workService.ts:69:    m.status === "WAITING_INPUT" && typeof record(m.waitStateJson).questionId === "string" ? listContinuationCandidates(actor.userId, m.id, { questionId: record(m.waitStateJson).questionId, includeExisting: "1" }) : { candidates: [] },
+scripts\mission-evaluation\run.ts:131:            if (state.status === "WAITING_INPUT") {
+app\projects\[id]\page.tsx:38: :kind==="mission"&&first?{eyebrow:missionStatusLabels[first.status],title:first.attention??first.goal,detail:first.attention?first.goal:first.activity??"步骤与草稿保留在原委托中。",href:missionHref,action:first.status==="WAITING_INPUT"?"补充委托资料":first.status==="WAITING_APPROVAL"?"审阅行动提案":"查看原因与进度"}
+app\projects\[id]\page.tsx:43: const waiting=summary.items.filter(m=>["WAITING_INPUT","WAITING_APPROVAL","PAUSED","FAILED"].includes(m.status)&&!(kind==="mission"&&m.id===(primaryId??first?.id)));
+app\projects\[id]\page.tsx:45: const continuing=summary.items.filter(m=>!["WAITING_INPUT","WAITING_APPROVAL","PAUSED","FAILED"].includes(m.status)&&!(kind==="mission"&&m.id===(primaryId??first?.id)));
+app\projects\[id]\page.tsx:53:  <section className={styles.focus} aria-label="当前最重要的事项"><div className="min-w-0"><small className={kind==="reminder"||(kind==="mission"&&first&&["WAITING_INPUT","WAITING_APPROVAL","PAUSED","FAILED"].includes(first.status))?"workspace-status":"workspace-status workspace-status-neutral"}>{focus.eyebrow}</small>{agentContext?.nextStep.workState&&<> <WorkStateBadges state={agentContext.nextStep.workState}/></>}<h3>{focus.title}</h3><p><EvidenceText text={readableProjectNotice(focus.detail)}/></p></div><div className={styles.focusActions}><Link className={"focus-ring "+(primaryActionTone(agentContext?.nextStep.workState)==="solid"?"editorial-button":"editorial-button-secondary")} prefetch={false} href={focus.href}>{focus.action}<ArrowRight size={14} aria-hidden="true"/></Link>{summary.totalActive>1&&<Link className={styles.otherTasks} href={`${base}/missions`}>全部 {summary.totalActive} 项委托<ArrowRight size={13} aria-hidden="true"/></Link>}</div></section>
+app\projects\[id]\page.tsx:59:  {(waiting.length>0||reminders.length>0)&&<section className={styles.summary} aria-label="需要你处理"><div className={styles.summaryHeading}><h3>需要你处理</h3></div><ul className={styles.queue}>{waiting.map(m=><li key={m.id}><div className="min-w-0">{m.workState?<WorkStateBadges state={m.workState}/>:<small><span aria-hidden="true">● </span>{missionStatusLabels[m.status]}</small>}<strong>{m.attention??m.goal}</strong><p>{m.attention?m.goal:"查看原因后决定是否继续原委托。"}</p></div><Link href={`${base}/missions?mission=${encodeURIComponent(m.id)}`}>{m.status==="WAITING_INPUT"?"补充委托资料":m.status==="WAITING_APPROVAL"?"审阅行动提案":"查看暂停原因"}<ArrowRight size={14} aria-hidden="true"/></Link></li>)}{reminders.map(i=><li key={i.id}><div className="min-w-0"><small><span aria-hidden="true">● </span>提醒待处理</small><strong>{i.title}</strong><p>{readableProjectNotice(i.content)}</p></div><Link href={`${base}/actions#intervention-${i.id}`}>查看提醒依据<ArrowRight size={14} aria-hidden="true"/></Link></li>)}</ul></section>}
+tests\finalCResultsReceipts.test.ts:45:    missionStatus: "WAITING_INPUT",
+tests\finalCReadbackRecovery.test.ts:25:    missionStatus: "WAITING_INPUT",
+tests\finalCBasisEvidence.test.ts:110:    missionStatus: "WAITING_INPUT",
+tests\finalAWorkPacketContract.test.ts:27:  missionStatus: "WAITING_INPUT",
+tests\finalAWorkPacketContract.test.ts:36:  status: "WAITING_INPUT",
+tests\finalAWorkPacketContract.test.ts:173:    expect(packet.stopped.missionStatus).toBe("WAITING_INPUT");
+tests\finalAWorkPacketContract.test.ts:397:    const workState = project({ status: "WAITING_INPUT", waitStateJson: { questionId: "q-7", question: "请补齐对照组", waitingFor: "USER" }, continuationPolicyJson: { mode: "BOUNDED_INVESTIGATION", expiresAt: POLICY_EXPIRES } });
+tests\finalAWorkPacketContract.test.ts:532:    status: "WAITING_INPUT",
+tests\finalAWorkStateContract.test.ts:233:    const first = state({ status: "WAITING_INPUT", planJson: delegation, waitStateJson: { waitingFor: "OBSERVATION" } }, now);
+tests\finalAWorkStateContract.test.ts:234:    const second = state({ status: "WAITING_INPUT", planJson: delegation, waitStateJson: { waitingFor: "OBSERVATION" } }, later);
+tests\finalAWorkStateContract.test.ts:258:    const result = missionWorkState({ id: "old", version: 1, status: "WAITING_INPUT" }, now);
+tests\finalAWorkStateContract.test.ts:275:      status: "WAITING_INPUT",
+tests\finalAWorkStateContract.test.ts:297:    const mission = { status: "WAITING_INPUT", waitStateJson: { waitingFor: "OBSERVATION" }, continuationPolicyJson: policy };
+tests\finalATerminalUnknownFocus.test.ts:50:  status: "SUCCEEDED" | "CANCELLED" | "WAITING_INPUT";
+tests\finalATerminalUnknownFocus.test.ts:63:    status: options.status, version: options.status === "WAITING_INPUT" ? 1 : 2,
+tests\finalATerminalUnknownFocus.test.ts:64:    updatedAt: options.updatedAt, ...(options.status === "WAITING_INPUT" ? {} : { finishedAt: options.updatedAt }),
+tests\finalATerminalUnknownFocus.test.ts:132:  activeWaiting = await mission({ key: "active-waiting", ownerUserId: orderUser.id, projectId: truncation.projectId, status: "WAITING_INPUT",
+tests\finalATerminalUnknownFocus.test.ts:235:    expect(entries[0]!.status).toBe("WAITING_INPUT");
+tests\finalAWorkPacketService.test.ts:112:    const waitingUser = await createMissionRow(userOwner, { status: "WAITING_INPUT",
+tests\finalAWorkPacketService.test.ts:144:    const mission = await createMissionRow(owner, { status: "WAITING_INPUT",
+tests\finalAWorkPacketService.test.ts:281:    const mission = await createMissionRow(owner, { status: "WAITING_INPUT", waitStateJson: { questionId: "q-negative", question: "原问题", waitingFor: "USER", resigned: false } });
+tests\finalAWorkPacketService.test.ts:338:    const mission = await createMissionRow(owner, { status: "WAITING_INPUT",
+tests\finalAWorkPacketService.test.ts:372:    const mission = await createMissionRow(owner, { status: "WAITING_INPUT",
+tests\finalAWorkPacketService.test.ts:394:    const mission = await createMissionRow(owner, { status: "WAITING_INPUT",
+tests\finalAWorkPacketService.test.ts:425:    const ghostMission = await createMissionRow(ghostOwner, { status: "WAITING_INPUT",
+tests\finalAWorkPacketService.test.ts:439:    const mission = await createMissionRow(owner, { status: "WAITING_INPUT", waitStateJson: { questionId: "q-deleted", waitingFor: "USER" } });
+tests\finalAWorkPacketService.test.ts:455:    const mission = await createMissionRow(owner, { status: "WAITING_INPUT",
+tests\finalAWorkPacketService.test.ts:487:    const mission = await createMissionRow(owner, { status: "WAITING_INPUT",
+tests\finalAWorkPacketService.test.ts:517:    const mission = await createMissionRow(owner, { status: "WAITING_INPUT",
+tests\finalAWorkPacketService.test.ts:600:    const mission = await createMissionRow(owner, { status: "WAITING_INPUT",
+tests\goalChangeReview.test.ts:212:    const m = await mission(f); expect(m.status).toBe("WAITING_INPUT"); expect(JSON.stringify(m.waitStateJson)).toContain("运行时缓存");
+tests\globalWorkspace.integration.test.ts:79:  for (const status of ["WAITING_INPUT", "WAITING_APPROVAL", "PAUSED", "FAILED", "RUNNING", "READY", "SUCCEEDED", "CANCELLED"]) await make(owned.id, user.id, status);
+tests\globalWorkspace.integration.test.ts:80:  await make(shared.id, user.id, "WAITING_INPUT");
+tests\globalWorkspace.integration.test.ts:81:  await make(owned.id, other.id, "WAITING_INPUT");
+tests\globalWorkspace.integration.test.ts:82:  await make(foreign.id, user.id, "WAITING_INPUT");
+tests\globalWorkspace.integration.test.ts:83:  await make(archived.id, user.id, "WAITING_INPUT");
+tests\globalWorkspace.integration.test.ts:84:  const waiting = await db.agentMission.findFirstOrThrow({ where: { ownerUserId: user.id, projectId: owned.id, status: "WAITING_INPUT" } });
+tests\globalWorkspace.integration.test.ts:92:  expect(focus.waiting.map(m => m.status).sort()).toEqual(["FAILED", "PAUSED", "WAITING_APPROVAL", "WAITING_INPUT"]);
+tests\globalFocusPresentation.test.ts:12:it.each(["WAITING_INPUT", "WAITING_APPROVAL", "PAUSED", "FAILED", "READY", "RUNNING"])("双端焦点的%s语义一致", status => {
+tests\globalFocusPresentation.test.ts:16:  expect(native.focusActionLabel("WAITING_INPUT", "mission")).toBe("补充委托资料 →");
+tests\globalFocusPresentation.test.ts:23:  const context=selectProjectAgentContext({projectId:"p",projectTitle:"研究",projectGoal:"总目标",projectUpdatedAt:"2026-10-23",candidates:[{kind:"MISSION",id:"original",status:"WAITING_INPUT",title:"整理成果",reason:"补充对照实验",updatedAt:"2026-10-23",questionId:"question",version:2,planRevision:1}]});
+tests\globalFocusPresentation.test.ts:25:  const item=native.focusPrimary(view)!;expect(item).toMatchObject({id:"original",projectId:"p",status:"WAITING_INPUT",detail:context.nextStep.reason});expect(native.focusEntryKind(view,item)).toBe("mission");
+tests\focusCollaboration.test.ts:139:    expect((await db.agentMission.findUniqueOrThrow({ where: { id: f.m.id } })).status).toBe("WAITING_INPUT");
+tests\focusCollaboration.test.ts:214:  it.each(["READY", "RUNNING", "WAITING_INPUT", "WAITING_APPROVAL", "SUCCEEDED", "FAILED", "CANCELLED"])("refuses a resume shortcut for %s", async status => {
+lib\services\workspaceContextService.ts:45:      privateMissions ? db.agentMission.count({ where: { ...missionWhere, status: { in: ["WAITING_INPUT", "WAITING_APPROVAL"] } } }) : 0,
+components\GoalQuestion.tsx:133:            {q.kind === "WAITING_INPUT"
+lib\conversation\anchorService.ts:121:  const question = m.status === "WAITING_INPUT" ? await tx.agentMissionEvent.findFirst({ where: { missionId: m.id, type: "QUESTION" }, orderBy: { seq: "desc" } }) : null;
+lib\conversation\anchorService.ts:124:    content: m.status === "WAITING_INPUT" ? "原委托正在等待补充：\n" + String(record(question?.payloadJson).question ?? wait.question ?? "请核对原问题")
+lib\conversation\anchorService.ts:266:        if (m.status !== "WAITING_INPUT" || p.questionId !== wait.questionId || typeof pointer.id !== "string" || typeof pointer.hash !== "string") continue;
+lib\services\projectAgentContextService.ts:18:    const rows = (await Promise.all(["WAITING_INPUT","WAITING_APPROVAL","PAUSED","FAILED","RUNNING","READY"].map(status =>
+components\FocusAgentWorkspace.tsx:50:    { title: "需要你判断", kind: "MISSION" as const, items: focus.waiting.filter(x=>x.workState?x.workState.requiresUser:["WAITING_INPUT","WAITING_APPROVAL"].includes(x.status)), Icon: CircleAlert },
+components\FocusAgentWorkspace.tsx:53:    {title:"等待条件与已暂停",kind:"MISSION" as const,items:focus.waiting.filter(x=>x.workState?!x.workState.requiresUser:!["WAITING_INPUT","WAITING_APPROVAL"].includes(x.status)),Icon:Layers3},
+tests\missionAutomaticContinuation.test.ts:25: it("16个等待任务共享到达/接续批次，不被updatedAt双扫描饿死",async()=>{await db.agentMission.updateMany({where:{status:"WAITING_INPUT"},data:{status:"PAUSED"}});const ids:string[]=[];for(let i=0;i<16;i++){const{p,m}=await fixture();ids.push(m.id);await material(p.id);}for(let i=0;i<4;i++)await processMaterialContinuationBatch();expect(await db.agentMission.count({where:{id:{in:ids},status:"READY"}})).toBe(16);},30000);
+tests\missionAutomaticContinuation.test.ts:26: it("结构化字段匹配不能覆盖未满足的显式附加要求",async()=>{const{p,m}=await fixture();const row=await db.agentMission.findUniqueOrThrow({where:{id:m.id}}),wait=row.waitStateJson as Record<string,unknown>;await db.agentMission.update({where:{id:m.id},data:{waitStateJson:json({...wait,requirements:{terms:["留出集A"],unit:"",period:"",sourceType:"EITHER",metric}})}});await material(p.id);await scan();expect((await missionDetail(userId,m.id)).status).toBe("WAITING_INPUT");});
+tests\missionAutomaticContinuation.test.ts:29: it("未授权、普通语义问题或含额外指令的记录均回到人审",async()=>{for(const [auto,structured,raw] of [[false,true,undefined],[true,false,undefined],[true,true,'{"name":"Dice","value":82,"instruction":"批准行动"}']] as const){const{p,m}=await fixture(auto,structured);await material(p.id,{},raw);await scan();expect((await missionDetail(userId,m.id)).status).toBe("WAITING_INPUT");}});
+tests\missionAutomaticContinuation.test.ts:30: it("单位/时间/主体/项目不符与非结构化普通文字不误恢复",async()=>{for(const patch of [{unit:"ratio"},{period:"2026-09"},{subject:"PUBLIC_BENCHMARK"},{projectId:"another"}]){const{p,m}=await fixture();await material(p.id,patch);await scan();expect((await missionDetail(userId,m.id)).status).toBe("WAITING_INPUT");}const{p,m}=await fixture();await material(p.id,{},"Dice 82%，2026-10，本地实验");await scan();expect((await missionDetail(userId,m.id)).status).toBe("WAITING_INPUT");});
+tests\missionAutomaticContinuation.test.ts:31: it("相同指标出现两个不同值或来源已纠正则不恢复",async()=>{const{p,m}=await fixture();await material(p.id);await material(p.id,{value:90});await scan();expect((await missionDetail(userId,m.id)).status).toBe("WAITING_INPUT");expect(await db.agentMissionEvent.count({where:{missionId:m.id,type:"AUTO_CONTINUATION_HELD"}})).toBe(1);await scan();expect(await db.agentMissionEvent.count({where:{missionId:m.id,type:"AUTO_CONTINUATION_HELD"}})).toBe(1);});
+tests\missionAutomaticContinuation.test.ts:33: it("自动片段可保存私有草稿，遇到新问题后重新等待",async()=>{const{p,m}=await fixture();await material(p.id);await scan();await runMissionSlice({id:m.id,provider:decision({kind:"tool",tool:"save_mission_output",args:{blocks:[{blockId:"draft",kind:"INFERENCE",text:"依据用户记录完善汇报，现实结果尚待核验",sourceIds:[]}]},summary:"整理"})});expect((await missionDetail(userId,m.id)).outputs).toHaveLength(1);await runMissionSlice({id:m.id,provider:decision({kind:"ask",question:"还缺哪些资源限制？",missing:"PRIVATE"})});expect((await missionDetail(userId,m.id)).status).toBe("WAITING_INPUT");expect((await db.agentMission.findUniqueOrThrow({where:{id:m.id}})).planJson).toMatchObject({automaticContinuation:null});});
+lib\server\globalFocus.ts:14:const waitingStates = ["WAITING_INPUT", "WAITING_APPROVAL", "PAUSED", "FAILED"];
+tests\missionEvidenceFitIntegration.test.ts:73:  expect((await missionDetail(userId,f.m.id)).status).toBe("WAITING_INPUT");
+tests\missionEvidenceFitIntegration.test.ts:118:  expect((await missionDetail(userId,f.m.id)).status).toBe("WAITING_INPUT");
+tests\missionContinuation.test.ts:29: it("材料到达不调用模型、不恢复；确认后同Mission继续且旧成果逐字保留",async()=>{const{p,m}=await fixture();const before=await db.agentMissionOutput.findMany({where:{missionId:m.id}}),steps=await db.agentMissionStep.findMany({where:{missionId:m.id}});const pointer=await material(p.id);await scanWaitingMaterials(100);expect((await missionDetail(userId,m.id)).status).toBe("WAITING_INPUT");expect((await listContinuationCandidates(userId,m.id)).candidates).toHaveLength(1);const body=await bodyFor(m.id,[pointer]);expect((await confirmContinuation(userId,m.id,body)).continued).toBe(true);const d=await missionDetail(userId,m.id);expect(d.status).toBe("READY");expect(d.contextVersion).toBe(2);expect(d.planRevision).toBe(2);expect(await db.agentMissionOutput.findMany({where:{missionId:m.id}})).toEqual(before);for(const s of steps)expect(await db.agentMissionStep.findUnique({where:{id:s.id}})).toEqual(s);expect(d.steps.at(-1)?.toolName).toBe("bind_project_sources");const types=(await db.agentMissionEvent.findMany({where:{missionId:m.id}})).map(e=>e.type);for(const type of ["SOURCE_ARRIVED","SOURCE_ASSOCIATED","GAP_ASSESSED","CONTINUATION_READY"])expect(types).toContain(type);expect(types).not.toContain("CRITERIA_CHECKED");});
+tests\missionContinuation.test.ts:30: it("缺单位/时间、无关内容和冲突均继续等待",async()=>{for(const text of ["10月本地实验 Dice 0.82","本地实验 Dice 82%","公开论文 Dice 82%","10月本地实验 Dice %"]){const{p,m}=await fixture();const pointer=await material(p.id,text);const result=await confirmContinuation(userId,m.id,await bodyFor(m.id,[pointer]));expect(result.continued).toBe(false);expect((await missionDetail(userId,m.id)).status).toBe("WAITING_INPUT");}const{p,m}=await fixture("CONFLICT");expect((await confirmContinuation(userId,m.id,await bodyFor(m.id,[await material(p.id)]))).continued).toBe(false);});
+tests\fixtures\missionEvidenceFit-v2.json:22:      "missionState": "WAITING_INPUT",
+tests\fixtures\missionEvidenceFit-v2.json:58:      "missionState": "WAITING_INPUT",
+tests\fixtures\missionEvidenceFit-v2.json:94:      "missionState": "WAITING_INPUT",
+tests\fixtures\missionEvidenceFit-v2.json:130:      "missionState": "WAITING_INPUT",
+tests\fixtures\missionEvidenceFit-v2.json:180:      "missionState": "WAITING_INPUT",
+tests\fixtures\missionEvidenceFit-v2.json:216:      "missionState": "WAITING_INPUT",
+tests\fixtures\missionEvidenceFit-v2.json:255:      "missionState": "WAITING_INPUT",
+tests\fixtures\missionEvidenceFit-v2.json:291:      "missionState": "WAITING_INPUT",
+tests\fixtures\missionEvidenceFit-v2.json:336:      "missionState": "WAITING_INPUT",
+tests\fixtures\missionEvidenceFit-v2.json:385:      "missionState": "WAITING_INPUT",
+tests\fixtures\missionEvidenceFit-v2.json:430:      "missionState": "WAITING_INPUT",
+tests\fixtures\missionEvidenceFit-v2.json:473:      "missionState": "WAITING_INPUT",
+tests\fixtures\missionEvidenceFit-v2.json:514:      "missionState": "WAITING_INPUT",
+tests\fixtures\missionEvidenceFit-v2.json:555:      "missionState": "WAITING_INPUT",
+tests\fixtures\missionEvidenceFit-v2.json:596:      "missionState": "WAITING_INPUT",
+tests\fixtures\missionEvidenceFit-v2.json:632:      "missionState": "WAITING_INPUT",
+tests\missionContinuation.review.test.ts:44: expect((await missionDetail(user.id,mission.id)).status).toBe("WAITING_INPUT");
+tests\missionRuntime.test.ts:46: it("WAITING_INPUT不运行，回答绑定问题且重放幂等",async()=>{const {m}=await fixture();const d=await slice(m.id,{kind:"ask",question:"请补充实验指标",missing:"PRIVATE"});expect(d.status).toBe("WAITING_INPUT");const mocked=vi.fn(provider(draft()));expect(await runMissionSlice({id:m.id,provider:mocked})).toBe(false);expect(mocked).not.toHaveBeenCalled();await expect(commandMission(userId,m.id,"input",{requestId:"bad",expectedVersion:d.version,questionId:"other",answer:"指标0.8"})).rejects.toMatchObject({status:409});const input={requestId:"answer",expectedVersion:d.version,questionId:d.question!.id,answer:"本地指标0.8"};await commandMission(userId,m.id,"input",input);await commandMission(userId,m.id,"input",input);expect((await missionEvents(userId,m.id)).events.filter(e=>e.type==="INPUT")).toHaveLength(1);});
+tests\missionRuntime.test.ts:65: it("等待输入暂停恢复不丢失原问题",async()=>{const {m}=await fixture();let d=await slice(m.id,{kind:'ask',question:'缺实验指标',missing:'PRIVATE'});const q=d.question!.id;await commandMission(userId,m.id,'pause',{requestId:'pause-input',expectedVersion:d.version});d=await missionDetail(userId,m.id);await commandMission(userId,m.id,'resume',{requestId:'resume-input',expectedVersion:d.version});d=await missionDetail(userId,m.id);expect(d.status).toBe('WAITING_INPUT');expect(d.question!.id).toBe(q);});
+tests\missionRuntime.test.ts:149:  expect(d.status).toBe("WAITING_INPUT");
+tests\finalCWorkPacket.test.ts:540:      identity: { ...base.identity, missionStatus: "WAITING_INPUT" },
+tests\finalCWorkPacket.test.ts:543:        missionStatus: "WAITING_INPUT",
+tests\finalCWorkPacket.test.ts:552:        note: "原生命周期 WAITING_INPUT；显示阶段 WAITING_USER；停止请求 NONE（已结算/无请求）；未结算效果不存在。",
+tests\finalCWorkPacket.test.ts:575:    expect(visible).not.toContain("WAITING_INPUT");
+tests\finalCWorkPacket.test.ts:581:    expect(technical.textContent).toContain("原生命周期 WAITING_INPUT");
+components\MissionPanel.tsx:157:     <div role="status" className={styles.statusText}>{(mission.workState?.phase==="WAITING_USER"?"等待你回答下方原问题":mission.workState?.reasonText)??labels[mission.status]}{!mission.workState&&(mission.status==="RUNNING"?"，最近已完成的步骤见下方":mission.status==="READY"?"，进度已保存，等待开始":mission.status==="WAITING_INPUT"?"，补充后可继续同一委托":mission.status==="WAITING_APPROVAL"?"，确认预览后才会执行该提案":"")}</div>
+components\MissionPanel.tsx:162:      {["READY","RUNNING","WAITING_INPUT","WAITING_APPROVAL"].includes(mission.status)&&<button disabled={busy} onClick={()=>void command("pause")}>暂停</button>}
+components\MissionPanel.module.css:32:.statusDot[data-status=PAUSED],.statusDot[data-status=WAITING_APPROVAL],.statusDot[data-status=WAITING_INPUT] { background: var(--amber); }
+components\MissionPanel.module.css:40:.badge[data-status=PAUSED],.badge[data-status=WAITING_INPUT],.badge[data-status=WAITING_APPROVAL] { color: var(--ink-soft); border-color: var(--amber); }
+tests\missionNativeContract.test.ts:110:    expect(summary.items.find(item=>item.id===m.id)).toMatchObject({status:"WAITING_INPUT",attention:"请补充同条件实验指标"});
+tests\missionNativeContract.test.ts:111:    expect((await native.detail(m.id)).status).toBe("WAITING_INPUT");
+tests\missionReadbackPanel.test.ts:10:    missionId: "m", projectId: "p1", missionVersion, missionStatus: "WAITING_INPUT",
+tests\missionMaterialUseProjection.test.ts:75:    expect(value.missionStatus).toBe("WAITING_INPUT");
+components\MissionInvestigationDelegation.tsx:5:const reasonLabel:Record<string,string>={WAITING_INPUT:"需要补充原任务的信息",BUDGET_EXHAUSTED:"调查预算已用完",DELEGATION_EXPIRED:"调查许可已到期",DIRECTIVE_STOPPED:"你已暂停这项工作",INPUT_COVERAGE_LIMIT:"资料变化较多，需要核对调查范围"};
+tests\p3ReviewBoundaries.test.ts:207:  await db.agentMission.update({ where: { id: m.id }, data: { status: "WAITING_INPUT" } });
+lib\client\focusPresentation.ts:7:  return view.waiting.find(x=>x.workState?x.workState.requiresUser:["WAITING_INPUT","WAITING_APPROVAL"].includes(x.status))
+tests\missionWorkspaceSummary.test.ts:19:  const m=await db.agentMission.create({data:{ownerUserId:user,projectId:project,goal:"需补充对照组的汇报",createRequestId:"waiting",createPayloadHash:"test",successCriteriaJson:["DRAFT_EXISTS"],constraintsJson:{},budgetJson:{},status:"WAITING_INPUT",updatedAt:new Date("2026-01-01")}});waiting=m.id;
+tests\missionWorkspaceSummary.test.ts:29:    expect(result.items[0]).toMatchObject({id:waiting,status:"WAITING_INPUT",attention:"请补充同条件下的对照组指标",activity:"草稿修订 2 已保存",outputRevision:2});
+tests\missionWorkspaceSummary.test.ts:31:    expect((await db.agentMission.findUniqueOrThrow({where:{id:waiting}})).status).toBe("WAITING_INPUT");
+tests\missionWaitNotice.test.ts:24:  await db.agentMission.update({ where: { id: mission.id }, data: { status: "WAITING_INPUT", waitStateJson: { questionId: "q-1", missing: "数据划分比例" } } });
+tests\projectAttention.test.ts:11: ["WAITING_INPUT",5,0,true,"reminder"],
+tests\projectAttention.test.ts:13: ["WAITING_INPUT",3,4,true,"mission"],
+lib\projectAttention.ts:5:  if (["WAITING_INPUT", "WAITING_APPROVAL", "PAUSED", "FAILED"].includes(missionStatus)) return "mission";
+tests\projectAgentContext.test.ts:21:  for(const [name,status] of [["waiting","WAITING_INPUT"],["running","RUNNING"],["ready","READY"]]){
+tests\projectAgentContext.test.ts:31:    const all=[candidate("RUNNING"),candidate("PAUSED"),{...candidate("PAUSED","source"),sourceChanged:true},candidate("WAITING_APPROVAL"),candidate("WAITING_INPUT")];
+tests\projectAgentContext.test.ts:32:    for(const [status,id] of [["WAITING_INPUT","WAITING_INPUT"],["WAITING_APPROVAL","WAITING_APPROVAL"],["SOURCE_CHANGED","source"],["STOPPED","PAUSED"],["RUNNING","RUNNING"]]){
+tests\projectAgentContext.test.ts:51:    expect(context?.nextStep).toMatchObject({attentionKind:"WAITING_INPUT",entityRef:{id:waiting}});
+lib\projectAgentContext.ts:13:  return c.status === "WAITING_INPUT"?10:c.status === "WAITING_APPROVAL"?15:["PAUSED","FAILED"].includes(c.status)?40:55;
+lib\projectAgentContext.ts:26:  const labels: Record<AgentAttentionKind,string> = { WAITING_INPUT:"补充委托资料", WAITING_APPROVAL:"审阅行动提案", SOURCE_CHANGED:"核对来源与进度", STOPPED:"查看原因与进度", RUNNING:"查看执行进度", READY:"查看原委托", REMINDER:"查看提醒依据", ACTION:"打开行动", CAPTURE:"记录项目进展", UNAVAILABLE:"重新读取项目" };
+tests\projectOverviewContext.test.ts:3:const data=vi.hoisted(()=>({primary:"waiting",kind:"MISSION",hasLocalReminder:true,items:[{id:"waiting",goal:"整理汇报",status:"WAITING_INPUT",version:1,attention:"请补充实验对照结果",activity:null,activityAt:null,outputRevision:null}]}));
+tests\s2AdaptivePreference.test.ts:85:    expect(asked.status).toBe("WAITING_INPUT");
+tests\s2AdaptivePreference.test.ts:102:    expect(after.status).toBe("WAITING_INPUT");
+lib\mission\investigationDelegation.ts:234:  const urgent = reason === "WAITING_INPUT" && ["CRITICAL", "CONFLICT"].includes(String(wait.missing)) && Number.isFinite(deadline) && deadline > +now && deadline - +now <= 3600000;
+lib\mission\investigationDelegation.ts:253:  const ids = await db.$queryRaw<Array<{ id: string }>>`SELECT id FROM "AgentMission" WHERE status='WAITING_INPUT' AND "cancelRequestedAt" IS NULL AND "pauseRequestedAt" IS NULL AND json_extract("continuationPolicyJson",'$.mode')='BOUNDED_INVESTIGATION' AND ("nextAttemptAt" IS NULL OR CASE WHEN typeof("nextAttemptAt")='integer' THEN "nextAttemptAt"<=${+now} ELSE julianday("nextAttemptAt")<=julianday(${now.toISOString()}) END) ORDER BY "updatedAt" ASC LIMIT ${batchSize}`;
+lib\mission\investigationDelegation.ts:264:        if (!p || m.status !== "WAITING_INPUT" || m.pauseRequestedAt || m.cancelRequestedAt) return;
+lib\mission\investigationDelegation.ts:386:                  attention: await scopedDelegationAttention(tx, m, "WAITING_INPUT"),
+lib\mission\workState.ts:106:  } else if (m.status === "WAITING_INPUT") {
+lib\mission\workspaceSummary.ts:26:  const attentionStates = ["WAITING_INPUT", "WAITING_APPROVAL", "PAUSED", "FAILED"];
+tests\ux2HypothesisRuntime.test.ts:106:  row = await db.agentMission.findUniqueOrThrow({ where: { id: m.id } }); expect(row.status).toBe("WAITING_INPUT"); expect(row.budgetUsedJson).toMatchObject({ models: 2 });
+tests\ux3AttentionContinuity.test.ts:65:      status: "WAITING_INPUT",
+tests\ux3AttentionContinuity.test.ts:73:  const quietAttention = await db.$transaction(tx => scopedDelegationAttention(tx, quietMission, "WAITING_INPUT", quietNight));
+tests\ux3AttentionContinuity.test.ts:91:  const urgentAttention = await db.$transaction(tx => scopedDelegationAttention(tx, urgentMission, "WAITING_INPUT", quietNight));
+tests\ux3AttentionContinuity.test.ts:109:  const morningAttention = await db.$transaction(tx => scopedDelegationAttention(tx, morningMission, "WAITING_INPUT", morningTime));
+tests\ux3AttentionContinuity.test.ts:158:      status: "WAITING_INPUT",
+tests\ux3AttentionContinuity.test.ts:168:  const decision1 = await db.$transaction(tx => scopedDelegationAttention(tx, currentMission, "WAITING_INPUT", noon));
+tests\ux3AttentionContinuity.test.ts:177:  const decision2 = await db.$transaction(tx => scopedDelegationAttention(tx, currentMission, "WAITING_INPUT", noon));
+lib\mission\waitNotice.ts:17:const WAITING = ["WAITING_INPUT", "WAITING_APPROVAL"] as const;
+lib\mission\waitNotice.ts:23:  if (mission.status === "WAITING_INPUT") {
+tests\ux3CumulativeBudget.test.ts:45:  await db.agentMission.update({where:{id:m.id},data:{status:"WAITING_INPUT",nextAttemptAt:null,budgetUsedJson:{tools:1,models:0,dailyUsage:{date:today,tools:1,models:0}}}});
+tests\ux3ProactiveDiscovery.test.ts:155:  expect(updatedMission.status).toBe("WAITING_INPUT");
+tests\ux3ProactiveDiscovery.test.ts:215:      status: "WAITING_INPUT",
+tests\ux3ProactiveDiscovery.test.ts:256:  // 将任务重新置为 WAITING_INPUT
+tests\ux3ProactiveDiscovery.test.ts:259:    data: { status: "WAITING_INPUT", nextAttemptAt: null },
+tests\ux3ProactiveDiscovery.test.ts:348:      status: "WAITING_INPUT",
+tests\ux3ProactiveDiscovery.test.ts:499:  // 数据上包含结构化 lastErrorJson，与正常无变化时的 WAITING_INPUT + waitingFor: OBSERVATION 明确区分
+lib\mission\delegationObservation.ts:92:      await release(tx, fresh, changed ? "READY" : "WAITING_INPUT");
+tests\ux3BranchRuntime.test.ts:18:  await db.agentMission.update({where:{id:m.id},data:{status:"WAITING_INPUT",nextAttemptAt:null}});
+tests\ux3Responsibility.test.ts:13:  await db.agentMission.update({ where: { id: m.id }, data: { status: "WAITING_INPUT", waitStateJson: { waitingFor: "OBSERVATION" },
+tests\ux3ResponsibilityRevision.test.ts:260:test("UX-3A (Issue 1): WAITING_INPUT（等待提问或巡检）修订截止时间保持 WAITING_INPUT，不错误恢复为 READY", async () => {
+tests\ux3ResponsibilityRevision.test.ts:270:  // 1. 设置为 WAITING_INPUT 且有未决问题
+tests\ux3ResponsibilityRevision.test.ts:274:      status: "WAITING_INPUT",
+tests\ux3ResponsibilityRevision.test.ts:296:  // 状态必须依然是 WAITING_INPUT，未决提问也完整保留
+tests\ux3ResponsibilityRevision.test.ts:298:  expect(updatedMission1.status).toBe("WAITING_INPUT");
+tests\ux3ResponsibilityRevision.test.ts:301:  // 2. 属于有界调查、等待下次巡检（无未决提问），仅改截止时间同样保持 WAITING_INPUT
+tests\ux3ResponsibilityRevision.test.ts:306:      status: "WAITING_INPUT",
+tests\ux3ResponsibilityRevision.test.ts:336:  expect(updatedMission2.status).toBe("WAITING_INPUT");
+tests\ux3ResponsibilityRevision.test.ts:530:      reason: "WAITING_INPUT",
+tests\ux3ResponsibilityRevision.test.ts:665:      status: "WAITING_INPUT",
+tests\ux3ResponsibilityRevision.test.ts:689:  expect(checkedMission.status).toBe("WAITING_INPUT"); // 仍然等待用户
+tests\ux3ResponsibilityRevision.test.ts:767:      status: "WAITING_INPUT",
+lib\mission\continuationService.ts:23:  if(m.status!=="WAITING_INPUT"||wait?.questionId!==body.questionId||m.cancelRequestedAt||m.pauseRequestedAt)throw new AppError("INPUT_CHANGED","等待问题已变化，请刷新",409);
+lib\mission\continuationService.ts:56:  if(query.questionId&&(m.status!=="WAITING_INPUT"||wait?.questionId!==query.questionId||m.cancelRequestedAt||m.pauseRequestedAt))throw new AppError("INPUT_CHANGED","原问题已变化，请返回原委托核对；不会提交给另一项问题",409);
+lib\mission\continuationService.ts:57:  if(m.status!=="WAITING_INPUT"||!wait?.questionId)return{candidates:[]};
+lib\mission\continuationService.ts:124: const missions=await db.agentMission.findMany({where:{status:"WAITING_INPUT",cancelRequestedAt:null,pauseRequestedAt:null,...(missionIds?{id:{in:missionIds}}:{})},orderBy:{updatedAt:"asc"},take:limit});let continued=0;
+lib\mission\continuationService.ts:127:  if(!m||m.status!=="WAITING_INPUT"||m.cancelRequestedAt||m.pauseRequestedAt||(m.continuationPolicyJson as {mode?:string}).mode!=="LOW_RISK_READ_ANALYZE")return;
+tests\ux3ThreeDayContinuity.test.ts:157:      status: "WAITING_INPUT",
+tests\ux3ThreeDayContinuity.test.ts:215:  expect(mAfterQuietCheck.status).toBe("WAITING_INPUT");
+lib\mission\sourceSignals.ts:40:  const missions=await db.agentMission.findMany({where:{status:"WAITING_INPUT",cancelRequestedAt:null,pauseRequestedAt:null},orderBy:{updatedAt:"asc"},take:limit});
+lib\mission\sourceSignals.ts:44:    if(m.status!=="WAITING_INPUT"||m.cancelRequestedAt||m.pauseRequestedAt)return;
+lib\mission\runtimeStore.ts:106:  if(status==="WAITING_INPUT"){const input=await investigationInputHash(current,tx);nextAttemptAt=new Date(Math.min(Date.parse(p.expiresAt),Date.now()+p.checkEveryMinutes*60000));plan={...current.planJson as object,delegation:{...state,inputHash:input.hash,attention:await scopedDelegationAttention(tx,current,"WAITING_INPUT")}};}
+lib\mission\readback.ts:370:                question.id !== workState.exactQuestionRef || m.status !== "WAITING_INPUT" ||
+lib\mission\runner.ts:76:      await release(tx,current,"WAITING_INPUT");
+lib\mission\runner.ts:146:     await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...current.planJson as object,automaticContinuation:null}),waitStateJson:json({waitingFor:"USER",questionId:q.id,gapId,question:choice.question,missing:choice.missing,requirements,evidencePremiseContext,startedAt:new Date().toISOString(),readSet:sourcesFrom(history.map(s=>s.resultJson))})}});await release(tx,current,"WAITING_INPUT");return null;
+lib\mission\presentation.ts:3:  READY: "等待执行", RUNNING: "正在执行", WAITING_INPUT: "等待补充信息",
+lib\mission\missionService.ts:64:  const fitPremise=m.waitStateJson&&m.status==="WAITING_INPUT"?premiseFor(m,m.waitStateJson as unknown as WaitState):null;
+lib\mission\missionService.ts:79:      if(m.status!=="WAITING_INPUT"||!body.answer||!wait||typeof wait!=="object"||Array.isArray(wait)
+lib\mission\missionService.ts:110:      if(m.status!=="PAUSED")throw new AppError("MISSION_NOT_PAUSED","仅暂停的委托可以继续；失败任务需先修复原因",409);const previous=(m.planJson as {resumeStatus?:string}).resumeStatus;status=previous&&["WAITING_INPUT","WAITING_APPROVAL"].includes(previous)?previous:"READY";
+lib\mission\missionService.ts:111:    }else if(action==="pause"){if(!["READY","RUNNING","WAITING_INPUT","WAITING_APPROVAL"].includes(m.status))throw new AppError("INVALID_TRANSITION","当前状态无法暂停",409);status=m.status==="RUNNING"?"RUNNING":"PAUSED";}
+lib\mission\missionService.ts:130:    const updated=await tx.agentMission.update({where:{id},data:{...(kind==="constraints"?{constraintsJson:json({...body.constraints,llmContextApproved:body.llmContextApproved??old.llmContextApproved}),constraintsVersion:{increment:1}}:{researchScopeJson:json(body.scope),researchScopeVersion:{increment:1}}),contextVersion:{increment:1},version:{increment:1},planRevision:{increment:1},planJson:json({...m.planJson as object,resumeStatus:(m.planJson as {resumeStatus?:string}).resumeStatus==="WAITING_INPUT"?"WAITING_INPUT":"READY"}),status:m.status==="WAITING_APPROVAL"?"READY":m.status}});
+lib\mission\missionService.ts:145:  const updated=await tx.agentMission.update({where:{id},data:{continuationPolicyJson:json(body.policy),contextVersion:{increment:1},planRevision:{increment:1},version:{increment:1},status:delegation&&m.status==="WAITING_INPUT"?"READY":status,nextAttemptAt:null,pauseRequestedAt:active&&m.status==="RUNNING"?new Date():m.pauseRequestedAt,planJson:json({...m.planJson as object,automaticContinuation:null,delegation,...(status==="PAUSED"?{resumeStatus:"READY"}:{})})}});
+harmonyos/entry/src/main/ets\components\ConversationWorkPanel.ets:99:      Text(this.work.status === 'WAITING_INPUT' ? '等待补充' : this.work.status === 'PAUSED' ? '已暂停' : this.work.status === 'DONE' ? '行动已完成' : '原任务状态：' + this.work.status).fontSize(12).fontColor(PMColors.INK_TERTIARY)
+harmonyos/entry/src/main/ets\common\GlobalFocusPresentation.ets:8:  const needsUser = view.waiting.find((item: FocusEntry) => item.workState ? item.workState.requiresUser : item.status === 'WAITING_INPUT' || item.status === 'WAITING_APPROVAL');
+harmonyos/entry/src/main/ets\common\GlobalFocusPresentation.ets:34:    if (status === 'WAITING_INPUT') return '等待补充信息';
+harmonyos/entry/src/main/ets\common\GlobalFocusPresentation.ets:47:      if (status === 'WAITING_INPUT') return '补充委托资料 →';
+harmonyos/entry/src/main/ets\common\MissionContract.ets:4:  const labels: Record<string, string> = { 'READY': '等待执行', 'RUNNING': '执行中', 'WAITING_INPUT': '等待补充资料',
+harmonyos/entry/src/main/ets\pages\MissionDetail.ets:219:        if (detail.status === 'WAITING_INPUT') {
+harmonyos/entry/src/main/ets\pages\MissionDetail.ets:363:      if (this.mission.status === 'WAITING_INPUT' && action.targetId !== '' && action.targetId === currentQuestion) {
+harmonyos/entry/src/main/ets\pages\MissionDetail.ets:700:      if (this.mission.status === 'WAITING_INPUT' && this.mission.question !== null) { this.WaitingInput() }
+harmonyos/entry/src/main/ets\pages\MissionDetail.ets:935:          if (['READY', 'RUNNING', 'WAITING_INPUT', 'WAITING_APPROVAL'].includes(this.mission.status)) {
+harmonyos/entry/src/main/ets\common\ProjectAttention.ets:4:  if (['WAITING_INPUT', 'WAITING_APPROVAL', 'PAUSED', 'FAILED'].includes(missionStatus)) return 'mission';
+harmonyos/entry/src/main/ets\pages\ProjectHome.ets:1744:    if (kind === 'mission') return this.homeMission?.status === 'WAITING_INPUT' ? '补充信息' : this.homeMission?.status === 'WAITING_APPROVAL' ? '审阅行动提案' : '查看原委托';
+harmonyos/entry/src/main/ets\components\GoalQuestionPanel.ets:55:     PMButton({ label: this.question.kind === 'WAITING_INPUT' ? '补充到原问题' : '核对并接续原委托', disabled: this.busy || !this.fresh, onAction: (): void => {
+harmonyos/entry/src/main/ets\components\GoalQuestionPanel.ets:56:      router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.projectId, missionId: this.question!.missionId, questionId: this.question!.kind === 'WAITING_INPUT' ? this.question!.questionId : '' } });
+harmonyos/entry/src/main/ets\components\MissionPanel.ets:71:      { title: '需要回应', statuses: ['WAITING_INPUT', 'WAITING_APPROVAL'] },
+harmonyos/entry/src/main/ets\components\MissionPanel.ets:92:    if (item.status === 'WAITING_INPUT') { return '补充信息 →'; }

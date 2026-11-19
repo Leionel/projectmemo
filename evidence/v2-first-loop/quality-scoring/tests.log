@@ -1,0 +1,16 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/contentQuality.test.ts tests/skillRouter.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ✓ tests/skillRouter.test.ts (6 tests) 1437ms
+   ✓ frozen 64 routing cases are answered from real isolated fixture records  1418ms
+ ✓ tests/contentQuality.test.ts (7 tests) 4ms
+
+ Test Files  2 passed (2)
+      Tests  13 passed (13)
+   Start at  08:25:48
+   Duration  2.28s (transform 745ms, setup 0ms, import 432ms, tests 1.44s, environment 0ms)
+

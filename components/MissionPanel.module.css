@@ -177,5 +177,7 @@
 .detailMain > .activity p:first-of-type { margin-top:0; }
 .progress .sectionTitle { display:none; }
 
+.sourceCaption { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.output h5 { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }.output h5 time { font-weight:400; color:var(--muted); font-size:12px; margin-left:auto; }
 .header { padding:.375rem 1rem; border-bottom:0; }
 .count { padding-top:0; }

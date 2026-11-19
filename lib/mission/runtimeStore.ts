@@ -3,6 +3,7 @@ import { record } from "@/lib/conversation/repository";
 import {readDecisionSnapshot} from "@/lib/decision/snapshot";
 import { assertAutomaticPermission,validateAutomaticEvidence } from "./automaticPolicy";
 import { db } from "@/lib/db";
+import { isFeatureEnabled } from "@/lib/config/features";
 import { AppError } from "@/lib/api";
 import type { AgentMission } from "@/lib/generated/prisma/client";
 import { json, usageOf, defaultBudget } from "./contracts";
@@ -13,10 +14,13 @@ import { assertInvestigationDelegation, validateDelegationConnections, boundedPo
 export type Lease={id:string;owner:string;epoch:number;contextVersion:number;planRevision:number};
 export async function claimMission(owner:string,id?:string){
  requireMissions();return db.$transaction(async tx=>{
-  const now=new Date();await tx.agentMission.updateMany({where:{status:"RUNNING",leaseUntil:{lte:now}},data:{status:"READY",executionSlot:null,leaseOwner:null,leaseUntil:null}});
+  const now=new Date();
+  // A worker that does not understand v2 must not reset or claim v2 rows at all.
+  const allowedVersions=isFeatureEnabled("MISSION_V2_ENABLED",false)?[1,2]:[1];
+  await tx.agentMission.updateMany({where:{status:"RUNNING",leaseUntil:{lte:now},runtimeProtocolVersion:{in:allowedVersions}},data:{status:"READY",executionSlot:null,leaseOwner:null,leaseUntil:null}});
   if(await tx.agentMission.count({where:{executionSlot:1}}))return null;
   for(let scan=0;scan<20;scan++){
-  const m=await tx.agentMission.findFirst({where:{status:"READY",OR:[{nextAttemptAt:null},{nextAttemptAt:{lte:now}}],...(id?{id}:{})},orderBy:{updatedAt:"asc"}});if(!m)return null;
+  const m=await tx.agentMission.findFirst({where:{status:"READY",runtimeProtocolVersion:{in:allowedVersions},OR:[{nextAttemptAt:null},{nextAttemptAt:{lte:now}}],...(id?{id}:{})},orderBy:{updatedAt:"asc"}});if(!m)return null;
   await lock(tx,m.id);try{await assertOwner(m.ownerUserId,m.projectId,tx);}catch(error){if(!(error instanceof AppError))throw error;await tx.agentMission.update({where:{id:m.id},data:{status:"PAUSED",pauseReason:"REVIEW_REQUIRED",version:{increment:1},lastErrorJson:{code:"AUTHORIZATION_REVOKED",message:"项目权限已撤销，委托已暂停"}}});await event(tx,m.id,"AUTHORIZATION_REVOKED",{});continue;}
   const claimed=await tx.agentMission.update({where:{id:m.id},data:{status:"RUNNING",nextAttemptAt:null,executionSlot:1,leaseOwner:owner,leaseUntil:new Date(Date.now()+60000),leaseEpoch:{increment:1},version:{increment:1}}});
   await event(tx,m.id,"CLAIMED",{epoch:claimed.leaseEpoch});return claimed;
@@ -27,6 +31,7 @@ export async function fenced(tx:Tx,lease:Lease,checkContext=true){
  requireMissions();await lock(tx,lease.id);const m=await tx.agentMission.findUniqueOrThrow({where:{id:lease.id}});
  if(m.status!=="RUNNING"||m.leaseOwner!==lease.owner||m.leaseEpoch!==lease.epoch||!m.leaseUntil||m.leaseUntil<=new Date())throw new AppError("LEASE_LOST","执行租约已失效",409);
  await assertOwner(m.ownerUserId,m.projectId,tx);assertAutomaticPermission(m);
+ if(m.runtimeProtocolVersion===2&&!isFeatureEnabled("MISSION_V2_ENABLED",false))throw new AppError("MISSION_V2_DISABLED","持续成果试验已暂停，进度与用量保留",409);
  assertInvestigationDelegation(m);
  await validateDelegationConnections(m,tx);
  if(checkContext)await assertContinuityBinding(m.ownerUserId,{projectId:m.projectId,missionId:m.id},(m.planJson as {continuityBinding?:unknown}).continuityBinding,tx);
@@ -68,8 +73,11 @@ export async function reserve(lease:Lease,kind:"models"|"tools",tool?:string,out
  if(Object.entries(limits).some(([key,value])=>typeof value === "number" && (used[key as keyof typeof used] ?? 0) > value))throw new AppError("BUDGET_EXHAUSTED","委托预算已用完，请检查后处理",409);
  await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json({...raw,...used,...(dailyUsage?{dailyUsage}:{})})}});return used;
  });}
-export async function settleUsage(lease:Lease,kind:"models"|"tools",durationMs:number,tokens?:{inputTokens:number|null;outputTokens:number|null}){return db.$transaction(async tx=>{
+export async function settleUsage(lease:Lease,kind:"models"|"tools",durationMs:number,tokens?:{inputTokens:number|null;outputTokens:number|null},reservedOutputTokens=0){return db.$transaction(async tx=>{
  const m=await fenced(tx,lease,false);const raw=record(m.budgetUsedJson);const used=usageOf(raw);used.activeMs=Math.max(0,used.activeMs-20000)+durationMs;
+ // The output-token reservation is per call; release it and keep actual usage instead,
+ // otherwise long-running continuous missions exhaust a lifetime reservation they never used.
+ if(kind==="models"&&reservedOutputTokens>0&&m.runtimeProtocolVersion===2)used.reservedOutputTokens=Math.max(0,used.reservedOutputTokens-reservedOutputTokens);
  if(kind==="models"&&tokens){if(tokens.inputTokens!==null)used.inputTokens+=tokens.inputTokens;if(tokens.outputTokens!==null)used.outputTokens+=tokens.outputTokens;if(tokens.inputTokens!==null&&tokens.outputTokens!==null)used.unknownCalls=Math.max(0,used.unknownCalls-1);}
  await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json({...raw,...used})}});
  });}
@@ -102,8 +110,20 @@ export async function settleCalendarUsage(lease:Lease,reserved:number,actual:num
  });}
 export async function release(tx:Tx,m:AgentMission,status:string,reason?:string){
  const p=boundedPolicy(m);let plan=m.planJson as object,nextAttemptAt:Date|null|undefined;
- if(p){const current=await tx.agentMission.findUniqueOrThrow({where:{id:m.id}}),state=(current.planJson as {delegation?:object}).delegation??{};
-  if(status==="WAITING_INPUT"){const input=await investigationInputHash(current,tx);nextAttemptAt=new Date(Math.min(Date.parse(p.expiresAt),Date.now()+p.checkEveryMinutes*60000));plan={...current.planJson as object,delegation:{...state,inputHash:input.hash,attention:await scopedDelegationAttention(tx,current,"WAITING_INPUT")}};}
+ if(p){const current=await tx.agentMission.findUniqueOrThrow({where:{id:m.id}});plan=current.planJson as object;const state=(current.planJson as {delegation?:object}).delegation??{};
+  if(status==="WAITING_INPUT"){
+   const input=await investigationInputHash(current,tx),saved=record(current.planJson),cursor=record(saved.skillCursor);
+   const snapshot=cursor.contextVersion===current.contextVersion?record(cursor.inputSnapshot):{};
+   const previous=record(state);
+   // Delivery acknowledges only the input snapshot at this cycle's start. Material arriving
+   // during a read/model/save remains pending and must wake the original Mission after delivery.
+   const consumed=current.runtimeProtocolVersion===2?{
+    hash:typeof snapshot.hash==="string"?snapshot.hash:typeof previous.inputHash==="string"?previous.inputHash:input.hash,
+    contentHash:typeof snapshot.contentHash==="string"?snapshot.contentHash:typeof previous.contentHash==="string"?previous.contentHash:input.contentHash,
+   }:input;
+   nextAttemptAt=new Date(Math.min(Date.parse(p.expiresAt),consumed.hash!==input.hash?Date.now():Date.now()+p.checkEveryMinutes*60000));
+   plan={...saved,delegation:{...state,inputHash:consumed.hash,contentHash:consumed.contentHash,attention:await scopedDelegationAttention(tx,current,"WAITING_INPUT")}};
+  }
   else if(status==="PAUSED")plan={...current.planJson as object,delegation:{...state,attention:await scopedDelegationAttention(tx,current,reason??"REVIEW_REQUIRED")}};
  }
  return tx.agentMission.update({where:{id:m.id},data:{status,pauseReason:reason??null,...(p?{planJson:json({...plan,...(status==="PAUSED"?{resumeStatus:"READY"}:{})}),nextAttemptAt}:status==="PAUSED"&&reason!=="USER"?{planJson:json({...m.planJson as object,resumeStatus:"READY"})}:{}),executionSlot:null,leaseOwner:null,leaseUntil:null,version:{increment:1},...(status==="SUCCEEDED"||status==="CANCELLED"?{finishedAt:new Date()}:{})}});

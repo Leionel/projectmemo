@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-11-17T00:16:47.319Z",
+  "missionId": "cmwjxzty300035k8ot95vde95",
+  "entry": "project page -> delegation preview/confirm -> workbench stage artifact",
+  "provider": "loopback mock selected by env",
+  "data": "temporary synthetic project",
+  "checks": [
+    "normal entry: plan-only delegation delivered a viewable, source-backed stage artifact and no report revision",
+    "stage artifact sources resolve to the original imported material",
+    "resume is explicit and recoverable; delivered artifact and report stay untouched",
+    "360px: no horizontal overflow"
+  ],
+  "errors": [],
+  "realModelValidated": false,
+  "realDeviceValidated": false
+}

@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-17T14:54:17.211Z",
+  "base": "http://127.0.0.1:4320",
+  "build": ".next-webgames3",
+  "database": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\prisma\\projectmemo-web-games.db",
+  "data": "SYNTHETIC_ONLY（隔离 SQLite；无真实项目、真实模型或外部写入）",
+  "checks": [
+    {
+      "name": "工作台显示玩法入口",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "生产包角色素材可访问",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "生产包 XLSX 提取可用",
+      "pass": true,
+      "detail": "status=200 body={\"text\":\"工作表：发布记录\\n输入回归\\t状态\\n系统分享\\t仍待真机验证\\t2\\n\\t\\tTRUE\\n\\n工作表：指标\\n准确率\\t0.91\",\"name\":\"发布记录.xlsx\",\"format\":\"XLSX_TEXT\",\"limitations\":\"读取单元格文本，不计算公式、不保留样式、图片或宏\"}"
+    },
+    {
+      "name": "原文阅读定位到相关段落",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "客户合成来源名称可读",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "拖放进入引用槽",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "键盘选择与点选一致",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "多选进入引用槽",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "服务端 verdict 显示关系已对上",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "刷新后恢复同一轮与已选引用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "刷新后原文仍可读",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "交回后显示接收回执",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1280 无横向溢出",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "360 可读且无横向溢出",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "删除后不再展示交回回执",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "删除后反馈副本已逻辑清除",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "丢包后保留回答并提示重试",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "重试原请求后进入第二轮",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "三轮意见整理为原文/建议",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "冲刺显示真实步骤回执",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "冲刺只在保存后显示打开新稿",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "自述写入服务端",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "冲刺改道进入原对话链",
+      "pass": true,
+      "detail": "turn=yes note=输入已送达原委托，工作重点尚未变化；以当前状态为准。"
+    },
+    {
+      "name": "冲刺改道以应用结果为准",
+      "pass": true,
+      "detail": "applied=false note=输入已送达原委托，工作重点尚未变化；以当前状态为准。"
+    },
+    {
+      "name": "结束后显示本轮留下了什么",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "结束冲刺不暂停原委托",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "结束后不吸收后来产物",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "暂停原委托独立生效",
+      "pass": true,
+      "detail": "status=RUNNING requested=true"
+    },
+    {
+      "name": "角色图片来自白名单且已加载",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "reduced-motion 关闭角色动画",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "来源变化后挑战撤题",
+      "pass": true,
+      "detail": "对\n证据侦探\n交付彩排\n双人冲刺\n另一种核对\n指标可比性\n返回成果\n第 2 版 · 11/17 22:53\n发布准备 · 合成演示/整理发布说明与验证边界\n已收到停止请求，等待本轮调用结算，不会继续派发新步骤\n本轮已交回，原稿已有新版本\n\n核查反馈仍保留在原记录中；本轮题面已撤下，旧版本继续可读。\n\n来源已变化或使用权限已撤销，本轮已撤下\n\n删除本轮回答\n已接收\n2026/11/17 22:53\n同一份委托已保存新稿\n\n新版本已保存；旧版本仍可读，交回建议不等于已批准结论。\n\n已收到停止请求，等待本轮调用结算，不会继续派发新步骤\n第 2 版 · 2026/11/17 22:53\n打开第 2 版"
+    }
+  ],
+  "screenshots": [
+    "01-workbench-1440.png",
+    "02-evidence-selected-1440.png",
+    "03-evidence-verified-1440.png",
+    "04-evidence-receipt-1440.png",
+    "05-evidence-receipt-1280.png",
+    "06-evidence-360.png",
+    "07-evidence-deleted-1440.png",
+    "08-mentor-preview-1440.png",
+    "09-mentor-receipt-1440.png",
+    "10-mentor-receipt-1280.png",
+    "11-sprint-active-1440.png",
+    "11b-sprint-directive-1440.png",
+    "12-sprint-wrap-1440.png",
+    "13-sprint-wrap-1280.png",
+    "14-sprint-paused-1440.png",
+    "15-reduced-motion-1440.png",
+    "16-source-stale-1440.png"
+  ],
+  "notes": [
+    "冲刺中的步骤与第 2 版由验收脚本直接写入持久表，模拟真实 Worker 回执；未调用模型。",
+    "暂停原委托在收尾执行，演示库保留 PAUSED 状态供复查。",
+    "未验证：真机、真实模型质量、72h、滚动升级、原生 XLSX 选择器。"
+  ]
+}

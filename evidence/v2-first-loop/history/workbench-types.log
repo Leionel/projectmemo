@@ -1,0 +1,4 @@
+lib/experience/workbenchFixture.ts(7,9): error TS2322: Type '{ id: string; revision: number; createdAt: string; blocks: { blockId: string; text: string; kind: string; sourceIds: string[]; }[]; presentation: { schemaVersion: number; allowedActions: never[]; blocks: { ...; }[]; }; }[]' is not assignable to type 'WorkbenchOutput[]'.
+  Type '{ id: string; revision: number; createdAt: string; blocks: { blockId: string; text: string; kind: string; sourceIds: string[]; }[]; presentation: { schemaVersion: number; allowedActions: never[]; blocks: { ...; }[]; }; }' is not assignable to type 'WorkbenchOutput'.
+    The types of 'presentation.schemaVersion' are incompatible between these types.
+      Type 'number' is not assignable to type '1'.

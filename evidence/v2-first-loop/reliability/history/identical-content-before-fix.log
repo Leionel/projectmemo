@@ -1,0 +1,41 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2ContinuityReliability.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ❯ tests/v2ContinuityReliability.test.ts (5 tests | 1 failed) 2675ms
+   × identical content re-upload does not wake the mission or consume model budget 444ms
+   ✓ 100 repeated scans with no new information produce no dispatch, draft or budget change  771ms
+   ✓ one real content change wakes once, produces one revision, and never loops on its own delivered output  972ms
+   ✓ out-of-order material arrival between scans is folded into one bounded observation 290ms
+   ✓ two workers claiming the same mission serialize: one executes, the other observes no work 186ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/v2ContinuityReliability.test.ts > identical content re-upload does not wake the mission or consume model budget
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/v2ContinuityReliability.test.ts:59:17
+     57|   const woken = scans.reduce((total, item) => total + item.woken, 0);
+     58|   const after = await db.agentMission.findUniqueOrThrow({ where: { id:…
+     59|   expect(woken).toBe(0);
+       |                 ^
+     60|   expect(after.status).toBe("WAITING_INPUT");
+     61|   expect(after.budgetUsedJson).toEqual(before.budgetUsedJson);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  08:30:04
+   Duration  5.06s (transform 1.28s, setup 0ms, import 2.05s, tests 2.68s, environment 0ms)
+

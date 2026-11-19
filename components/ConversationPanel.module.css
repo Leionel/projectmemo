@@ -307,13 +307,13 @@
 @keyframes conversationDrawerIn { from { transform:translateX(24px); opacity:.5; } to { transform:translateX(0); opacity:1; } }
 .sourceGroups { display:grid; gap:1.1rem; }
 .sourceGroup { display:grid; gap:.55rem; }
-.sourceGroupTitle { font-size:.75rem; font-weight:600; color:var(--ink-soft); }
+.sourceGroupTitle { display:flex; align-items:center; gap:.4rem; font-size:.75rem; font-weight:600; color:var(--ink-soft); }
 .sourceCard { display:grid; gap:.4rem; padding:.75rem .85rem; border:1px solid var(--rule); border-radius:10px; background:var(--card-bg); }
 .sourceCard header { display:flex; align-items:baseline; justify-content:space-between; gap:.6rem; }
 .sourceCard header strong { font-size:.8125rem; font-weight:600; color:var(--ink); min-width:0; overflow-wrap:anywhere; }
 .sourceFlag { flex-shrink:0; font-size:.625rem; color:var(--muted); }
 .sourceNotice { font-size:.71875rem; color:var(--muted); line-height:1.65; }
-.sourceMeta { font-size:.6875rem; color:var(--muted); line-height:1.6; overflow-wrap:anywhere; }
+.sourceMeta { display:flex; align-items:flex-start; gap:.4rem; font-size:.75rem; color:var(--muted); line-height:1.6; overflow-wrap:anywhere; }.sourceMeta svg { flex-shrink:0; margin-top:2px; }
 .sourceCard blockquote { margin:0; padding:.45rem .65rem; border-left:2px solid var(--rule-strong); border-radius:0 7px 7px 0; background:var(--paper); font-size:.75rem; line-height:1.7; color:var(--ink-soft); white-space:pre-wrap; overflow-wrap:anywhere; }
 .sourceCard a { display:inline-flex; align-items:center; gap:.25rem; min-height:2rem; font-size:.75rem; }
 @media (max-width:760px) {

@@ -1,0 +1,148 @@
+import { db } from "@/lib/db";
+import { AppError } from "@/lib/api";
+import { isFeatureEnabled } from "@/lib/config/features";
+import { record } from "@/lib/conversation/repository";
+import { sourceUse } from "@/lib/continuity/sourcePolicy";
+import { effectiveContinuity } from "@/lib/continuity/directiveService";
+import { agentPresentationSchema } from "@/lib/types/agentExperience";
+import { BUILTIN_SKILLS } from "@/lib/skills/registry";
+import { readSkillArtifacts } from "@/lib/skills/artifacts";
+import type { WorkbenchOutput, WorkbenchSnapshot, WorkbenchSource, WorkbenchStageArtifact } from "@/lib/types/workbench";
+import type { Source } from "./contracts";
+import { ownedMission, validateSources } from "./repository";
+import { missionWorkState } from "./workState";
+import { readReentryReceipt } from "./reentryBrief";
+import { workbenchChanges, workbenchReferenceChanges } from "./workbenchComparison";
+
+/** Authenticated, bounded, read-only view. Historical material is checked against current source-use permission. */
+export async function readMissionWorkbench(userId: string, id: string, selection: { revision?: number; baseline?: number } = {}): Promise<WorkbenchSnapshot> {
+  if (!isFeatureEnabled("MISSION_WORKBENCH_ENABLED", false)) throw new AppError("WORKBENCH_DISABLED", "成果工作台试验未开启", 404);
+  return db.$transaction(async tx => {
+    const m = await ownedMission(userId, id, tx);
+    const [project, recent, events, run, continuity, approvals, unknownSteps, receipt, recentAnswer] = await Promise.all([
+      tx.project.findUniqueOrThrow({ where: { id: m.projectId }, select: { title: true } }),
+      tx.agentMissionOutput.findMany({ where: { missionId: id }, orderBy: { revision: "desc" }, take: 5 }),
+      tx.agentMissionEvent.findMany({ where: { missionId: id }, orderBy: { seq: "desc" }, take: 24 }),
+      tx.agentRun.findFirst({ where: { projectId: m.projectId, trace: { path: "$.missionId", equals: id } }, orderBy: { createdAt: "desc" }, select: { provider: true } }),
+      effectiveContinuity(userId, { projectId: m.projectId, missionId: id }, tx),
+      tx.agentMissionApproval.findMany({ where: { missionId: id, status: "PENDING" } }),
+      tx.agentMissionStep.count({ where: { missionId: id, status: "UNKNOWN" } }),
+      readReentryReceipt(tx, id),
+      tx.agentMissionEvent.findFirst({ where: { missionId: id, type: "INPUT" }, orderBy: { seq: "desc" }, select: { payloadJson: true } }),
+    ]);
+    const lastSeenOutputRevision = Number(receipt.seenOutputRevision ?? 0);
+    const included = new Set(recent.map(row => row.revision));
+    const requested = [...new Set([selection.revision, selection.baseline, lastSeenOutputRevision])]
+      .filter((revision): revision is number => typeof revision === "number" && revision > 0 && !included.has(revision));
+    const extra = requested.length ? await tx.agentMissionOutput.findMany({ where: { missionId: id, revision: { in: requested } } }) : [];
+    const rows = [...recent, ...extra].sort((a, b) => b.revision - a.revision);
+    const artifactAdoptionEnabled = m.status !== "CANCELLED" && !m.cancelRequestedAt && isFeatureEnabled("MISSION_ARTIFACT_ADOPTION_ENABLED", false);
+    const adopted = artifactAdoptionEnabled && rows.length ? await tx.missionArtifactReceipt.findMany({
+      where: { missionId: id, projectId: m.projectId, outputId: { in: rows.map(row => row.id) }, artifactType: "weekly_report" },
+      select: { outputId: true, artifactId: true },
+    }) : [];
+    const weeklyReports = new Map(adopted.map(receipt => [receipt.outputId, receipt.artifactId]));
+    const sources: WorkbenchSource[] = [], outputs: WorkbenchOutput[] = [], stageArtifacts: WorkbenchStageArtifact[] = [];
+    const materialEvents = await tx.agentMissionEvent.findMany({ where: { missionId: id, type: { in: ["USER_MATERIAL_ADDED", "USER_FEEDBACK_ADDED"] } },
+      orderBy: { seq: "desc" }, take: 64, select: { payloadJson: true } });
+    const sourceNames = new Map<string, string>();
+    const delegation = record(record(m.planJson).v2DelegationReceipt);
+    if (typeof delegation.materialSourceId === "string" && typeof delegation.materialName === "string") sourceNames.set(delegation.materialSourceId, delegation.materialName);
+    for (const event of materialEvents) {
+      const payload = record(event.payloadJson);
+      if (typeof payload.sourceId === "string" && typeof payload.name === "string" && !sourceNames.has(payload.sourceId)) sourceNames.set(payload.sourceId, payload.name);
+    }
+    /** Resolve real source refs against the current owner/source-use policy; returns the visible ids. */
+    const visibleRefs = async (refs: Source[]): Promise<Set<string>> => {
+      const allowed = new Set<string>();
+      for (const source of refs) {
+        if (!source?.id || !source?.hash) continue;
+        if ((await sourceUse(userId, m.projectId, source.id, tx, { missionId: id })).state !== "ALLOWED") continue;
+        allowed.add(source.id);
+        const key = source.id + "@" + source.hash;
+        if (sources.some(item => item.key === key)) continue;
+        let current = true;
+        try { await validateSources(m.projectId, [source], tx, id); } catch { current = false; }
+        sources.push({ key, id: source.id, revision: source.revision, hash: source.hash, text: source.text.slice(0, 4000), current, kind: source.kind, observedAt: source.observedAt,
+          ...(sourceNames.has(source.id) ? { name: sourceNames.get(source.id) } : {}) });
+      }
+      return allowed;
+    };
+    const withSuppressedText = <T extends { blockId: string; text: string; kind: string; sourceIds: string[] }>(blocks: T[], refs: Source[], allowed: Set<string>) =>
+      blocks.map(block => {
+        const visible = refs.every(source => allowed.has(source.id)) && block.sourceIds.every(sourceId => allowed.has(sourceId));
+        return { blockId: block.blockId, text: visible ? block.text : "相关来源的使用许可已变化，请重新核对。",
+          kind: block.kind, sourceIds: visible ? block.sourceIds : [] };
+      });
+    const presentationOf = (blocks: Array<{ blockId: string; text: string }>) => agentPresentationSchema.parse({ schemaVersion: 1, allowedActions: [], blocks: blocks.map(block => ({
+      blockKey: block.blockId, semanticType: "prose", emphasis: "supporting", refs: [], actionBindingIds: [],
+      fallbackText: block.text, content: [{ type: "paragraph", spans: [{ kind: "text", text: block.text }] }],
+    })) });
+    // Stage artifacts from non-creation Skills are separate from report revisions.
+    for (const artifact of readSkillArtifacts(m.planJson)) {
+      const allowed = await visibleRefs(artifact.sources);
+      const blocks = withSuppressedText(artifact.blocks, artifact.sources, allowed);
+      const allSourcesAllowed = artifact.sources.every(source => allowed.has(source.id));
+      stageArtifacts.push({ id: artifact.id, skillId: artifact.skillId, label: BUILTIN_SKILLS[artifact.skillId]?.label ?? artifact.skillId,
+        createdAt: artifact.createdAt, blocks, sourceKeys: artifact.sources.filter(source => allowed.has(source.id)).map(source => source.id + "@" + source.hash),
+        presentation: presentationOf(blocks), checks: allSourcesAllowed ? artifact.checks : [], unknowns: allSourcesAllowed ? artifact.unknowns : [] });
+    }
+    for (const row of rows) {
+      const refs = row.sourceRefsJson as unknown as Source[];
+      const allowed = await visibleRefs(refs);
+      const content = record(row.contentJson), raw = Array.isArray(content.blocks) ? content.blocks.map(record) : [];
+      const sourceAccessChanged = refs.some(source => !allowed.has(source.id)) || raw.some(block =>
+        Array.isArray(block.sourceIds) && block.sourceIds.some(sourceId => typeof sourceId === "string" && !allowed.has(sourceId)));
+      const blocks = raw.map(b => {
+        const ids = Array.isArray(b.sourceIds) ? b.sourceIds.filter((v): v is string => typeof v === "string") : [];
+        const visible = refs.every(source => allowed.has(source.id)) && ids.every(sourceId => allowed.has(sourceId));
+        return { blockId: String(b.blockId), text: visible ? String(b.text) : "相关来源的使用许可已变化，请重新核对。",
+          kind: String(b.kind), sourceIds: visible ? ids : [] };
+      });
+      outputs.push({ id: row.id, revision: row.revision, createdAt: row.createdAt.toISOString(),
+        sourceKeys: refs.filter(s => allowed.has(s.id)).map(s => s.id + "@" + s.hash), blocks, presentation: presentationOf(blocks), sourceAccessChanged,
+        weeklyReportArtifactId: !sourceAccessChanged ? weeklyReports.get(row.id) : undefined,
+        missingInformation: !sourceAccessChanged && Array.isArray(content.missingInformation)
+          ? content.missingInformation.filter((item): item is string => typeof item === "string") : [] });
+    }
+    const state = missionWorkState({ ...m, delegationEnabled: isFeatureEnabled("MISSION_INVESTIGATION_DELEGATION_ENABLED", false),
+      events, approvals, unknownSteps });
+    const labels: Record<string, string> = { SKILL_ENTERED: "开始读取项目资料", SKILL_HANDOFF: "证据包已交给创作",
+      SKILL_OUTPUT_READY: "创作产物已保存", OUTPUT_SAVED: "私有稿已更新", CHECKPOINT_REACHED: "成果备好，继续留意变化",
+      FOLLOWUP_DEFERRED: "补充问题已留待核对，继续关注新资料",
+      USER_MATERIAL_ADDED: "你补充的资料已保存", USER_FEEDBACK_ADDED: "你的反馈已保存，等待核对影响", INPUT: "你对原问题的答复已保存",
+      CHALLENGE_HANDED_OFF: "成果核查缺口已交回原委托",
+      SKILL_ARTIFACT_SAVED: "阶段成果已保存", SKILL_DELIVERABLE_READY: "阶段成果已备好，原报告与行动未改动",
+      INVESTIGATION_WOKEN: "新资料唤醒原委托", INVESTIGATION_INPUT_CHANGED: "新资料唤醒原委托", INVESTIGATION_OBSERVATION_CHANGED: "观察到获准变化",
+      CLAIMED: "后台取得本轮执行权", TOOL_STARTED: "正在执行获准步骤", TOOL_FINISHED: "步骤回执已保存",
+      PAUSE: "已收到暂停请求", CANCEL: "已收到取消请求", RESPONSIBILITY_REVISED: "工作方向已更新",
+      NATURAL_CONTROL_APPLIED: "已按你的指引调整原委托", INVESTIGATION_HELD: "持续跟进需核对条件",
+      FAILURE: "当前步骤需核对" };
+    const usage = record(m.budgetUsedJson);
+    const answeredQuestion = record(recentAnswer?.payloadJson).questionId;
+    const target = selection.revision ? outputs.find(output => output.revision === selection.revision) : outputs[0];
+    const baseline = selection.baseline && target && selection.baseline < target.revision
+      ? outputs.find(output => output.revision === selection.baseline) : undefined;
+    const restricted = !!(target?.sourceAccessChanged || baseline?.sourceAccessChanged);
+    const references = target && baseline && !restricted ? workbenchReferenceChanges(baseline, target, sources) : { added: [], removed: [] };
+    const comparison = target && baseline ? {
+      revision: target.revision, baselineRevision: baseline.revision, restricted,
+      changes: restricted ? [] : workbenchChanges(baseline, target, sources).map(change => ({
+        id: change.id, kind: change.kind, before: change.before?.text, after: change.after?.text,
+        beforeKeys: change.beforeSources.map(source => source.key), afterKeys: change.afterSources.map(source => source.key),
+      })),
+      addedKeys: references.added.map(source => source.key), removedKeys: references.removed.map(source => source.key),
+    } : undefined;
+    return { id, projectId: m.projectId, projectTitle: project.title, goal: m.goal,
+      comparison,
+      lastSeenOutputRevision: m.runtimeProtocolVersion === 2 && isFeatureEnabled("MISSION_V2_ENABLED", false) ? lastSeenOutputRevision : undefined,
+      pendingQuestionId: state.exactQuestionRef ?? undefined,
+      lastAnsweredQuestionId: typeof answeredQuestion === "string" ? answeredQuestion : undefined,
+      artifactAdoptionEnabled,
+      challengesEnabled: m.runtimeProtocolVersion === 2 && isFeatureEnabled("MISSION_V2_ENABLED", false) && isFeatureEnabled("MISSION_CHALLENGES_ENABLED", false),
+      workingObjective: continuity.workingObjective ?? m.goal, status: m.status, phase: state.phase, reason: state.reasonText, reasonCode: state.reasonCode, version: m.version,
+      checkedAt: new Date().toISOString(), provider: run?.provider ?? "尚无模型调用",
+      models: Number(usage.models ?? 0), tools: Number(usage.tools ?? 0), outputs, stageArtifacts, sources,
+      events: events.filter(e => labels[e.type]).map(e => ({ id: e.id, label: labels[e.type], at: e.createdAt.toISOString(), kind: e.type })) };
+  });
+}

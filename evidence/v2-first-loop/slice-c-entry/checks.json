@@ -1,0 +1,87 @@
+{
+  "slice": "C",
+  "generatedAt": "2026-11-16T13:01:53.105Z",
+  "branch": "codex/v2-first-loop",
+  "baseCommit": "54a7c93",
+  "entry": {
+    "page": "/projects/[id] → V2DelegationStarter → /v2/workbench?missionId=…",
+    "apis": [
+      "POST /api/projects/[id]/v2-delegation/preview（只读，无业务写入）",
+      "POST /api/projects/[id]/v2-delegation/confirm（事务：材料+Mission+有界许可+回执）"
+    ],
+    "provider": "本机 127.0.0.1 OpenAI-compatible mock，通过正常 LLM_* 环境配置接入；产品 API 没有测试 provider 选择开关",
+    "isolatedDemoCli": "scripts/v2-local-demo.ts 保持独立，未改动"
+  },
+  "browser": {
+    "command": "npm.cmd exec tsx -- scripts/v2-entry-demo.ts  然后  npm.cmd exec tsx -- scripts/verify-v2-entry.ts（每条验收使用全新演示库）",
+    "exitCode": 0,
+    "receipt": "browser/receipt.json",
+    "screenshots": [
+      "browser/preview.png",
+      "browser/desktop.png",
+      "browser/mobile.png"
+    ],
+    "checks": [
+      "normal project page: import text material -> bounded delegation preview (scope, expiry, limits, excluded effects)",
+      "one confirmation created the real v2 Mission and first private version; evidence, process and provider are readable",
+      "new text material woke the same Mission; background worker produced version 2 with the new source",
+      "natural language redirect continued the same Mission; version 3 followed the new focus and returned to await_event",
+      "pause entry stays available on the real snapshot; pause stops further dispatch and keeps delivered versions",
+      "360px: no horizontal overflow"
+    ],
+    "data": "temporary synthetic project + local loopback model; no personal data, no paid call"
+  },
+  "checks": {
+    "entryTests": {
+      "command": "npm.cmd test -- tests/v2DelegationEntry.test.ts",
+      "tests": 4,
+      "exitCode": 0
+    },
+    "regression": {
+      "command": "npm.cmd test -- <上轮 19 文件验收范围> tests/v2FirstSlice.test.ts tests/v2MissionProtocol.test.ts tests/v2ModelProtocol.test.ts tests/missionRuntime.test.ts tests/missionNativeContract.test.ts tests/missionWaitNotice.test.ts tests/missionModelProtocol.test.ts tests/missionProtocolRecovery.integration.test.ts tests/missionContinuation.test.ts tests/agentUxWorkState.test.ts tests/agentUxJourney.test.ts tests/missionPanel.test.ts tests/ux3ThreeDayContinuity.test.ts tests/ux3ResponsibilityRevision.test.ts tests/continuityIntent.test.ts tests/continuityStages23.test.ts tests/continuitySuppression.test.ts tests/conversationAnchor.test.ts tests/conversationAnchorContract.test.ts tests/skillRouter.test.ts tests/v2Journey.test.ts tests/v2DelegationEntry.test.ts",
+      "files": 22,
+      "tests": 185,
+      "exitCode": 0,
+      "log": "regression.log"
+    },
+    "fullSuite": {
+      "command": "npm.cmd test（先对 prisma/test-vitest.db 执行 prisma migrate deploy 初始化共享测试库）",
+      "files": 265,
+      "tests": 2077,
+      "exitCode": 0,
+      "log": "full-tests.log"
+    },
+    "types": {
+      "command": "npm.cmd exec tsc -- --noEmit",
+      "exitCode": 0,
+      "log": "tsc.log"
+    },
+    "lint": {
+      "command": "npm.cmd exec eslint -- lib/skills lib/evaluation lib/mission/v2DelegationService.ts lib/mission/missionService.ts lib/mission/workbenchService.ts lib/types/workbench.ts components/v2 app/v2 app/api/projects scripts/eval-routes.ts scripts/eval-v2.ts scripts/v2-entry-demo.ts scripts/verify-v2-entry.ts tests/skillRouter.test.ts tests/v2Journey.test.ts tests/v2DelegationEntry.test.ts tests/v2FirstSlice.test.ts",
+      "exitCode": 0,
+      "log": "eslint.log"
+    },
+    "build": {
+      "command": "NEXT_DIST_DIR=.next-v2-build + isolated synthetic DATABASE_URL, LLM_MODE=mock: npm.cmd run build -- --webpack",
+      "exitCode": 0,
+      "log": "build.log"
+    }
+  },
+  "invariants": {
+    "oneTimeBoundedPermission": "预览展示期限/预算/允许工具与排除能力；确认后写入 continuationPolicyJson（BOUNDED_INVESTIGATION）",
+    "noAuthorityExpansion": "allowedTools 仅 read_project_material / save_mission_output / inspect_project；无联网、公开研究、业务写入、自动外发",
+    "atomicConfirmation": "材料 Capture、v2 Mission、许可与 V2_DELEGATION_CONFIRMED 回执同一事务；requestId 幂等",
+    "previewWritesNothing": "预览前后 Capture/AgentMission 计数不变（测试断言）",
+    "versionEvidenceProcessRetained": "沿用 OutcomeWorkbench：版本切换、修改对照、原始依据、过程事件、暂停/结束入口",
+    "testProviderNotInProductApi": "确认接口不接受 provider 参数；本地模型只通过部署环境变量选择",
+    "workerWakePath": "新材料经既有 processInvestigationDelegations 扫描器唤醒同一 Mission（contextVersion 递增）"
+  },
+  "migration": {
+    "newMigrations": 0
+  },
+  "remaining": [
+    "真实模型下的完整托付质量需授权后以 --provider=live 验收",
+    "HarmonyOS/HAP 未构建；本切片无 ArkTS 契约改动",
+    "生产滚动升级与旧 Worker 混跑未验证，V2 保持关闭"
+  ]
+}

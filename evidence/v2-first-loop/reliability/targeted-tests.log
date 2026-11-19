@@ -1,0 +1,33 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2ContinuityReliability.test.ts tests/v2FaultInjection.test.ts tests/v2ControlConcurrency.test.ts tests/v2RuntimeReliability.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ✓ tests/v2FaultInjection.test.ts (8 tests) 27101ms
+   ✓ crash after read: a new process resumes the same Mission and reaches the next checkpoint  4692ms
+   ✓ crash before output commit: restart re-runs the unfinished step and commits one revision  4527ms
+   ✓ crash after receipt commit: restart scans never re-trigger the delivered output  3558ms
+   ✓ two worker processes racing one READY mission: exactly one claims and writes once  3003ms
+   ✓ a second process recovers the delivery of 这次只做计划，报告不要动  2831ms
+   ✓ a second process recovers the delivery of 先研究，不开始写报告  2800ms
+   ✓ a second process recovers the delivery of 只复盘，不创建行动  2825ms
+   ✓ a second process recovers the delivery of 整理持续报告  2855ms
+ ✓ tests/v2RuntimeReliability.test.ts (5 tests) 4168ms
+   ✓ clock advance: the next observation is only woken once nextAttemptAt is due  376ms
+   ✓ long-run harness: start --wait, status and report produce wall-clock evidence  3423ms
+ ✓ tests/v2ContinuityReliability.test.ts (5 tests) 3093ms
+   ✓ identical content re-upload does not wake the mission or consume model budget  826ms
+   ✓ 100 repeated scans with no new information produce no dispatch, draft or budget change  770ms
+   ✓ one real content change wakes once, produces one revision, and never loops on its own delivered output  1009ms
+ ✓ tests/v2ControlConcurrency.test.ts (7 tests) 2036ms
+   ✓ new material arriving concurrently with pause never dispatches after the stop  393ms
+   ✓ a redirect directive racing a new material wake produces one revision with the new objective bound  315ms
+   ✓ long-running cycles settle reservations, known usage and unknown calls without resetting budgets  810ms
+
+ Test Files  4 passed (4)
+      Tests  25 passed (25)
+   Start at  09:05:48
+   Duration  41.94s (transform 1.55s, setup 0ms, import 4.57s, tests 36.40s, environment 0ms)
+

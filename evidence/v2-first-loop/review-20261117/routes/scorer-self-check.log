@@ -1,0 +1,14 @@
+{
+  "status": "DATASET_AND_SCORER_SELF_CHECK_PASSED",
+  "cases": 64,
+  "groups": {
+    "planning": 12,
+    "research": 12,
+    "creation": 12,
+    "review": 12,
+    "chain": 8,
+    "negative": 8
+  },
+  "routerExecuted": false,
+  "modelCalls": 0
+}

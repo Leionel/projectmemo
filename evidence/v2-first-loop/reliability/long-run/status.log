@@ -1,0 +1,38 @@
+{
+  "out": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\evidence\\v2-first-loop\\reliability\\long-run",
+  "workerPid": null,
+  "stopRequestedAt": null,
+  "mission": {
+    "status": "READY",
+    "pauseReason": null,
+    "budgetUsedJson": "{\"models\":8,\"tools\":6,\"searches\":0,\"fetches\":0,\"browserRequests\":0,\"browserBytes\":0,\"calendarRequests\":0,\"externalWrites\":0,\"metadataRequests\":0,\"activeMs\":13,\"reservedOutputTokens\":0,\"inputTokens\":80,\"outputTokens\":40,\"unknownCalls\":0}",
+    "version": 20,
+    "contextVersion": 4,
+    "planRevision": 4,
+    "updatedAt": "2026-11-17T00:53:08.444+00:00"
+  },
+  "outputs": {
+    "c": 3,
+    "latest": 3
+  },
+  "checkpoints": {
+    "c": 2
+  },
+  "evidenceLines": 10,
+  "lastEvidence": {
+    "at": "2026-11-17T00:53:08.445Z",
+    "cycle": 9,
+    "materialAdded": false,
+    "woken": 0,
+    "status": "READY",
+    "pauseReason": null,
+    "outputs": 3,
+    "artifacts": 0,
+    "models": 8,
+    "tools": 6,
+    "reservedOutputTokens": 0,
+    "inputTokens": 80,
+    "outputTokens": 40,
+    "unknownCalls": 0
+  }
+}

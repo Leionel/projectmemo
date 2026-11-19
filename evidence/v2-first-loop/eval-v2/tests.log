@@ -1,0 +1,29 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2FirstSlice.test.ts tests/v2MissionProtocol.test.ts tests/v2ModelProtocol.test.ts tests/skillRouter.test.ts tests/v2Journey.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ✓ tests/v2FirstSlice.test.ts (12 tests) 7648ms
+   ✓ 独立开发版本: persisted research→creation, restart, new material and same-Mission draft v2  1065ms
+   ✓ 客户交付项目: persisted research→creation, restart, new material and same-Mission draft v2  970ms
+   ✓ 科研实验汇报: persisted research→creation, restart, new material and same-Mission draft v2  928ms
+   ✓ 学生课程项目: persisted research→creation, restart, new material and same-Mission draft v2  816ms
+   ✓ natural compound veto persists through original Conversation/Directive services  918ms
+   ✓ bounded literal objective redirects v2 immediately without changing authority or resetting usage  780ms
+   ✓ natural continue never revives a deliberately paused v2 Mission  446ms
+   ✓ workbench reads frozen versions without writes, rejects outsiders and withholds suppressed material  977ms
+ ✓ tests/v2Journey.test.ts (2 tests) 1881ms
+   ✓ continuous revision journey: first draft, new material, restriction, redirect, delivered versions and pause  1381ms
+   ✓ pause and cancel end dispatch while delivered versions stay readable  490ms
+ ✓ tests/skillRouter.test.ts (5 tests) 884ms
+   ✓ frozen 64 routing cases are answered from real isolated fixture records  865ms
+ ✓ tests/v2MissionProtocol.test.ts (6 tests) 762ms
+ ✓ tests/v2ModelProtocol.test.ts (2 tests) 18ms
+
+ Test Files  5 passed (5)
+      Tests  27 passed (27)
+   Start at  20:05:33
+   Duration  16.67s (transform 2.00s, setup 0ms, import 4.36s, tests 11.19s, environment 0ms)
+

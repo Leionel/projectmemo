@@ -1,5 +1,6 @@
 "use client";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, BookOpen, CalendarDays, FileText, GitBranch, Globe2, Info } from "lucide-react";
+import { evidenceTime } from "@/lib/client/sourceDisplay";
 import type { ConversationMessage } from "@/lib/types/conversation";
 import { conversationHref } from "@/lib/conversation/navigation";
 import { researchReadLevelLabel } from "@/lib/conversation/researchLabels";
@@ -25,6 +26,8 @@ function collectEntries(message: ConversationMessage, conversationId: string): S
     if (file.external) meta.push(researchReadLevelLabel(file.external.readLevel) + " · 抓取于 " + file.external.fetchedAt.slice(0, 10) +
       (file.external.publishedAt ? " · 发布于 " + file.external.publishedAt.slice(0, 10) : "") + (file.external.truncated ? " · 已截断" : ""));
     if (file.document) meta.push((file.document.pages.length ? `原件物理第 ${file.document.pages[0]} 页` : "校对文本或文件目录") + (file.document.kind === "TABLE" ? " · 表头待核对" : ""));
+    const observedAt = file.document?.observedAt ?? message.sources.find(source => source.sourceId === file.sourceId)?.observedAt;
+    if (observedAt && !file.external) meta.push("读取于 " + evidenceTime(observedAt));
     if (file.calendar) meta.push("飞书日历只读 · " + file.calendar.calendarSummary + " · " + file.calendar.eventStatus +
       " · " + (file.calendar.startAt?.slice(0, 16).replace("T", " ") ?? file.calendar.startDate ?? "") +
       (file.calendar.window.complete ? "" : " · 本次窗口未完整读取"));
@@ -38,8 +41,9 @@ function collectEntries(message: ConversationMessage, conversationId: string): S
   for (const source of message.sources) {
     if (known.has(source.sourceId)) continue;
     const kind: SourceEntryKind = source.repository ? "CI 观察" : source.calendar ? "日历来源" : source.external ? "网页引用" : source.document ? "文档与附件" : "项目记录";
-    const meta: string[] = [source.temporalState, new Date(source.observedAt).toLocaleString("zh-CN")];
-    if (source.repository) meta.push(source.repository.repo + " · " + source.repository.sha.slice(0, 10) + " · " +
+    const state = ({ CURRENT: "当前记录", SUPERSEDED: "此前版本", CONTESTED: "存在争议", UNKNOWN: "状态待核对" } as Record<string, string>)[source.temporalState] ?? "状态待核对";
+    const meta: string[] = [state, evidenceTime(source.observedAt)];
+    if (source.repository) meta.push(source.repository.repo + "，" +
       (source.repository.kind === "LOG" ? "脱敏日志片段" : source.repository.kind === "JOBS" ? "任务列表" : "CI 状态"));
     entries.push({ key: source.sourceId, kind, title: source.title, meta: meta.join(" · "), body: source.excerpt, notice: "",
       href: source.repository ? `https://github.com/${source.repository.repo}/commit/${source.repository.sha}` : undefined, externalLink: !!source.repository,
@@ -63,12 +67,13 @@ export function SourcePanelDialog({ open, onClose, message, conversationId }: {
       {sourceEntryKinds.map(kind => {
         const rows = entries.filter(e => e.kind === kind);
         if (!rows.length) return null;
+        const Icon = kind === "网页引用" ? Globe2 : kind === "CI 观察" ? GitBranch : kind === "日历来源" ? CalendarDays : kind === "项目成果" ? BookOpen : FileText;
         return <section key={kind} className={styles.sourceGroup}>
-          <p className={styles.sourceGroupTitle}>{kind} {rows.length}</p>
+          <p className={styles.sourceGroupTitle}><Icon size={16} aria-hidden="true" />{kind} {rows.length}</p>
           {rows.map(e => <article key={e.key} className={styles.sourceCard}>
             <header><strong>{e.title}</strong>{e.notice && <span className={styles.sourceFlag}>{e.notice.includes("不可用") ? "已失效" : "已修订"}</span>}</header>
             {e.notice && <p className={styles.sourceNotice}>{e.notice}</p>}
-            <p className={styles.sourceMeta}>{e.meta}</p>
+            <p className={styles.sourceMeta}><Info size={14} aria-hidden="true" /><span>{e.meta}</span></p>
             <blockquote>{e.body}</blockquote>
             {e.href && e.linkLabel && <a className="workspace-link focus-ring" href={e.href} target={e.externalLink ? "_blank" : undefined}
               rel={e.externalLink ? "noopener noreferrer" : undefined}>{e.linkLabel} <ArrowUpRight size={13} aria-hidden="true"/></a>}

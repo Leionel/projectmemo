@@ -1,0 +1,28 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2FirstSlice.test.ts tests/v2MissionProtocol.test.ts tests/v2ModelProtocol.test.ts tests/skillRouter.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ✓ tests/v2FirstSlice.test.ts (12 tests) 9657ms
+   ✓ 独立开发版本: persisted research→creation, restart, new material and same-Mission draft v2  1747ms
+   ✓ 客户交付项目: persisted research→creation, restart, new material and same-Mission draft v2  1116ms
+   ✓ 科研实验汇报: persisted research→creation, restart, new material and same-Mission draft v2  1080ms
+   ✓ 学生课程项目: persisted research→creation, restart, new material and same-Mission draft v2  1063ms
+   ✓ natural compound veto persists through original Conversation/Directive services  1150ms
+   ✓ bounded literal objective redirects v2 immediately without changing authority or resetting usage  972ms
+   ✓ responsibility correction fences a late model result and retains its usage  367ms
+   ✓ literal correction fences a late model result and retains its usage  314ms
+   ✓ natural continue never revives a deliberately paused v2 Mission  511ms
+   ✓ workbench reads frozen versions without writes, rejects outsiders and withholds suppressed material  1033ms
+ ✓ tests/skillRouter.test.ts (5 tests) 877ms
+   ✓ frozen 64 routing cases are answered from real isolated fixture records  860ms
+ ✓ tests/v2MissionProtocol.test.ts (6 tests) 747ms
+ ✓ tests/v2ModelProtocol.test.ts (2 tests) 19ms
+
+ Test Files  4 passed (4)
+      Tests  25 passed (25)
+   Start at  19:49:30
+   Duration  17.30s (transform 2.69s, setup 0ms, import 5.16s, tests 11.30s, environment 0ms)
+

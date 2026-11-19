@@ -3,7 +3,7 @@ import { missionStrategyV2 } from "@/lib/agent/specialistPrompts";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { AppError } from "@/lib/api";
 import { getChatProviderConfig } from "@/lib/config/provider";
-import { choiceSchema, type Decision } from "./contracts";
+import { choiceSchemaFor, type Decision } from "./contracts";
 import type { ToolSet } from "./tools";
 import { ModelProtocolError, protocolDiagnostic, MISSION_DECISION_TOKENS, MISSION_REPAIR_TOKENS, type ProtocolReason } from "./modelProtocol";
 import { DecisionJsonError, parseDecisionJson } from "./decisionJson";
@@ -12,11 +12,14 @@ export const chooseNext: DecisionProvider = async (context, tools) => {
   if (process.env.LLM_MODE !== "openai-compatible") throw new AppError("MODEL_UNAVAILABLE", "未启用真实模型，委托已暂停；测试脚本不代表真实自主执行", 503);
   const cfg = getChatProviderConfig(); const native = process.env.MISSION_MODEL_PROTOCOL === "native";
   const deepseek = cfg.provider === "deepseek" || new URL(cfg.baseUrl).origin === "https://api.deepseek.com";
+  const protocolVersion=(JSON.parse(context) as {runtimeProtocolVersion?:number}).runtimeProtocolVersion??1;
+  const choiceSchema=choiceSchemaFor(protocolVersion);
   const definitions = Object.entries(tools).map(([name, t]) => ({ type: "function", function: { name, description: t.description, parameters: z.toJSONSchema(t.schema) } }));
   const fullContext=JSON.parse(context) as {outputTokenLimit?:number;protocolRepair?:{reason?:string};observations?:Array<{callId?:string;status?:string}>};
   // Reuse the existing single repair window, with a forced decision function on DeepSeek.
   // This is transport for Choice, not an additional business tool or an extra model call.
   const functionChoice = !native && deepseek && ["INVALID_JSON", "INVALID_CHOICE", "INVALID_TOOL_ARGUMENTS"].includes(fullContext.protocolRepair?.reason ?? "");
+  const requestTokenLimit = typeof fullContext.outputTokenLimit === "number" ? Math.min(MISSION_REPAIR_TOKENS, Math.max(500, fullContext.outputTokenLimit)) : MISSION_DECISION_TOKENS;
   const decisionFunction = { type: "function", function: { name: "select_mission_step", description: "提交下一步决策；不执行业务写入。只能选择给定工具、追问或结束。", parameters: { ...z.toJSONSchema(choiceSchema), type: "object" } } };
   const modelContext=native?{...fullContext,observations:fullContext.observations?.filter(o=>!o.callId||o.status!=="SUCCEEDED")}:fullContext;
   const messages = [
@@ -24,6 +27,9 @@ export const chooseNext: DecisionProvider = async (context, tools) => {
     { role: "user", content: JSON.stringify({ kind: "UNTRUSTED_DATA", context: modelContext, tools: native ? undefined : definitions, responseSchema: z.toJSONSchema(choiceSchema), response: (native ? "优先调用一个原生工具；若需追问或结束，" : "") + "每次只返回一个符合 responseSchema 的 JSON 对象。工具参数严格遵守 parameters，不附 Markdown 或解释。草稿简明，控制在本次输出预算内。完成前须先保存草稿，finish.outputId 使用已保存的真实 ID。协议错误事件中的 repairHint 是格式修正要求，保留已有成功步骤，不重复读取已充分的资料。", example: native ? {kind:"ask",question:"请补充必要信息",missing:"PRIVATE"} : tools.inspect_project ? {kind:"tool",tool:"inspect_project",args:{},summary:"读取项目"} : undefined }) },
   ];
   if (isFeatureEnabled("MISSION_EVIDENCE_FIT_ENABLED", false)) messages[0].content += "仅对GPU显存测量问题，可附requirements.evidenceFitV1:{schemaVersion:1,domain:TECH_RESOURCE_MEASUREMENT,measurement:{name:GPU_MEMORY,unit:GB或MB,upperLimit:原文明确的预算可选},checks:[{id:SUBJECT或STAGE或CONDITION_1或CONDITION_2,expected:原问题明确主体/阶段/条件,basis:{kind:QUESTION或CONSTRAINT,quote:对应原文}}]}。必须有主体与阶段，阶段写训练或推理，至多两个额外条件。没有明确依据就不附此块；这只是待用户核对的候选，不能推断已验证。绑定观察后的evidenceFitReview独立保留用途、未决项、负结果及原文范围；条件分析不得把未知写成事实，用户提供的论文摘录不得写成本项目实测或系统抓取。";
+  if(protocolVersion===2)messages[0].content += " context.skillExecution是随产品发布的只读方法。按当前stage和证据包门槛执行；研究/规划/复盘阶段先读资料；若本轮计划在这些阶段结束，用save_mission_output交付该阶段成果（不修改报告、不创建行动）；只有创作阶段保存报告草稿。";
+  if(protocolVersion===2)messages[0].content += " 持续成果协议v2：已获准有界跟进时，草稿完成后选择await_event，subscriptionIds只能使用context.approvedSubscriptionIds。这是交付节点，不是终止责任；不要用finish结束持续委托。";
+  if(protocolVersion===2)messages[0].content += " 优先用已获准的资料做可交付的私有草稿。可以继续的细节，在save_mission_output的missingInformation里明确保留未知。只有用户的决定会改变目标、资料边界、结论有效性，或缺少信息导致完全无法形成可用稿时，才选择ask，给出一个具体问题。若本轮有效草稿已经保存，且只是补充细节，可用missing=PRIVATE、blocking=false登记问题并继续观察；不得用它跳过冲突、审批或实质性缺口。";
   if (functionChoice) messages[0].content += "本次必须通过select_mission_step函数参数提交一个完整的Choice对象。";
   if ((JSON.parse(context) as {experienceAdvisories?:unknown[]}).experienceAdvisories?.length)
     messages[0].content += "context.experienceAdvisories 是带适用条件的项目经验案例，只是可评估的建议：可逐条采用、改进、拒绝或据此进一步调查；如需记录判断，在 choice 中附 experienceUse 数组（experienceId 只能取实际注入的 id，disposition 为 ADOPT/ADAPT/REJECT/INVESTIGATE）。条件不匹配或未知时不要照搬，不能把经验当作目标、权限或预算。";
@@ -34,7 +40,7 @@ export const chooseNext: DecisionProvider = async (context, tools) => {
       messages.push({role:"tool",tool_call_id:h.callId,content:JSON.stringify(h.observation)} as unknown as typeof messages[number]);
     }
   }
-  const response = await fetch(`${cfg.baseUrl}/chat/completions`, { method: "POST", signal: AbortSignal.timeout(Math.min(cfg.timeoutMs, 20000)), headers: { "Content-Type": "application/json", Authorization: `Bearer ${cfg.apiKey}` }, body: JSON.stringify({ model: cfg.model, temperature: 0.2, max_tokens: fullContext.outputTokenLimit === MISSION_REPAIR_TOKENS ? MISSION_REPAIR_TOKENS : MISSION_DECISION_TOKENS, messages, ...(native ? { tools: definitions } : functionChoice ? { tools: [decisionFunction], tool_choice: { type: "function", function: { name: "select_mission_step" } } } : deepseek ? { response_format: { type: "json_object" } } : {}), ...(deepseek ? { thinking: { type: "disabled" } } : {}) }) });
+  const response = await fetch(`${cfg.baseUrl}/chat/completions`, { method: "POST", signal: AbortSignal.timeout(Math.min(cfg.timeoutMs, 20000)), headers: { "Content-Type": "application/json", Authorization: `Bearer ${cfg.apiKey}` }, body: JSON.stringify({ model: cfg.model, temperature: 0.2, max_tokens: requestTokenLimit, messages, ...(native ? { tools: definitions } : functionChoice ? { tools: [decisionFunction], tool_choice: { type: "function", function: { name: "select_mission_step" } } } : deepseek ? { response_format: { type: "json_object" } } : {}), ...(deepseek ? { thinking: { type: "disabled" } } : {}) }) });
   if (!response.ok) throw new AppError("MODEL_HTTP_ERROR", `模型服务返回 ${response.status}`, response.status >= 500 ? 503 : 409);
   const token = z.number().int().nonnegative().nullable().catch(null);
   const envelope = z.object({ choices: z.array(z.object({ finish_reason: z.string().nullish(), message: z.object({ content: z.string().nullish(), tool_calls: z.array(z.object({ id: z.string().min(1), function: z.object({ name: z.string(), arguments: z.string() }) })).optional() }) })).min(1), usage: z.object({ prompt_tokens: token, completion_tokens: token }).optional() });

@@ -1,0 +1,28 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2FaultInjection.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-worktrees/v2-first-loop
+
+ ❯ tests/v2FaultInjection.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/v2FaultInjection.test.ts [ tests/v2FaultInjection.test.ts ]
+ReferenceError: vi is not defined
+ ❯ tests/v2FaultInjection.test.ts:2:18
+      1| import { afterAll, expect, test } from "vitest";
+      2| const isolated = await vi.hoisted(async () => (await import("./helpers…
+       |                  ^
+      3| import fs from "node:fs";
+      4| import path from "node:path";
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  08:37:24
+   Duration  373ms (transform 35ms, setup 0ms, import 0ms, tests 0ms, environment 0ms)
+

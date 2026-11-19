@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/agentUxWorkState.test.ts tests/agentUxJourney.test.ts tests/goalQuestion.test.ts tests/missionContinuation.test.ts tests/ux3ThreeDayContinuity.test.ts tests/missionPanel.test.ts
+
+
+ RUN  v4.1.10 C:/Users/Administrator/.codex/worktrees/v2-first-loop/hongmen
+
+
+ Test Files  5 passed (5)
+      Tests  38 passed (38)
+   Start at  18:04:35
+   Duration  14.22s (transform 2.85s, setup 0ms, import 6.90s, tests 4.15s, environment 2.25s)
+

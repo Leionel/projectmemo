@@ -1,0 +1,12 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/v2FirstSlice.test.ts tests/continuityStages23.test.ts tests/continuitySuppression.test.ts tests/continuityIntent.test.ts tests/agentUxWorkState.test.ts tests/ux3ResponsibilityRevision.test.ts
+
+
+ RUN  v4.1.10 C:/Users/Administrator/.codex/worktrees/v2-first-loop/hongmen
+
+
+ Test Files  6 passed (6)
+      Tests  50 passed (50)
+   Start at  18:38:13
+   Duration  15.78s (transform 3.33s, setup 0ms, import 8.19s, tests 6.20s, environment 0ms)

@@ -1,10 +1,11 @@
 "use client";
+import { BookmarkSpiritIcon } from "./mascot/BookmarkSpiritIcon";
 import {CalendarProposalPreview} from "./CalendarEventApproval";
 import {projectHref} from "@/lib/projectNavigation";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Bot, Check, ChevronDown, CircleAlert, LoaderCircle, Send } from "lucide-react";
+import { Check, ChevronDown, CircleAlert, LoaderCircle, Send } from "lucide-react";
 import type {
   AgentChatResponse,
   AgentCitation,
@@ -188,7 +189,7 @@ function ProjectCopilot({projectId,historyOnly}:{projectId:string;historyOnly:bo
 
   return <section id="memory-copilot" className="card-surface scroll-mt-24 overflow-hidden rounded-lg">
     <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} className="focus-ring flex w-full items-center justify-between gap-3 p-5 text-left sm:p-6">
-      <span className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-md bg-[var(--navy)] text-white"><Bot size={20} /></span><span><span className="block text-sm font-black text-[var(--navy)]">问忆程</span><span className="mt-0.5 block text-xs text-[var(--ink-soft)]">逐条核验依据；写入行动或成果前由你确认</span></span></span>
+      <span className="flex items-center gap-3"><BookmarkSpiritIcon size={40} /><span><span className="block text-sm font-black text-[var(--navy)]">问忆程</span><span className="mt-0.5 block text-xs text-[var(--ink-soft)]">逐条核验依据；写入行动或成果前由你确认</span></span></span>
       <ChevronDown size={18} className={`transition ${open ? "rotate-180" : ""}`} />
     </button>
     {open && <div className="border-t archive-rule p-5 sm:p-6">

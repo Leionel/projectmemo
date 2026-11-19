@@ -1,0 +1,118 @@
+{
+  "provider": "live",
+  "executed": true,
+  "executedAt": "2026-11-16T22:12:00+08:00",
+  "model": "deepseek-flash",
+  "command": "node --env-file=\"D:\\Projects\\hongmen\\.env\" --import tsx scripts/eval-v2.ts --provider=live --confirm-paid --max-models=20 --max-tokens=200000 --out evidence/v2-first-loop/eval-v2/live4",
+  "authorization": "用户明确指示继续真实模型复验、不受上一轮上限限制",
+  "result": {
+    "protocolPassed": 40,
+    "protocolTotal": 40,
+    "contentPassed": 24,
+    "contentTotal": 24,
+    "decisionCalls": 38,
+    "tokens": 440918,
+    "exitCode": 0
+  },
+  "journeys": {
+    "developer": {
+      "versions": 3,
+      "redirectFocusInDraft": true,
+      "ending": "PAUSED",
+      "failures": []
+    },
+    "freelancer": {
+      "versions": 3,
+      "redirectFocusInDraft": true,
+      "ending": "CANCELLED",
+      "failures": []
+    },
+    "research": {
+      "versions": 4,
+      "redirectFocusInDraft": true,
+      "ending": "PAUSED",
+      "failures": []
+    },
+    "course": {
+      "versions": 4,
+      "redirectFocusInDraft": true,
+      "ending": "CANCELLED",
+      "failures": []
+    }
+  },
+  "toolBoundary": {
+    "externalRead": 0,
+    "externalWrite": 0,
+    "businessWrite": 0,
+    "allowed": [
+      "inspect_project",
+      "read_project_material",
+      "save_mission_output"
+    ]
+  },
+  "fixesValidatedHere": [
+    "per-call output reservation released; long continuous mission no longer hits lifetime reservation",
+    "v2 decision output budget 3000 tokens (repair 4000), adapter honors context limit",
+    "v2 allows a second protocol repair",
+    "guided retry for method-gate rejection with requiredTool + sourcePointers",
+    "identical immediate draft deduped as OUTPUT_UNCHANGED",
+    "redirected/restricted new version states the current working objective in its first paragraph"
+  ],
+  "cumulativeLiveUsage": {
+    "runs": [
+      {
+        "name": "live",
+        "calls": 31,
+        "tokens": 327567,
+        "protocol": "34/40",
+        "content": "16/24"
+      },
+      {
+        "name": "live2",
+        "calls": 40,
+        "tokens": 481010,
+        "protocol": "34/40",
+        "content": "20/24"
+      },
+      {
+        "name": "live3",
+        "calls": 35,
+        "tokens": 401699,
+        "protocol": "34/40",
+        "content": "18/24"
+      },
+      {
+        "name": "live4",
+        "calls": 38,
+        "tokens": 440918,
+        "protocol": "40/40",
+        "content": "24/24"
+      }
+    ],
+    "totalCalls": 144,
+    "totalTokens": 1651194,
+    "balanceBeforeCny": 37.85,
+    "balanceAfterCny": 36.57,
+    "totalCostCnyApprox": 1.28
+  },
+  "remaining": [
+    "单次通过不代表所有场景稳定；模型输出仍有随机性",
+    "72h 真实时钟、断电恢复、真机/HAP、生产滚动升级未验",
+    "预算展示已变化（预留释放、v2 输出上限提升），实际模型/工具总量限制未放宽"
+  ],
+  "fixSemantics": {
+    "reservationRelease": "只在 runtimeProtocolVersion=2 的成功结算中释放每次调用的输出预留；v1 保留原“失败/未知成本按最坏值累计”的合同，失败路径不释放",
+    "protocolRepair": "v1 仍一次修复；v2 允许两次（本次实模通过的代码路径）",
+    "v2DecisionOutputTokens": 3000,
+    "redirectDraftRule": "改道/受限后的新版本首段必须写出当前工作重点原话",
+    "duplicateDraft": "内容与来源完全相同的连续保存返回上一版并记 OUTPUT_UNCHANGED"
+  },
+  "validation": {
+    "fullTests": "见 full-tests.log（最终代码：全量 vitest）",
+    "offlineFixture": "protocol 40/40, content 24/24",
+    "offlineHttp": "protocol 40/40, content 24/24",
+    "frozenRouting": "routing 64/64 mode/primary/sequence, safety 0, critical 0, full-pass 39/64 (25 content checks unproven offline by design)",
+    "tsc": "见 tsc.log",
+    "eslint": "见 eslint.log"
+  }
+}

@@ -1,0 +1,9 @@
+{"type":"START","pid":38712,"at":1794913510638}
+{"type":"SLICE","missionId":"cmwkl5r57000mz48op7r4opa2","begin":1794913511101,"at":1794913511285,"outputs":1}
+{"type":"SLICE","missionId":"cmwkl5r63000yz48oyktsb17h","begin":1794913511287,"at":1794913511362,"outputs":1}
+{"type":"SLICE","missionId":"cmwkl5r7f001gz48osufg8va4","begin":1794913511363,"at":1794913511451,"outputs":0}
+{"type":"SLICE","missionId":"cmwkl5r2g0004z48oxskjvopm","begin":1794913511483,"at":1794913511553,"outputs":1}
+{"type":"SLICE","missionId":"cmwkl5r57000mz48op7r4opa2","begin":1794913511554,"at":1794913511618,"outputs":1}
+{"type":"SLICE","missionId":"cmwkl5r63000yz48oyktsb17h","begin":1794913511620,"at":1794913511669,"outputs":1}
+{"type":"SLICE","missionId":"cmwkl5r7f001gz48osufg8va4","begin":1794913511670,"at":1794913511732,"outputs":1}
+{"type":"EXIT","pid":38712,"at":1794913511920}

@@ -62,11 +62,11 @@ export async function readConversationWork(actor: ConversationActor, id: string,
   }
   const m = await ownedMission(actor.userId, ref.id);
   const [q, approval, output, scenario, candidates] = await Promise.all([
-    m.status === "WAITING_INPUT" ? db.agentMissionEvent.findFirst({ where: { missionId: m.id, type: "QUESTION" }, orderBy: { seq: "desc" } }) : null,
+    m.status === "WAITING_INPUT" && record(m.waitStateJson).waitingFor !== "OBSERVATION" ? db.agentMissionEvent.findFirst({ where: { missionId: m.id, type: "QUESTION" }, orderBy: { seq: "desc" } }) : null,
     m.status === "WAITING_APPROVAL" ? db.agentMissionApproval.findFirst({ where: { missionId: m.id, status: "PENDING" }, orderBy: { id: "desc" } }) : null,
     db.agentMissionOutput.findFirst({ where: { missionId: m.id }, orderBy: { revision: "desc" } }),
     latestScenario(actor, m.id),
-    m.status === "WAITING_INPUT" && typeof record(m.waitStateJson).questionId === "string" ? listContinuationCandidates(actor.userId, m.id, { questionId: record(m.waitStateJson).questionId, includeExisting: "1" }) : { candidates: [] },
+    m.status === "WAITING_INPUT" && record(m.waitStateJson).waitingFor !== "OBSERVATION" && typeof record(m.waitStateJson).questionId === "string" ? listContinuationCandidates(actor.userId, m.id, { questionId: record(m.waitStateJson).questionId, includeExisting: "1" }) : { candidates: [] },
   ]);
   await requireWork(actor, id, ref);
   const args = record(record(approval?.proposalJson).args);

@@ -1,0 +1,159 @@
+V2 entry demo control: http://127.0.0.1:4421 (synthetic DB: C:\Users\ADMINI~1\AppData\Local\Temp\pm-v2-entry-Ly0BsQ\entry.db)
+▲ Next.js 16.2.11 (webpack)
+- Local:         http://127.0.0.1:4420
+- Network:       http://127.0.0.1:4420
+✓ Ready in 738ms
+
+○ Compiling /projects/[id] ...
+ GET /projects/cmwj972u50002ok8objrieg8t 200 in 6.0s (next.js: 5.2s, application-code: 796ms)
+ GET /api/auth/me 200 in 545ms (next.js: 501ms, application-code: 44ms)
+ GET /api/auth/me 200 in 547ms (next.js: 504ms, application-code: 43ms)
+ GET /api/auth/me 200 in 17ms (next.js: 5ms, application-code: 12ms)
+ POST /api/projects/cmwj972u50002ok8objrieg8t/v2-delegation/preview 200 in 1292ms (next.js: 1264ms, application-code: 27ms)
+ GET /projects/cmwj972u50002ok8objrieg8t 200 in 279ms (next.js: 79ms, application-code: 200ms)
+ POST /api/projects/cmwj972u50002ok8objrieg8t/v2-delegation/confirm 201 in 3.9s (next.js: 3.8s, application-code: 68ms)
+⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /v2/workbench?missionId=cmwj97qwy0003r48owply7zth 200 in 651ms (next.js: 488ms, application-code: 163ms)
+ GET /api/auth/me 200 in 48ms (next.js: 36ms, application-code: 12ms)
+ GET /api/auth/me 200 in 16ms (next.js: 4ms, application-code: 11ms)
+ GET /api/missions/cmwj97qwy0003r48owply7zth/workbench 200 in 1326ms (next.js: 1296ms, application-code: 30ms)
+ GET /api/missions/cmwj97qwy0003r48owply7zth/workbench 200 in 30ms (next.js: 12ms, application-code: 18ms)
+ GET /api/missions/cmwj97qwy0003r48owply7zth/workbench 200 in 23ms (next.js: 2ms, application-code: 21ms)
+ GET /api/missions/cmwj97qwy0003r48owply7zth/workbench 200 in 42ms (next.js: 17ms, application-code: 25ms)
+ GET /api/missions/cmwj97qwy0003r48owply7zth/workbench 200 in 26ms (next.js: 2ms, application-code: 24ms)
+ POST /api/conversations 200 in 580ms (next.js: 553ms, application-code: 27ms)
+ GET /api/conversations/cmwj97wel0007r48ob2e0vkah 200 in 1333ms (next.js: 1300ms, application-code: 32ms)
+⚠ ./lib/browser/reader.ts
+module.createRequire failed parsing argument.
+
+Import trace for requested module:
+./lib/browser/reader.ts
+./lib/conversation/investigationService.ts
+./lib/conversation/turnService.ts
+./app/api/conversations/[id]/turns/route.ts
+
+./lib/browser/reader.ts
+module.createRequire failed parsing argument.
+
+Import trace for requested module:
+./lib/browser/reader.ts
+./lib/conversation/investigationService.ts
+./lib/conversation/turnService.ts
+./app/api/conversations/[id]/turns/route.ts
+ GET /api/missions/cmwj97qwy0003r48owply7zth/workbench 200 in 788ms (next.js: 750ms, application-code: 38ms)
+ GET /v2/workbench?missionId=cmwj97qwy0003r48owply7zth 200 in 69ms (next.js: 20ms, application-code: 49ms)
+ POST /api/conversations/cmwj97wel0007r48ob2e0vkah/turns 200 in 2.2s (next.js: 2.0s, application-code: 158ms)
+ GET /api/missions/cmwj97qwy0003r48owply7zth/workbench 200 in 39ms (next.js: 15ms, application-code: 24ms)
+ GET /api/missions/cmwj97qwy0003r48owply7zth/workbench 200 in 28ms (next.js: 2ms, application-code: 26ms)
+○ Compiling /api/conversations/[id]/turns ...
+ GET /api/missions/cmwj97qwy0003r48owply7zth/workbench 200 in 38ms (next.js: 9ms, application-code: 29ms)
+ GET /api/missions/cmwj97qwy0003r48owply7zth/workbench 200 in 31ms (next.js: 1916µs, application-code: 29ms)
+ GET /api/missions/cmwj97qwy0003r48owply7zth/workbench 200 in 31ms (next.js: 2ms, application-code: 29ms)
+⚠ ./lib/browser/reader.ts
+module.createRequire failed parsing argument.
+
+Import trace for requested module:
+./lib/browser/reader.ts
+./lib/conversation/investigationService.ts
+./lib/conversation/turnService.ts
+./app/api/conversations/[id]/turns/route.ts
+
+./lib/browser/reader.ts
+module.createRequire failed parsing argument.
+
+Import trace for requested module:
+./lib/browser/reader.ts
+./lib/conversation/investigationService.ts
+./lib/conversation/turnService.ts
+./app/api/conversations/[id]/turns/route.ts
+⚠ ./lib/browser/reader.ts
+module.createRequire failed parsing argument.
+
+Import trace for requested module:
+./lib/browser/reader.ts
+./lib/conversation/investigationService.ts
+./lib/conversation/turnService.ts
+./app/api/conversations/[id]/turns/route.ts
+
+./lib/browser/reader.ts
+module.createRequire failed parsing argument.
+
+Import trace for requested module:
+./lib/browser/reader.ts
+./lib/conversation/investigationService.ts
+./lib/conversation/turnService.ts
+./app/api/conversations/[id]/turns/route.ts
+ GET /api/missions/cmwj97qwy0003r48owply7zth 200 in 1510ms (next.js: 1488ms, application-code: 22ms)
+⚠ ./lib/browser/reader.ts
+module.createRequire failed parsing argument.
+
+Import trace for requested module:
+./lib/browser/reader.ts
+./lib/conversation/investigationService.ts
+./lib/conversation/turnService.ts
+./app/api/conversations/[id]/turns/route.ts
+
+./lib/browser/reader.ts
+module.createRequire failed parsing argument.
+
+Import trace for requested module:
+./lib/browser/reader.ts
+./lib/conversation/investigationService.ts
+./lib/conversation/turnService.ts
+./app/api/conversations/[id]/turns/route.ts
+⚠ ./lib/browser/reader.ts
+module.createRequire failed parsing argument.
+
+Import trace for requested module:
+./lib/browser/reader.ts
+./lib/conversation/investigationService.ts
+./lib/conversation/turnService.ts
+./app/api/conversations/[id]/turns/route.ts
+
+./lib/browser/reader.ts
+module.createRequire failed parsing argument.
+
+Import trace for requested module:
+./lib/browser/reader.ts
+./lib/conversation/investigationService.ts
+./lib/conversation/turnService.ts
+./app/api/conversations/[id]/turns/route.ts
+ GET /api/missions/cmwj97qwy0003r48owply7zth/workbench 200 in 52ms (next.js: 21ms, application-code: 31ms)
+ POST /api/missions/cmwj97qwy0003r48owply7zth/pause 202 in 1274ms (next.js: 1252ms, application-code: 21ms)
+ GET /api/missions/cmwj97qwy0003r48owply7zth/workbench 200 in 28ms (next.js: 2ms, application-code: 26ms)
+ GET /api/missions/cmwj97qwy0003r48owply7zth/workbench 200 in 29ms (next.js: 3ms, application-code: 26ms)
+ GET /api/missions/cmwj97qwy0003r48owply7zth 200 in 45ms (next.js: 28ms, application-code: 18ms)
+⚠ ./lib/browser/reader.ts
+module.createRequire failed parsing argument.
+
+Import trace for requested module:
+./lib/browser/reader.ts
+./lib/conversation/investigationService.ts
+./lib/conversation/turnService.ts
+./app/api/conversations/[id]/turns/route.ts
+
+./lib/browser/reader.ts
+module.createRequire failed parsing argument.
+
+Import trace for requested module:
+./lib/browser/reader.ts
+./lib/conversation/investigationService.ts
+./lib/conversation/turnService.ts
+./app/api/conversations/[id]/turns/route.ts
+⚠ ./lib/browser/reader.ts
+module.createRequire failed parsing argument.
+
+Import trace for requested module:
+./lib/browser/reader.ts
+./lib/conversation/investigationService.ts
+./lib/conversation/turnService.ts
+./app/api/conversations/[id]/turns/route.ts
+
+./lib/browser/reader.ts
+module.createRequire failed parsing argument.
+
+Import trace for requested module:
+./lib/browser/reader.ts
+./lib/conversation/investigationService.ts
+./lib/conversation/turnService.ts
+./app/api/conversations/[id]/turns/route.ts

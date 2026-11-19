@@ -1,0 +1,22 @@
+{
+  "waiting": {
+    "lines": 266,
+    "files": 96
+  },
+  "terminal": {
+    "lines": 341,
+    "files": 134
+  },
+  "finish": {
+    "lines": 42,
+    "files": 24
+  },
+  "continuation": {
+    "lines": 51,
+    "files": 14
+  },
+  "notifications": {
+    "lines": 123,
+    "files": 50
+  }
+}

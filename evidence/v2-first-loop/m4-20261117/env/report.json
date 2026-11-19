@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-17T07:20:18.296Z",
+  "node": "v24.16.0",
+  "npm": "unavailable",
+  "lockfileVersion": 3,
+  "packageCount": 879,
+  "declaredExact": 10,
+  "installedMismatches": [
+    {
+      "name": "@playwright/test",
+      "declared": "^1.56.0",
+      "installed": "1.61.1"
+    },
+    {
+      "name": "@prisma/adapter-better-sqlite3",
+      "declared": "7.10.1",
+      "installed": "7.8.0"
+    },
+    {
+      "name": "@prisma/client",
+      "declared": "7.10.1",
+      "installed": "7.8.0"
+    },
+    {
+      "name": "@tailwindcss/postcss",
+      "declared": "^4.1.0",
+      "installed": "4.3.2"
+    },
+    {
+      "name": "@testing-library/jest-dom",
+      "declared": "^6.9.0",
+      "installed": "6.9.1"
+    },
+    {
+      "name": "@testing-library/react",
+      "declared": "^16.3.0",
+      "installed": "16.3.2"
+    },
+    {
+      "name": "@types/better-sqlite3",
+      "declared": "^7.6.13",
+      "installed": "7.6.13"
+    },
+    {
+      "name": "@types/node",
+      "declared": "^24.0.0",
+      "installed": "24.13.3"
+    },
+    {
+      "name": "@types/nodemailer",
+      "declared": "^8.0.2",
+      "installed": "8.0.2"
+    },
+    {
+      "name": "@types/react",
+      "declared": "^19.2.0",
+      "installed": "19.2.17"
+    },
+    {
+      "name": "@types/react-dom",
+      "declared": "^19.2.0",
+      "installed": "19.2.3"
+    },
+    {
+      "name": "better-sqlite3",
+      "declared": "^12.4.1",
+      "installed": "12.11.1"
+    },
+    {
+      "name": "csv-parse",
+      "declared": "^7.0.3",
+      "installed": "7.0.3"
+    },
+    {
+      "name": "eslint-config-next",
+      "declared": "16.4.3",
+      "installed": "16.2.11"
+    },
+    {
+      "name": "jsdom",
+      "declared": "^27.0.0",
+      "installed": "27.4.0"
+    },
+    {
+      "name": "lucide-react",
+      "declared": "^0.552.0",
+      "installed": "0.552.0"
+    },
+    {
+      "name": "next",
+      "declared": "16.4.3",
+      "installed": "16.2.11"
+    },
+    {
+      "name": "next-themes",
+      "declared": "^0.4.6",
+      "installed": "0.4.6"
+    },
+    {
+      "name": "nodemailer",
+      "declared": "^10.2.1",
+      "installed": "10.2.1"
+    },
+    {
+      "name": "prisma",
+      "declared": "7.10.1",
+      "installed": "7.8.0"
+    },
+    {
+      "name": "react",
+      "declared": "^19.2.0",
+      "installed": "19.2.7"
+    },
+    {
+      "name": "react-dom",
+      "declared": "^19.2.0",
+      "installed": "19.2.7"
+    },
+    {
+      "name": "react-markdown",
+      "declared": "^10.1.0",
+      "installed": "10.1.0"
+    },
+    {
+      "name": "remark-gfm",
+      "declared": "^4.0.1",
+      "installed": "4.0.1"
+    },
+    {
+      "name": "tailwindcss",
+      "declared": "^4.1.0",
+      "installed": "4.3.2"
+    },
+    {
+      "name": "tsx",
+      "declared": "^4.20.0",
+      "installed": "4.23.0"
+    },
+    {
+      "name": "typescript",
+      "declared": "^5.9.0",
+      "installed": "5.9.3"
+    },
+    {
+      "name": "vitest",
+      "declared": "4.1.12",
+      "installed": "4.1.10"
+    },
+    {
+      "name": "zod",
+      "declared": "4.6.7",
+      "installed": "4.4.3"
+    }
+  ],
+  "docxRuntime": [
+    {
+      "name": "mammoth",
+      "declared": "1.13.0",
+      "lockRoot": "1.13.0",
+      "lockedVersion": "1.13.0",
+      "installed": "1.13.0",
+      "exactInstalled": true,
+      "mismatch": false
+    },
+    {
+      "name": "fflate",
+      "declared": "0.8.3",
+      "lockRoot": "0.8.3",
+      "lockedVersion": "0.8.3",
+      "installed": "0.8.3",
+      "exactInstalled": true,
+      "mismatch": false
+    },
+    {
+      "name": "better-sqlite3",
+      "declared": "^12.4.1",
+      "lockRoot": "^12.4.1",
+      "lockedVersion": "12.11.1",
+      "installed": "12.11.1",
+      "exactInstalled": false,
+      "mismatch": true
+    },
+    {
+      "name": "next",
+      "declared": "16.4.3",
+      "lockRoot": "16.4.3",
+      "lockedVersion": "16.4.3",
+      "installed": "16.2.11",
+      "exactInstalled": false,
+      "mismatch": true
+    },
+    {
+      "name": "react",
+      "declared": "^19.2.0",
+      "lockRoot": "^19.2.0",
+      "lockedVersion": "19.2.7",
+      "installed": "19.2.7",
+      "exactInstalled": false,
+      "mismatch": true
+    },
+    {
+      "name": "react-dom",
+      "declared": "^19.2.0",
+      "lockRoot": "^19.2.0",
+      "lockedVersion": "19.2.7",
+      "installed": "19.2.7",
+      "exactInstalled": false,
+      "mismatch": true
+    },
+    {
+      "name": "prisma",
+      "declared": "7.10.1",
+      "lockRoot": "7.10.1",
+      "lockedVersion": "7.10.1",
+      "installed": "7.8.0",
+      "exactInstalled": false,
+      "mismatch": true
+    },
+    {
+      "name": "@prisma/client",
+      "declared": "7.10.1",
+      "lockRoot": "7.10.1",
+      "lockedVersion": "7.10.1",
+      "installed": "7.8.0",
+      "exactInstalled": false,
+      "mismatch": true
+    }
+  ],
+  "cleanInstallVerified": false,
+  "productionPackVerified": false,
+  "limitation": "This baseline reads the existing node_modules; it is not a clean-install proof. Run npm ci in an empty temp checkout with network access to verify reproducibility.",
+  "cleanInstall": {
+    "attempted": true,
+    "command": "npm ci --ignore-scripts --no-audit --no-fund (temp copy of package.json+package-lock.json)",
+    "exitCode": 1,
+    "result": "BLOCKED",
+    "reason": "EUSAGE: package.json and package-lock.json are out of sync; lock missing lie@3.3.0, immediate@3.0.6, duck@0.1.12, underscore@1.13.8",
+    "log": "clean-install.log"
+  },
+  "installedMismatchesCount": 29,
+  "conclusion": "Existing node_modules is NOT a reproducible clean environment. Do not enable the trial based on this environment; repair the lock (or use the exact lock-defined versions) in a separate approved dependency change and re-run npm ci."
+}

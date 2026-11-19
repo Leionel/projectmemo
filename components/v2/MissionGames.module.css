@@ -1,0 +1,79 @@
+.shell {
+  --game-surface: color-mix(in srgb, var(--paper) 60%, var(--card-bg));
+  --game-radius: 12px;
+  --copper: #9B6139;
+  margin-top: 16px;
+  border: 1px solid var(--rule);
+  border-radius: 18px;
+  background: var(--paper);
+}
+
+:global(.dark) .shell { --copper: #DEA77F; }
+
+.header {
+  padding-inline: clamp(14px, 3vw, 30px);
+  border-bottom: 1px solid var(--rule);
+  border-radius: 17px 17px 0 0;
+  background: var(--game-surface);
+}
+
+.context {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 61px;
+  padding-block: 10px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.context > button, .nav > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.context > button { flex-shrink: 0; padding: 0 8px 0 0; color: var(--teal-strong); }
+.context > button:hover, .nav > button:hover { color: var(--teal-strong); }
+.context > button:focus-visible, .nav > button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 4px; }
+
+.project { display: grid; gap: 2px; min-width: 0; padding-left: 14px; border-left: 1px solid var(--rule); }
+.project strong { font-size: 13px; }
+.project span, .version time { color: var(--muted); font-size: 12px; }
+.project span { line-height: 1.45; overflow-wrap: anywhere; }
+.version { display: grid; gap: 2px; flex-shrink: 0; margin-left: auto; text-align: right; font-size: 12px; font-weight: 600; }
+.version time { font-weight: 400; }
+
+.nav { display: flex; flex-wrap: wrap; gap: 6px 20px; }
+.nav > button { position: relative; justify-content: center; min-height: 46px; padding: 6px 2px; }
+.nav > button[aria-current="page"] { color: var(--teal-strong); font-weight: 700; }
+.nav > button[aria-current="page"]::after {
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--teal);
+  content: "";
+}
+
+.stage {
+  min-width: 0;
+  padding: clamp(16px, 3vw, 30px);
+  container: game-stage / inline-size;
+}
+
+@media (max-width: 620px) {
+  .context { gap: 10px; }
+  .project { padding-left: 10px; }
+  .version { display: none; }
+  .nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding-block: 8px; }
+  .nav > button { min-height: 40px; border-radius: 7px; }
+  .nav > button[aria-current="page"] { background: var(--teal-pale); }
+  .nav > button[aria-current="page"]::after { display: none; }
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-17T10:10:00.000Z",
+  "startedAt": "2026-11-17T10:10:00.000Z",
+  "dbPath": "D:\\Projects\\hongmen-worktrees\\v2-first-loop\\evidence\\v2-first-loop\\review-20261117\\long-run-smoke\\long-run.db",
+  "ownerUserId": "cmwkj6tyh0000q48oe5uwpklf",
+  "projectId": "cmwkj6tze0001q48o3qic44m4",
+  "captureId": "cmwkj6tzi0003q48o4rqp87kn",
+  "missionId": "cmwkj6u080004q48oubmqw0uo",
+  "intervalMs": 250,
+  "cycles": 4,
+  "materialEvery": 2,
+  "durationHours": 72,
+  "workerPid": 53280
+}

@@ -18,12 +18,15 @@ import { verifyMissionResult } from "./resultVerifier";
 import { gapRequirementsSchema } from "./gaps";
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
+import { enterObservationCheckpoint } from "./checkpoint";
+import { prepareSkillCursor, assertSkillTool, recordSkillResult, skillContext } from "@/lib/skills/runtime";
+import { saveSkillArtifact } from "@/lib/skills/artifacts";
 import { AppError } from "@/lib/api";
 import { missionStrategyV2 } from "@/lib/agent/specialistPrompts";
 import { chooseNext, type DecisionProvider } from "./modelAdapter";
 import { buildContext } from "./contextBuilder";
 import { assertPersonalMemoryReadSet } from "@/lib/memory/userMemoryPolicy";
-import { choiceSchema, json, jsonHash, MISSION_PROTOCOL_SCHEMA_VERSION, type Decision, type Source } from "./contracts";
+import { choiceSchemaFor, json, jsonHash, MISSION_PROTOCOL_SCHEMA_VERSION, type Decision, type Source } from "./contracts";
 import { event, lock, validateSources } from "./repository";
 import { claimMission, fenced, release, renew, reserve, settleUsage, type Lease } from "./runtimeStore";
 import { projectTools, sourcesFrom, toolInputHash, type ToolSet } from "./tools";
@@ -50,7 +53,7 @@ import { commitApprovedCalendarEvent, commitApprovedCalendarEvents } from "./cal
 /** 只写本项目数据的提案（创建待办）。外部写入仍是 10 分钟。 */
 const INTERNAL_APPROVAL_TTL_MS=24*60*60*1000;
 export type CalendarWriteDependencies = { fetcher?: typeof fetch };
-export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;browser?:BrowserDependencies;calendar?:CalendarDependencies;calendarWrite?:CalendarWriteDependencies;repository?:CiTransport;deployment?:DeploymentTransport;document?:DocumentExtractor;sandbox?:DockerCommand;academic?:typeof fetch;judge?:ClaimJudge;onClaim?:()=>void}={}){
+export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;browser?:BrowserDependencies;calendar?:CalendarDependencies;calendarWrite?:CalendarWriteDependencies;repository?:CiTransport;deployment?:DeploymentTransport;document?:DocumentExtractor;sandbox?:DockerCommand;academic?:typeof fetch;judge?:ClaimJudge;onClaim?:()=>void;beforeDecision?:(context:string)=>void;onDecisionUsage?:(usage:Decision["usage"],provider:string)=>void}={}){
  const m=await claimMission(options.workerId??randomUUID(),options.id);if(!m)return false;
  options.onClaim?.();
  const lease:Lease={id:m.id,owner:m.leaseOwner!,epoch:m.leaseEpoch,contextVersion:m.contextVersion,planRevision:m.planRevision};
@@ -58,7 +61,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
  let phase:MissionPhase="CONTEXT",contextManifest:MissionContextManifest|undefined,sourceDecisionRunId:string|null|undefined;
  const failedSettlements=new Set<"models"|"tools">();
  // Keep failed reservations and unknown usage; a lost lease must not hide the original failure.
- const settleFailed=async(kind:"models"|"tools",started:number,usage?:Decision["usage"])=>{try{await settleUsage(lease,kind,Date.now()-started,usage);}catch{failedSettlements.add(kind);}};
+ const settleFailed=async(kind:"models"|"tools",started:number,usage?:Decision["usage"],reservedOutputTokens=0)=>{try{await settleUsage(lease,kind,Date.now()-started,usage,reservedOutputTokens);}catch{failedSettlements.add(kind);}};
  const heartbeat=setInterval(()=>{void renew(lease).catch(()=>false);},10000);heartbeat.unref();
  try{
   if(recordDelegationPoll(m.planJson)){phase="TOOL";if(await runDelegationObservation(lease,tools,id=>{activeStepId=id;},options.repository))return true;phase="CONTEXT";}
@@ -92,7 +95,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    const constraints=m.constraintsJson as {llmContextApproved?:boolean;costCeiling?:{amount:number}|null};
    if(!options.provider&&!constraints.llmContextApproved)throw new AppError("LLM_CONTEXT_NOT_APPROVED","请先确认云模型使用本委托上下文的范围",409);
    if(!options.provider&&constraints.costCeiling)throw new AppError("COST_POLICY_REQUIRED","金额上限尚无法自动换算，需确认调用额度或使用不计费模式",409);
-   const context=await buildContext(m,tools,{remoteProcessing:!options.provider});contextManifest=missionContextManifest(context,m);
+   const context=await buildContext(m.runtimeProtocolVersion===2?await prepareSkillCursor(lease):m,tools,{remoteProcessing:!options.provider});contextManifest=missionContextManifest(context,m);
    const built=JSON.parse(context) as { sourceInput: { projectId: string; revision: number; role: string }; hypotheses?: { readSet?: { claimId: string; projectId: string; revision: number; validityHash: string }[] };
      experienceReadSet?: ExperienceReadRef[]; experienceAdvisories?: Array<{ id: string; version: number; contentHash: string }>;
      personalMemoryReadSet?: unknown };
@@ -110,13 +113,17 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     await assertPersonalMemoryReadSet(m.ownerUserId,personalMemoryReadSet,tx);
     await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...record(live.planJson),personalMemoryReadSet})}});
    });
-   phase="DECISION";await reserve(lease,"models",undefined,decisionTokenLimit(m.lastErrorJson));const started=Date.now();
+   // Evaluation-only pre-dispatch guard: refuse a call that could exceed an authorized token window.
+    options.beforeDecision?.(context);
+    const outputReserve=decisionTokenLimit(m.lastErrorJson,m.runtimeProtocolVersion??1);
+    phase="DECISION";await reserve(lease,"models",undefined,outputReserve);const started=Date.now();
    const decision=await (async()=>{try{if(!options.provider)await reserveCloudCall(m.projectId);return await (options.provider??chooseNext)(context,tools);}catch(error){
     await settleFailed("models",started,error instanceof ModelProtocolError?error.metadata.usage:undefined);
     throw error;
    }})();
-   await settleUsage(lease,"models",Date.now()-started,decision.usage);
-   const parsedChoice=choiceSchema.safeParse(decision.choice);
+   await settleUsage(lease,"models",Date.now()-started,decision.usage,outputReserve);
+    options.onDecisionUsage?.(decision.usage,decision.provider);
+   const parsedChoice=choiceSchemaFor(m.runtimeProtocolVersion).safeParse(decision.choice);
    if(!parsedChoice.success)throw new ModelProtocolError(protocolDiagnostic("INVALID_CHOICE",null,0,parsedChoice.error.issues.slice(0,8).map(issue=>({code:issue.code,path:issue.path.join(".")}))),decision);
    const choice=parsedChoice.data;
    const injectedExperiences=new Map((built.experienceAdvisories??[]).map(a=>[a.id,a]));
@@ -139,21 +146,36 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     await tx.agentMission.update({where:{id:m.id},data:{lastErrorJson:Prisma.DbNull}});
     const run=await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"SUCCESS",provider:decision.provider,trace:json({missionId:m.id,phase:"DECISION",model:decision.model,protocol:decision.protocol,prompt:decision.prompt??null,usage:decision.usage,serialization:decision.serialization,contextManifest}),resultJson:json({kind:choice.kind}),durationMs:Date.now()-started}});
     if(choice.kind==="ask"){
+     const skill = current.runtimeProtocolVersion === 2 && boundedPolicy(current) ? skillContext(current) : null;
+     if ("blocking" in choice && choice.blocking === false && choice.missing === "PRIVATE" && !choice.requirements && skill?.outputId && skill.stageIndex === skill.sequence.length - 1) {
+       await enterObservationCheckpoint(tx, current, { kind: "await_event", outputId: skill.outputId, reason: "DELIVERABLE_READY", subscriptionIds: ["project-materials"] });
+       await event(tx,current.id,"FOLLOWUP_DEFERRED",{outputId:skill.outputId,question:choice.question,contextVersion:current.contextVersion});
+       return null;
+     }
      phase="DECISION";const requirements=gapRequirementsSchema.parse(choice.requirements??{});if(!isFeatureEnabled("MISSION_EVIDENCE_FIT_ENABLED",false))delete requirements.evidenceFitV1;const gapId=randomUUID();phase="COMMIT";
      const evidencePremiseContext=requirements.evidenceFitV1?{constraintsVersion:current.constraintsVersion,scopeVersion:current.researchScopeVersion,goalHash:jsonHash(current.goal)}:undefined;
      const q=await event(tx,m.id,"QUESTION",{question:choice.question,missing:choice.missing,gapId,requirements,evidencePremiseContext,phase:"DECISION"});
      const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED",...((current.planJson as {impactGuard?:string}).impactGuard?{planRevision:current.planRevision}:{})},orderBy:{ordinal:"asc"}});
      await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...current.planJson as object,automaticContinuation:null}),waitStateJson:json({waitingFor:"USER",questionId:q.id,gapId,question:choice.question,missing:choice.missing,requirements,evidencePremiseContext,startedAt:new Date().toISOString(),readSet:sourcesFrom(history.map(s=>s.resultJson))})}});await release(tx,current,"WAITING_INPUT");return null;
     }
+    if(choice.kind==="await_event"){
+     await enterObservationCheckpoint(tx,current,choice);return null;
+    }
     if(choice.kind==="finish"){
+     if(current.runtimeProtocolVersion===2&&boundedPolicy(current))throw new AppError("CONTINUOUS_CHECKPOINT_REQUIRED","持续成果准备好后应等待变化；结束责任需用户操作",409);
      phase="VERIFY";const verification=await verifyMissionResult(tx,current,choice.outputId);phase="COMMIT";
      await event(tx,m.id,"CRITERIA_CHECKED",{...verification,phase:"VERIFY"});await release(tx,current,"SUCCEEDED");return null;
     }
-    phase="TOOL";const tool=tools[choice.tool],args=toolArgs;assertAutomaticTool(current,choice.tool,tool.effects.businessWrite);assertToolConstraints(current.constraintsJson,choice.tool,args);
-    const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED",...((current.planJson as {impactGuard?:string}).impactGuard?{planRevision:current.planRevision}:{})},orderBy:{ordinal:"asc"}});const sources=sourcesFrom(history.map(s=>s.resultJson));const inputHash=toolInputHash(choice.tool,args,sources);
+    phase="TOOL";await assertSkillTool(tx,current,choice.tool);const tool=tools[choice.tool],args=toolArgs;assertAutomaticTool(current,choice.tool,tool.effects.businessWrite);assertToolConstraints(current.constraintsJson,choice.tool,args);
+    const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED",...((current.planJson as {impactGuard?:string}).impactGuard?{planRevision:current.planRevision}:{})},orderBy:{ordinal:"asc"}});const sources=sourcesFrom(history.map(s=>s.resultJson));
+    // The v2 evidence pack is the read set for the current method step; it only ever contains
+    // sources this Mission read (or validated project material seeded by the router).
+    const evidenceSources=(skillContext(current)?.evidencePack?.sources??[]) as Source[];
+    const readSet=[...new Map([...sources,...evidenceSources].map(s=>[s.id,s])).values()];
+    const inputHash=toolInputHash(choice.tool,args,readSet);
     if(history.slice(-2).length===2&&history.slice(-2).every(s=>s.inputHash===inputHash))throw new AppError("NO_PROGRESS","连续调用没有新信息，请调整目标或补充资料",409);
     phase="COMMIT";const last=await tx.agentMissionStep.aggregate({where:{missionId:m.id},_max:{ordinal:true}});
-    const created=await tx.agentMissionStep.create({data:{missionId:m.id,ordinal:(last._max.ordinal??0)+1,planRevision:m.planRevision,toolName:choice.tool,toolVersion:tools[choice.tool].version??"1",canonicalInputJson:json(args),inputHash,readSetJson:json(sources),agentRunId:run.id,providerCallId:decision.callId,protocolJson:{protocol:decision.protocol,schemaVersion:MISSION_PROTOCOL_SCHEMA_VERSION,sourceRevisionReadSet,cognitiveReadSet,experienceReadSet,personalMemoryReadSet}}});
+    const created=await tx.agentMissionStep.create({data:{missionId:m.id,ordinal:(last._max.ordinal??0)+1,planRevision:m.planRevision,toolName:choice.tool,toolVersion:tools[choice.tool].version??"1",canonicalInputJson:json(args),inputHash,readSetJson:json(readSet),agentRunId:run.id,providerCallId:decision.callId,protocolJson:{protocol:decision.protocol,schemaVersion:m.runtimeProtocolVersion??MISSION_PROTOCOL_SCHEMA_VERSION,sourceRevisionReadSet,cognitiveReadSet,experienceReadSet,personalMemoryReadSet}}});
     await event(tx,m.id,"TOOL_STARTED",{stepId:created.id,tool:choice.tool,summary:choice.summary,phase:"TOOL"});return created;
    });
    if(choice.experienceUse?.length){
@@ -166,6 +188,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
   phase="TOOL";activeStepId=step.id;sourceDecisionRunId=step.agentRunId;const tool=tools[step.toolName];if(!tool)throw new AppError("UNKNOWN_TOOL","该工具版本不可恢复",409);
   const currentMission=await db.agentMission.findUniqueOrThrow({where:{id:m.id}});assertAutomaticTool(currentMission,step.toolName,tool.effects.businessWrite);
   assertToolConstraints(currentMission.constraintsJson,step.toolName,step.canonicalInputJson);
+  await assertSkillTool(db,currentMission,step.toolName);
   const args=tool.schema.parse(step.canonicalInputJson);assertDynamicTool(currentMission,step.toolName,args);await assertExperienceReadSet(m.ownerUserId,record(step.protocolJson).experienceReadSet);await assertPersonalMemoryReadSet(m.ownerUserId,record(step.protocolJson).personalMemoryReadSet);await reserve(lease,"tools",step.toolName);const started=Date.now();
   const result=await(async()=>{try{const value=await tool.run({userId:m.ownerUserId,projectId:m.projectId,missionId:m.id},args);if(JSON.stringify(value).length>40000)throw new AppError("TOOL_OUTPUT_LIMIT","工具结果超出任务读取范围",409);return value;}catch(error){await settleFailed("tools",started);throw error;}})();
   await settleUsage(lease,"tools",Date.now()-started);
@@ -182,7 +205,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
      const failure=missionFailure(error,"VERIFY");
      await db.$transaction(async tx=>{await fenced(tx,lease);await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"FAILED",provider:options.judge?"TEST_FIXTURE":"mission-claim-judge",fallbackReason:"JUDGE_UNAVAILABLE",trace:json({missionId:m.id,phase:"VERIFY",purpose:"CLAIM_JUDGE",claimId:request.claimId,code:failure.code,category:failure.category,diagnostic:failure.diagnostic,contextManifest})}});});throw error;
     }})();
-    await settleUsage(lease,"models",Date.now()-begin,response.usage);
+    await settleUsage(lease,"models",Date.now()-begin,response.usage,1000);
     await db.$transaction(async tx=>{await fenced(tx,lease);await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"SUCCESS",provider:response.provider,trace:json({missionId:m.id,phase:"VERIFY",purpose:"CLAIM_JUDGE",model:response.model,claimId:request.claimId,usage:response.usage,contextManifest}),resultJson:{verdict:response.verdict}}});});return response;
    }:undefined;
    claimChecks=await verifyResearchClaims(step.canonicalInputJson,step.readSetJson as unknown as Source[],{enabled:isFeatureEnabled("MISSION_SEMANTIC_CHECK_ENABLED",false),judge});
@@ -204,6 +227,21 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    }
    if(step!.toolName==="web_search"||step!.toolName==="web_fetch"||step!.toolName==="read_paper_metadata"||step!.toolName==="browser_read")await persistObservations(tx,m.id,result.data);
    if(step!.toolName==="save_mission_output"){
+    const skill=current.runtimeProtocolVersion===2?skillContext(current):undefined;
+    const artifactMode=!!skill&&skill.stage!=="deliverable-creation"&&skill.stageIndex===skill.sequence.length-1;
+    if(artifactMode){
+     // Terminal planning/research/review delivers a stage artifact; the report and business state stay untouched.
+     phase="VERIFY";
+     const artifact=await saveSkillArtifact(tx,current,step!.canonicalInputJson,step!.readSetJson as unknown as Source[],{stage:skill!.stage,sequence:skill!.sequence});
+     const live=await tx.agentMission.findUniqueOrThrow({where:{id:m.id}});
+     const plan=record(live.planJson),cursor=record(plan.skillCursor);
+     const updated=await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...plan,skillCursor:{...cursor,artifactReady:true,artifactId:artifact.id}}),pauseReason:"SKILL_DELIVERABLE_READY",lastErrorJson:Prisma.DbNull,nextAttemptAt:null}});
+     await tx.agentMissionStep.update({where:{id:step!.id},data:{status:"SUCCEEDED",resultJson:json({data:{artifactId:artifact.id},sources:[]}),finishedAt:new Date()}});
+     await event(tx,m.id,"TOOL_FINISHED",{stepId:step!.id,result:{artifactId:artifact.id,skillId:artifact.skillId},phase:"COMMIT"});
+     await event(tx,m.id,"SKILL_DELIVERABLE_READY",{stepId:step!.id,artifactId:artifact.id,skillId:artifact.skillId,checks:artifact.checks,
+       sourceRefs:artifact.sources.map(source=>({id:source.id,hash:source.hash})),reportUnchanged:true,businessActionsUnchanged:true});
+     await release(tx,updated,"PAUSED","SKILL_DELIVERABLE_READY");return;
+    }
     phase="VERIFY";const output=await saveOutput(tx,m.id,step!.id,step!.canonicalInputJson,step!.readSetJson as unknown as Source[],claimChecks);phase="COMMIT";data={data:{outputId:output.id,revision:output.revision},sources:[]};
    }
    if(step!.toolName==="propose_metric_verification"){
@@ -246,6 +284,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    }
    if(step!.toolName==="inspect_action"){const action=data.data as {actionId?:string;status?:string;resultCardId?:string};if(action.status==="DONE"&&action.resultCardId)await event(tx,m.id,"USER_REPORTED",{stepId:step!.id,actionId:action.actionId,resultCardId:action.resultCardId});}
    await tx.agentMissionStep.update({where:{id:step!.id},data:{status:"SUCCEEDED",resultJson:json(data),finishedAt:new Date()}});
+   await recordSkillResult(tx,current,step!.toolName,data);
    await event(tx,m.id,"TOOL_FINISHED",{stepId:step!.id,result:data,phase:"COMMIT"});await release(tx,current,"READY");
   });return true;
  }catch(error){
@@ -255,6 +294,15 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    if(current.leaseOwner!==lease.owner||current.leaseEpoch!==lease.epoch||current.status!=="RUNNING")return;
    const stop=!!current.cancelRequestedAt||!!current.pauseRequestedAt;
    const active=activeStepId?await tx.agentMissionStep.findUnique({where:{id:activeStepId}}):null;
+
+   // One guided retry when the method gate rejected the model's action (wrong stage / missing evidence).
+   const repairEvents=await tx.agentMissionEvent.findMany({where:{missionId:m.id,type:"SKILL_REPAIR_REQUESTED"},orderBy:{seq:"desc"},take:8});
+   const alreadyRepaired=repairEvents.some(e=>(e.payloadJson as {contextVersion?:number}).contextVersion===current.contextVersion);
+   if(!stop&&["SKILL_GATE_NOT_MET","SKILL_OUTPUT_REQUIRED","SKILL_TOOL_RESTRICTED"].includes(code)&&!alreadyRepaired){
+    await event(tx,m.id,"SKILL_REPAIR_REQUESTED",{code,contextVersion:current.contextVersion,phase,attempt:1});
+    await tx.agentMission.update({where:{id:m.id},data:{lastErrorJson:json({code,message:failure.message,phase:failure.phase,category:failure.category,recovery:{kind:"SKILL_REPAIR",automatic:true,message:"已保留资料与用量；下一次决策先读取本轮材料，再保存新版本。"}})}});
+    await release(tx,current,"READY");return;
+   }
    if(!stop&&code==="COGNITIVE_RECOORDINATE"&&(!active||["save_mission_output","propose_action","propose_metric_verification"].includes(active.toolName)&&!record(active.protocolJson).sandboxJob)){
     await obsoleteApprovals(tx,m.id);
     if(active)await tx.agentMissionStep.update({where:{id:active.id},data:{status:"OBSOLETE"}});

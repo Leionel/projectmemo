@@ -25,13 +25,23 @@ export async function missionWorkspaceSummary(userId: string, projectId: string)
   }
   const attentionStates = ["WAITING_INPUT", "WAITING_APPROVAL", "PAUSED", "FAILED"];
   const where = {ownerUserId: userId, projectId, status: {notIn: ["SUCCEEDED", "CANCELLED"]}};
-  const [waiting, running, totalActive, terminalUnsettled] = await Promise.all([
-    db.agentMission.findMany({where: {...where, status: {in: attentionStates}}, orderBy: {updatedAt: "desc"}, take: 3, select: missionSummarySelect}),
-    db.agentMission.findMany({where: {...where, status: {notIn: [...attentionStates, "SUCCEEDED", "CANCELLED"]}}, orderBy: {updatedAt: "desc"}, take: 3, select: missionSummarySelect}),
+  // An observation-waiting Mission is not a user decision. Query user-actionable rows first with an explicit
+  // JSON predicate so any amount of newer "waiting for changes" rows cannot crowd them out.
+  const userAttentionIds = await db.$queryRaw<Array<{ id: string }>>`
+    SELECT "id" FROM "AgentMission"
+    WHERE "ownerUserId" = ${userId} AND "projectId" = ${projectId}
+      AND "status" IN ('WAITING_INPUT','WAITING_APPROVAL','PAUSED','FAILED')
+      AND ("status" <> 'WAITING_INPUT' OR COALESCE(json_extract("waitStateJson", '$.waitingFor'), '') <> 'OBSERVATION')
+    ORDER BY "updatedAt" DESC, "id" DESC LIMIT 3`;
+  const [userAttention, recent, totalActive, terminalUnsettled] = await Promise.all([
+    userAttentionIds.length ? db.agentMission.findMany({where: {id: {in: userAttentionIds.map(row => row.id)}}, select: missionSummarySelect}) : Promise.resolve([]),
+    db.agentMission.findMany({where, orderBy: [{updatedAt: "desc"}, {id: "desc"}], take: 6, select: missionSummarySelect}),
     db.agentMission.count({where}),
     readTerminalUnsettled(userId, projectId),
   ]);
-  const items = [...waiting, ...running].slice(0, 3).map(m => presentMissionSummary(m));
+  const ordered = [...userAttentionIds.map(row => userAttention.find(m => m.id === row.id)).filter((m): m is typeof userAttention[number] => !!m),
+    ...recent.filter(m => !userAttentionIds.some(row => row.id === m.id))];
+  const items = ordered.slice(0, 3).map(m => presentMissionSummary(m));
   return {enabled: true, totalActive, items, terminalUnsettled};
 }
 
